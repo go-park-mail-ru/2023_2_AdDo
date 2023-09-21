@@ -1,0 +1,103 @@
+openapi: 3.0.3
+info:
+  title: MusicOnAPI
+  description: Music web app
+  version: 1.0.0
+components:
+  securitySchemes:
+    cookieAuth:         # arbitrary name for the security scheme; will be used in the "security" key later
+      type: apiKey
+      in: cookie
+      name: SESSIONID  # cookie name
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 4
+        name:
+          type: string
+          example: John Snow
+      required:  
+        - id
+        - name
+    LoginRequest:
+      type: object
+      properties:
+        login:
+          type: string
+          example: John Snow
+        password:
+          type: string
+          example: John's password
+      required:  
+        - login
+        - password
+  
+paths:
+  /{path_to_static_file}:
+    get:
+      parameters:
+        - in: path
+          name: path_to_static_file
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: file not found
+
+  /api/v1/sign_up:
+    post:
+      description: Create new user and return created user info
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  example: John Snow
+                password:
+                  type: string
+                  example: Jonh's password
+      responses:
+        '201':
+          description: User created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User' 
+        '409':
+          description: User has already created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User' 
+  /api/v1/auth:
+    post:
+      description: Log in and return the authentication cookie
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest' 
+      security: []    # no authentication
+      responses:
+        '200':
+          description: >
+            Successfully authenticated.
+            The session ID is returned in a cookie named `SESSIONID`. You need to include this cookie in subsequent requests.
+          headers: 
+            Set-Cookie:
+              schema: 
+                type: string
+                example: SESSIONID=abcde12345; Path=/;
+        '401':
+          description: Authentication failed
