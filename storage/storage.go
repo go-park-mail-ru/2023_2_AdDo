@@ -34,7 +34,7 @@ type Audio struct {
 }
 
 type DummyDB struct {
-	users map[uint64]User
+	users map[string]User
 	// временное хранилище, выполняющее роль таблицы, содержащей пользователей
 	artists map[uint64]Artist
 	// временное хранилище, выполняющее роль таблицы, содержащей исполнителей
@@ -42,26 +42,56 @@ type DummyDB struct {
 	// временное хранилище, выполняющее роль таблицы, содержащей альбомы
 	audio map[uint64]Artist
 	// временное хранилище, выполняющее роль таблицы, содержащей сами аудиофайлы
-	sessions map[string]bool
+	sessions map[string]uint64
 	// временное хранилище, выполняющее роль таблицы, содержащей активные сессии
+	id_getter uint64
+	// получаем айдишники отсюда
 }
 
 func NewDummyDB() *DummyDB {
 	return &DummyDB{
-		users:    make(map[uint64]User),
+		users:    make(map[string]User),
 		artists:  make(map[uint64]Artist),
 		albums:   make(map[uint64]Artist),
 		audio:    make(map[uint64]Artist),
-		sessions: make(map[string]bool),
+		sessions: make(map[string]uint64),
 	}
 }
 
-func (db *DummyDB) CreateUser(user User) uint64 {
-	id := rand.Uint64()
-	db.users[id] = user
+func (db *DummyDB) GetNewUniqId() uint64 {
+	db.id_getter++
+	return db.id_getter
+}
+
+func (db *DummyDB) CreateUser(name, password string) uint64 {
+	id := db.GetNewUniqId()
+	db.users[name] = User{
+		Id:       id,
+		Username: name,
+		Password: password,
+	}
 	return id
 }
 
-func (db *DummyDB) GetUser(id uint64) User {
-	return db.users[id]
+func (db *DummyDB) GetUser(name string) (User, bool) {
+	user, ok := db.users[name]
+	return user, ok
+}
+
+var (
+	letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+)
+
+func RandStringRunes(n int) string {
+	b := make([]rune, n)
+	for i := range b {
+		b[i] = letterRunes[rand.Intn(len(letterRunes))]
+	}
+	return string(b)
+}
+
+func (db *DummyDB) CreateNewSession(userId uint64) string {
+	sessionId := RandStringRunes(30)
+	db.sessions[sessionId] = userId
+	return sessionId
 }
