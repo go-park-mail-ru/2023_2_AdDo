@@ -8,19 +8,20 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/gookit/ini/v2"
+
 	_ "github.com/lib/pq"
 )
 
-func startServer() {
+func startServer(port string) {
 	handler := storage_handler.NewStorageHandler()
 
 	http.HandleFunc("/", handler.Root)
 	http.HandleFunc("/api/v1/sign_up", handler.SignUp)
 	http.HandleFunc("/api/v1/auth", handler.Auth)
 	http.HandleFunc("/api/v1/logout", handler.LogOut)
-	serverPort := os.Getenv("SERVER_PORT")
-	fmt.Println("starting server at :" + serverPort)
-	http.ListenAndServe(":"+serverPort, nil)
+	fmt.Println("starting server at :" + port)
+	http.ListenAndServe(":"+port, nil)
 }
 
 /*
@@ -76,12 +77,19 @@ func createUser() {
 */
 
 func main() {
+	err := ini.LoadExists("./config.ini")
+	if err != nil {
+		fmt.Println("config file is missing")
+		os.Exit(1)
+	}
+
 	var (
-		host     = os.Getenv("POSTGRES_HOST")
-		port     = os.Getenv("P0STGRES_PORT")
-		user     = os.Getenv("POSTGRES_USER")
-		password = os.Getenv("POSTGRES_PASSWORD")
-		dbname   = os.Getenv("POSTGRES_DB")
+		serverPort = ini.String("server.port")
+		host       = ini.String("postgres.host")
+		port       = ini.String("postgres.port")
+		user       = os.Getenv("POSTGRES_USER")
+		password   = os.Getenv("POSTGRES_PASSWORD")
+		dbname     = os.Getenv("POSTGRES_DB")
 	)
 
 	psqlInfo := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, dbname)
@@ -102,7 +110,7 @@ func main() {
 	}
 	fmt.Println("Successfully connected to database!")
 
-	startServer()
+	startServer(serverPort)
 
 	//	time.Sleep(100 * time.Millisecond)
 	//	runGetRoot()
