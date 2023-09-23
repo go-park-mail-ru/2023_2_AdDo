@@ -1,26 +1,31 @@
+version: '3.0'
+
 services:
+  
+  service-db:
+    restart: always
+    image: postgres:14
+    env_file: ./database/db.env
+    ports:
+      - "${P0STGRES_PORT}:${P0STGRES_PORT}"
+    volumes:
+      - ./database/db_schema.sql:/db_schema.sql
+      - ./database/startup.sh:/docker-entrypoint-initdb.d/startup.sh
+      - ./db-data:/var/lib/postgresql/data
+  
   backend:
     build:
       context: backend
       dockerfile: Dockerfile
-    ports:
-      - "8080:8080"
     depends_on:
       - service-db
-    environment:
-      - SERVER_PORT=8080
-
-  service-db:
-    image: postgres:16
-    environment:
-      POSTGRES_DB: "musicon"
-      POSTGRES_USER: "musicon"
-      POSTGRES_PASSWORD: "musicon"
     ports:
-      - "5432:5432"
-    volumes:
-      - ./database:/docker-entrypoint-initdb.d
-      - db-data:/var/lib/postgresql/data
+      - "${SERVER_PORT}:${SERVER_PORT}"
+    env_file: ./database/db.env
+    environment:
+      - SERVER_PORT=${SERVER_PORT}
+      - POSTGRES_HOST=${POSTGRES_HOST}
+      - P0STGRES_PORT=${P0STGRES_PORT}
 
 #  proxy:
 #    image: nginx
@@ -33,6 +38,3 @@ services:
   #    - 8000:8000
   #  depends_on:
   #    - backend
-
-volumes:
-  db-data:

@@ -3,18 +3,12 @@ package main
 import (
 	"database/sql"
 	"fmt"
-	_ "github.com/lib/pq"
 	"log"
 	"main/storage_handler"
 	"net/http"
-)
+	"os"
 
-const (
-	host     = "localhost"
-	port     = 5432
-	user     = "musicon"
-	password = "musicon"
-	dbname   = "musicon"
+	_ "github.com/lib/pq"
 )
 
 func startServer() {
@@ -24,9 +18,9 @@ func startServer() {
 	http.HandleFunc("/api/v1/sign_up", handler.SignUp)
 	http.HandleFunc("/api/v1/auth", handler.Auth)
 	http.HandleFunc("/api/v1/logout", handler.LogOut)
-
-	fmt.Println("starting server at :8080")
-	http.ListenAndServe(":8080", nil)
+	serverPort := os.Getenv("SERVER_PORT")
+	fmt.Println("starting server at :" + serverPort)
+	http.ListenAndServe(":"+serverPort, nil)
 }
 
 /*
@@ -82,11 +76,18 @@ func createUser() {
 */
 
 func main() {
-	//psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
-	//	"password=%s dbname=%s sslmode=disable",
-	//		host, port, user, password, dbname)
-	// urlExample := "postgres://username:password@localhost:5432/database_name"
-	db, err := sql.Open("postgres", fmt.Sprintf("postgres://musicon:031201@service-db:5432/musicon?sslmode=disable"))
+	var (
+		host     = os.Getenv("POSTGRES_HOST")
+		port     = os.Getenv("P0STGRES_PORT")
+		user     = os.Getenv("POSTGRES_USER")
+		password = os.Getenv("POSTGRES_PASSWORD")
+		dbname   = os.Getenv("POSTGRES_DB")
+	)
+
+	psqlInfo := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, dbname)
+	fmt.Println(psqlInfo)
+
+	db, err := sql.Open("postgres", psqlInfo)
 	if err != nil {
 		log.Fatalf("error while starting database %e", err)
 		panic("")
