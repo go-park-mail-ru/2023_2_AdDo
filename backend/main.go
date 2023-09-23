@@ -1,9 +1,20 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
+	_ "github.com/lib/pq"
+	"log"
 	"main/storage_handler"
 	"net/http"
+)
+
+const (
+	host     = "localhost"
+	port     = 5432
+	user     = "musicon"
+	password = "musicon"
+	dbname   = "musicon"
 )
 
 func startServer() {
@@ -71,7 +82,27 @@ func createUser() {
 */
 
 func main() {
+	//psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
+	//	"password=%s dbname=%s sslmode=disable",
+	//		host, port, user, password, dbname)
+	// urlExample := "postgres://username:password@localhost:5432/database_name"
+	db, err := sql.Open("postgres", fmt.Sprintf("postgres://musicon:031201@service-db:5432/musicon?sslmode=disable"))
+	if err != nil {
+		log.Fatalf("error while starting database %e", err)
+		panic("")
+	}
+	defer db.Close()
+
+	fmt.Println("we ready to ping")
+
+	err = db.Ping()
+	if err != nil {
+		log.Fatalf("error database ping %e", err)
+	}
+	fmt.Println("Successfully connected to database!")
+
 	startServer()
+
 	//	time.Sleep(100 * time.Millisecond)
 	//	runGetRoot()
 	//	createUser()

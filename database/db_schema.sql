@@ -1,5 +1,4 @@
 create extension if not exists "uuid-ossp";
-
 create table if not exists profile (
                                        id serial primary key,
                                        name text not null unique,
