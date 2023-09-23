@@ -1,20 +1,20 @@
-# syntax=docker/dockerfile:1.4
-FROM golang:1.21 AS builder
+FROM golang:1.21-alpine AS builder
 
 WORKDIR /code
 
 ENV CGO_ENABLED 0
 ENV GOOS linux
 
-COPY go.mod go.sum ./
-RUN go mod download
-RUN go mod tidy
-
-
 COPY . .
 
-RUN go build -o bin/backend main.go
+RUN go mod download \
+    && go mod tidy \
+    && go build -o bin/backend main.go
 
-CMD ["/code/bin/backend"]
+FROM alpine:3.17
+
+COPY --from=builder /code/bin/backend /backend 
 
 EXPOSE 8080
+
+CMD ["/backend"]
