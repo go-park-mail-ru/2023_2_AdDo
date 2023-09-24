@@ -1,6 +1,10 @@
 package storage
 
-import "math/rand"
+import (
+	"crypto/md5"
+	"database/sql"
+	"encoding/hex"
+)
 
 type User struct {
 	Id       uint64
@@ -33,65 +37,45 @@ type Audio struct {
 	ContentPath string
 }
 
-type DummyDB struct {
-	users map[string]User
-	// временное хранилище, выполняющее роль таблицы, содержащей пользователей
-	artists map[uint64]Artist
-	// временное хранилище, выполняющее роль таблицы, содержащей исполнителей
-	albums map[uint64]Artist
-	// временное хранилище, выполняющее роль таблицы, содержащей альбомы
-	audio map[uint64]Artist
-	// временное хранилище, выполняющее роль таблицы, содержащей сами аудиофайлы
-	sessions map[string]uint64
-	// временное хранилище, выполняющее роль таблицы, содержащей активные сессии
-	id_getter uint64
-	// получаем айдишники отсюда
+type Database struct {
+	database *sql.DB
 }
 
-func NewDummyDB() *DummyDB {
-	return &DummyDB{
-		users:    make(map[string]User),
-		artists:  make(map[uint64]Artist),
-		albums:   make(map[uint64]Artist),
-		audio:    make(map[uint64]Artist),
-		sessions: make(map[string]uint64),
+func NewDatabasePostgres(db *sql.DB) *Database {
+	return &Database{database: db}
+}
+
+func (db *Database) CreateUser(user User) (uint64, error) {
+	var id uint64
+	hash := md5.Sum([]byte(user.Password))
+	hashString := hex.EncodeToString(hash[:])
+	err := db.database.QueryRow("insert into profile (name, password) values ($1, $2) returning id",
+		user.Username, hashString).Scan(&id)
+	return id, err
+}
+
+func (db *Database) CheckUserCredentials(user User) bool {
+	hash := md5.Sum([]byte(user.Password))
+	hashString := hex.EncodeToString(hash[:])
+	var userNameFromDB string
+	db.database.QueryRow("select name from profile where name = $1 and password = $2", user.Username, hashString).Scan(&userNameFromDB)
+
+	return userNameFromDB == user.Username
+}
+
+const SessionExpiration = "1 minute"
+
+func (db *Database) CreateNewSession(userId uint64) (string, error) {
+	var sessionId string
+	err := db.database.QueryRow(`insert into session (expiration, profile_id) values (now() + '1 minute', $1) returning session_id`,
+		userId).Scan(&sessionId)
+	return sessionId, err
+}
+
+func (db *Database) DeleteSession(userId uint64) error {
+	result, err := db.database.Exec("delete from session where profile_id = $1", userId)
+	if deletedRows, _ := result.RowsAffected(); deletedRows != 1 {
+		return err
 	}
-}
-
-func (db *DummyDB) GetNewUniqId() uint64 {
-	db.id_getter++
-	return db.id_getter
-}
-
-func (db *DummyDB) CreateUser(name, password string) uint64 {
-	id := db.GetNewUniqId()
-	db.users[name] = User{
-		Id:       id,
-		Username: name,
-		Password: password,
-	}
-	return id
-}
-
-func (db *DummyDB) GetUser(name string) (User, bool) {
-	user, ok := db.users[name]
-	return user, ok
-}
-
-var (
-	letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
-)
-
-func RandStringRunes(n int) string {
-	b := make([]rune, n)
-	for i := range b {
-		b[i] = letterRunes[rand.Intn(len(letterRunes))]
-	}
-	return string(b)
-}
-
-func (db *DummyDB) CreateNewSession(userId uint64) string {
-	sessionId := RandStringRunes(30)
-	db.sessions[sessionId] = userId
-	return sessionId
+	return nil
 }

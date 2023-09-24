@@ -1,6 +1,7 @@
 package storage_handler
 
 import (
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"main/storage"
@@ -9,15 +10,28 @@ import (
 )
 
 type StorageHandler struct {
-	database *storage.DummyDB
+	database *storage.Database
 }
 
-func NewStorageHandler() *StorageHandler {
-	return &StorageHandler{database: storage.NewDummyDB()}
+func NewStorageHandler(db *sql.DB) *StorageHandler {
+	return &StorageHandler{database: storage.NewDatabasePostgres(db)}
 }
 
 func (api *StorageHandler) Root(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "index.html here\n")
+	var user storage.User
+
+	err := json.NewDecoder(r.Body).Decode(&user)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if api.database.CheckUserCredentials(user) {
+		fmt.Fprintf(w, "authorized\n")
+	} else {
+		fmt.Fprintf(w, "unauthorized\n")
+	}
+
 }
 
 func (api *StorageHandler) SignUp(w http.ResponseWriter, r *http.Request) {
@@ -29,13 +43,19 @@ func (api *StorageHandler) SignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	id := api.database.CreateUser(user.Username, user.Password)
+	id, err := api.database.CreateUser(user)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+	}
 
 	body := map[string]interface{}{
 		"id": id,
 	}
 
-	json.NewEncoder(w).Encode(&body)
+	err = json.NewEncoder(w).Encode(&body)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+	}
 }
 
 func (api *StorageHandler) Auth(w http.ResponseWriter, r *http.Request) {
@@ -47,14 +67,19 @@ func (api *StorageHandler) Auth(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userDb, isUser := api.database.GetUser(user.Username)
+	isUser := api.database.CheckUserCredentials(user)
 
 	if !isUser {
 		http.Error(w, err.Error(), 401)
 		return
 	}
 
-	sessionId := api.database.CreateNewSession(userDb.Id)
+	sessionId, err := api.database.CreateNewSession(user.Id)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusForbidden)
+		return
+	}
 
 	http.SetCookie(w, &http.Cookie{
 		Name:    "JSESSIONID",
@@ -64,5 +89,12 @@ func (api *StorageHandler) Auth(w http.ResponseWriter, r *http.Request) {
 }
 
 func (api *StorageHandler) LogOut(w http.ResponseWriter, r *http.Request) {
+	var user storage.User
 
+	err := json.NewDecoder(r.Body).Decode(&user)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	api.database.DeleteSession(user.Id)
 }

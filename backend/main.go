@@ -13,8 +13,8 @@ import (
 	_ "github.com/lib/pq"
 )
 
-func startServer(port string) {
-	handler := storage_handler.NewStorageHandler()
+func startServer(port string, db *sql.DB) {
+	handler := storage_handler.NewStorageHandler(db)
 
 	http.HandleFunc("/", handler.Root)
 	http.HandleFunc("/api/v1/sign_up", handler.SignUp)
@@ -98,7 +98,6 @@ func main() {
 	db, err := sql.Open("postgres", psqlInfo)
 	if err != nil {
 		log.Fatalf("error while starting database %e", err)
-		panic("")
 	}
 	defer db.Close()
 
@@ -110,9 +109,5 @@ func main() {
 	}
 	fmt.Println("Successfully connected to database!")
 
-	startServer(serverPort)
-
-	//	time.Sleep(100 * time.Millisecond)
-	//	runGetRoot()
-	//	createUser()
+	startServer(serverPort, db)
 }
