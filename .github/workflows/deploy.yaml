@@ -1,21 +1,31 @@
 name: Deploy
 
-on:
-  push:
-    branches:
+on: [push]
 
 jobs:
-  deploy:
+  build:
+
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v2
-      # Setup key
-      - run: set -eu
-      - run: mkdir "$HOME/.ssh"
-      - run: echo "$" > "$HOME/.ssh/key"
-      - run: chmod 600 "$HOME/.ssh/key"
-      # Build
-      - run: npm ci
-      - run: npm run build
-      # Deploy
-      - run: cd app && rsync -e "ssh -p 20022 -i $HOME/.ssh/key -o StrictHostKeyChecking=no" --archive --compress --delete . m71516@hostru04.fornex.org:/home/m71516/public_html/blog.maxgraph.ru
+      - uses: actions/checkout@v1
+
+      - name: Copy repository content to VM
+        uses: appleboy/scp-action@master
+        env:
+          HOST: ${{ secrets.HOST }}
+          USERNAME: ${{ secrets.USERNAME }}
+          PORT: ${{ secrets.PORT }}
+          KEY: ${{ secrets.SSHKEY }}
+        with:
+          source: "."
+          target: "/AdDoBackend"
+
+      - name: Executing remote command
+        uses: appleboy/ssh-action@master
+        with:
+          host: 82.146.45.164
+          USERNAME: dmitry
+          PORT: 22
+          KEY: ${{ secrets.SSHKEY }}
+          script: ls
