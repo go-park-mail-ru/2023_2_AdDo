@@ -26,4 +26,4 @@ jobs:
           USERNAME: "dmitry"
           PORT: "22"
           PASSWORD: "031201"
-          script: ls
+          script: cd AdDoBackendDeploy && docker compose up -d
