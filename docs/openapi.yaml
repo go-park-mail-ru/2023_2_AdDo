@@ -8,8 +8,9 @@ components:
     cookieAuth:         # arbitrary name for the security scheme; will be used in the "security" key later
       type: apiKey
       in: cookie
-      name: SESSIONID  # cookie name
+      name: JSESSIONID  # cookie name
   schemas:
+
     User:
       type: object
       properties:
@@ -22,6 +23,7 @@ components:
       required:  
         - id
         - name
+
     LoginRequest:
       type: object
       properties:
@@ -38,6 +40,67 @@ components:
         - login
         - password
         - id
+
+    Album:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: AwesomeAlbumName
+        author:
+          type: integer
+          example: 12
+        preview:
+          type: string
+          example: http://our_cloud_storage/preview_for_awesome_album.jpg
+
+    Track:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: AwesomeSong
+        author:
+          type: integer
+          example: 12
+        preview:
+          type: string
+          example: http://our_cloud_storage/preview_for_awesome_song.jpg
+        content:
+          type: string
+          example: http://our_cloud_storage/song_data.mp3
+
+    Artist:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: Dr. Dre
+
+    MainPageData:
+      type: object
+      properties:
+        albums:
+          type: array
+          items:
+            $ref: '#/components/schemas/Album'
+        artists:
+          type: array
+          items:
+            $ref: '#/components/schemas/Artist'
+        tracks:
+          type: array
+          items:
+            $ref: '#/components/schemas/Track'
 
 servers:
   - url: http://82.146.45.164:8080
@@ -111,3 +174,49 @@ paths:
                 example: JSESSIONID=abcde12345
         '401':
           description: Authentication failed
+  /api/v1/logout:
+    post:
+      servers:
+        - url: http://82.146.45.164:8080
+      description: Delete user session by id and delete your cookie
+      security:
+        - []    # no authentication
+        - cookieAuth: [] # or you can have cookie in header. Your sessionId will be deleted
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: number
+                  example: 1
+      responses:
+        '200':
+          description: Session deleted
+  /api/v1/home:
+    get:
+      servers:
+        - url: http://82.146.45.164:8080
+      description: Show tracks, artists, albums
+      security:
+        - []    # no authentication
+        - cookieAuth: [] # or you can have cookie in header. Your sessionId will be deleted
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: number
+                  example: 1
+      responses:
+        '200':
+          description: Returns lists of artists, albums and tracks
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MainPageData'
