@@ -26,4 +26,4 @@ jobs:
           USERNAME: "dmitry"
           PORT: "22"
           PASSWORD: "031201"
-          script: cd AdDoBackendDeploy && ./deploy.sh
+          script: cd AdDoBackendDeploy && sudo ./deploy.sh
