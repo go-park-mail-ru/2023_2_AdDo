@@ -25,6 +25,9 @@ components:
     LoginRequest:
       type: object
       properties:
+        id:
+          type: number
+          example: 1
         login:
           type: string
           example: John Snow
@@ -34,10 +37,15 @@ components:
       required:  
         - login
         - password
-  
+        - id
+
+servers:
+  - url: http://82.146.45.164:8080
 paths:
   /{path_to_static_file}:
     get:
+      servers:
+        - url: http://82.146.45.164:8080
       parameters:
         - in: path
           name: path_to_static_file
@@ -52,6 +60,8 @@ paths:
 
   /api/v1/sign_up:
     post:
+      servers:
+        - url: http://82.146.45.164:8080
       description: Create new user and return created user info
       requestBody:
         required: true
@@ -94,10 +104,10 @@ paths:
           description: >
             Successfully authenticated.
             The session ID is returned in a cookie named `SESSIONID`. You need to include this cookie in subsequent requests.
-          headers: 
+          headers:
             Set-Cookie:
               schema: 
                 type: string
-                example: SESSIONID=abcde12345; Path=/;
+                example: JSESSIONID=abcde12345
         '401':
           description: Authentication failed

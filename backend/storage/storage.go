@@ -72,6 +72,12 @@ func (db *Database) CreateNewSession(userId uint64) (string, error) {
 	return sessionId, err
 }
 
+func (db *Database) CheckSession(userId uint64, sessionId string) bool {
+	var id uint64
+	db.database.QueryRow("select id from session where profile_id = $1 and session_id = $2 and expiration < now()", userId, sessionId).Scan(&id)
+	return id != 0
+}
+
 func (db *Database) DeleteSession(userId uint64) error {
 	result, err := db.database.Exec("delete from session where profile_id = $1", userId)
 	if deletedRows, _ := result.RowsAffected(); deletedRows != 1 {
