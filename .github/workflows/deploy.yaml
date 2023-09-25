@@ -17,7 +17,7 @@ jobs:
           PORT: "22"
           PASSWORD: "031201"
           source: "."
-          target: "/AdDoBackend"
+          target: ~/AdDoBackendDeploy
 
       - name: Executing remote command
         uses: appleboy/ssh-action@master
@@ -25,5 +25,5 @@ jobs:
           HOST: "82.146.45.164"
           USERNAME: "dmitry"
           PORT: "22"
-          KEY: ${{ secrets.SSHKEY }}
+          PASSWORD: "031201"
           script: ls
