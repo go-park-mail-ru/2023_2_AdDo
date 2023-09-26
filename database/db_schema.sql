@@ -7,8 +7,8 @@ create table if not exists profile (
     );
 
 create table if not exists session (
-                                       id serial primary key,
-                                       session_id uuid default uuid_generate_v4() not null unique,
+    id serial primary key,
+    session_id uuid default uuid_generate_v4() not null unique,
     expiration timestamp with time zone not null default current_timestamp,
                              profile_id int not null references profile(id)
     );

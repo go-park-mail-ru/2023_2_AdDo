@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	"io"
+	"main/handler"
 	"main/storage"
 	"net/http"
 	"time"
@@ -20,89 +20,78 @@ func NewStorageHandler(db *sql.DB) *StorageHandler {
 
 const CookieName = "JSESSIONID"
 
-func ReadCookie(r *http.Request) string {
-	cookie, err := r.Cookie(CookieName)
-	if err != nil {
-		panic(err)
-	}
-	return cookie.Value
-}
-
-func RenderJSON(w http.ResponseWriter, v interface{}) {
+func RenderJSON(w http.ResponseWriter, v interface{}) error {
 	jsonResponse, err := json.Marshal(v)
 	if err != nil {
-		panic(err)
+		return err
 	}
+
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(jsonResponse)
+	return nil
 }
 
-func ParseJSON(r *http.Request, dataStruct interface{}) {
-	err := json.NewDecoder(r.Body).Decode(&dataStruct)
+func (api *StorageHandler) Home(w http.ResponseWriter, r *http.Request) error {
+	var user storage.User
+	err := json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
-		panic(err)
+		return handler.StatusError{Code: 409, Err: err}
 	}
-}
 
-func (api *StorageHandler) Root(w http.ResponseWriter, r *http.Request) {
-	var user storage.User
-	ParseJSON(r, user)
+	sessionId, err := r.Cookie(CookieName)
+	if err != nil {
+		return handler.StatusError{Code: 409, Err: err}
+	}
 
-	sessionId := ReadCookie(r)
-	if api.database.CheckSession(user.Id, sessionId) {
+	if api.database.CheckSession(user.Id, sessionId.Value) {
+		//auth
 		fmt.Fprintf(w, "authorized\n")
 	} else {
-		w.WriteHeader(http.StatusUnauthorized)
+		// no auth
 		fmt.Fprintf(w, "unauthorized\n")
 	}
+	return nil
 }
 
-func (api *StorageHandler) Home(w http.ResponseWriter, r *http.Request) {
+func (api *StorageHandler) SignUp(w http.ResponseWriter, r *http.Request) error {
 	var user storage.User
-	ParseJSON(r, user)
-
-	sessionId := ReadCookie(r)
-	if api.database.CheckSession(user.Id, sessionId) {
-		fmt.Fprintf(w, "authorized\n")
-	} else {
-		fmt.Fprintf(w, "unauthorized\n")
+	err := json.NewDecoder(r.Body).Decode(&user)
+	if err != nil {
+		return handler.StatusError{Code: 409, Err: err}
 	}
-}
-
-func (api *StorageHandler) SignUp(w http.ResponseWriter, r *http.Request) {
-	var user storage.User
-	ParseJSON(r, user)
 
 	id, err := api.database.CreateUser(user)
 	if err != nil {
-		panic(err)
+		return handler.StatusError{Code: 409, Err: err}
 	}
 
 	if id == 0 {
-		w.WriteHeader(http.StatusConflict)
-		io.WriteString(w, `{"status": 409, "err": "user with such username has already created"}`)
-		return
+		return handler.StatusError{Code: http.StatusConflict, Err: err}
 	}
 
-	RenderJSON(w, storage.ResponseId{Id: id})
+	err = RenderJSON(w, storage.ResponseId{Id: id})
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
-func (api *StorageHandler) Auth(w http.ResponseWriter, r *http.Request) {
+func (api *StorageHandler) Auth(w http.ResponseWriter, r *http.Request) error {
 	var user storage.User
-
-	ParseJSON(r, user)
+	err := json.NewDecoder(r.Body).Decode(&user)
+	if err != nil {
+		return handler.StatusError{Code: 409, Err: err}
+	}
 
 	isUser := api.database.CheckUserCredentials(user)
 
 	if !isUser {
-		w.WriteHeader(http.StatusUnauthorized)
-		io.WriteString(w, `{"status": 401, "err": "wrong login or password"}`)
-		return
+		return handler.StatusError{Code: http.StatusUnauthorized, Err: err}
 	}
 
 	sessionId, err := api.database.CreateNewSession(user.Id)
 	if err != nil {
-		panic(err)
+		return handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}
 
 	http.SetCookie(w, &http.Cookie{
@@ -112,19 +101,23 @@ func (api *StorageHandler) Auth(w http.ResponseWriter, r *http.Request) {
 		Secure:   true,
 		HttpOnly: true,
 	})
-	w.Header().Set("csrf", "my token")
+	return nil
 }
 
-func (api *StorageHandler) LogOut(w http.ResponseWriter, r *http.Request) {
+func (api *StorageHandler) LogOut(w http.ResponseWriter, r *http.Request) error {
 	var user storage.User
-	ParseJSON(r, user)
-
-	err := api.database.DeleteSession(user.Id)
+	err := json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
-		panic(err)
+		return handler.StatusError{Code: http.StatusInternalServerError, Err: err}
+	}
+
+	err = api.database.DeleteSession(user.Id)
+	if err != nil {
+		return handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}
 
 	http.SetCookie(w, &http.Cookie{
 		Expires: time.Now().Add(-1 * time.Second),
 	})
+	return nil
 }

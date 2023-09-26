@@ -58,13 +58,13 @@ func (db *Database) CreateUser(user User) (uint64, error) {
 	return id, err
 }
 
-func (db *Database) CheckUserCredentials(user User) bool {
+func (db *Database) CheckUserCredentials(user User) (uint64, error) {
 	hash := md5.Sum([]byte(user.Password))
 	hashString := hex.EncodeToString(hash[:])
-	var userNameFromDB string
-	db.database.QueryRow("select name from profile where name = $1 and password = $2", user.Username, hashString).Scan(&userNameFromDB)
 
-	return userNameFromDB == user.Username
+	var id uint64
+	err := db.database.QueryRow("select id from profile where name = $1 and password = $2", user.Username, hashString).Scan(&id)
+	return id, err
 }
 
 const SessionExpiration = "1 minute"
@@ -76,10 +76,10 @@ func (db *Database) CreateNewSession(userId uint64) (string, error) {
 	return sessionId, err
 }
 
-func (db *Database) CheckSession(userId uint64, sessionId string) bool {
-	var id uint64
-	db.database.QueryRow("select id from session where profile_id = $1 and session_id = $2 and expiration < now()", userId, sessionId).Scan(&id)
-	return id != 0
+func (db *Database) CheckSession(userId uint64, sessionId string) (bool, error) {
+	var sesIdFromDb string
+	err := db.database.QueryRow("select session_id from session where profile_id = $1 and expiration < now()", userId, sessionId).Scan(&sesIdFromDb)
+	return sesIdFromDb == sessionId, err
 }
 
 func (db *Database) DeleteSession(userId uint64) error {
