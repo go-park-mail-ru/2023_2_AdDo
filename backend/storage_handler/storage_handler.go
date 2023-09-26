@@ -27,8 +27,8 @@ func RenderJSON(w http.ResponseWriter, v interface{}) error {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	w.Write(jsonResponse)
-	return nil
+	_, err = w.Write(jsonResponse)
+	return err
 }
 
 func (api *StorageHandler) Home(w http.ResponseWriter, r *http.Request) error {
@@ -75,10 +75,7 @@ func (api *StorageHandler) SignUp(w http.ResponseWriter, r *http.Request) error 
 	}
 
 	err = RenderJSON(w, storage.ResponseId{Id: id})
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
 }
 
 func (api *StorageHandler) Auth(w http.ResponseWriter, r *http.Request) error {
@@ -107,10 +104,7 @@ func (api *StorageHandler) Auth(w http.ResponseWriter, r *http.Request) error {
 		HttpOnly: true,
 	})
 	err = RenderJSON(w, storage.ResponseId{Id: userId})
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
 }
 
 func (api *StorageHandler) LogOut(w http.ResponseWriter, r *http.Request) error {
