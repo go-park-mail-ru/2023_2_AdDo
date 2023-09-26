@@ -43,7 +43,12 @@ func (api *StorageHandler) Home(w http.ResponseWriter, r *http.Request) error {
 		return handler.StatusError{Code: 409, Err: err}
 	}
 
-	if api.database.CheckSession(user.Id, sessionId.Value) {
+	isAuth, err := api.database.CheckSession(user.Id, sessionId.Value)
+	if err != nil {
+		return err
+	}
+
+	if isAuth {
 		//auth
 		fmt.Fprintf(w, "authorized\n")
 	} else {
@@ -83,9 +88,9 @@ func (api *StorageHandler) Auth(w http.ResponseWriter, r *http.Request) error {
 		return handler.StatusError{Code: 409, Err: err}
 	}
 
-	isUser := api.database.CheckUserCredentials(user)
+	userId, err := api.database.CheckUserCredentials(user)
 
-	if !isUser {
+	if err != nil {
 		return handler.StatusError{Code: http.StatusUnauthorized, Err: err}
 	}
 
@@ -101,6 +106,10 @@ func (api *StorageHandler) Auth(w http.ResponseWriter, r *http.Request) error {
 		Secure:   true,
 		HttpOnly: true,
 	})
+	err = RenderJSON(w, storage.ResponseId{Id: userId})
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
