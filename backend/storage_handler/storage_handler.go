@@ -94,7 +94,7 @@ func (api *StorageHandler) Auth(w http.ResponseWriter, r *http.Request) error {
 		return handler.StatusError{Code: http.StatusUnauthorized, Err: err}
 	}
 
-	sessionId, err := api.database.CreateNewSession(user.Id)
+	sessionId, err := api.database.CreateNewSession(userId)
 	if err != nil {
 		return handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}
