@@ -3,7 +3,9 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	"github.com/gorilla/mux"
 	"log"
+	"main/middleware"
 	"main/storage_handler"
 	"net/http"
 	"os"
@@ -14,14 +16,19 @@ import (
 )
 
 func startServer(port string, db *sql.DB) {
-	handler := storage_handler.NewStorageHandler(db)
+	databaseHandler := storage_handler.NewStorageHandler(db)
+	router := mux.NewRouter()
 
-	http.HandleFunc("/", handler.Root)
-	http.HandleFunc("/api/v1/sign_up", handler.SignUp)
-	http.HandleFunc("/api/v1/auth", handler.Auth)
-	http.HandleFunc("/api/v1/logout", handler.LogOut)
-	fmt.Println("starting server at :" + port)
-	http.ListenAndServe(":"+port, nil)
+	router.HandleFunc("/", databaseHandler.Root).Methods("GET")
+	router.HandleFunc("/api/v1/home", databaseHandler.Home).Methods("GET")
+	router.HandleFunc("/api/v1/sign_up", databaseHandler.SignUp).Methods("POST")
+	router.HandleFunc("/api/v1/auth", databaseHandler.Auth).Methods("POST")
+	router.HandleFunc("/api/v1/logout", databaseHandler.LogOut).Methods("POST")
+
+	handlerWithMiddleWare := middleware.Logging(router)
+	handlerWithMiddleWare = middleware.PanicRecovery(handlerWithMiddleWare)
+
+	log.Fatal(http.ListenAndServe("starting server at :"+port, handlerWithMiddleWare))
 }
 
 /*
