@@ -3,7 +3,6 @@ package handler
 import (
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 )
 
@@ -36,7 +35,6 @@ func (h Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		case Error:
 			w.WriteHeader(e.Status())
 			io.WriteString(w, fmt.Sprintf("{\"status\": %d, \"err\": \"%s\"}", e.Status(), e.Error()))
-			log.Printf("HTTP %d - %s", e.Status(), e)
 			http.Error(w, e.Error(), e.Status())
 		default:
 			w.WriteHeader(http.StatusInternalServerError)

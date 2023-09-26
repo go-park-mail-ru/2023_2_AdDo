@@ -20,7 +20,7 @@ func startServer(port string, db *sql.DB) {
 	databaseHandler := storage_handler.NewStorageHandler(db)
 	router := mux.NewRouter()
 
-	router.Handle("/api/v1/home", handler.Handler{H: databaseHandler.Home}).Methods("GET")
+	router.Handle("/api/v1/home", handler.Handler{H: databaseHandler.Home}).Methods("POST")
 	router.Handle("/api/v1/sign_up", handler.Handler{H: databaseHandler.SignUp}).Methods("POST")
 	router.Handle("/api/v1/auth", handler.Handler{H: databaseHandler.Auth}).Methods("POST")
 	router.Handle("/api/v1/logout", handler.Handler{H: databaseHandler.LogOut}).Methods("POST")
