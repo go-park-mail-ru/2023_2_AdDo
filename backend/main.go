@@ -28,7 +28,7 @@ func startServer(port string, db *sql.DB) {
 	handlerWithMiddleWare := middleware.Logging(router)
 	handlerWithMiddleWare = middleware.PanicRecovery(handlerWithMiddleWare)
 
-	log.Fatal(http.ListenAndServe("starting server at :"+port, handlerWithMiddleWare))
+	log.Fatal(http.ListenAndServe(":"+port, handlerWithMiddleWare))
 }
 
 /*
