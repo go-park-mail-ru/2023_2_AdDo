@@ -20,24 +20,48 @@ func NewStorageHandler(db *sql.DB) *StorageHandler {
 
 const CookieName = "JSESSIONID"
 
-func ReadCookie(r *http.Request) (value string, err error) {
+func ReadCookie(r *http.Request) string {
 	cookie, err := r.Cookie(CookieName)
 	if err != nil {
-		return value, err
+		panic(err)
 	}
-	return cookie.Value, err
+	return cookie.Value
+}
+
+func RenderJSON(w http.ResponseWriter, v interface{}) {
+	jsonResponse, err := json.Marshal(v)
+	if err != nil {
+		panic(err)
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(jsonResponse)
+}
+
+func ParseJSON(r *http.Request, dataStruct interface{}) {
+	err := json.NewDecoder(r.Body).Decode(&dataStruct)
+	if err != nil {
+		panic(err)
+	}
 }
 
 func (api *StorageHandler) Root(w http.ResponseWriter, r *http.Request) {
 	var user storage.User
-	err := json.NewDecoder(r.Body).Decode(&user)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		io.WriteString(w, `{"status": 500, "err": "json decoding error: check openapi"}`)
-		return
-	}
+	ParseJSON(r, user)
 
-	sessionId, err := ReadCookie(r)
+	sessionId := ReadCookie(r)
+	if api.database.CheckSession(user.Id, sessionId) {
+		fmt.Fprintf(w, "authorized\n")
+	} else {
+		w.WriteHeader(http.StatusUnauthorized)
+		fmt.Fprintf(w, "unauthorized\n")
+	}
+}
+
+func (api *StorageHandler) Home(w http.ResponseWriter, r *http.Request) {
+	var user storage.User
+	ParseJSON(r, user)
+
+	sessionId := ReadCookie(r)
 	if api.database.CheckSession(user.Id, sessionId) {
 		fmt.Fprintf(w, "authorized\n")
 	} else {
@@ -47,19 +71,11 @@ func (api *StorageHandler) Root(w http.ResponseWriter, r *http.Request) {
 
 func (api *StorageHandler) SignUp(w http.ResponseWriter, r *http.Request) {
 	var user storage.User
-
-	err := json.NewDecoder(r.Body).Decode(&user)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		io.WriteString(w, `{"status": 500, "err": "json decoding error: check openapi"}`)
-		return
-	}
+	ParseJSON(r, user)
 
 	id, err := api.database.CreateUser(user)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		io.WriteString(w, `{"status": 500, "err": "db_error"}`)
-		return
+		panic(err)
 	}
 
 	if id == 0 {
@@ -68,27 +84,13 @@ func (api *StorageHandler) SignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	body := map[string]interface{}{
-		"id": id,
-	}
-
-	err = json.NewEncoder(w).Encode(&body)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		io.WriteString(w, `{"status": 500, "err": "json encoding error: check openapi"}`)
-		return
-	}
+	RenderJSON(w, storage.ResponseId{Id: id})
 }
 
 func (api *StorageHandler) Auth(w http.ResponseWriter, r *http.Request) {
 	var user storage.User
 
-	err := json.NewDecoder(r.Body).Decode(&user)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		io.WriteString(w, `{"status": 500, "err": "json decoding error: check openapi"}`)
-		return
-	}
+	ParseJSON(r, user)
 
 	isUser := api.database.CheckUserCredentials(user)
 
@@ -99,34 +101,27 @@ func (api *StorageHandler) Auth(w http.ResponseWriter, r *http.Request) {
 	}
 
 	sessionId, err := api.database.CreateNewSession(user.Id)
-
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		io.WriteString(w, `{"status": 500, "err": "db_error"}`)
-		return
+		panic(err)
 	}
 
 	http.SetCookie(w, &http.Cookie{
-		Name:    CookieName,
-		Value:   sessionId,
-		Expires: time.Now().Add(1 * time.Minute),
+		Name:     CookieName,
+		Value:    sessionId,
+		Expires:  time.Now().Add(1 * time.Minute),
+		Secure:   true,
+		HttpOnly: true,
 	})
+	w.Header().Set("csrf", "my token")
 }
 
 func (api *StorageHandler) LogOut(w http.ResponseWriter, r *http.Request) {
 	var user storage.User
+	ParseJSON(r, user)
 
-	err := json.NewDecoder(r.Body).Decode(&user)
+	err := api.database.DeleteSession(user.Id)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		io.WriteString(w, `{"status": 500, "err": "json decoding error: check openapi"}`)
-		return
-	}
-	err = api.database.DeleteSession(user.Id)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		io.WriteString(w, `{"status": 500, "err": "db_error"}`)
-		return
+		panic(err)
 	}
 
 	http.SetCookie(w, &http.Cookie{

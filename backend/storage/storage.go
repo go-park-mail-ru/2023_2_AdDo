@@ -37,6 +37,10 @@ type Audio struct {
 	ContentPath string
 }
 
+type ResponseId struct {
+	Id uint64
+}
+
 type Database struct {
 	database *sql.DB
 }
