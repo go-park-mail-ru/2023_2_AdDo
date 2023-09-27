@@ -51,6 +51,12 @@ func (api *StorageHandler) Home(w http.ResponseWriter, r *http.Request) error {
 	if isAuth {
 		//auth
 		fmt.Fprintf(w, "authorized\n")
+		userMusic, err := api.database.GetUserMusic(user.Id)
+		if err != nil {
+			return err
+		}
+		err = RenderJSON(w, userMusic)
+		return err
 	} else {
 		// no auth
 		fmt.Fprintf(w, "unauthorized\n")
@@ -102,6 +108,7 @@ func (api *StorageHandler) Auth(w http.ResponseWriter, r *http.Request) error {
 		Expires:  time.Now().Add(1 * time.Minute),
 		Secure:   true,
 		HttpOnly: true,
+		Path: 	  "/",
 	})
 	err = RenderJSON(w, storage.ResponseId{Id: userId})
 	return err

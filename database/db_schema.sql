@@ -1,69 +1,102 @@
 create extension if not exists "uuid-ossp";
+
 create table if not exists profile (
-                                       id serial primary key,
-                                       name text not null unique,
-                                       password varchar(32) not null
-    --avatar image
-    );
+    id serial primary key,
+    mail varchar(32) unique not null,
+    password varchar(32) not null,
+    nickname varchar(32) not null,
+    birth_date date not null,
+    avatar varchar(128)
+    -- premium
+);
 
 create table if not exists session (
     id serial primary key,
     session_id uuid default uuid_generate_v4() not null unique,
     expiration timestamp with time zone not null default current_timestamp,
-                             profile_id int not null references profile(id)
-    );
+    profile_id int not null references profile(id)
+);
 
 create function session_delete_expired_rows() returns trigger
     language plpgsql
     AS $$
-begin
-delete from session where session.expiration < now();
-return NEW;
-end;
-$$;
+        begin
+            delete from session where session.expiration < now();
+            return NEW;
+        end;
+    $$;
 
 create trigger session_delete_expired_rows_trigger
     after insert on session
     EXECUTE PROCEDURE session_delete_expired_rows();
 
 create table if not exists artist (
-                                      id serial primary key,
-                                      name text not null unique
+    id serial primary key,
+    name varchar(32) not null,
+    avatar varchar(128) 
 );
 
 create table if not exists album (
-                                     id serial primary key,
-                                     name text not null unique,
-    -- image path or url
-                                     artist_id int not null references artist(id)
-    );
+    id serial primary key,
+    name varchar(32) not null unique,
+    artist_id int not null references artist(id),
+    preview varchar(128),
+    release date
+);
 
 create table if not exists playlist (
-                                        id serial primary key,
-                                        name text not null unique,
-    -- image path or url
-                                        profile_id int not null references profile(id)
-    );
+    id serial primary key,
+    name varchar(32) not null unique,
+    creator_id int not null references profile(id),
+    preview varchar(128)
+);
 
 create table if not exists track(
-                                    id serial primary key,
-                                    name text not null,
-                                    artist_id int references artist(id),
-    playlist_id int references playlist(id),
-    album_id int references album(id)
-    -- content path or url
-    -- song text
-    );
+    id serial primary key,
+    name varchar(32) not null,
+    artist_id int not null references artist(id),
+    preview varchar(128)
+    -- song_text text
+);
 
 create table if not exists podcast(
-                                      id serial primary key,
-                                      name text not null,
-                                      artist_id int references artist(id),
-    playlist_id int references playlist(id),
-    album_id int references album(id)
-    -- content path or url
-    -- description
-    );
+    id serial primary key,
+    name varchar(32) not null,
+    artist_id int references artist(id),
+    preview varchar(128),
+    descr varchar(256),
+    release date
+);
+
+create table if not exists profile_playlist(
+    id serial primary key,
+    profile_id int not null references profile(id),
+    playlist_id int not null references playlist(id)
+);
+
+create table if not exists profile_album(
+    id serial primary key,
+    profile_id int not null references profile(id),
+    album_id int not null references album(id)
+);
+
+create table if not exists profile_podcast(
+    id serial primary key,
+    profile_id int not null references profile(id),
+    podcast_id int not null references podcast(id)
+);
+
+create table if not exists playlist_track(
+    id serial primary key,
+    playlist_id int not null references playlist(id),
+    track_id int not null references track(id)
+);
+
+create table if not exists album_track(
+    id serial primary key,
+    album_id int not null references album(id),
+    track_id int not null references track(id)
+);
 
 -- table with like for songs:
 --      id like_author
