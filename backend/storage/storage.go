@@ -7,9 +7,12 @@ import (
 )
 
 type User struct {
-	Id       uint64
-	Username string
-	Password string
+	Id        uint64
+	Nickname  string
+	Email     string
+	Password  string
+	BirthDate string
+	Avatar    string
 }
 
 type Artist struct {
@@ -78,8 +81,11 @@ func (db *Database) CreateUser(user User) (uint64, error) {
 	var id uint64
 	hash := md5.Sum([]byte(user.Password))
 	hashString := hex.EncodeToString(hash[:])
-	err := db.database.QueryRow("insert into profile (name, password) values ($1, $2) returning id",
-		user.Username, hashString).Scan(&id)
+	err := db.database.QueryRow(`
+		insert into profile (mail, password, nickname, birth_date, avatar)
+		values ($1, $2, $3, $4, $5) 
+		returning id`,
+		user.Email, hashString, user.Nickname, user.BirthDate, user.Avatar).Scan(&id)
 	return id, err
 }
 
@@ -88,7 +94,7 @@ func (db *Database) CheckUserCredentials(user User) (uint64, error) {
 	hashString := hex.EncodeToString(hash[:])
 
 	var id uint64
-	err := db.database.QueryRow("select id from profile where name = $1 and password = $2", user.Username, hashString).Scan(&id)
+	err := db.database.QueryRow("select id from profile where name = $1 and password = $2", user.Email, hashString).Scan(&id)
 	return id, err
 }
 
