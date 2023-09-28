@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"main/handler"
 	"main/storage"
+	"main/validator"
 	"net/http"
 	"time"
 )
@@ -71,6 +72,11 @@ func (api *StorageHandler) SignUp(w http.ResponseWriter, r *http.Request) error 
 		return handler.StatusError{Code: 409, Err: err}
 	}
 
+	err = validator.ValidateNewUser(user)
+	if err != nil {
+		return handler.StatusError{Code: 409, Err: err}
+	}
+
 	id, err := api.database.CreateUser(user)
 	if err != nil {
 		return handler.StatusError{Code: 409, Err: err}
@@ -108,7 +114,7 @@ func (api *StorageHandler) Auth(w http.ResponseWriter, r *http.Request) error {
 		Expires:  time.Now().Add(1 * time.Minute),
 		Secure:   true,
 		HttpOnly: true,
-		Path: 	  "/",
+		Path:     "/",
 	})
 	err = RenderJSON(w, storage.ResponseId{Id: userId})
 	return err
