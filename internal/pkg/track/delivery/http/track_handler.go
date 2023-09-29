@@ -10,11 +10,11 @@ import (
 )
 
 type TrackHandler struct {
-	trackUseCase   track.Usecase
+	trackUseCase   track.UseCase
 	sessionUseCase session.Usecase
 }
 
-func NewHandler(track track.Usecase, session session.Usecase) TrackHandler {
+func NewHandler(track track.UseCase, session session.Usecase) TrackHandler {
 	return TrackHandler{
 		trackUseCase:   track,
 		sessionUseCase: session,
@@ -22,7 +22,7 @@ func NewHandler(track track.Usecase, session session.Usecase) TrackHandler {
 }
 
 func (handler *TrackHandler) Music(w http.ResponseWriter, r *http.Request) error {
-	tracks, err := handler.trackUseCase.GetPopular()
+	tracks, err := handler.trackUseCase.GetAll()
 	if err != nil {
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}

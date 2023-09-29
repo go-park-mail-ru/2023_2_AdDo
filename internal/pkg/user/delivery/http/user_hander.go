@@ -12,10 +12,10 @@ import (
 )
 
 type UserHandler struct {
-	userUseCase user_domain.Usecase
+	userUseCase user_domain.UseCase
 }
 
-func NewHandler(userUseCase user_domain.Usecase) UserHandler {
+func NewHandler(userUseCase user_domain.UseCase) UserHandler {
 	handler := UserHandler{
 		userUseCase: userUseCase,
 	}
