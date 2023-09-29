@@ -6,6 +6,8 @@ import (
 	"log"
 	init_db "main/init/database"
 	router_init "main/init/router"
+	album_repository "main/internal/pkg/album/repository/postgres"
+	artist_repository "main/internal/pkg/artist/repository/postgres"
 	session_repository "main/internal/pkg/session/repository/postgresql"
 	session_usecase "main/internal/pkg/session/usecase"
 	track_delivery "main/internal/pkg/track/delivery/http"
@@ -32,15 +34,17 @@ func main() {
 	sessionRepo := session_repository.NewPostgres(db)
 	userRepo := user_repository.NewPostgres(db)
 	trackRepo := track_repository.NewPostgres(db)
+	albumRepo := album_repository.NewPostgres(db)
+	artistRepo := artist_repository.NewPostgres(db)
 	log.Println("Repositories initialized")
 
-	sessionUsecase := session_usecase.NewDefault(sessionRepo)
-	userUsecase := user_usecase.NewWithStatefulSessions(userRepo, sessionRepo)
-	trackUsecase := track_usecase.NewDefault(trackRepo)
+	sessionUseCase := session_usecase.NewDefault(sessionRepo)
+	userUseCase := user_usecase.NewWithStatefulSessions(userRepo, sessionRepo)
+	trackUseCase := track_usecase.NewDefault(trackRepo, &artistRepo, albumRepo)
 	log.Println("UseCases initialized")
 
-	userHandler := user_delivery.NewHandler(&userUsecase)
-	trackHandler := track_delivery.NewHandler(&trackUsecase, &sessionUsecase)
+	userHandler := user_delivery.NewHandler(&userUseCase)
+	trackHandler := track_delivery.NewHandler(&trackUseCase, &sessionUseCase)
 	log.Println("Deliveries initialized")
 
 	router = router_init.New(router, userHandler, trackHandler)
