@@ -39,7 +39,7 @@ func (useCase *WithStatefulSessions) Login(email, password string) (uint64, stri
 	return id, sessionId, nil
 }
 
-func (useCase *WithStatefulSessions) GetUserById(id uint64) (user_domain.User, error) {
+func (useCase *WithStatefulSessions) GetUserInfo(id uint64) (user_domain.User, error) {
 	u, err := useCase.userRepo.GetById(id)
 	if err != nil {
 		return u, user_domain.ErrUserDoesNotExist

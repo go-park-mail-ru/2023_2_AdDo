@@ -77,8 +77,10 @@ func (handler *UserHandler) Auth(w http.ResponseWriter, r *http.Request) error {
 		return common_handler.StatusError{Code: http.StatusUnauthorized, Err: err}
 	}
 
-	// get user avatar here
-	return nil
+	user, err := handler.userUseCase.GetUserInfo(uint64(id))
+
+	err = response.RenderJSON(w, user)
+	return err
 }
 
 func (handler *UserHandler) LogOut(w http.ResponseWriter, r *http.Request) error {

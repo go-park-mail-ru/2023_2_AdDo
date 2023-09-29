@@ -25,13 +25,12 @@ func (db *Postgres) Create(user user_domain.User) (uint64, error) {
 }
 
 func (db *Postgres) GetById(id uint64) (user_domain.User, error) {
-	return user_domain.User{
-		Id:        0,
-		Username:  "",
-		Email:     "",
-		Password:  "",
-		BirthDate: "",
-	}, nil
+	user := user_domain.User{Id: id}
+	err := db.database.QueryRow("select email, nickname, birth_date, avatar_url from profile where id = $1", id).Scan(&user.Email, user.Username, user.BirthDate, user.Avatar)
+	if err != nil {
+		return user, user_domain.ErrUserDoesNotExist
+	}
+	return user, nil
 }
 
 func (db *Postgres) CheckEmailAndPassword(email, password string) (uint64, error) {
