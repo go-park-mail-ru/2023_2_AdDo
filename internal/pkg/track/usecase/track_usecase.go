@@ -51,14 +51,6 @@ func (useCase *Default) GetAll() ([]track.Response, error) {
 	return tracks, nil
 }
 
-func (useCase *Default) GetPopular() ([]track.Response, error) {
-	//tracks, err := useCase.repo.GetMostLiked()
-	//if err != nil {
-	//	return nil, track.ErrNoTracks
-	//}
-	return nil, nil
-}
-
 func (useCase *Default) GetFavourite(userId uint64) ([]track.Response, error) {
 	tracks, err := useCase.repoTrack.GetByUserId(userId)
 	if err != nil {
@@ -80,4 +72,8 @@ func (useCase *Default) GetFavourite(userId uint64) ([]track.Response, error) {
 	}
 
 	return tracks, nil
+}
+
+func (useCase *Default) GetPopular() ([]track.Response, error) {
+	return nil, nil
 }
