@@ -21,7 +21,7 @@ type Usecase interface {
 	Register(user User) (uint64, error)
 	Login(email, password string) (uint64, string, error)
 	Auth(userId uint64, sessionId string) (bool, error)
-	//GetById(id uint64) (*User, error)
+	GetUserInfo(id uint64) (User, error)
 	Logout(id uint64) error
 }
 
