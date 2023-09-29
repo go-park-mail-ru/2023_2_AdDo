@@ -41,8 +41,8 @@ create table if not exists playlist (
 create table if not exists track(
     id serial primary key,
     name varchar(32) not null,
-    artist_id int not null references artist(id),
-    preview varchar(1024)
+    preview varchar(1024),
+    content varchar(1024)
     -- song_text text
 );
 
@@ -82,6 +82,12 @@ create table if not exists playlist_track(
 create table if not exists album_track(
     id serial primary key,
     album_id int not null references album(id),
+    track_id int not null references track(id)
+);
+
+create table if not exists artist_track(
+    id serial primary key,
+    artist_id int not null references artist(id),
     track_id int not null references track(id)
 );
 
