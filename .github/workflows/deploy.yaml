@@ -12,18 +12,18 @@ jobs:
       - name: Copy repository content to VM
         uses: appleboy/scp-action@master
         with:
-          HOST: "82.146.45.164"
-          USERNAME: "dmitry"
-          PORT: "22"
-          PASSWORD: "031201"
+          HOST: ${{ secrets.HOST }}
+          USERNAME: ${{ secrets.USERNAME }}
+          PORT: ${{ secrets.PORT }}
+          PASSWORD: ${{ secrets.PASSWORD }}
           source: "."
           target: ~/AdDoBackendDeploy
 
       - name: Executing remote command
         uses: appleboy/ssh-action@master
         with:
-          HOST: "82.146.45.164"
-          USERNAME: "dmitry"
-          PORT: "22"
-          PASSWORD: "031201"
+          HOST: ${{ secrets.HOST }}
+          USERNAME: ${{ secrets.USERNAME }}
+          PORT: ${{ secrets.PORT }}
+          PASSWORD: ${{ secrets.PASSWORD }}
           script: cd AdDoBackendDeploy && chmod +x deploy.sh && ./deploy.sh
