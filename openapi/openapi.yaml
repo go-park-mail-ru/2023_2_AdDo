@@ -196,7 +196,7 @@ paths:
         '200':
           description: Session deleted
   /api/v1/home:
-    get:
+    post:
       servers:
         - url: http://82.146.45.164:8080
       description: Show tracks, artists, albums

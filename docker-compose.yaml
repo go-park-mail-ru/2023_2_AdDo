@@ -13,16 +13,16 @@ services:
       - ./database/startup.sh:/docker-entrypoint-initdb.d/startup.sh
       - ~/db-data:/var/lib/postgresql/data
   
-  backend:
+  musicon:
     build:
-      context: backend
       dockerfile: Dockerfile
     depends_on:
       - service-db
     ports:
       - "8080:8080"
-    env_file: ./database/db.env
-
+    env_file: database/db.env
+    environment:
+      - POSTGRES_QUERY=host=service-db port=5432 user=musicon password=musicon dbname=musicon sslmode=disable
 
 #  proxy:
 #    image: nginx
