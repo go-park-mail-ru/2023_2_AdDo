@@ -9,6 +9,7 @@ import (
 	router_init "main/init/router"
 	album_repository "main/internal/pkg/album/repository/postgres"
 	artist_repository "main/internal/pkg/artist/repository/postgres"
+	common_middleware "main/internal/pkg/common/middleware"
 	"main/internal/pkg/session"
 	session_repository "main/internal/pkg/session/repository/postgresql"
 	session_usecase "main/internal/pkg/session/usecase"
@@ -59,5 +60,5 @@ func main() {
 		handlers.AllowCredentials(),
 	)(router)
 
-	log.Fatal(http.ListenAndServe(ServerPort, routerCORS))
+	log.Fatal(http.ListenAndServe(ServerPort, common_middleware.Logging(routerCORS)))
 }
