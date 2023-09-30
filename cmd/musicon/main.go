@@ -53,7 +53,7 @@ func main() {
 	router = router_init.New(router, userHandler, trackHandler)
 
 	routerCORS := handlers.CORS(
-		handlers.AllowedOrigins([]string{"*"}),
+		handlers.AllowedOrigins([]string{"http://82.146.45.164:8081"}),
 		handlers.AllowedMethods([]string{"POST", "GET", "PUT", "DELETE", "OPTIONS"}),
 		handlers.AllowedHeaders([]string{"Content-Type"}),
 		handlers.ExposedHeaders([]string{session.CookieName}),
