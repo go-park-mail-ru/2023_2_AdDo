@@ -1,16 +1,11 @@
 package album
 
-import (
-	"main/internal/pkg/artist"
-	"main/internal/pkg/track"
-)
-
 type Album struct {
 	Id      uint64
 	Name    string
-	Track   []track.Track
-	Artist  artist.Artist
 	Preview string
+	artist  uint64
+	track   []uint64
 }
 
 type Response struct {
