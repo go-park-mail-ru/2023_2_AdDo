@@ -54,7 +54,7 @@ func (handler *UserHandler) Login(w http.ResponseWriter, r *http.Request) error 
 		Name:     session.CookieName,
 		Value:    sessionId,
 		Expires:  time.Now().Add(session.TimeToLive),
-		Secure:   true,
+		Secure:   true, // сейчас не работает, потому что запрос не https
 		HttpOnly: true,
 	})
 	err = response.RenderJSON(w, user_domain.ResponseId{Id: id})

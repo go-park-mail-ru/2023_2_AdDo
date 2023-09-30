@@ -38,15 +38,11 @@ func (db *Postgres) DeleteByUserId(userId uint64) error {
 }
 
 func (db *Postgres) GetBySessionId(sessionId string) (string, error) {
+	/// TODO implement me
 	return "", nil
 }
 
 func (db *Postgres) DeleteBySessionId(sessionId string) error {
+	/// TODO implement me
 	return nil
 }
-
-//Create(userId uint64) (string, error)
-//GetByUserId(userId uint64) (string, error)
-//DeleteByUserId(userId uint64) error
-//GetBySessionId(sessionId string) (string, error)
-//DeleteBySessionId(sessionId string) error
