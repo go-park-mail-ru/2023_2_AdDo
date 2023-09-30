@@ -1,0 +1,3 @@
+INSERT INTO artist (name, avatar)  VALUES ('Mayot', 'ur_avatar here');
+INSERT INTO album (name, artist_id, preview, release_date) VALUES ('Оба', (SELECT id FROM artist WHERE name = 'Mayot') , 'url album here', '10-01-2021');
+INSERT INTO track (name, preview, content) VALUES ('Позвони', 'url track here', 'music url here');INSERT INTO album_track (album_id, track_id) VALUES ((SELECT id FROM album WHERE name = 'Оба'), (SELECT id FROM track WHERE name = 'Позвони'));INSERT INTO artist_track (artist_id, track_id) VALUES ((SELECT id FROM artist WHERE name = 'Mayot'), (SELECT id FROM track WHERE name = 'Позвони'));
