@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
 	"log"
@@ -8,6 +9,7 @@ import (
 	router_init "main/init/router"
 	album_repository "main/internal/pkg/album/repository/postgres"
 	artist_repository "main/internal/pkg/artist/repository/postgres"
+	"main/internal/pkg/session"
 	session_repository "main/internal/pkg/session/repository/postgresql"
 	session_usecase "main/internal/pkg/session/usecase"
 	track_delivery "main/internal/pkg/track/delivery/http"
@@ -49,5 +51,13 @@ func main() {
 
 	router = router_init.New(router, userHandler, trackHandler)
 
-	log.Fatal(http.ListenAndServe(ServerPort, router))
+	routerCORS := handlers.CORS(
+		handlers.AllowedOrigins([]string{"*"}),
+		handlers.AllowedMethods([]string{"POST", "GET", "PUT", "DELETE", "OPTIONS"}),
+		handlers.AllowedHeaders([]string{"Content-Type"}),
+		handlers.ExposedHeaders([]string{session.CookieName}),
+		handlers.AllowCredentials(),
+	)(router)
+
+	log.Fatal(http.ListenAndServe(ServerPort, routerCORS))
 }
