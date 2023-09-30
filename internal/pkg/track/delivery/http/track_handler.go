@@ -47,12 +47,15 @@ func (handler *TrackHandler) Music(w http.ResponseWriter, r *http.Request) error
 	if err != nil || !isAuth {
 		return common_handler.StatusError{Code: http.StatusUnauthorized, Err: err}
 	}
+	// TODO На текущий момент мы не возвращаем пользовательскую музыку, потому что нет смысла возвращать то, что у пользователя в добавленных
+	// TODO Поэтому к первому рк можно сделать так, что мы возвращаем просто общую музыку
+	// TODO После того как придумаем простейшую систему рекомендаций, будет смысл возвращать что-то из пользовательских подборок
+	//userTracks, err := handler.trackUseCase.GetFavourite(uint64(userId))
+	//if err != nil {
+	//	return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
+	//}
 
-	userTracks, err := handler.trackUseCase.GetFavourite(uint64(userId))
-	if err != nil {
-		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
-	}
-
-	err = response.RenderJSON(w, userTracks)
-	return err
+	//err = response.RenderJSON(w, userTracks)
+	//return err
+	return nil
 }
