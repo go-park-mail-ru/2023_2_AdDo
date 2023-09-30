@@ -19,7 +19,7 @@ func TestUserRepository_Create(t *testing.T) {
 	}
 
 	// Ожидаемый SQL-запрос
-	mock.ExpectExec("INSERT INTO user").
+	mock.ExpectExec("INSERT INTO profile").
 		WithArgs("John", "Doe").
 		WillReturnResult(sqlmock.NewResult(1, 1))
 
