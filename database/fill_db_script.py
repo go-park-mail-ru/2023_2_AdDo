@@ -31,32 +31,48 @@ def create_track_command(track_name, track_preview, track_content, album_name, a
     return command
 
 
+def create_single_command(track_name, track_preview, track_content, artist_name):
+    command = (
+        f"INSERT INTO track (name, preview, content)"
+        f" VALUES ('{track_name}', '{track_preview}', '{track_content}');"
+
+        f"INSERT INTO artist_track (artist_id, track_id)"
+        f" VALUES ((SELECT id FROM artist WHERE name = '{artist_name}'), (SELECT id FROM track WHERE name = '{track_name}'));"
+    )
+    return command
+
+
 with open("data_for_db_filling.json") as file:
     conf = json.load(file)
 
 
 server = conf["server_addr"]
 artist_name = conf["artist_name"]
-album_name = conf["album_name"]
-album_release = conf["album_release_date"]
-tracks = conf["tracks"]
+albums = conf["albums"]
+singles = conf["singles"]
 
 artist_avatar_url = server + "/images/avatars/artists/" + artist_name.replace(" ", "_") + ".jpg"
-album_url = server + "/audio/" + artist_name.replace(" ", "_") + "/albums/" + album_name.replace(" ", "_")
-album_image = server + "/images/tracks/" + artist_name.replace(" ", "_") + "/albums/" + album_name.replace(" ", "_") + ".jpg"
-
-# print(artist_avatar_url)
-# print(album_url)
-# print(album_image, "\n")
-
 
 with open("data_init.sql", "w") as file:
     file.write(create_artist_command(artist_name, artist_avatar_url) + '\n')
-    file.write(create_album_command(artist_name, album_name, album_url, album_release) + '\n')
 
-    for track in tracks:
-        track_url = server + "/audio/" + artist_name.replace(" ", "_") + "/albums/" + album_name.replace(" ", "_") + "/" + track.replace(" ", "_") + ".mp3"
-        # print(track_url)
-        file.write(create_track_command(track, album_image, track_url, album_name, artist_name) + '\n')
+    for album in albums:
+        album_name = album["album_name"]
+        album_release = album["album_release_date"]
+
+        album_url = server + "/audio/" + artist_name.replace(" ", "_") + "/albums/" + album_name.replace(" ", "_")
+        album_image = server + "/images/tracks/" + artist_name.replace(" ", "_") + "/albums/" + album_name.replace(" ", "_") + ".jpg"
+        file.write(create_album_command(artist_name, album_name, album_url, album_release) + '\n')
+
+        tracks = album["tracks"]
+        for track in tracks:
+            track_url = server + "/audio/" + artist_name.replace(" ", "_") + "/albums/" + album_name.replace(" ", "_") + "/" + track.replace(" ", "_") + ".mp3"
+            file.write(create_track_command(track, album_image, track_url, album_name, artist_name) + '\n')
+
+    for single_name in singles:
+        single_url = server + "/audio/" + artist_name.replace(" ", "_") + "/" + single_name.replace(" ", "_") + ".mp3"
+        single_image = server + "/images/tracks/" + artist_name.replace(" ", "_") + "/" + single_name.replace(" ", "_") + ".jpg"
+        file.write(create_single_command(single_name, single_image, single_url, artist_name) + '\n')
+
 
 file.close()
