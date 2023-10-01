@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	common_handler "main/internal/pkg/common/handler"
 	"main/internal/pkg/common/response"
-	"main/internal/pkg/session"
 	user_domain "main/internal/pkg/user"
 	"net/http"
 	"strconv"
@@ -50,13 +49,7 @@ func (handler *UserHandler) Login(w http.ResponseWriter, r *http.Request) error 
 		return common_handler.StatusError{Code: http.StatusForbidden, Err: err}
 	}
 
-	http.SetCookie(w, &http.Cookie{
-		Name:     session.CookieName,
-		Value:    sessionId,
-		Expires:  time.Now().Add(session.TimeToLive),
-		Secure:   true, // сейчас не работает, потому что запрос не https
-		HttpOnly: true,
-	})
+	response.SetCookie(w, sessionId)
 	err = response.RenderJSON(w, user_domain.ResponseId{Id: id})
 	return err
 }
