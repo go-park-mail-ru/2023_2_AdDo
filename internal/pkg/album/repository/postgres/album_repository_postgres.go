@@ -15,16 +15,6 @@ func NewPostgres(db *sql.DB) Postgres {
 	}
 }
 
-func (p Postgres) Create(track album.Album) (uint64, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (p Postgres) GetById(id uint64) (album.Album, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
 func (p Postgres) GetByTrackId(trackId uint64) ([]album.Response, error) {
 	result := make([]album.Response, 0)
 	query := "select album.id, name, preview from album " +

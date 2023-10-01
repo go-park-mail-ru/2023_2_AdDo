@@ -34,21 +34,6 @@ func (m *MockRepository) EXPECT() *MockRepositoryMockRecorder {
 	return m.recorder
 }
 
-// Create mocks base method.
-func (m *MockRepository) Create(track artist.Artist) (uint64, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Create", track)
-	ret0, _ := ret[0].(uint64)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// Create indicates an expected call of Create.
-func (mr *MockRepositoryMockRecorder) Create(track interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockRepository)(nil).Create), track)
-}
-
 // GetByAlbumId mocks base method.
 func (m *MockRepository) GetByAlbumId(albumId uint64) (artist.Response, error) {
 	m.ctrl.T.Helper()
@@ -62,21 +47,6 @@ func (m *MockRepository) GetByAlbumId(albumId uint64) (artist.Response, error) {
 func (mr *MockRepositoryMockRecorder) GetByAlbumId(albumId interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByAlbumId", reflect.TypeOf((*MockRepository)(nil).GetByAlbumId), albumId)
-}
-
-// GetById mocks base method.
-func (m *MockRepository) GetById(id uint64) (artist.Artist, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetById", id)
-	ret0, _ := ret[0].(artist.Artist)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetById indicates an expected call of GetById.
-func (mr *MockRepositoryMockRecorder) GetById(id interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetById", reflect.TypeOf((*MockRepository)(nil).GetById), id)
 }
 
 // GetByTrackId mocks base method.

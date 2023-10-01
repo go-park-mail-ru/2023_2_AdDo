@@ -15,16 +15,6 @@ func NewPostgres(db *sql.DB) Postgres {
 	}
 }
 
-func (repo *Postgres) Create(artist artist.Artist) (uint64, error) {
-	// implement me
-	return 0, nil
-}
-
-func (repo *Postgres) GetById(id uint64) (artist.Artist, error) {
-	// implement me
-	return artist.Artist{}, nil
-}
-
 func (repo *Postgres) GetByTrackId(trackId uint64) ([]artist.Response, error) {
 	result := make([]artist.Response, 0)
 	query := "select artist.id, name, avatar from artist " +
@@ -49,7 +39,7 @@ func (repo *Postgres) GetByTrackId(trackId uint64) ([]artist.Response, error) {
 
 func (repo *Postgres) GetByAlbumId(albumId uint64) (artist.Response, error) {
 	var result artist.Response
-	query := "select artist.id, name, avatar from artist " +
+	query := "select id, name, avatar from artist " +
 		"join album at on artist.id = album.artist_id " +
 		"where album.id = $1"
 	err := repo.db.QueryRow(query, albumId).Scan(&result.Id, &result.Name, &result.Avatar)
