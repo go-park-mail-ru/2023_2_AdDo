@@ -66,7 +66,7 @@ func TestArtistRepository_GetByAlbumId(t *testing.T) {
 	profileTable := sqlmock.NewRows([]string{"id", "name", "avatar"}).
 		AddRow(expectedArtists.Id, expectedArtists.Name, expectedArtists.Avatar)
 
-	mock.ExpectQuery("select id, name, avatar from artist").
+	mock.ExpectQuery("select artist.id, artist.name, avatar from artist").
 		WithArgs(albumId).WillReturnRows(profileTable)
 
 	received, err := repo.GetByAlbumId(albumId)
