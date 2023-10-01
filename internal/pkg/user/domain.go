@@ -5,16 +5,16 @@ import (
 )
 
 type User struct {
-	Id        uint64
-	Username  string
-	Email     string
-	Password  string
-	BirthDate string
-	Avatar    string
+	Id        uint64 `json:"id" example:"1"`
+	Username  string `json:"username" example:"john"`
+	Email     string `json:"email" example:"example@gmail.com"`
+	Password  string `json:"password" example:"password"`
+	BirthDate string `json:"date" example:"2000-01-01"`
+	Avatar    string `json:"avatar" example:"http://test/image/1.jpg,http://test/image/2.jpg"`
 }
 
 type ResponseId struct {
-	Id uint64
+	Id uint64 `json:"id" example:"1"`
 }
 
 type UseCase interface {
