@@ -1,9 +1,8 @@
-package user_repository_test
+package user_repository
 
 import (
 	"github.com/DATA-DOG/go-sqlmock"
 	user_domain "main/internal/pkg/user"
-	user_repository "main/internal/pkg/user/repository/postgresql"
 	"testing"
 )
 
@@ -13,7 +12,7 @@ func TestUserRepository_Create(t *testing.T) {
 		t.Fatalf("Failed to create mock database: %v", err)
 	}
 	defer db.Close()
-	repo := user_repository.Postgres{
+	repo := Postgres{
 		Database: db,
 	}
 	data := user_domain.User{Email: "John@email.com", Password: "John's password", Username: "John's username", BirthDate: "2003-12-01"}
@@ -38,7 +37,7 @@ func TestUserRepository_GetById(t *testing.T) {
 	}
 	defer db.Close()
 
-	repo := user_repository.Postgres{
+	repo := Postgres{
 		Database: db,
 	}
 
@@ -77,7 +76,7 @@ func TestUserRepository_CheckEmailAndPassword(t *testing.T) {
 	}
 	defer db.Close()
 
-	repo := user_repository.Postgres{
+	repo := Postgres{
 		Database: db,
 	}
 	expectedUserId := uint64(1)
