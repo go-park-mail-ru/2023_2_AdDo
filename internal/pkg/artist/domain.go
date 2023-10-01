@@ -15,8 +15,6 @@ type Response struct {
 }
 
 type Repository interface {
-	Create(track Artist) (uint64, error)
-	GetById(id uint64) (Artist, error)
 	GetByTrackId(trackId uint64) ([]Response, error)
 	GetByAlbumId(albumId uint64) (Response, error)
 }

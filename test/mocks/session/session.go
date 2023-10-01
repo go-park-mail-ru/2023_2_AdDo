@@ -86,20 +86,6 @@ func (mr *MockRepositoryMockRecorder) Create(userId interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockRepository)(nil).Create), userId)
 }
 
-// DeleteBySessionId mocks base method.
-func (m *MockRepository) DeleteBySessionId(sessionId string) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "DeleteBySessionId", sessionId)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// DeleteBySessionId indicates an expected call of DeleteBySessionId.
-func (mr *MockRepositoryMockRecorder) DeleteBySessionId(sessionId interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteBySessionId", reflect.TypeOf((*MockRepository)(nil).DeleteBySessionId), sessionId)
-}
-
 // DeleteByUserId mocks base method.
 func (m *MockRepository) DeleteByUserId(userId uint64) error {
 	m.ctrl.T.Helper()
@@ -112,21 +98,6 @@ func (m *MockRepository) DeleteByUserId(userId uint64) error {
 func (mr *MockRepositoryMockRecorder) DeleteByUserId(userId interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteByUserId", reflect.TypeOf((*MockRepository)(nil).DeleteByUserId), userId)
-}
-
-// GetBySessionId mocks base method.
-func (m *MockRepository) GetBySessionId(sessionId string) (string, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetBySessionId", sessionId)
-	ret0, _ := ret[0].(string)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetBySessionId indicates an expected call of GetBySessionId.
-func (mr *MockRepositoryMockRecorder) GetBySessionId(sessionId interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetBySessionId", reflect.TypeOf((*MockRepository)(nil).GetBySessionId), sessionId)
 }
 
 // GetByUserId mocks base method.
