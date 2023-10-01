@@ -37,21 +37,14 @@ type Response struct {
 }
 
 type UseCase interface {
-	Add(track Track) (uint64, error)
+	//Add(track Track) (uint64, error)
 	GetAll() ([]Response, error)
-	GetPopular() ([]Response, error)
-	GetFavourite(userId uint64) ([]Response, error)
+	//GetPopular() ([]Response, error)
+	//GetFavourite(userId uint64) ([]Response, error)
 }
 
 type Repository interface {
-	Create(track Track) (uint64, error)
-	GetById(id uint64) (Track, error)
 	GetAll() ([]Response, error)
-	GetByUserId(userId uint64) ([]Response, error)
-	//GetMostLiked() ([]Track, error)
-	//GetByArtistId(artistId uint64) ([]Track, error)
-	//GetByPlaylistId(playlistId uint64) ([]Track, error)
-	//GetByAlbumId(albumId uint64) ([]Track, error)
 }
 
 var (
