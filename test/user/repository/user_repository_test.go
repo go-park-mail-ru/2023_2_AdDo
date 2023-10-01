@@ -13,17 +13,15 @@ func TestUserRepository_Create(t *testing.T) {
 		t.Fatalf("Failed to create mock database: %v", err)
 	}
 	defer db.Close()
-
 	repo := user_repository.Postgres{
 		Database: db,
 	}
+	data := user_domain.User{Email: "John@email.com", Password: "John's password", Username: "John's username", BirthDate: "2003-12-01"}
 
-	// Ожидаемый SQL-запрос
-	mock.ExpectExec("INSERT INTO profile").
-		WithArgs("John", "Doe").
-		WillReturnResult(sqlmock.NewResult(1, 1))
+	query := "insert into profile"
+	mock.ExpectExec(query).WithArgs(data.Email, sqlmock.AnyArg(), data.Username, data.BirthDate).WillReturnResult(sqlmock.NewResult(1, 1))
 
-	_, err = repo.Create(user_domain.User{Username: "John", Password: "Doe"})
+	_, err = repo.Create(data)
 	if err != nil {
 		t.Errorf("Error creating user: %v", err)
 	}
@@ -44,20 +42,25 @@ func TestUserRepository_GetById(t *testing.T) {
 		Database: db,
 	}
 
-	rows := sqlmock.NewRows([]string{"id", "name", "lastname"}).
-		AddRow(1, "John", "Doe")
+	expectedUser := user_domain.User{
+		Id:        1,
+		Email:     "email@mail.com",
+		Username:  "TestUser",
+		BirthDate: "2000-01-01",
+		Avatar:    "https://example.com/avatar.jpg",
+	}
 
-	// Ожидаемый SQL-запрос
-	mock.ExpectQuery("SELECT * FROM user").
-		WithArgs(1).
-		WillReturnRows(rows)
+	profileTable := sqlmock.NewRows([]string{"email", "nickname", "birth_date", "avatar_url"}).
+		AddRow(expectedUser.Email, expectedUser.Username, expectedUser.BirthDate, expectedUser.Avatar)
 
-	user, err := repo.GetById(1)
+	mock.ExpectQuery("select email, nickname, birth_date, avatar_url from profile where id = ?").
+		WithArgs(expectedUser.Id).WillReturnRows(profileTable)
+
+	user, err := repo.GetById(expectedUser.Id)
 	if err != nil {
 		t.Errorf("Error getting user by id: %v", err)
 	}
 
-	expectedUser := user_domain.User{Id: 1, Username: "John", Password: "Doe"}
 	if user != expectedUser {
 		t.Errorf("Expected user %+v but got %+v", expectedUser, user)
 	}
@@ -77,13 +80,13 @@ func TestUserRepository_CheckEmailAndPassword(t *testing.T) {
 	repo := user_repository.Postgres{
 		Database: db,
 	}
+	expectedUserId := uint64(1)
 
 	rows := sqlmock.NewRows([]string{"id"}).
 		AddRow(1)
 
-	// Ожидаемый SQL-запрос
-	mock.ExpectQuery("SELECT * FROM user").
-		WithArgs("test@example.com", "password").
+	mock.ExpectQuery("select id from profile").
+		WithArgs("test@example.com", sqlmock.AnyArg()).
 		WillReturnRows(rows)
 
 	userId, err := repo.CheckEmailAndPassword("test@example.com", "password")
@@ -91,7 +94,6 @@ func TestUserRepository_CheckEmailAndPassword(t *testing.T) {
 		t.Errorf("Error checking email and password: %v", err)
 	}
 
-	expectedUserId := uint64(1)
 	if userId != expectedUserId {
 		t.Errorf("Expected user id %d but got %d", expectedUserId, userId)
 	}
