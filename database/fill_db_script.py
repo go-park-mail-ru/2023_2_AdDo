@@ -60,9 +60,8 @@ with open("data_init.sql", "w") as file:
         album_name = album["album_name"]
         album_release = album["album_release_date"]
 
-        album_url = server + "/audio/" + artist_name.replace(" ", "_") + "/albums/" + album_name.replace(" ", "_")
         album_image = server + "/images/tracks/" + artist_name.replace(" ", "_") + "/albums/" + album_name.replace(" ", "_") + ".jpg"
-        file.write(create_album_command(artist_name, album_name, album_url, album_release) + '\n')
+        file.write(create_album_command(artist_name, album_name, album_image, album_release) + '\n')
 
         tracks = album["tracks"]
         for track in tracks:

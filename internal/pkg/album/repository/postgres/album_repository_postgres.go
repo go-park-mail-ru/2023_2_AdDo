@@ -17,9 +17,7 @@ func NewPostgres(db *sql.DB) Postgres {
 
 func (p Postgres) GetByTrackId(trackId uint64) ([]album.Response, error) {
 	result := make([]album.Response, 0)
-	query := "select album.id, name, preview from album " +
-		"join album_track on album.id = album_track.album_id " +
-		"where album_track.track_id = $1"
+	query := "select album.id, name, preview from album join album_track on album.id = album_track.album_id where album_track.track_id = $1"
 	rows, err := p.db.Query(query, trackId)
 	if err != nil {
 		return nil, err
@@ -33,7 +31,7 @@ func (p Postgres) GetByTrackId(trackId uint64) ([]album.Response, error) {
 		}
 		result = append(result, a)
 	}
-
+	//log.Println(result)
 	return result, nil
 }
 

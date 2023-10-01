@@ -21,6 +21,23 @@ func NewHandler(track track.UseCase, session session.UseCase) TrackHandler {
 	}
 }
 
+//{
+//	"Id":1,
+//	"Name":"Stargazing",
+//	"Artist":[{
+//		"Id":1,
+//		"Name":"Travis Scott",
+//		"Avatar":"http://82.146.45.164:9000/images/avatars/artists/Travis_Scott.jpg"
+//	}],
+//	"Album":[{
+//		"Id":1,
+//		"Name":"Astroworld",
+//		"Preview":"http://82.146.45.164:9000/audio/Travis_Scott/albums/Astroworld"
+//	}],
+//	"Preview":"http://82.146.45.164:9000/images/tracks/Travis_Scott/albums/Astroworld.jpg",
+//	"Content":"http://82.146.45.164:9000/audio/Travis_Scott/albums/Astroworld/Stargazing.mp3"
+//}
+
 func (handler *TrackHandler) Music(w http.ResponseWriter, r *http.Request) error {
 	tracks, err := handler.trackUseCase.GetAll()
 	if err != nil {
@@ -32,9 +49,10 @@ func (handler *TrackHandler) Music(w http.ResponseWriter, r *http.Request) error
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}
 
-	cookie, err := r.Cookie(session.CookieName)
+	cookie, err := response.GetCookie(r)
 	if err != nil {
-		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
+		w.WriteHeader(http.StatusUnauthorized)
+		return nil
 	}
 
 	userId, err := strconv.Atoi(r.URL.Query().Get("id"))
@@ -42,7 +60,7 @@ func (handler *TrackHandler) Music(w http.ResponseWriter, r *http.Request) error
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}
 
-	isAuth, err := handler.sessionUseCase.CheckSession(cookie.Value, uint64(userId))
+	isAuth, err := handler.sessionUseCase.CheckSession(cookie, uint64(userId))
 
 	if err != nil || !isAuth {
 		return common_handler.StatusError{Code: http.StatusUnauthorized, Err: err}

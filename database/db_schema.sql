@@ -12,7 +12,7 @@ create table if not exists profile (
 
 create table if not exists artist (
     id serial primary key,
-    name varchar(32) not null,
+    name varchar(32) not null unique,
     avatar varchar(1024)
 );
 
