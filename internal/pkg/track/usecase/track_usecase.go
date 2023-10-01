@@ -20,14 +20,6 @@ func NewDefault(trackRepo track.Repository, artistRepo artist.Repository, albumR
 	}
 }
 
-func (useCase *Default) Add(t track.Track) (uint64, error) {
-	id, err := useCase.repoTrack.Create(t)
-	if err != nil {
-		return 0, track.ErrTrackAlreadyExist
-	}
-	return id, nil
-}
-
 func (useCase *Default) GetAll() ([]track.Response, error) {
 	tracks, err := useCase.repoTrack.GetAll()
 	if err != nil {
@@ -51,29 +43,25 @@ func (useCase *Default) GetAll() ([]track.Response, error) {
 	return tracks, nil
 }
 
-func (useCase *Default) GetFavourite(userId uint64) ([]track.Response, error) {
-	tracks, err := useCase.repoTrack.GetByUserId(userId)
-	if err != nil {
-		return nil, track.ErrNoTracks
-	}
-
-	for _, t := range tracks {
-		artists, err := useCase.repoArtist.GetByTrackId(t.Id)
-		if err != nil {
-			return nil, err
-		}
-		t.Artist = artists
-
-		albums, err := useCase.repoAlbum.GetByTrackId(t.Id)
-		if err != nil {
-			return nil, err
-		}
-		t.Album = albums
-	}
-
-	return tracks, nil
-}
-
-func (useCase *Default) GetPopular() ([]track.Response, error) {
-	return nil, nil
-}
+//func (useCase *Default) GetFavourite(userId uint64) ([]track.Response, error) {
+//	tracks, err := useCase.repoTrack.GetByUserId(userId)
+//	if err != nil {
+//		return nil, track.ErrNoTracks
+//	}
+//
+//	for _, t := range tracks {
+//		artists, err := useCase.repoArtist.GetByTrackId(t.Id)
+//		if err != nil {
+//			return nil, err
+//		}
+//		t.Artist = artists
+//
+//		albums, err := useCase.repoAlbum.GetByTrackId(t.Id)
+//		if err != nil {
+//			return nil, err
+//		}
+//		t.Album = albums
+//	}
+//
+//	return tracks, nil
+//}

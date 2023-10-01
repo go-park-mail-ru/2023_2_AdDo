@@ -55,14 +55,12 @@ func (handler *TrackHandler) Music(w http.ResponseWriter, r *http.Request) error
 	//	return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	//}
 
+	//err = response.RenderJSON(w, userTracks)
+	//return err
+
 	// track_repo
 	// track_useCase
 	// track_delivery
-	// artist_repo
-	// album_repo
 	// common
-
-	//err = response.RenderJSON(w, userTracks)
-	//return err
 	return nil
 }
