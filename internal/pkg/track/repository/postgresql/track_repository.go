@@ -14,7 +14,7 @@ func NewPostgres(db *sql.DB) *Postgres {
 }
 
 func (db *Postgres) GetAll() ([]track.Response, error) {
-	query := "select id, name, preview, content from track"
+	query := "select id, name, preview, content, play_count from track"
 	rows, err := db.database.Query(query)
 	if err != nil {
 		return nil, err
@@ -24,7 +24,7 @@ func (db *Postgres) GetAll() ([]track.Response, error) {
 	result := make([]track.Response, 0)
 	for rows.Next() {
 		var t track.Response
-		err = rows.Scan(&t.Id, &t.Name, &t.Preview, &t.Content)
+		err = rows.Scan(&t.Id, &t.Name, &t.Preview, &t.Content, &t.PlayCount)
 		if err != nil {
 			return nil, err
 		}

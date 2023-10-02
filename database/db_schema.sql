@@ -28,7 +28,8 @@ create table if not exists track(
     id serial primary key,
     name varchar(32) not null,
     preview varchar(1024),
-    content varchar(1024)
+    content varchar(1024),
+    play_count int default 0
     -- song_text text
 );
 
