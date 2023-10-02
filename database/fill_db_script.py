@@ -46,12 +46,11 @@ with open("data_for_db_filling.json") as file:
     conf = json.load(file)
 
 
-server = conf["server_addr"]
 artist_name = conf["artist_name"]
 albums = conf["albums"]
 singles = conf["singles"]
 
-artist_avatar_url = server + "/images/avatars/artists/" + artist_name.replace(" ", "_") + ".jpg"
+artist_avatar_url = "/images/avatars/artists/" + artist_name.replace(" ", "_") + ".jpg"
 
 with open("data_init.sql", "w") as file:
     file.write(create_artist_command(artist_name, artist_avatar_url) + '\n')
@@ -60,18 +59,20 @@ with open("data_init.sql", "w") as file:
         album_name = album["album_name"]
         album_release = album["album_release_date"]
 
-        album_image = server + "/images/tracks/" + artist_name.replace(" ", "_") + "/albums/" + album_name.replace(" ", "_") + ".jpg"
+        album_image = "/images/tracks/" + artist_name.replace(" ", "_") + "/albums/" + album_name.replace(" ", "_") + ".jpg"
         file.write(create_album_command(artist_name, album_name, album_image, album_release) + '\n')
 
         tracks = album["tracks"]
         for track in tracks:
-            track_url = server + "/audio/" + artist_name.replace(" ", "_") + "/albums/" + album_name.replace(" ", "_") + "/" + track.replace(" ", "_") + ".mp3"
+            track = track.replace("'", "''")
+            track_url = "/audio/" + artist_name.replace(" ", "_") + "/albums/" + album_name.replace(" ", "_") + "/" + track.replace(" ", "_") + ".mp3"
             file.write(create_track_command(track, album_image, track_url, album_name, artist_name) + '\n')
 
-    for single_name in singles:
-        single_url = server + "/audio/" + artist_name.replace(" ", "_") + "/" + single_name.replace(" ", "_") + ".mp3"
-        single_image = server + "/images/tracks/" + artist_name.replace(" ", "_") + "/" + single_name.replace(" ", "_") + ".jpg"
-        file.write(create_single_command(single_name, single_image, single_url, artist_name) + '\n')
+    for single in singles:
+        single = single.replace("'", "''")
+        single_url = "/audio/" + artist_name.replace(" ", "_") + "/" + single.replace(" ", "_") + ".mp3"
+        single_image = "/images/tracks/" + artist_name.replace(" ", "_") + "/" + single.replace(" ", "_") + ".jpg"
+        file.write(create_single_command(single, single_image, single_url, artist_name) + '\n')
 
 
 file.close()
