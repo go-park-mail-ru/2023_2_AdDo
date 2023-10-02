@@ -6,7 +6,6 @@ import (
 	"main/internal/pkg/session"
 	"main/internal/pkg/track"
 	"net/http"
-	"strconv"
 )
 
 type TrackHandler struct {
@@ -39,21 +38,6 @@ func NewHandler(track track.UseCase, session session.UseCase) TrackHandler {
 //}
 
 func (handler *TrackHandler) Music(w http.ResponseWriter, r *http.Request) error {
-	cookie, err := response.GetCookie(r)
-	if err != nil {
-		w.WriteHeader(http.StatusUnauthorized)
-	}
-
-	userId, err := strconv.Atoi(r.URL.Query().Get("id"))
-	if err != nil {
-		w.WriteHeader(http.StatusUnauthorized)
-	}
-
-	isAuth, err := handler.sessionUseCase.CheckSession(cookie, uint64(userId))
-
-	if err != nil || !isAuth {
-		w.WriteHeader(http.StatusUnauthorized)
-	}
 	tracks, err := handler.trackUseCase.GetAll()
 	if err != nil {
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
