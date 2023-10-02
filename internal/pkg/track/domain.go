@@ -19,27 +19,29 @@ type ArtistAlbumResponse struct {
 }
 
 type Track struct {
-	Id      uint64
-	Name    string
-	Artist  []uint64
-	Album   []uint64
-	Preview string
-	Content string
+	Id        uint64
+	Name      string
+	Artist    []uint64
+	Album     []uint64
+	Preview   string
+	Content   string
+	PlayCount uint64
 }
 
 type Response struct {
-	Id      uint64
-	Name    string
-	Artist  []artist.Response
-	Album   []album.Response
-	Preview string
-	Content string
+	Id        uint64
+	Name      string
+	Artist    []artist.Response
+	Album     []album.Response
+	Preview   string
+	Content   string
+	PlayCount uint64
 }
 
 type UseCase interface {
 	//Add(track Track) (uint64, error)
 	GetAll() ([]Response, error)
-	//GetPopular() ([]Response, error)
+	GetPopular() ([]Response, error)
 	//GetFavourite(userId uint64) ([]Response, error)
 }
 
