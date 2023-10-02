@@ -33,22 +33,22 @@ func TestGetAll(t *testing.T) {
 			{
 				Id:     1,
 				Name:   "Track 1",
-				Artist: []artist.Response{artist.Response{Name: "Artist 1"}},
-				Album:  []album.Response{album.Response{Name: "Album 1"}},
+				Artist: []artist.Response{{Name: "Artist 1"}},
+				Album:  []album.Response{{Name: "Album 1"}},
 			},
 			{
 				Id:     2,
 				Name:   "Track 2",
-				Artist: []artist.Response{artist.Response{Name: "Artist 2"}},
-				Album:  []album.Response{album.Response{Name: "Album 2"}},
+				Artist: []artist.Response{{Name: "Artist 2"}},
+				Album:  []album.Response{{Name: "Album 2"}},
 			},
 		}
 
 		mockTrackRepo.EXPECT().GetAll().Return(expectedTracks, nil)
-		mockArtistRepo.EXPECT().GetByTrackId(uint64(1)).Return([]artist.Response{artist.Response{Name: "Artist 1"}}, nil)
-		mockAlbumRepo.EXPECT().GetByTrackId(uint64(1)).Return([]album.Response{album.Response{Name: "Album 1"}}, nil)
-		mockArtistRepo.EXPECT().GetByTrackId(uint64(2)).Return([]artist.Response{artist.Response{Name: "Artist 2"}}, nil)
-		mockAlbumRepo.EXPECT().GetByTrackId(uint64(2)).Return([]album.Response{album.Response{Name: "Album 2"}}, nil)
+		mockArtistRepo.EXPECT().GetByTrackId(uint64(1)).Return([]artist.Response{{Name: "Artist 1"}}, nil)
+		mockAlbumRepo.EXPECT().GetByTrackId(uint64(1)).Return([]album.Response{{Name: "Album 1"}}, nil)
+		mockArtistRepo.EXPECT().GetByTrackId(uint64(2)).Return([]artist.Response{{Name: "Artist 2"}}, nil)
+		mockAlbumRepo.EXPECT().GetByTrackId(uint64(2)).Return([]album.Response{{Name: "Album 2"}}, nil)
 
 		tracks, err := useCase.GetAll()
 
@@ -84,5 +84,61 @@ func TestGetAll(t *testing.T) {
 
 		assert.Error(t, err)
 		assert.Nil(t, tracks)
+	})
+}
+
+func TestGetPopular(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockTrackRepo := track_mock.NewMockRepository(ctrl)
+	mockArtistRepo := artist_mock.NewMockRepository(ctrl)
+	mockAlbumRepo := album_mock.NewMockRepository(ctrl)
+
+	useCase := Default{
+		repoTrack:  mockTrackRepo,
+		repoArtist: mockArtistRepo,
+		repoAlbum:  mockAlbumRepo,
+	}
+
+	t.Run("Success", func(t *testing.T) {
+		expectedTracks := []track.Response{
+			{
+				Id:        1,
+				Name:      "Track 1",
+				Artist:    []artist.Response{{Name: "Artist 1"}},
+				Album:     []album.Response{{Name: "Album 1"}},
+				PlayCount: 10,
+			},
+			{
+				Id:        2,
+				Name:      "Track 2",
+				Artist:    []artist.Response{{Name: "Artist 2"}},
+				Album:     []album.Response{{Name: "Album 2"}},
+				PlayCount: 20,
+			},
+			{
+				Id:        3,
+				Name:      "Track 3",
+				Artist:    []artist.Response{{Name: "Artist 3"}},
+				Album:     []album.Response{{Name: "Album 3"}},
+				PlayCount: 100,
+			},
+		}
+
+		mockTrackRepo.EXPECT().GetAll().Return(expectedTracks, nil)
+		mockArtistRepo.EXPECT().GetByTrackId(uint64(1)).Return([]artist.Response{{Name: "Artist 1"}}, nil)
+		mockAlbumRepo.EXPECT().GetByTrackId(uint64(1)).Return([]album.Response{{Name: "Album 1"}}, nil)
+		mockArtistRepo.EXPECT().GetByTrackId(uint64(2)).Return([]artist.Response{{Name: "Artist 2"}}, nil)
+		mockAlbumRepo.EXPECT().GetByTrackId(uint64(2)).Return([]album.Response{{Name: "Album 2"}}, nil)
+		mockArtistRepo.EXPECT().GetByTrackId(uint64(3)).Return([]artist.Response{{Name: "Artist 3"}}, nil)
+		mockAlbumRepo.EXPECT().GetByTrackId(uint64(3)).Return([]album.Response{{Name: "Album 3"}}, nil)
+
+		popularTracks, err := useCase.GetPopular(2)
+		assert.Nil(t, err)
+		assert.Equal(t, uint64(3), popularTracks[0].Id)
+		assert.Equal(t, uint64(100), popularTracks[0].PlayCount)
+		assert.Equal(t, uint64(2), popularTracks[1].Id)
+		assert.Equal(t, uint64(20), popularTracks[1].PlayCount)
 	})
 }
