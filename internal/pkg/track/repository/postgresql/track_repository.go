@@ -13,21 +13,6 @@ func NewPostgres(db *sql.DB) *Postgres {
 	return &Postgres{database: db}
 }
 
-func (db *Postgres) Create(track track.Track) (uint64, error) {
-	/// implement me
-	return 0, nil
-}
-
-func (db *Postgres) GetById(trackId uint64) (track.Track, error) {
-	/// implement me
-	return track.Track{}, nil
-}
-
-func (db *Postgres) GetByUserId(userId uint64) ([]track.Response, error) {
-	/// implement me
-	return nil, nil
-}
-
 func (db *Postgres) GetAll() ([]track.Response, error) {
 	query := "select id, name, preview, content from track"
 	rows, err := db.database.Query(query)

@@ -15,21 +15,9 @@ func NewPostgres(db *sql.DB) Postgres {
 	}
 }
 
-func (repo *Postgres) Create(artist artist.Artist) (uint64, error) {
-	// implement me
-	return 0, nil
-}
-
-func (repo *Postgres) GetById(id uint64) (artist.Artist, error) {
-	// implement me
-	return artist.Artist{}, nil
-}
-
 func (repo *Postgres) GetByTrackId(trackId uint64) ([]artist.Response, error) {
 	result := make([]artist.Response, 0)
-	query := "select artist.id, name, avatar from artist " +
-		"join artist_track at on artist.id = artist_track.artist_id " +
-		"where artist_track.track_id = $1"
+	query := "select artist.id, name, avatar from artist join artist_track on artist.id = artist_track.artist_id where artist_track.track_id = $1"
 	rows, err := repo.db.Query(query, trackId)
 	if err != nil {
 		return nil, err
@@ -43,15 +31,13 @@ func (repo *Postgres) GetByTrackId(trackId uint64) ([]artist.Response, error) {
 		}
 		result = append(result, artist)
 	}
-
+	//log.Println(result)
 	return result, nil
 }
 
 func (repo *Postgres) GetByAlbumId(albumId uint64) (artist.Response, error) {
 	var result artist.Response
-	query := "select artist.id, name, avatar from artist " +
-		"join album at on artist.id = album.artist_id " +
-		"where album.id = $1"
+	query := "select artist.id, artist.name, avatar from artist join album on artist.id = album.artist_id where album.id = $1"
 	err := repo.db.QueryRow(query, albumId).Scan(&result.Id, &result.Name, &result.Avatar)
 	if err != nil {
 		return artist.Response{}, err

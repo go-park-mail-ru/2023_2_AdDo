@@ -10,16 +10,9 @@ create table if not exists profile (
     -- premium
 );
 
-create table if not exists session (
-    id serial primary key,
-    session_id uuid default uuid_generate_v4() not null unique,
-    expiration timestamp with time zone not null default current_timestamp,
-    profile_id int not null references profile(id)
-);
-
 create table if not exists artist (
     id serial primary key,
-    name varchar(32) not null,
+    name varchar(32) not null unique,
     avatar varchar(1024)
 );
 
@@ -31,52 +24,12 @@ create table if not exists album (
     release_date date
 );
 
-create table if not exists playlist (
-    id serial primary key,
-    name varchar(32) not null unique,
-    creator_id int not null references profile(id),
-    preview varchar(1024)
-);
-
 create table if not exists track(
     id serial primary key,
     name varchar(32) not null,
     preview varchar(1024),
     content varchar(1024)
     -- song_text text
-);
-
-create table if not exists podcast(
-    id serial primary key,
-    name varchar(32) not null,
-    artist_id int references artist(id),
-    preview varchar(1024),
-    description varchar(256),
-    release_date date
-);
-
-create table if not exists profile_playlist(
-    id serial primary key,
-    profile_id int not null references profile(id),
-    playlist_id int not null references playlist(id)
-);
-
-create table if not exists profile_album(
-    id serial primary key,
-    profile_id int not null references profile(id),
-    album_id int not null references album(id)
-);
-
-create table if not exists profile_podcast(
-    id serial primary key,
-    profile_id int not null references profile(id),
-    podcast_id int not null references podcast(id)
-);
-
-create table if not exists playlist_track(
-    id serial primary key,
-    playlist_id int not null references playlist(id),
-    track_id int not null references track(id)
 );
 
 create table if not exists album_track(
@@ -90,6 +43,53 @@ create table if not exists artist_track(
     artist_id int not null references artist(id),
     track_id int not null references track(id)
 );
+
+create table if not exists playlist (
+                                        id serial primary key,
+                                        name varchar(32) not null unique,
+    creator_id int not null references profile(id),
+    preview varchar(1024)
+    );
+
+create table if not exists playlist_track(
+                                             id serial primary key,
+                                             playlist_id int not null references playlist(id),
+    track_id int not null references track(id)
+    );
+
+create table if not exists podcast(
+                                      id serial primary key,
+                                      name varchar(32) not null,
+    artist_id int references artist(id),
+    preview varchar(1024),
+    description varchar(256),
+    release_date date
+    );
+
+create table if not exists profile_playlist(
+                                               id serial primary key,
+                                               profile_id int not null references profile(id),
+    playlist_id int not null references playlist(id)
+    );
+
+create table if not exists profile_album(
+                                            id serial primary key,
+                                            profile_id int not null references profile(id),
+    album_id int not null references album(id)
+    );
+
+create table if not exists profile_podcast(
+                                              id serial primary key,
+                                              profile_id int not null references profile(id),
+    podcast_id int not null references podcast(id)
+    );
+
+create table if not exists session (
+                                       id serial primary key,
+                                       session_id uuid default uuid_generate_v4() not null unique,
+    expiration timestamp with time zone not null default current_timestamp,
+                             profile_id int not null references profile(id)
+    );
 
 -- table with like for songs:
 --      id like_author

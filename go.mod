@@ -6,8 +6,9 @@ require github.com/lib/pq v1.10.3
 
 require (
 	github.com/DATA-DOG/go-sqlmock v1.5.0 // indirect
-	github.com/KyleBanks/depth v1.2.1 // indirect
-	github.com/cpuguy83/go-md2man/v2 v2.0.0-20190314233015-f79a8a8ca69d // indirect
+
+	github.com/asaskevich/govalidator v0.0.0-20230301143203-a9d515a09cc2 // indirect
+
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/felixge/httpsnoop v1.0.1 // indirect
 	github.com/go-openapi/jsonpointer v0.19.5 // indirect
