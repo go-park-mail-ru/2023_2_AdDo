@@ -57,7 +57,7 @@ func (useCase *Default) GetPopular(requiredNumOfTracks int) ([]track.Response, e
 	sort.Slice(tracks, func(i, j int) bool {
 		return tracks[i].PlayCount > tracks[j].PlayCount
 	})
-	if len(tracks) < requiredNumOfTracks {
+	if len(tracks) <= requiredNumOfTracks {
 		return tracks, nil
 	}
 	return tracks[:requiredNumOfTracks], nil
