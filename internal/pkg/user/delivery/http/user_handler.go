@@ -27,8 +27,12 @@ func (handler *UserHandler) SignUp(w http.ResponseWriter, r *http.Request) error
 	if err := json.NewDecoder(r.Body).Decode(&u); err != nil {
 		return common_handler.StatusError{Code: http.StatusBadRequest, Err: err}
 	}
+	err := u.Validate()
+	if err != nil {
+		return err
+	}
 
-	err := handler.userUseCase.Register(u)
+	err = handler.userUseCase.Register(u)
 	if err != nil {
 		return err
 	}
