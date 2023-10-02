@@ -7,7 +7,7 @@ import (
 
 type User struct {
 	Id        uint64 `valid:"-"`
-	Username  string `valid:"length(2|30), alphanum, required"`
+	Username  string `valid:"length(2|30), required"`
 	Email     string `valid:"length(1|30), email, required"`
 	Password  string `valid:"length(6|30), required"`
 	BirthDate string `valid:"required"`
