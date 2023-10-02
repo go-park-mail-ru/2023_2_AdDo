@@ -28,10 +28,9 @@ func TestRegister_Success(t *testing.T) {
 
 	mockUserRepo.EXPECT().Create(mockUser).Return(mockUser.Id, nil)
 
-	id, err := useCase.Register(mockUser)
+	err := useCase.Register(mockUser)
 
 	assert.NoError(t, err)
-	assert.Equal(t, mockUser.Id, id)
 }
 
 func TestRegister_UserAlreadyExists(t *testing.T) {
@@ -53,11 +52,9 @@ func TestRegister_UserAlreadyExists(t *testing.T) {
 	// Ожидаем, что метод Create вызовется с аргументом mockUser и вернет ошибку
 	mockUserRepo.EXPECT().Create(mockUser).Return(uint64(0), errors.New("user already exists"))
 
-	id, err := useCase.Register(mockUser)
+	err := useCase.Register(mockUser)
 
 	assert.Error(t, err)
-	//	assert.Equal(t, user_domain.ErrUserAlreadyExist, err)
-	assert.Equal(t, uint64(0), id)
 }
 
 func TestLogin_Success(t *testing.T) {

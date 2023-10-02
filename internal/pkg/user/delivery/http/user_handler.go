@@ -29,7 +29,7 @@ func (handler *UserHandler) SignUp(w http.ResponseWriter, r *http.Request) error
 	}
 	err := u.Validate()
 	if err != nil {
-		return err
+		return common_handler.StatusError{Code: http.StatusBadRequest, Err: err}
 	}
 
 	err = handler.userUseCase.Register(u)

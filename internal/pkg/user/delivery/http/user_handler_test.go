@@ -48,31 +48,29 @@ func TestSignUp(t *testing.T) {
 		req := httptest.NewRequest(http.MethodPost, "/signup", bytes.NewBuffer(requestBody))
 		w := httptest.NewRecorder()
 
-		mockUseCase.EXPECT().Register(user).Return(uint64(0), errors.New("registration failed"))
-
 		err = handler.SignUp(w, req)
 
 		assert.NotNil(t, err)
-		assert.Equal(t, http.StatusConflict, err.(common_handler.StatusError).Code)
+		assert.Equal(t, http.StatusBadRequest, err.(common_handler.StatusError).Code)
 	})
 
 	t.Run("Success", func(t *testing.T) {
-		user := user_domain.User{Username: "John", Email: "john@example.com"}
-
+		user := user_domain.User{Id: 1, Username: "John", Email: "john@example.com", BirthDate: "12-12-2003", Password: "password"}
+		sessionId := "sesId"
 		requestBody, err := json.Marshal(user)
 		assert.NoError(t, err)
 
 		req := httptest.NewRequest(http.MethodPost, "/signup", bytes.NewBuffer(requestBody))
 		w := httptest.NewRecorder()
 
-		mockUseCase.EXPECT().Register(user).Return(uint64(123), nil)
-
+		mockUseCase.EXPECT().Register(user).Return(nil)
+		mockUseCase.EXPECT().Login(user.Email, user.Password).Return(user.Id, sessionId, nil)
 		err = handler.SignUp(w, req)
 
 		assert.Nil(t, err)
 		assert.Equal(t, http.StatusOK, w.Code)
 
-		expectedResponse := user_domain.ResponseId{Id: 123}
+		expectedResponse := user_domain.ResponseId{Id: 1}
 		expectedResponseBody, err := json.Marshal(expectedResponse)
 		assert.NoError(t, err)
 		assert.Equal(t, expectedResponseBody, w.Body.Bytes())
