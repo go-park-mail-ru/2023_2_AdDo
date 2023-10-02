@@ -10,7 +10,7 @@ type User struct {
 	Username  string `valid:"length(2|30), alphanum, required"`
 	Email     string `valid:"length(1|30), email, required"`
 	Password  string `valid:"length(6|30), required"`
-	BirthDate string `valid:"date, required"`
+	BirthDate string `valid:"required"`
 	Avatar    string `valid:"url_optional"`
 }
 
