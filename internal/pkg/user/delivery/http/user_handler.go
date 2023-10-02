@@ -28,7 +28,17 @@ func (handler *UserHandler) SignUp(w http.ResponseWriter, r *http.Request) error
 		return common_handler.StatusError{Code: http.StatusBadRequest, Err: err}
 	}
 
-	id, err := handler.userUseCase.Register(u)
+	err := handler.userUseCase.Register(u)
+	if err != nil {
+		return err
+	}
+
+	id, sessionId, err := handler.userUseCase.Login(u.Email, u.Password)
+	if err != nil {
+		return err
+	}
+	response.SetCookie(w, sessionId)
+
 	if err != nil || id == 0 {
 		return common_handler.StatusError{Code: http.StatusConflict, Err: err}
 	}
