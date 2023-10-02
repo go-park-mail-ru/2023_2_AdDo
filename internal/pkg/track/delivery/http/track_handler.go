@@ -39,6 +39,21 @@ func NewHandler(track track.UseCase, session session.UseCase) TrackHandler {
 //}
 
 func (handler *TrackHandler) Music(w http.ResponseWriter, r *http.Request) error {
+	cookie, err := response.GetCookie(r)
+	if err != nil {
+		w.WriteHeader(http.StatusUnauthorized)
+	}
+
+	userId, err := strconv.Atoi(r.URL.Query().Get("id"))
+	if err != nil {
+		w.WriteHeader(http.StatusUnauthorized)
+	}
+
+	isAuth, err := handler.sessionUseCase.CheckSession(cookie, uint64(userId))
+
+	if err != nil || !isAuth {
+		w.WriteHeader(http.StatusUnauthorized)
+	}
 	tracks, err := handler.trackUseCase.GetAll()
 	if err != nil {
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
@@ -48,37 +63,8 @@ func (handler *TrackHandler) Music(w http.ResponseWriter, r *http.Request) error
 	if err != nil {
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}
-
-	cookie, err := response.GetCookie(r)
-	if err != nil {
-		w.WriteHeader(http.StatusUnauthorized)
-		return nil
-	}
-
-	userId, err := strconv.Atoi(r.URL.Query().Get("id"))
-	if err != nil {
-		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
-	}
-
-	isAuth, err := handler.sessionUseCase.CheckSession(cookie, uint64(userId))
-
-	if err != nil || !isAuth {
-		return common_handler.StatusError{Code: http.StatusUnauthorized, Err: err}
-	}
 	// TODO На текущий момент мы не возвращаем пользовательскую музыку, потому что нет смысла возвращать то, что у пользователя в добавленных
 	// TODO Поэтому к первому рк можно сделать так, что мы возвращаем просто общую музыку
 	// TODO После того как придумаем простейшую систему рекомендаций, будет смысл возвращать что-то из пользовательских подборок
-	//userTracks, err := handler.trackUseCase.GetFavourite(uint64(userId))
-	//if err != nil {
-	//	return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
-	//}
-
-	//err = response.RenderJSON(w, userTracks)
-	//return err
-
-	// track_repo
-	// track_useCase
-	// track_delivery
-	// common
 	return nil
 }
