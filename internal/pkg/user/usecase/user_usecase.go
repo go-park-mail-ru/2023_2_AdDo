@@ -6,32 +6,33 @@ import (
 )
 
 type WithStatefulSessions struct {
-	userRepo user_domain.Repository
-	authRepo session.Repository
+	UserRepo user_domain.Repository
+	AuthRepo session.Repository
 }
 
 func NewWithStatefulSessions(userRepo user_domain.Repository, authRepo session.Repository) WithStatefulSessions {
 	return WithStatefulSessions{
-		userRepo: userRepo,
-		authRepo: authRepo,
+		UserRepo: userRepo,
+		AuthRepo: authRepo,
 	}
 }
 
-func (useCase *WithStatefulSessions) Register(user user_domain.User) (uint64, error) {
-	id, err := useCase.userRepo.Create(user)
+func (useCase *WithStatefulSessions) Register(user user_domain.User) error {
+	_, err := useCase.UserRepo.Create(user)
 	if err != nil {
-		return 0, user_domain.ErrUserAlreadyExist
+		return err
 	}
-	return id, nil
+
+	return nil
 }
 
 func (useCase *WithStatefulSessions) Login(email, password string) (uint64, string, error) {
-	id, err := useCase.userRepo.CheckEmailAndPassword(email, password)
+	id, err := useCase.UserRepo.CheckEmailAndPassword(email, password)
 	if err != nil || id == 0 {
 		return 0, "", user_domain.ErrUserDoesNotExist
 	}
 
-	sessionId, err := useCase.authRepo.Create(id)
+	sessionId, err := useCase.AuthRepo.Create(id)
 	if err != nil || id == 0 {
 		return 0, "", user_domain.ErrSessionCreatingFailed
 	}
@@ -40,23 +41,15 @@ func (useCase *WithStatefulSessions) Login(email, password string) (uint64, stri
 }
 
 func (useCase *WithStatefulSessions) GetUserInfo(id uint64) (user_domain.User, error) {
-	u, err := useCase.userRepo.GetById(id)
+	u, err := useCase.UserRepo.GetById(id)
 	if err != nil {
 		return u, user_domain.ErrUserDoesNotExist
 	}
 	return u, nil
 }
 
-func (useCase *WithStatefulSessions) CreateUserSession(id uint64) (string, error) {
-	sessionId, err := useCase.authRepo.Create(id)
-	if err != nil {
-		return "", user_domain.ErrUserDoesNotExist
-	}
-	return sessionId, nil
-}
-
 func (useCase *WithStatefulSessions) Auth(id uint64, sessionId string) (bool, error) {
-	sessionIdInDb, err := useCase.authRepo.GetByUserId(id)
+	sessionIdInDb, err := useCase.AuthRepo.GetByUserId(id)
 	if err != nil {
 		return false, user_domain.ErrSessionDoesNotExist
 	}
@@ -64,7 +57,7 @@ func (useCase *WithStatefulSessions) Auth(id uint64, sessionId string) (bool, er
 }
 
 func (useCase *WithStatefulSessions) Logout(id uint64) error {
-	err := useCase.authRepo.DeleteByUserId(id)
+	err := useCase.AuthRepo.DeleteByUserId(id)
 	if err != nil {
 		return user_domain.ErrSessionDoesNotExist
 	}

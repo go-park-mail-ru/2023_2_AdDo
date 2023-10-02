@@ -1,9 +1,62 @@
 name: Deploy
 
-on: [push]
+on:
+  push:
+    branches:
+      - clean_arch
+      - http_server_init
 
 jobs:
+
   build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Go 
+        uses: actions/setup-go@v4 
+        with:
+          go-version: '1.21.x'
+      - name: Install dependencies
+        run: go mod download && go mod tidy
+      - name: Build musicon
+        run: go build -o bin/musicon cmd/musicon/main.go
+      # - name: Upload musicon
+      #   uses: action/upload-artifacts@v3
+      #   with:
+      #     name: musicon
+      #     path: ./bin/musicon
+      # - name: Setup Python 
+      #   uses: actions/setup-python@v4 
+      #   with:
+      #     python-version: '3.10'
+      # - name: Create db_init
+      #   run: python3 ./database/fill_db_script.py
+      # - name: Upload db_init
+      #   uses: actions/upload-artifact@v3
+      #   with:
+      #     name: db_init
+      #     path: ./database/
+
+  test:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Go 
+        uses: actions/setup-go@v4 
+        with:
+          go-version: '1.21.x'
+      - name: Install dependencies
+        run: |
+          go mod download && go mod tidy 
+          go install github.com/golang/mock/mockgen@v1.6.0
+      - name: Test musicon
+        run: |
+          cd test/script/ && chmod +x mockgen.sh  && ./mockgen.sh
+          go test ../../internal/...
+  
+  deploy:
+    needs: test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -15,8 +68,12 @@ jobs:
           PORT: ${{ secrets.PORT }}
           PASSWORD: ${{ secrets.PASSWORD }}
           source: "."
-          target: ~/AdDoBackendDeploy
-
+          target: ~/addo-backend
+      # - name: Download db_init
+      #   uses: actions/download-artifact@v3
+      #   with:
+      #     name: db_init
+      #     path: ~/addo-backend/database
       - name: Executing remote command
         uses: appleboy/ssh-action@master
         with:
@@ -24,4 +81,4 @@ jobs:
           USERNAME: ${{ secrets.USERNAME }}
           PORT: ${{ secrets.PORT }}
           PASSWORD: ${{ secrets.PASSWORD }}
-          script: cd AdDoBackendDeploy && chmod +x deploy.sh && ./deploy.sh
+          script: cd addo-backend && chmod +x deploy.sh && ./deploy.sh

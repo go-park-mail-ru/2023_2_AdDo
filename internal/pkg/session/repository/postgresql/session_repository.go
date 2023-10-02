@@ -11,16 +11,18 @@ func NewPostgres(db *sql.DB) *Postgres {
 }
 
 func (db *Postgres) Create(userId uint64) (string, error) {
-	var sessionId string
-	err := db.database.QueryRow(`insert into session (expiration, profile_id) values (now() + '1 minute', $1) returning session_id`,
-		userId).Scan(&sessionId)
-	return sessionId, err
-}
+	_, err := db.database.Exec(`insert into session (expiration, profile_id) values (now() + '1 minute', $1) returning session_id`,
+		userId)
+	if err != nil {
+		return "", err
+	}
 
-func (db *Postgres) CheckByUserId(userId uint64, sessionId string) (bool, error) {
-	var sesIdFromDb string
-	err := db.database.QueryRow("select session_id from session where profile_id = $1 and expiration > now()", userId, sessionId).Scan(&sesIdFromDb)
-	return sesIdFromDb == sessionId, err
+	sessionId, err := db.GetByUserId(userId)
+	if err != nil {
+		return "", err
+	}
+
+	return sessionId, nil
 }
 
 func (db *Postgres) GetByUserId(userId uint64) (string, error) {
@@ -34,15 +36,5 @@ func (db *Postgres) DeleteByUserId(userId uint64) error {
 	if deletedRows, _ := result.RowsAffected(); deletedRows != 1 {
 		return err
 	}
-	return nil
-}
-
-func (db *Postgres) GetBySessionId(sessionId string) (string, error) {
-	/// TODO implement me
-	return "", nil
-}
-
-func (db *Postgres) DeleteBySessionId(sessionId string) error {
-	/// TODO implement me
 	return nil
 }

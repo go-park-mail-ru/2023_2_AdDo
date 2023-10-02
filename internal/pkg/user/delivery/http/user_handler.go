@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	common_handler "main/internal/pkg/common/handler"
 	"main/internal/pkg/common/response"
-	"main/internal/pkg/session"
 	user_domain "main/internal/pkg/user"
 	"net/http"
 	"strconv"
@@ -44,14 +43,32 @@ func (handler *UserHandler) SignUp(w http.ResponseWriter, r *http.Request) error
 	if err := json.NewDecoder(r.Body).Decode(&u); err != nil {
 		return common_handler.StatusError{Code: http.StatusBadRequest, Err: err}
 	}
+	err := u.Validate()
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusBadRequest, Err: err}
+	}
 
-	id, err := handler.userUseCase.Register(u)
+	err = handler.userUseCase.Register(u)
+	if err != nil {
+		return err
+	}
+
+	id, sessionId, err := handler.userUseCase.Login(u.Email, u.Password)
+	if err != nil {
+		return err
+	}
+	response.SetCookie(w, sessionId)
+
 	if err != nil || id == 0 {
 		return common_handler.StatusError{Code: http.StatusConflict, Err: err}
 	}
 
 	err = response.RenderJSON(w, user_domain.ResponseId{Id: id})
-	return err
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 //	@Description	login user
@@ -78,13 +95,7 @@ func (handler *UserHandler) Login(w http.ResponseWriter, r *http.Request) error 
 		return common_handler.StatusError{Code: http.StatusForbidden, Err: err}
 	}
 
-	http.SetCookie(w, &http.Cookie{
-		Name:     session.CookieName,
-		Value:    sessionId,
-		Expires:  time.Now().Add(session.TimeToLive),
-		Secure:   true, // сейчас не работает, потому что запрос не https
-		HttpOnly: true,
-	})
+	response.SetCookie(w, sessionId)
 	err = response.RenderJSON(w, user_domain.ResponseId{Id: id})
 	return err
 }

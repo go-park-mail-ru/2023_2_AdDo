@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"main/internal/pkg/session"
 	"net/http"
+	"time"
 )
 
 func GetCookie(r *http.Request) (string, error) {
@@ -23,4 +24,14 @@ func RenderJSON(w http.ResponseWriter, v interface{}) error {
 	w.Header().Set("Content-Type", "application/json")
 	_, err = w.Write(jsonResponse)
 	return err
+}
+
+func SetCookie(w http.ResponseWriter, sessionId string) {
+	http.SetCookie(w, &http.Cookie{
+		Name:    session.CookieName,
+		Value:   sessionId,
+		Expires: time.Now().Add(session.TimeToLive),
+		///Secure:   true, // сейчас не работает, потому что запрос не https
+		HttpOnly: true,
+	})
 }

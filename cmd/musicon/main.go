@@ -28,7 +28,7 @@ const ServerPort = ":8080"
 func main() {
 	db, err := init_db.InitPostgres(EnvPostgresQueryName)
 	if err != nil {
-		log.Fatalf("error database connecting %w", err)
+		log.Fatalf("error database connecting %v", err)
 	}
 	defer db.Close()
 

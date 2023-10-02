@@ -10,11 +10,13 @@ services:
       - "5432:5432"
     volumes:
       - ./database/db_schema.sql:/db_schema.sql
+      - ./database/data_init.sql:/data_init.sql
       - ./database/startup.sh:/docker-entrypoint-initdb.d/startup.sh
       - ~/db-data:/var/lib/postgresql/data
   
   musicon:
     build:
+      context: .
       dockerfile: Dockerfile
     depends_on:
       - service-db
@@ -35,15 +37,3 @@ services:
                     fi;
                     sleep 1;
                   done;"
-
-#  proxy:
-#    image: nginx
-#    volumes:
-#      - type: bind
-#        source: ./proxy/nginx.conf
- #       target: /etc/nginx/conf.d/default.conf
-  #      read_only: true
-  #  ports:
-  #    - 8000:8000
-  #  depends_on:
-  #    - backend

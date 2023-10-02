@@ -16,17 +16,9 @@ func NewDefault(repository session.Repository) Default {
 }
 
 func (s *Default) CheckSession(sessionId string, userId uint64) (bool, error) {
-	isSession, err := s.CheckSession(sessionId, userId)
+	id, err := s.repoSession.GetByUserId(userId)
 	if err != nil {
 		return false, user_domain.ErrSessionDoesNotExist
 	}
-	return isSession, nil
-}
-
-func (s *Default) Expire(userId uint64) error {
-	err := s.repoSession.DeleteByUserId(userId)
-	if err != nil {
-		return user_domain.ErrSessionDoesNotExist
-	}
-	return nil
+	return sessionId == id, nil
 }
