@@ -5,6 +5,7 @@ import (
 	"main/internal/pkg/album"
 	"main/internal/pkg/artist"
 	"main/internal/pkg/track"
+	"sort"
 )
 
 type Default struct {
@@ -46,6 +47,20 @@ func (useCase *Default) GetAll() ([]track.Response, error) {
 	}
 	log.Println(tracks)
 	return tracks, nil
+}
+
+func (useCase *Default) GetPopular(requiredNumOfTracks int) ([]track.Response, error) {
+	tracks, err := useCase.GetAll()
+	if err != nil {
+		return nil, err
+	}
+	sort.Slice(tracks, func(i, j int) bool {
+		return tracks[i].PlayCount > tracks[j].PlayCount
+	})
+	if len(tracks) < requiredNumOfTracks {
+		return tracks, nil
+	}
+	return tracks[:requiredNumOfTracks], nil
 }
 
 //func (useCase *Default) GetFavourite(userId uint64) ([]track.Response, error) {
