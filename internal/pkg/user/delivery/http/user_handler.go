@@ -34,7 +34,11 @@ func (handler *UserHandler) SignUp(w http.ResponseWriter, r *http.Request) error
 	}
 
 	err = response.RenderJSON(w, user_domain.ResponseId{Id: id})
-	return err
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (handler *UserHandler) Login(w http.ResponseWriter, r *http.Request) error {

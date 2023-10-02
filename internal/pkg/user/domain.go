@@ -2,15 +2,24 @@ package user_domain
 
 import (
 	"errors"
+	"github.com/asaskevich/govalidator"
 )
 
 type User struct {
-	Id        uint64
-	Username  string
-	Email     string
-	Password  string
-	BirthDate string
-	Avatar    string
+	Id        uint64 `valid:"-"`
+	Username  string `valid:"length(2|30), alphanum, required"`
+	Email     string `valid:"length(1|30), email, required"`
+	Password  string `valid:"length(6|30), required"`
+	BirthDate string `valid:"date, required"`
+	Avatar    string `valid:"url_optional"`
+}
+
+func (u *User) Validate() error {
+	_, err := govalidator.ValidateStruct(u)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 type ResponseId struct {
