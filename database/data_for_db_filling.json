@@ -1,5 +1,4 @@
 {
-  "server_addr": "http://82.146.45.164:9000",
   "artist_name": "Travis Scott",
   "albums": [
     {
@@ -13,7 +12,7 @@
         "Astrothunder",
         "Stop Trying To Be God",
         "Wake Up",
-        "Cant Say",
+        "Can't Say",
         "Carousel",
         "5% Tint",
         "Skeletons (feat. The Weekend)",
