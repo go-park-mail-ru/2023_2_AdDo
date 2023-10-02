@@ -17,13 +17,8 @@ func NewPostgres(db *sql.DB) *Postgres {
 func (db *Postgres) Create(user user_domain.User) (uint64, error) {
 	var id int64
 
-	row, err := db.Database.Exec("insert into profile (email, password, nickname, birth_date) values ($1, $2, $3, $4) returning id",
+	_, err := db.Database.Exec("insert into profile (email, password, nickname, birth_date) values ($1, $2, $3, $4) returning id",
 		user.Email, utils.GetMD5Sum(user.Password), user.Username, user.BirthDate)
-	if err != nil {
-		return 0, err
-	}
-
-	id, err = row.LastInsertId()
 	if err != nil {
 		return 0, err
 	}

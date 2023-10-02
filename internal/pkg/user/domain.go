@@ -27,7 +27,7 @@ type ResponseId struct {
 }
 
 type UseCase interface {
-	Register(user User) (uint64, error)
+	Register(user User) error
 	Login(email, password string) (uint64, string, error)
 	Auth(userId uint64, sessionId string) (bool, error)
 	GetUserInfo(id uint64) (User, error)
