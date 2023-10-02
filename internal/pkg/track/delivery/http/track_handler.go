@@ -20,6 +20,7 @@ func NewHandler(track track.UseCase, session session.UseCase) TrackHandler {
 	}
 }
 
+
 //{
 //	"Id":1,
 //	"Name":"Stargazing",
@@ -37,6 +38,17 @@ func NewHandler(track track.UseCase, session session.UseCase) TrackHandler {
 //	"Content":"http://82.146.45.164:9000/audio/Travis_Scott/albums/Astroworld/Stargazing.mp3"
 //}
 
+//	@Description	return all tracks
+//	@Tags			track
+//	@Produce		json
+//	@Param			id	query	int	false	"user id"
+//	@Security		cookieAuth
+//	@Security		csrfToken
+//	@Success		200	{array}		track.Response
+//	@Failure		400	{string}	errMsg
+//	@Failure		401	{string}	errMsg	
+//	@Failure		500	{string}	errMsg	
+//	@Router			/music [get]
 func (handler *TrackHandler) Music(w http.ResponseWriter, r *http.Request) error {
 	tracks, err := handler.trackUseCase.GetAll()
 	if err != nil {

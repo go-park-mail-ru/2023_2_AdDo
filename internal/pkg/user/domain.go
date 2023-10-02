@@ -6,12 +6,12 @@ import (
 )
 
 type User struct {
-	Id        uint64 `valid:"-"`
-	Username  string `valid:"length(2|30), required"`
-	Email     string `valid:"length(1|30), email, required"`
-	Password  string `valid:"length(6|30), required"`
-	BirthDate string `valid:"required"`
-	Avatar    string `valid:"url_optional"`
+	Id        uint64 `valid:"-" json:"id" example:"1"`
+	Username  string `valid:"length(2|30), required" json:"username" example:"john"`
+	Email     string `valid:"length(1|30), email, required" json:"email" example:"example@gmail.com"`
+	Password  string `valid:"length(6|30), required" json:"password" example:"password"`
+	BirthDate string `valid:"required" json:"date" example:"2000-01-01"`
+	Avatar    string `valid:"url_optional" json:"avatar" example:"http://test/image/1.jpg,http://test/image/2.jpg"`
 }
 
 func (u *User) Validate() error {
@@ -23,7 +23,7 @@ func (u *User) Validate() error {
 }
 
 type ResponseId struct {
-	Id uint64
+	Id uint64 `json:"id" example:"1"`
 }
 
 type UseCase interface {
