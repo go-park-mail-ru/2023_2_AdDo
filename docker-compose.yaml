@@ -1,0 +1,39 @@
+version: '3.0'
+
+services:
+  
+  service-db:
+    restart: always
+    image: postgres:14
+    env_file: ./database/db.env
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./database/db_schema.sql:/db_schema.sql
+      - ./database/data_init.sql:/data_init.sql
+      - ./database/startup.sh:/docker-entrypoint-initdb.d/startup.sh
+      - ~/db-data:/var/lib/postgresql/data
+  
+  musicon:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - service-db
+    ports:
+      - "8080:8080"
+    environment:
+      - POSTGRES_QUERY=host=service-db port=5432 user=musicon password=musicon dbname=musicon sslmode=disable
+
+  wait-musicon:
+    image: alpine
+    depends_on:
+      - musicon
+    command: >
+      /bin/sh -c "apk add --no-cache curl && 
+                  while true; do
+                    if curl -s -o /dev/null http://musicon:8080; then
+                      break;
+                    fi;
+                    sleep 1;
+                  done;"
