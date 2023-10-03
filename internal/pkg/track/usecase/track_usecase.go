@@ -1,7 +1,6 @@
 package track_usecase
 
 import (
-	"log"
 	"main/internal/pkg/album"
 	"main/internal/pkg/artist"
 	"main/internal/pkg/track"
@@ -32,41 +31,13 @@ func (useCase *Default) GetAll() ([]track.Response, error) {
 		if err != nil {
 			return nil, err
 		}
-		log.Println("before setting artist in track", t.Id, artists)
 		tracks[index].Artist = artists
-		log.Println("after setting artist in track", t.Id, tracks[index].Artist)
 
 		albums, err := useCase.repoAlbum.GetByTrackId(t.Id)
 		if err != nil {
 			return nil, err
 		}
-		log.Println("before setting albums in track", t.Id, albums)
 		tracks[index].Album = albums
-		log.Println("after setting albums in track", t.Id, tracks[index].Album)
 	}
-	log.Println(tracks)
 	return tracks, nil
 }
-
-//func (useCase *Default) GetFavourite(userId uint64) ([]track.Response, error) {
-//	tracks, err := useCase.repoTrack.GetByUserId(userId)
-//	if err != nil {
-//		return nil, track.ErrNoTracks
-//	}
-//
-//	for _, t := range tracks {
-//		artists, err := useCase.repoArtist.GetByTrackId(t.Id)
-//		if err != nil {
-//			return nil, err
-//		}
-//		t.Artist = artists
-//
-//		albums, err := useCase.repoAlbum.GetByTrackId(t.Id)
-//		if err != nil {
-//			return nil, err
-//		}
-//		t.Album = albums
-//	}
-//
-//	return tracks, nil
-//}

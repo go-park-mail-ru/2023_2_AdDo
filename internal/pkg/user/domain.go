@@ -35,7 +35,7 @@ type UseCase interface {
 }
 
 type Repository interface {
-	Create(user User) (uint64, error)
+	Create(user User) error
 	GetById(id uint64) (User, error)
 	CheckEmailAndPassword(email string, password string) (uint64, error)
 }

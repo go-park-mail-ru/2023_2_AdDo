@@ -1,21 +1,28 @@
 package common_middleware
 
 import (
+	"github.com/sirupsen/logrus"
 	"io"
-	"log"
 	"net/http"
 	"time"
 )
 
-func Logging(next http.Handler) http.Handler {
+func Logging(next http.Handler, logger *logrus.Logger) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 		start := time.Now()
-		log.Println(req.Header)
+		logger.WithFields(logrus.Fields{
+			"request_method": req.Method,
+			"request_uri":    req.RequestURI,
+			"request header": req.Header,
+			"request_body":   req.Body,
+		}).Infoln("start request processing")
 
 		next.ServeHTTP(w, req)
 
-		log.Printf("%s %s %s", req.Method, req.RequestURI, time.Since(start))
-		log.Println(w.Header())
+		logger.WithFields(logrus.Fields{
+			"time_since_start": time.Since(start),
+			"response_header":  w.Header(),
+		}).Infoln("request processed")
 	})
 }
 

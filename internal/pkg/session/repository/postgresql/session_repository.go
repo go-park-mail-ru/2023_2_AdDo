@@ -11,7 +11,7 @@ func NewPostgres(db *sql.DB) *Postgres {
 }
 
 func (db *Postgres) Create(userId uint64) (string, error) {
-	_, err := db.database.Exec(`insert into session (expiration, profile_id) values (now() + '1 minute', $1) returning session_id`,
+	_, err := db.database.Exec(`insert into session (expiration, profile_id) values (now() + '1 minute', $1)`,
 		userId)
 	if err != nil {
 		return "", err

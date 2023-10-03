@@ -6,6 +6,7 @@ import (
 	_ "github.com/lib/pq"
 	"log"
 	init_db "main/init/database"
+	logger_init "main/init/logger"
 	router_init "main/init/router"
 	album_repository "main/internal/pkg/album/repository/postgres"
 	artist_repository "main/internal/pkg/artist/repository/postgres"
@@ -33,22 +34,23 @@ func main() {
 	defer db.Close()
 
 	router := mux.NewRouter()
+	logger := logger_init.LogRusInit()
 
 	sessionRepo := session_repository.NewPostgres(db)
 	userRepo := user_repository.NewPostgres(db)
 	trackRepo := track_repository.NewPostgres(db)
 	albumRepo := album_repository.NewPostgres(db)
 	artistRepo := artist_repository.NewPostgres(db)
-	log.Println("Repositories initialized")
+	logger.Infoln("Repositories initialized")
 
 	sessionUseCase := session_usecase.NewDefault(sessionRepo)
 	userUseCase := user_usecase.NewWithStatefulSessions(userRepo, sessionRepo)
 	trackUseCase := track_usecase.NewDefault(trackRepo, &artistRepo, albumRepo)
-	log.Println("UseCases initialized")
+	logger.Infoln("UseCases initialized")
 
 	userHandler := user_delivery.NewHandler(&userUseCase)
 	trackHandler := track_delivery.NewHandler(&trackUseCase, &sessionUseCase)
-	log.Println("Deliveries initialized")
+	logger.Infoln("Deliveries initialized")
 
 	router = router_init.New(router, userHandler, trackHandler)
 
@@ -60,5 +62,5 @@ func main() {
 		handlers.AllowCredentials(),
 	)(router)
 
-	log.Fatal(http.ListenAndServe(ServerPort, common_middleware.Logging(routerCORS)))
+	log.Fatal(http.ListenAndServe(ServerPort, common_middleware.Logging(routerCORS, logger)))
 }

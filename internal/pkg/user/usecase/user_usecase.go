@@ -18,7 +18,7 @@ func NewWithStatefulSessions(userRepo user_domain.Repository, authRepo session.R
 }
 
 func (useCase *WithStatefulSessions) Register(user user_domain.User) error {
-	_, err := useCase.UserRepo.Create(user)
+	err := useCase.UserRepo.Create(user)
 	if err != nil {
 		return err
 	}
