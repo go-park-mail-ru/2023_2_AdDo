@@ -20,7 +20,7 @@ func TestUserRepository_Create(t *testing.T) {
 	query := "insert into profile"
 	mock.ExpectExec(query).WithArgs(data.Email, sqlmock.AnyArg(), data.Username, data.BirthDate).WillReturnResult(sqlmock.NewResult(1, 1))
 
-	_, err = repo.Create(data)
+	err = repo.Create(data)
 	if err != nil {
 		t.Errorf("Error creating user: %v", err)
 	}

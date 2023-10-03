@@ -14,16 +14,14 @@ func NewPostgres(db *sql.DB) *Postgres {
 	return &Postgres{Database: db}
 }
 
-func (db *Postgres) Create(user user_domain.User) (uint64, error) {
-	var id int64
-
-	_, err := db.Database.Exec("insert into profile (email, password, nickname, birth_date) values ($1, $2, $3, $4) returning id",
+func (db *Postgres) Create(user user_domain.User) error {
+	_, err := db.Database.Exec("insert into profile (email, password, nickname, birth_date) values ($1, $2, $3, $4)",
 		user.Email, utils.GetMD5Sum(user.Password), user.Username, user.BirthDate)
 	if err != nil {
-		return 0, err
+		return err
 	}
 
-	return uint64(id), nil
+	return nil
 }
 
 func (db *Postgres) GetById(id uint64) (user_domain.User, error) {
