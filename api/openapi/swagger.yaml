@@ -2,74 +2,84 @@ basePath: /api/v1
 definitions:
   album.Response:
     properties:
-      id:
+      Id:
+        example: 1
         type: integer
-      name:
+      Name:
+        example: AlbumName
         type: string
-      preview:
+      Preview:
+        example: AlbumPreview
         type: string
     type: object
   artist.Response:
     properties:
-      avatar:
+      Avatar:
+        example: ArtistAvatar
         type: string
-      id:
+      Id:
+        example: 1
         type: integer
-      name:
+      Name:
+        example: ArtistName
         type: string
     type: object
   track.Response:
     properties:
-      album:
+      Album:
         items:
           $ref: '#/definitions/album.Response'
         type: array
-      artist:
+      Artist:
         items:
           $ref: '#/definitions/artist.Response'
         type: array
-      content:
+      Content:
+        example: TrackContent
         type: string
-      id:
+      Id:
+        example: 1
         type: integer
-      name:
+      Name:
+        example: TrackName
         type: string
-      preview:
+      Preview:
+        example: TrackPreview
         type: string
     type: object
   user_delivery.userCrds:
     properties:
-      email:
+      Email:
         example: example@gmail.com
         type: string
-      password:
+      Password:
         example: password
         type: string
     type: object
   user_domain.ResponseId:
     properties:
-      id:
+      Id:
         example: 1
         type: integer
     type: object
   user_domain.User:
     properties:
-      avatar:
+      Avatar:
         example: http://test/image/1.jpg,http://test/image/2.jpg
         type: string
-      date:
+      BirthDate:
         example: "2000-01-01"
         type: string
-      email:
+      Email:
         example: example@gmail.com
         type: string
-      id:
+      Id:
         example: 1
         type: integer
-      password:
+      Password:
         example: password
         type: string
-      username:
+      Username:
         example: john
         type: string
     type: object

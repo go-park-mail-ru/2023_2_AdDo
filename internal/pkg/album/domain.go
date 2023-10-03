@@ -9,9 +9,9 @@ type Album struct {
 }
 
 type Response struct {
-	Id      uint64
-	Name    string
-	Preview string
+	Id      uint64 `json:"Id" example:"1"`
+	Name    string `json:"Name" example:"AlbumName"`
+	Preview string `json:"Preview" example:"AlbumPreview"`
 }
 
 type Repository interface {
