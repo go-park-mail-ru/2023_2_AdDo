@@ -1,32 +1,64 @@
 {
-  "artist_name": "Travis Scott",
-  "albums": [
+  "artists": [
     {
-      "album_name": "Astroworld",
-      "album_release_date": "03.08.2018",
-      "tracks": [
-        "Stargazing",
-        "NC-17 (feat. 21 Savage)",
-        "Houstonfornication",
-        "Coffee Bean",
-        "Astrothunder",
-        "Stop Trying To Be God",
-        "Wake Up",
-        "Can't Say",
-        "Carousel",
-        "5% Tint",
-        "Skeletons (feat. The Weekend)",
-        "No Bystanders (feat. Juice WRLD)",
-        "Yosemite",
-        "R.I.P. Screw (feat. Swae Lee)",
-        "Butterfly Effect",
-        "Sicko Mode (feat. Drake)",
-        "Who What! (feat. Quavo)"
+      "artist_name": "Doja Cat",
+      "albums": [
+        {
+          "album_name": "Scarlet",
+          "album_release_date": "22.09.2023",
+          "tracks": [
+            "97",
+            "Agora_Hills",
+            "Attention",
+            "Balut",
+            "Can't_Wait.mp3",
+            "Demons",
+            "Fuck_The_Girls",
+            "Go_Off",
+            "Gun",
+            "Love_Life",
+            "Often",
+            "Ouchies",
+            "Paint_The_Town_Red",
+            "Shutcho",
+            "Skull_And_Bones",
+            "Wym_Freestyle"
+          ]
+        }
+      ],
+      "singles": []
+    },
+    {
+      "artist_name": "Travis Scott",
+      "albums": [
+        {
+          "album_name": "Astroworld",
+          "album_release_date": "03.08.2018",
+          "tracks": [
+            "Stargazing",
+            "NC-17 (feat. 21 Savage)",
+            "Houstonfornication",
+            "Coffee Bean",
+            "Astrothunder",
+            "Stop Trying To Be God",
+            "Wake Up",
+            "Can't Say",
+            "Carousel",
+            "5% Tint",
+            "Skeletons (feat. The Weekend)",
+            "No Bystanders (feat. Juice WRLD)",
+            "Yosemite",
+            "R.I.P. Screw (feat. Swae Lee)",
+            "Butterfly Effect",
+            "Sicko Mode (feat. Drake)",
+            "Who What! (feat. Quavo)"
+          ]
+        }
+      ],
+      "singles": [
+        "Escape Plan",
+        "Highest In The Room"
       ]
     }
-  ],
-  "singles": [
-    "Escape Plan",
-    "Highest In The Room"
   ]
 }
