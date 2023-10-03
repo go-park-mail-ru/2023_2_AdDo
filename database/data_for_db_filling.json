@@ -1,0 +1,32 @@
+{
+  "artist_name": "Travis Scott",
+  "albums": [
+    {
+      "album_name": "Astroworld",
+      "album_release_date": "03.08.2018",
+      "tracks": [
+        "Stargazing",
+        "NC-17 (feat. 21 Savage)",
+        "Houstonfornication",
+        "Coffee Bean",
+        "Astrothunder",
+        "Stop Trying To Be God",
+        "Wake Up",
+        "Can't Say",
+        "Carousel",
+        "5% Tint",
+        "Skeletons (feat. The Weekend)",
+        "No Bystanders (feat. Juice WRLD)",
+        "Yosemite",
+        "R.I.P. Screw (feat. Swae Lee)",
+        "Butterfly Effect",
+        "Sicko Mode (feat. Drake)",
+        "Who What! (feat. Quavo)"
+      ]
+    }
+  ],
+  "singles": [
+    "Escape Plan",
+    "Highest In The Room"
+  ]
+}

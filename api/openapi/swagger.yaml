@@ -1,0 +1,278 @@
+basePath: /api/v1
+definitions:
+  album.Response:
+    properties:
+      Id:
+        example: 1
+        type: integer
+      Name:
+        example: AlbumName
+        type: string
+      Preview:
+        example: AlbumPreview
+        type: string
+    type: object
+  artist.Response:
+    properties:
+      Avatar:
+        example: ArtistAvatar
+        type: string
+      Id:
+        example: 1
+        type: integer
+      Name:
+        example: ArtistName
+        type: string
+    type: object
+  track.Response:
+    properties:
+      Album:
+        items:
+          $ref: '#/definitions/album.Response'
+        type: array
+      Artist:
+        items:
+          $ref: '#/definitions/artist.Response'
+        type: array
+      Content:
+        example: TrackContent
+        type: string
+      Id:
+        example: 1
+        type: integer
+      Name:
+        example: TrackName
+        type: string
+      Preview:
+        example: TrackPreview
+        type: string
+    type: object
+  user_delivery.userCrds:
+    properties:
+      Email:
+        example: example@gmail.com
+        type: string
+      Password:
+        example: password
+        type: string
+    type: object
+  user_domain.ResponseId:
+    properties:
+      Id:
+        example: 1
+        type: integer
+    type: object
+  user_domain.User:
+    properties:
+      Avatar:
+        example: http://test/image/1.jpg,http://test/image/2.jpg
+        type: string
+      BirthDate:
+        example: "2000-01-01"
+        type: string
+      Email:
+        example: example@gmail.com
+        type: string
+      Id:
+        example: 1
+        type: integer
+      Password:
+        example: password
+        type: string
+      Username:
+        example: john
+        type: string
+    type: object
+host: musicon.space
+info:
+  contact: {}
+  description: Music web app
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: MusicOn API
+  version: "1.0"
+paths:
+  /auth:
+    get:
+      description: check user's authentication by cookie and user_id
+      parameters:
+      - description: user id
+        in: query
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/user_domain.User'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - cookieAuth: []
+      - csrfToken: []
+      tags:
+      - user
+  /login:
+    post:
+      consumes:
+      - application/json
+      description: login user
+      parameters:
+      - description: User email and password
+        in: body
+        name: userCrds
+        required: true
+        schema:
+          $ref: '#/definitions/user_delivery.userCrds'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          headers:
+            JSESSIONID:
+              description: cookie
+              type: string
+            X-CSRFTOKEN:
+              description: csrf token
+              type: string
+          schema:
+            $ref: '#/definitions/user_domain.ResponseId'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "403":
+          description: Forbidden
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      tags:
+      - user
+  /logout:
+    post:
+      consumes:
+      - application/json
+      description: logout user
+      parameters:
+      - description: user id
+        in: body
+        name: id
+        required: true
+        schema:
+          type: integer
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - cookieAuth: []
+      - csrfToken: []
+      tags:
+      - user
+  /music:
+    get:
+      description: return all tracks
+      parameters:
+      - description: user id
+        in: query
+        name: id
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/track.Response'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - cookieAuth: []
+      - csrfToken: []
+      tags:
+      - track
+  /sign_up:
+    post:
+      consumes:
+      - application/json
+      description: register user
+      parameters:
+      - description: User data
+        in: body
+        name: userData
+        required: true
+        schema:
+          $ref: '#/definitions/user_domain.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/user_domain.ResponseId'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "409":
+          description: Conflict
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      tags:
+      - user
+securityDefinitions:
+  cookieAuth:
+    in: header
+    name: JSESSIONID
+    type: apiKey
+  csrfToken:
+    in: header
+    name: X-CSRFTOKEN
+    type: apiKey
+swagger: "2.0"
