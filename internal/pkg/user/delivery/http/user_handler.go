@@ -12,8 +12,8 @@ import (
 
 // needed for swagger..
 type userCrds struct {
-	Email string `json:"email" example:"example@gmail.com"` 
-	Password string `json:"password" example:"password"` 
+	Email string `json:"Email" example:"example@gmail.com"` 
+	Password string `json:"Password" example:"password"` 
 }
 
 type UserHandler struct {
