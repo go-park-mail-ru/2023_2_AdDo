@@ -5,6 +5,9 @@ import (
 	common_handler "main/internal/pkg/common/handler"
 	track_delivery "main/internal/pkg/track/delivery/http"
 	user_delivery "main/internal/pkg/user/delivery/http"
+	httpSwagger "github.com/swaggo/http-swagger/v2"
+	_ "main/api/openapi"
+
 )
 
 //	@title			MusicOn API
@@ -27,6 +30,7 @@ import (
 //	@host		musicon.space
 //	@BasePath	/api/v1
 func New(router *mux.Router, userHandler user_delivery.UserHandler, trackHandler track_delivery.TrackHandler) *mux.Router {
+	router.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
 	router.Handle("/api/v1/sign_up", common_handler.Handler{H: userHandler.SignUp}).Methods("POST")
 	router.Handle("/api/v1/login", common_handler.Handler{H: userHandler.Login}).Methods("POST")
 	router.Handle("/api/v1/auth", common_handler.Handler{H: userHandler.Auth}).Methods("GET")
