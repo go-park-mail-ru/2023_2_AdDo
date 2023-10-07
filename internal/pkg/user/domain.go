@@ -42,8 +42,6 @@ type Repository interface {
 }
 
 var (
-	ErrUserAlreadyExist      = errors.New("user already exist")
-	ErrUserDoesNotExist      = errors.New("user does not exist")
-	ErrSessionDoesNotExist   = errors.New("session does not exist")
-	ErrSessionCreatingFailed = errors.New("session does not exist")
+	ErrUserAlreadyExist = errors.New("user already exist")
+	ErrUserDoesNotExist = errors.New("user does not exist")
 )

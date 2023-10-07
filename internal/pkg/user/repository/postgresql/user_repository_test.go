@@ -9,7 +9,7 @@ import (
 func TestUserRepository_Create(t *testing.T) {
 	db, mock, err := sqlmock.New()
 	if err != nil {
-		t.Fatalf("Failed to create mock database: %v", err)
+		t.Fatalf("Failed to create mock postgres_db: %v", err)
 	}
 	defer db.Close()
 	repo := Postgres{
@@ -33,7 +33,7 @@ func TestUserRepository_Create(t *testing.T) {
 func TestUserRepository_GetById(t *testing.T) {
 	db, mock, err := sqlmock.New()
 	if err != nil {
-		t.Fatalf("Failed to create mock database: %v", err)
+		t.Fatalf("Failed to create mock postgres_db: %v", err)
 	}
 	defer db.Close()
 
@@ -72,7 +72,7 @@ func TestUserRepository_GetById(t *testing.T) {
 func TestUserRepository_CheckEmailAndPassword(t *testing.T) {
 	db, mock, err := sqlmock.New()
 	if err != nil {
-		t.Fatalf("Failed to create mock database: %v", err)
+		t.Fatalf("Failed to create mock postgres_db: %v", err)
 	}
 	defer db.Close()
 

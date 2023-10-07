@@ -1,12 +1,14 @@
 package main
 
 import (
+	"context"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
 	"log"
-	init_db "main/init/database"
 	logger_init "main/init/logger"
+	init_db "main/init/postgres_db"
+	init_redis "main/init/redis_db"
 	router_init "main/init/router"
 	album_repository "main/internal/pkg/album/repository/postgres"
 	artist_repository "main/internal/pkg/artist/repository/postgres"
@@ -27,20 +29,27 @@ const EnvPostgresQueryName = "POSTGRES_QUERY"
 const ServerPort = ":8080"
 
 func main() {
-	db, err := init_db.InitPostgres(EnvPostgresQueryName)
+	postgres, err := init_db.InitPostgres(EnvPostgresQueryName)
 	if err != nil {
-		log.Fatalf("error database connecting %v", err)
+		log.Fatalf("error postgres_db connecting %v", err)
 	}
-	defer db.Close()
+	defer postgres.Close()
+
+	ctx := context.Background()
+	redis, err := init_redis.InitRedis(ctx)
+	if err != nil {
+		log.Fatalf("error redis_db connecting %v", err)
+	}
+	defer redis.Close()
 
 	router := mux.NewRouter()
 	logger := logger_init.LogRusInit()
 
-	sessionRepo := session_repository.NewPostgres(db)
-	userRepo := user_repository.NewPostgres(db)
-	trackRepo := track_repository.NewPostgres(db)
-	albumRepo := album_repository.NewPostgres(db)
-	artistRepo := artist_repository.NewPostgres(db)
+	sessionRepo := session_repository.NewPostgres(postgres)
+	userRepo := user_repository.NewPostgres(postgres)
+	trackRepo := track_repository.NewPostgres(postgres)
+	albumRepo := album_repository.NewPostgres(postgres)
+	artistRepo := artist_repository.NewPostgres(postgres)
 	logger.Infoln("Repositories initialized")
 
 	sessionUseCase := session_usecase.NewDefault(sessionRepo)
