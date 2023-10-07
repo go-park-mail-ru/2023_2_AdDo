@@ -2,8 +2,6 @@ package main
 
 import (
 	"context"
-	"github.com/gorilla/handlers"
-	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
 	"log"
 	logger_init "main/init/logger"
@@ -12,8 +10,6 @@ import (
 	router_init "main/init/router"
 	album_repository "main/internal/pkg/album/repository/postgres"
 	artist_repository "main/internal/pkg/artist/repository/postgres"
-	common_middleware "main/internal/pkg/common/middleware"
-	"main/internal/pkg/session"
 	session_repository_redis "main/internal/pkg/session/repository/redis"
 	session_usecase "main/internal/pkg/session/usecase"
 	track_delivery "main/internal/pkg/track/delivery/http"
@@ -42,7 +38,6 @@ func main() {
 	}
 	defer redis.Close()
 
-	router := mux.NewRouter()
 	logger := logger_init.LogRusInit()
 
 	sessionRepo := session_repository_redis.NewRedis(redis, ctx)
@@ -61,15 +56,7 @@ func main() {
 	trackHandler := track_delivery.NewHandler(&trackUseCase, &sessionUseCase)
 	logger.Infoln("Deliveries initialized")
 
-	router = router_init.New(router, userHandler, trackHandler)
+	router := router_init.New(userHandler, trackHandler, logger)
 
-	routerCORS := handlers.CORS(
-		handlers.AllowedOrigins([]string{"http://82.146.45.164:8081"}),
-		handlers.AllowedMethods([]string{"POST", "GET", "PUT", "DELETE", "OPTIONS"}),
-		handlers.AllowedHeaders([]string{"Content-Type"}),
-		handlers.ExposedHeaders([]string{session.CookieName}),
-		handlers.AllowCredentials(),
-	)(router)
-
-	log.Fatal(http.ListenAndServe(ServerPort, common_middleware.Logging(routerCORS, logger)))
+	log.Fatal(http.ListenAndServe(ServerPort, router))
 }
