@@ -1,13 +1,18 @@
 package router_init
 
 import (
+	"github.com/gorilla/csrf"
+	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
-	common_handler "main/internal/pkg/common/handler"
-	track_delivery "main/internal/pkg/track/delivery/http"
-	user_delivery "main/internal/pkg/user/delivery/http"
+	"github.com/sirupsen/logrus"
 	httpSwagger "github.com/swaggo/http-swagger/v2"
 	_ "main/api/openapi"
-
+	common_handler "main/internal/pkg/common/handler"
+	common_middleware "main/internal/pkg/common/middleware"
+	"main/internal/pkg/session"
+	track_delivery "main/internal/pkg/track/delivery/http"
+	user_delivery "main/internal/pkg/user/delivery/http"
+	"net/http"
 )
 
 //	@title			MusicOn API
@@ -19,17 +24,18 @@ import (
 //	@license.name	Apache 2.0
 //	@license.url	http://www.apache.org/licenses/LICENSE-2.0.html
 
-//	@SecurityDefinitions.apikey	cookieAuth 
+//	@SecurityDefinitions.apikey	cookieAuth
 //	@in							header
 //	@name						JSESSIONID
 
-//	@SecurityDefinitions.apikey	csrfToken 
+//	@SecurityDefinitions.apikey	csrfToken
 //	@in							header
-//	@name						X-CSRFTOKEN
+//	@name						X-CSRF-Token
 
-//	@host		musicon.space
-//	@BasePath	/api/v1
-func New(router *mux.Router, userHandler user_delivery.UserHandler, trackHandler track_delivery.TrackHandler) *mux.Router {
+// @host		musicon.space
+// @BasePath	/api/v1
+func New(userHandler user_delivery.UserHandler, trackHandler track_delivery.TrackHandler, logger *logrus.Logger) http.Handler {
+	router := mux.NewRouter()
 	router.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
 	router.Handle("/api/v1/sign_up", common_handler.Handler{H: userHandler.SignUp}).Methods("POST")
 	router.Handle("/api/v1/login", common_handler.Handler{H: userHandler.Login}).Methods("POST")
@@ -38,5 +44,26 @@ func New(router *mux.Router, userHandler user_delivery.UserHandler, trackHandler
 
 	router.Handle("/api/v1/music", common_handler.Handler{H: trackHandler.Music}).Methods("GET")
 
-	return router
+	corsMiddleware := handlers.CORS(
+		handlers.AllowedOrigins([]string{"http://82.146.45.164:8081"}),
+		handlers.AllowedMethods([]string{"POST", "GET", "PUT", "DELETE", "OPTIONS"}),
+		handlers.AllowedHeaders([]string{"Content-Type"}),
+		handlers.ExposedHeaders([]string{session.CookieName}),
+		handlers.AllowCredentials(),
+	)
+
+	csrfMiddleware := csrf.Protect(
+		[]byte(session.CSRFKey),
+		csrf.Secure(false),
+		csrf.CookieName("X-CSRF-Token"),
+		csrf.FieldName("__csrf"),
+		csrf.MaxAge(session.TimeToLiveCSRF),
+	)
+
+	routerWithMiddleware := common_middleware.Logging(router, logger)
+	routerWithMiddleware = common_middleware.PanicRecovery(routerWithMiddleware)
+	routerWithMiddleware = corsMiddleware(routerWithMiddleware)
+	routerWithMiddleware = csrfMiddleware(routerWithMiddleware)
+
+	return routerWithMiddleware
 }

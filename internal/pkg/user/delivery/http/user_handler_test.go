@@ -129,7 +129,7 @@ func TestLogin(t *testing.T) {
 		cookie := w.Result().Cookies()[firstCookie]
 		sessionIdReceived := cookie.Value
 		assert.Equal(t, sessionIdExpected, sessionIdReceived)
-		assert.Equal(t, time.Now().Add(session.TimeToLive).Unix(), cookie.Expires.Unix())
+		assert.Equal(t, time.Now().Add(session.TimeToLiveCookie).Unix(), cookie.Expires.Unix())
 	})
 }
 
@@ -156,7 +156,7 @@ func TestAuth(t *testing.T) {
 		cookie := http.Cookie{
 			Name:     session.CookieName,
 			Value:    sessionId,
-			Expires:  time.Now().Add(session.TimeToLive),
+			Expires:  time.Now().Add(session.TimeToLiveCookie),
 			Secure:   true,
 			HttpOnly: true,
 		}
@@ -177,7 +177,7 @@ func TestAuth(t *testing.T) {
 		cookie := http.Cookie{
 			Name:     session.CookieName,
 			Value:    sessionId,
-			Expires:  time.Now().Add(session.TimeToLive),
+			Expires:  time.Now().Add(session.TimeToLiveCookie),
 			Secure:   true,
 			HttpOnly: true,
 		}
@@ -207,7 +207,7 @@ func TestLogOut(t *testing.T) {
 		cookie := http.Cookie{
 			Name:     session.CookieName,
 			Value:    sessionId,
-			Expires:  time.Now().Add(session.TimeToLive),
+			Expires:  time.Now().Add(session.TimeToLiveCookie),
 			Secure:   true,
 			HttpOnly: true,
 		}

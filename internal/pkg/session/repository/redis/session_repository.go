@@ -19,7 +19,7 @@ func NewRedis(db *redis.Client, ctx context.Context) *Redis {
 func (redis *Redis) Create(userId uint64) (string, error) {
 	sessionId := uuid.New().String()
 
-	err := redis.database.Set(redis.ctx, sessionId, userId, session.TimeToLive).Err()
+	err := redis.database.Set(redis.ctx, sessionId, userId, session.TimeToLiveCookie).Err()
 	if err != nil {
 		return "", err
 	}
