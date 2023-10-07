@@ -37,11 +37,9 @@ func (h Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		case errors.As(err, &e):
 			w.WriteHeader(e.Status())
 			io.WriteString(w, fmt.Sprintf("{ \"status\": %d, \"err\": \"%s\" }\n", e.Status(), e.Error()))
-			//http.Error(w, e.Error(), e.Status())
 		default:
 			w.WriteHeader(http.StatusInternalServerError)
 			io.WriteString(w, fmt.Sprintf("{ \"status\": %d, \"err\": \"%s\" }\n", http.StatusInternalServerError, e.Error()))
-			//http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		}
 	}
 }

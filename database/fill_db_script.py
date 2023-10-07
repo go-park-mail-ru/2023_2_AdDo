@@ -1,6 +1,5 @@
 import json
 
-
 def create_artist_command(artist_name, artist_avatar):
     command = (
         f"INSERT INTO artist (name, avatar) "

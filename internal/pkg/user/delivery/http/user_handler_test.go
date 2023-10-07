@@ -54,7 +54,7 @@ func TestSignUp(t *testing.T) {
 
 	t.Run("Success", func(t *testing.T) {
 		user := user_domain.User{Id: 1, Username: "John", Email: "john@example.com", BirthDate: "12-12-2003", Password: "password"}
-		sessionId := "sesId"
+		const sessionId = "sesId"
 		requestBody, err := json.Marshal(user)
 		assert.NoError(t, err)
 
