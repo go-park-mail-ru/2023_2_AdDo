@@ -1,4 +1,4 @@
-package session_repository
+package session_repository_postgres
 
 import "database/sql"
 

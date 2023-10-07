@@ -14,7 +14,7 @@ import (
 	artist_repository "main/internal/pkg/artist/repository/postgres"
 	common_middleware "main/internal/pkg/common/middleware"
 	"main/internal/pkg/session"
-	session_repository "main/internal/pkg/session/repository/postgresql"
+	session_repository_redis "main/internal/pkg/session/repository/redis"
 	session_usecase "main/internal/pkg/session/usecase"
 	track_delivery "main/internal/pkg/track/delivery/http"
 	track_repository "main/internal/pkg/track/repository/postgresql"
@@ -45,7 +45,7 @@ func main() {
 	router := mux.NewRouter()
 	logger := logger_init.LogRusInit()
 
-	sessionRepo := session_repository.NewPostgres(postgres)
+	sessionRepo := session_repository_redis.NewRedis(redis, ctx)
 	userRepo := user_repository.NewPostgres(postgres)
 	trackRepo := track_repository.NewPostgres(postgres)
 	albumRepo := album_repository.NewPostgres(postgres)

@@ -1,5 +1,3 @@
-create extension if not exists "uuid-ossp";
-
 create table if not exists profile (
     id serial primary key,
     email varchar(32) unique not null,
@@ -101,13 +99,6 @@ create table if not exists profile_podcast(
     FOREIGN KEY (podcast_id) references podcast(id)
     );
 
-create table if not exists session (
-                                       id serial primary key,
-                                       session_id uuid default uuid_generate_v4() not null unique,
-    expiration timestamp with time zone not null default current_timestamp,
-                             profile_id int not null references profile(id)
-    );
-
 -- table with like for songs:
 --      id like_author
 --      id like_song
@@ -123,16 +114,3 @@ create table if not exists session (
 -- table with like for podcasts:
 --      id like_author
 --      id like_podcast
-
-create function session_delete_expired_rows() returns trigger
-    language plpgsql
-    AS $$
-begin
-delete from session where session.expiration < now();
-return NEW;
-end;
-    $$;
-
-create trigger session_delete_expired_rows_trigger
-    after insert on session
-    EXECUTE PROCEDURE session_delete_expired_rows();

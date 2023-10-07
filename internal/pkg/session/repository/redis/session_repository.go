@@ -1,4 +1,4 @@
-package session_repository
+package session_repository_redis
 
 import (
 	"context"
@@ -16,10 +16,10 @@ func NewRedis(db *redis.Client, ctx context.Context) *Redis {
 	return &Redis{database: db, ctx: ctx}
 }
 
-func (redis *Redis) Create() (string, error) {
+func (redis *Redis) Create(userId uint64) (string, error) {
 	sessionId := uuid.New().String()
 
-	err := redis.database.Set(redis.ctx, sessionId, true, session.TimeToLive).Err()
+	err := redis.database.Set(redis.ctx, sessionId, userId, session.TimeToLive).Err()
 	if err != nil {
 		return "", err
 	}
@@ -27,13 +27,13 @@ func (redis *Redis) Create() (string, error) {
 	return sessionId, nil
 }
 
-func (redis *Redis) Get(sessionId string) (bool, error) {
-	_, err := redis.database.Get(redis.ctx, sessionId).Result()
+func (redis *Redis) Get(sessionId string) (uint64, error) {
+	userId, err := redis.database.Get(redis.ctx, sessionId).Uint64()
 	if err != nil {
-		return false, err
+		return 0, err
 	}
 
-	return true, nil
+	return userId, nil
 }
 
 func (redis *Redis) Delete(sessionId string) error {

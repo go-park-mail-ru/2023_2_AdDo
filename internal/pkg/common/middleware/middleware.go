@@ -35,5 +35,6 @@ func PanicRecovery(next http.Handler) http.Handler {
 			}
 		}(w, request)
 		next.ServeHTTP(w, request)
+
 	})
 }

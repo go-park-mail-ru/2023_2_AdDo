@@ -1,4 +1,4 @@
-package session_repository
+package session_repository_postgres
 
 import (
 	"github.com/DATA-DOG/go-sqlmock"
