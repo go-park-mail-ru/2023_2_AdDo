@@ -15,9 +15,10 @@ func NewDefault(repository session.Repository) Default {
 }
 
 func (s *Default) CheckSession(sessionId string) (bool, error) {
-	isAuth, err := s.repoSession.Get(sessionId)
+	_, err := s.repoSession.Get(sessionId)
 	if err != nil {
 		return false, session.ErrSessionDoesNotExist
 	}
-	return isAuth, nil
+
+	return true, nil
 }

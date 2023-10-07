@@ -17,12 +17,13 @@ func TestDefault_CheckSession_Success(t *testing.T) {
 		repoSession: mockSessionRepo,
 	}
 
-	userId := 1
+	const isAuthExpected = true
 	const sessionId = "sessionId"
+	const anyUserId = 1
 
-	mockSessionRepo.EXPECT().GetByUserId(uint64(userId)).Return(sessionId, nil)
-	isSame, err := useCase.CheckSession(sessionId, uint64(userId))
+	mockSessionRepo.EXPECT().Get(sessionId).Return(uint64(anyUserId), nil)
+	isAuth, err := useCase.CheckSession(sessionId)
 
 	assert.Equal(t, nil, err)
-	assert.True(t, isSame)
+	assert.Equal(t, isAuthExpected, isAuth)
 }
