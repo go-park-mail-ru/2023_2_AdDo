@@ -1,5 +1,1 @@
-package session_repository
-
-func main() {
-
-}
+package session_repository_redis

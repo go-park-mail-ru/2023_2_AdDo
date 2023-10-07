@@ -10,8 +10,8 @@ type UseCase interface {
 }
 
 type Repository interface {
-	Create() (string, error)
-	Get(sessionId string) (string, error)
+	Create(userId uint64) (string, error)
+	Get(sessionId string) (uint64, error)
 	Delete(sessionId string) error
 }
 

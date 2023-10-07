@@ -6,6 +6,11 @@ import (
 	"github.com/asaskevich/govalidator"
 )
 
+type UserCredentials struct {
+	Email    string `json:"Email" example:"example@gmail.com"`
+	Password string `json:"Password" example:"password"`
+}
+
 type User struct {
 	Id        uint64 `valid:"-" json:"Id" example:"1"`
 	Username  string `valid:"length(2|30), required" json:"Username" example:"john"`
@@ -29,10 +34,10 @@ type ResponseId struct {
 
 type UseCase interface {
 	Register(user User) error
-	Login(email, password string) (uint64, string, error)
-	Auth(userId uint64, sessionId string) (bool, error)
-	GetUserInfo(id uint64) (User, error)
-	Logout(id uint64) error
+	Login(email, password string) (string, error)
+	Auth(sessionId string) (bool, error)
+	GetUserInfo(sessionId string) (User, error)
+	Logout(sessionId string) error
 }
 
 type Repository interface {
@@ -42,6 +47,7 @@ type Repository interface {
 }
 
 var (
+	ErrWrongCredentials = errors.New("wrong user credentials")
 	ErrUserAlreadyExist = errors.New("user already exist")
 	ErrUserDoesNotExist = errors.New("user does not exist")
 )
