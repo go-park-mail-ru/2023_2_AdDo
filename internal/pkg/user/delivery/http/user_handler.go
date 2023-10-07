@@ -2,6 +2,7 @@ package user_delivery
 
 import (
 	"encoding/json"
+	"github.com/gorilla/csrf"
 	common_handler "main/internal/pkg/common/handler"
 	"main/internal/pkg/common/response"
 	user_domain "main/internal/pkg/user"
@@ -30,6 +31,7 @@ func NewHandler(userUseCase user_domain.UseCase) UserHandler {
 // @Failure		500			{string}	errMsg
 // @Router			/sign_up [post]
 func (handler *UserHandler) SignUp(w http.ResponseWriter, r *http.Request) error {
+	csrf.Token(r)
 	var u user_domain.User
 	if err := json.NewDecoder(r.Body).Decode(&u); err != nil {
 		return common_handler.StatusError{Code: http.StatusBadRequest, Err: err}

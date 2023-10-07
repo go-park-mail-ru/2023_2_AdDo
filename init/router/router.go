@@ -36,34 +36,36 @@ import (
 // @BasePath	/api/v1
 func New(userHandler user_delivery.UserHandler, trackHandler track_delivery.TrackHandler, logger *logrus.Logger) http.Handler {
 	router := mux.NewRouter()
+
 	router.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
 	router.Handle("/api/v1/sign_up", common_handler.Handler{H: userHandler.SignUp}).Methods("POST")
 	router.Handle("/api/v1/login", common_handler.Handler{H: userHandler.Login}).Methods("POST")
-	router.Handle("/api/v1/auth", common_handler.Handler{H: userHandler.Auth}).Methods("GET")
 	router.Handle("/api/v1/logout", common_handler.Handler{H: userHandler.LogOut}).Methods("POST")
 
+	router.Handle("/api/v1/auth", common_handler.Handler{H: userHandler.Auth}).Methods("GET")
 	router.Handle("/api/v1/music", common_handler.Handler{H: trackHandler.Music}).Methods("GET")
 
 	corsMiddleware := handlers.CORS(
 		handlers.AllowedOrigins([]string{"http://82.146.45.164:8081"}),
 		handlers.AllowedMethods([]string{"POST", "GET", "PUT", "DELETE", "OPTIONS"}),
-		handlers.AllowedHeaders([]string{"Content-Type"}),
+		handlers.AllowedHeaders([]string{"Content-Type", "X-Csrf-Token"}),
 		handlers.ExposedHeaders([]string{session.CookieName}),
 		handlers.AllowCredentials(),
 	)
 
 	csrfMiddleware := csrf.Protect(
-		[]byte(session.CSRFKey),
+		session.CSRFKey,
 		csrf.Secure(false),
-		csrf.CookieName("X-CSRF-Token"),
-		csrf.FieldName("__csrf"),
+		csrf.HttpOnly(false),
 		csrf.MaxAge(session.TimeToLiveCSRF),
+		csrf.RequestHeader("X-Csrf-Token"),
+		csrf.CookieName("X-Csrf-Token"),
+		csrf.FieldName("X-Csrf-Token"),
 	)
+	router.Use(corsMiddleware, csrfMiddleware)
 
 	routerWithMiddleware := common_middleware.Logging(router, logger)
 	routerWithMiddleware = common_middleware.PanicRecovery(routerWithMiddleware)
-	routerWithMiddleware = corsMiddleware(routerWithMiddleware)
-	routerWithMiddleware = csrfMiddleware(routerWithMiddleware)
 
 	return routerWithMiddleware
 }
