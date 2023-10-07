@@ -28,7 +28,7 @@ mocks-clean:
 #очистка базы данных
 database-clean:
 	@echo "Database cleaning..."
-	@sudo rm -r ~/db-data
+	@-rm -r ~/db-data
 
 #запуск интеграционных тестов на пустой базе данных
 docker-service-empty-db-test:
@@ -73,6 +73,8 @@ clean:
 	@-docker rmi $$(docker images -q)
 	@echo "Removing networks..."
 	@-docker network rm $$(docker network ls -q)
+	@echo "Removing volumes..."
+	@-docker-compose down --volumes
 
 # Деплой без очистки данных - мы не теряем созданных пользователей и их лайки
 deploy:

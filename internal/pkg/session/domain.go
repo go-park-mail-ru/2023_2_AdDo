@@ -18,7 +18,8 @@ type Repository interface {
 const CookieName = "JSESSIONID"
 const TimeToLiveCookie = 1 * time.Minute
 const TimeToLiveCSRF = 24 * 60 * 60
-const CSRFKey = "SecretKey"
+
+var CSRFKey = []byte("6rOD7Jb4gwBISPPd4T2CVDHEILjr4rq2")
 
 var (
 	ErrSessionDoesNotExist   = errors.New("session does not exist")
