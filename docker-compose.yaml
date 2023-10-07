@@ -1,17 +1,22 @@
 version: '3.0'
 
 services:
-  
-  service-db:
+  service-db-redis:
+    restart: always
+    image: redis
+    ports:
+      - "6379:6379"
+
+  service-db-postgres:
     restart: always
     image: postgres:14
     env_file: ./database/db.env
     ports:
       - "5432:5432"
     volumes:
-      - ./database/db_schema.sql:/db_schema.sql
-      - ./database/data_init.sql:/data_init.sql
-      - ./database/startup.sh:/docker-entrypoint-initdb.d/startup.sh
+      - ./postgres_db/db_schema.sql:/db_schema.sql
+      - ./postgres_db/data_init.sql:/data_init.sql
+      - ./postgres_db/startup.sh:/docker-entrypoint-initdb.d/startup.sh
       - ~/db-data:/var/lib/postgresql/data
   
   musicon:
@@ -19,11 +24,12 @@ services:
       context: .
       dockerfile: Dockerfile
     depends_on:
-      - service-db
+      - service-db-postgres
+      - service-db-redis
     ports:
       - "8080:8080"
     environment:
-      - POSTGRES_QUERY=host=service-db port=5432 user=musicon password=musicon dbname=musicon sslmode=disable
+      - POSTGRES_QUERY=host=service-db-postgres port=5432 user=musicon password=musicon dbname=musicon sslmode=disable
 
   wait-musicon:
     image: alpine

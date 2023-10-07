@@ -1,4 +1,4 @@
-package init_db
+package init_postgres
 
 import (
 	"database/sql"
@@ -6,8 +6,6 @@ import (
 	"log"
 	"os"
 )
-
-// db_connection_string = "host=db port=5432 user=postgres password=music dbname=wave sslmode=disable TimeZone=Europe/Moscow"
 
 func InitPostgres(env string) (*sql.DB, error) {
 	psqlInfo := os.Getenv(env)
@@ -17,13 +15,13 @@ func InitPostgres(env string) (*sql.DB, error) {
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println("Database opened")
+	fmt.Println("Postgres database opened")
 
 	err = db.Ping()
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println("Database successfully connected!")
+	fmt.Println("Postgres database successfully connected!")
 
 	return db, nil
 }

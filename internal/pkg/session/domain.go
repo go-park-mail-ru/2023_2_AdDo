@@ -1,24 +1,24 @@
 package session
 
 import (
+	"errors"
 	"time"
 )
 
-type Session struct {
-	SessionId  string
-	ProfileId  uint64
-	Expiration time.Time
-}
-
 type UseCase interface {
-	CheckSession(sessionId string, userId uint64) (bool, error)
+	CheckSession(sessionId string) (bool, error)
 }
 
 type Repository interface {
-	Create(userId uint64) (string, error)
-	GetByUserId(userId uint64) (string, error)
-	DeleteByUserId(userId uint64) error
+	Create() (string, error)
+	Get(sessionId string) (string, error)
+	Delete(sessionId string) error
 }
 
 const CookieName = "JSESSIONID"
 const TimeToLive = 1 * time.Minute
+
+var (
+	ErrSessionDoesNotExist   = errors.New("session does not exist")
+	ErrSessionCreatingFailed = errors.New("session hasn't created")
+)
