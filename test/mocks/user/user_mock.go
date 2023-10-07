@@ -35,43 +35,42 @@ func (m *MockUseCase) EXPECT() *MockUseCaseMockRecorder {
 }
 
 // Auth mocks base method.
-func (m *MockUseCase) Auth(userId uint64, sessionId string) (bool, error) {
+func (m *MockUseCase) Auth(sessionId string) (bool, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Auth", userId, sessionId)
+	ret := m.ctrl.Call(m, "Auth", sessionId)
 	ret0, _ := ret[0].(bool)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Auth indicates an expected call of Auth.
-func (mr *MockUseCaseMockRecorder) Auth(userId, sessionId interface{}) *gomock.Call {
+func (mr *MockUseCaseMockRecorder) Auth(sessionId interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Auth", reflect.TypeOf((*MockUseCase)(nil).Auth), userId, sessionId)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Auth", reflect.TypeOf((*MockUseCase)(nil).Auth), sessionId)
 }
 
 // GetUserInfo mocks base method.
-func (m *MockUseCase) GetUserInfo(id uint64) (user_domain.User, error) {
+func (m *MockUseCase) GetUserInfo(sessionId string) (user_domain.User, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetUserInfo", id)
+	ret := m.ctrl.Call(m, "GetUserInfo", sessionId)
 	ret0, _ := ret[0].(user_domain.User)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetUserInfo indicates an expected call of GetUserInfo.
-func (mr *MockUseCaseMockRecorder) GetUserInfo(id interface{}) *gomock.Call {
+func (mr *MockUseCaseMockRecorder) GetUserInfo(sessionId interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserInfo", reflect.TypeOf((*MockUseCase)(nil).GetUserInfo), id)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserInfo", reflect.TypeOf((*MockUseCase)(nil).GetUserInfo), sessionId)
 }
 
 // Login mocks base method.
-func (m *MockUseCase) Login(email, password string) (uint64, string, error) {
+func (m *MockUseCase) Login(email, password string) (string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Login", email, password)
-	ret0, _ := ret[0].(uint64)
-	ret1, _ := ret[1].(string)
-	ret2, _ := ret[2].(error)
-	return ret0, ret1, ret2
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // Login indicates an expected call of Login.
@@ -81,17 +80,17 @@ func (mr *MockUseCaseMockRecorder) Login(email, password interface{}) *gomock.Ca
 }
 
 // Logout mocks base method.
-func (m *MockUseCase) Logout(id uint64) error {
+func (m *MockUseCase) Logout(sessionId string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Logout", id)
+	ret := m.ctrl.Call(m, "Logout", sessionId)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Logout indicates an expected call of Logout.
-func (mr *MockUseCaseMockRecorder) Logout(id interface{}) *gomock.Call {
+func (mr *MockUseCaseMockRecorder) Logout(sessionId interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Logout", reflect.TypeOf((*MockUseCase)(nil).Logout), id)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Logout", reflect.TypeOf((*MockUseCase)(nil).Logout), sessionId)
 }
 
 // Register mocks base method.

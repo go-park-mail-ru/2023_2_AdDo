@@ -49,7 +49,6 @@ func TestRegister_UserAlreadyExists(t *testing.T) {
 		Username: "user1",
 	}
 
-	// Ожидаем, что метод Create вызовется с аргументом mockUser и вернет ошибку
 	mockUserRepo.EXPECT().Create(mockUser).Return(errors.New("user already exists"))
 
 	err := useCase.Register(mockUser)
@@ -78,10 +77,9 @@ func TestLogin_Success(t *testing.T) {
 
 	mockUserRepo.EXPECT().CheckEmailAndPassword(mockUser.Email, mockUser.Password).Return(uint64(mockUser.Id), nil)
 	mockAuthRepo.EXPECT().Create(mockUser.Id).Return(mockSessionId, nil)
-	id, session, err := useCase.Login(mockUser.Email, mockUser.Password)
+	session, err := useCase.Login(mockUser.Email, mockUser.Password)
 
 	assert.Equal(t, nil, err)
-	assert.Equal(t, mockUser.Id, id)
 	assert.Equal(t, mockSessionId, session)
 }
 
@@ -90,9 +88,11 @@ func TestGetUserInfo_Success(t *testing.T) {
 	defer ctrl.Finish()
 
 	mockUserRepo := user_mock.NewMockRepository(ctrl)
+	mockAuthRepo := session_mock.NewMockRepository(ctrl)
 
 	useCase := &WithStatefulSessions{
 		UserRepo: mockUserRepo,
+		AuthRepo: mockAuthRepo,
 	}
 
 	mockUser := user_domain.User{
@@ -100,9 +100,11 @@ func TestGetUserInfo_Success(t *testing.T) {
 		Email:    "user@example.com",
 		Password: "my_password",
 	}
+	const sessionId = "sessionId"
 
+	mockAuthRepo.EXPECT().Get(sessionId).Return(mockUser.Id, nil)
 	mockUserRepo.EXPECT().GetById(mockUser.Id).Return(mockUser, nil)
-	user, err := useCase.GetUserInfo(mockUser.Id)
+	user, err := useCase.GetUserInfo(sessionId)
 
 	assert.Equal(t, nil, err)
 	assert.Equal(t, mockUser, user)
@@ -123,10 +125,10 @@ func TestAuth_Success(t *testing.T) {
 		Email:    "user@example.com",
 		Password: "my_password",
 	}
-	mockSessionId := "mockSessId"
+	const sessionId = "sessionId"
 
-	mockAuthRepo.EXPECT().GetByUserId(mockUser.Id).Return(mockSessionId, nil)
-	isAuth, err := useCase.Auth(mockUser.Id, mockSessionId)
+	mockAuthRepo.EXPECT().Get(sessionId).Return(mockUser.Id, nil)
+	isAuth, err := useCase.Auth(sessionId)
 
 	assert.Equal(t, nil, err)
 	assert.Equal(t, true, isAuth)
@@ -142,14 +144,10 @@ func TestLogOut_Success(t *testing.T) {
 		AuthRepo: mockAuthRepo,
 	}
 
-	mockUser := user_domain.User{
-		Id:       1,
-		Email:    "user@example.com",
-		Password: "my_password",
-	}
+	const sessionId = "sessionId"
 
-	mockAuthRepo.EXPECT().DeleteByUserId(mockUser.Id).Return(nil)
-	err := useCase.Logout(mockUser.Id)
+	mockAuthRepo.EXPECT().Delete(sessionId).Return(nil)
+	err := useCase.Logout(sessionId)
 
 	assert.Equal(t, nil, err)
 }
