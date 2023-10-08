@@ -63,6 +63,55 @@ func (useCase *Default) GetPopular(requiredNumOfTracks int) ([]track.Response, e
 	return tracks[:requiredNumOfTracks], nil
 }
 
+func (useCase *Default) GetByAlbum(albumId uint64) ([]track.Response, error) {
+	trackIds, err := useCase.repoTrack.GetTrackIdsByAlbum(albumId)
+	if err != nil {
+		return nil, err
+	}
+
+	tracks := make([]track.Response, 0)
+	for _, trackId := range trackIds {
+		t, err := useCase.repoTrack.GetByTrackId(trackId)
+		if err != nil {
+			return nil, err
+		}
+		tracks = append(tracks, t)
+	}
+	return tracks, nil
+}
+
+func (useCase *Default) GetByArtist(artistId uint64) ([]track.Response, error) {
+	trackIds, err := useCase.repoTrack.GetTrackIdsByArtist(artistId)
+	if err != nil {
+		return nil, err
+	}
+	tracks := make([]track.Response, 0)
+	for _, trackId := range trackIds {
+		t, err := useCase.repoTrack.GetByTrackId(trackId)
+		if err != nil {
+			return nil, err
+		}
+		tracks = append(tracks, t)
+	}
+	return tracks, nil
+}
+
+func (useCase *Default) GetByPlaylist(artistId uint64) ([]track.Response, error) {
+	trackIds, err := useCase.repoTrack.GetTrackIdsByPlaylist(artistId)
+	if err != nil {
+		return nil, err
+	}
+	tracks := make([]track.Response, 0)
+	for _, trackId := range trackIds {
+		t, err := useCase.repoTrack.GetByTrackId(trackId)
+		if err != nil {
+			return nil, err
+		}
+		tracks = append(tracks, t)
+	}
+	return tracks, nil
+}
+
 //func (useCase *Default) GetFavourite(userId uint64) ([]track.Response, error) {
 //	tracks, err := useCase.repoTrack.GetByUserId(userId)
 //	if err != nil {
