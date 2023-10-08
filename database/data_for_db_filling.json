@@ -5,7 +5,7 @@
       "albums": [
         {
           "album_name": "Scarlet",
-          "album_release_date": "22.09.2023",
+          "album_release_date": "2023-09-22",
           "tracks": [
             "97",
             "Agora Hills",
@@ -33,7 +33,7 @@
       "albums": [
         {
           "album_name": "Dark Lane Demo Tapes",
-          "album_release_date": "01.05.2020",
+          "album_release_date": "2020-05-01",
           "tracks": [
             "Chicago Freestyle",
             "D4L (feat. Young Thug, Future)",
@@ -62,7 +62,7 @@
       "albums": [
         {
           "album_name": "Astroworld",
-          "album_release_date": "03.08.2018",
+          "album_release_date": "2018-08-03",
           "tracks": [
             "Stargazing",
             "NC-17 (feat. 21 Savage)",
