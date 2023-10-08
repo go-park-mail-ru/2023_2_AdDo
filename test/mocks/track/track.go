@@ -162,6 +162,21 @@ func (mr *MockRepositoryMockRecorder) GetByTrackId(trackId interface{}) *gomock.
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByTrackId", reflect.TypeOf((*MockRepository)(nil).GetByTrackId), trackId)
 }
 
+// GetPopular mocks base method.
+func (m *MockRepository) GetPopular(limit uint32) ([]track.Response, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetPopular", limit)
+	ret0, _ := ret[0].([]track.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetPopular indicates an expected call of GetPopular.
+func (mr *MockRepositoryMockRecorder) GetPopular(limit interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPopular", reflect.TypeOf((*MockRepository)(nil).GetPopular), limit)
+}
+
 // GetTrackIdsByAlbum mocks base method.
 func (m *MockRepository) GetTrackIdsByAlbum(albumId uint64) ([]uint64, error) {
 	m.ctrl.T.Helper()

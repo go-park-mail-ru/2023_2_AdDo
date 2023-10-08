@@ -34,6 +34,27 @@ func (db *Postgres) GetAll() ([]track.Response, error) {
 	return result, nil
 }
 
+func (db *Postgres) GetPopular(limit uint32) ([]track.Response, error) {
+	query := "select id, name, preview, content, play_count from track order by play_count desc limit $1"
+	rows, err := db.database.Query(query, limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	result := make([]track.Response, 0)
+	for rows.Next() {
+		var t track.Response
+		err = rows.Scan(&t.Id, &t.Name, &t.Preview, &t.Content, &t.PlayCount)
+		if err != nil {
+			return nil, err
+		}
+
+		result = append(result, t)
+	}
+	return result, nil
+}
+
 func (db *Postgres) getIds(query string, id uint64) ([]uint64, error) {
 	rows, err := db.database.Query(query, id)
 	if err != nil {

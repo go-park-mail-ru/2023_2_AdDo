@@ -5,7 +5,6 @@ import (
 	"main/internal/pkg/album"
 	"main/internal/pkg/artist"
 	"main/internal/pkg/track"
-	"sort"
 )
 
 type Default struct {
@@ -49,18 +48,26 @@ func (useCase *Default) GetAll() ([]track.Response, error) {
 	return tracks, nil
 }
 
-func (useCase *Default) GetPopular(requiredNumOfTracks int) ([]track.Response, error) {
-	tracks, err := useCase.GetAll()
+func (useCase *Default) GetPopular(limit uint32) ([]track.Response, error) {
+	tracks, err := useCase.repoTrack.GetPopular(limit)
 	if err != nil {
-		return nil, err
+		return nil, track.ErrNoTracks
 	}
-	sort.Slice(tracks, func(i, j int) bool {
-		return tracks[i].PlayCount > tracks[j].PlayCount
-	})
-	if len(tracks) <= requiredNumOfTracks {
-		return tracks, nil
+
+	for index, t := range tracks {
+		artists, err := useCase.repoArtist.GetByTrackId(t.Id)
+		if err != nil {
+			return nil, err
+		}
+		tracks[index].Artist = artists
+
+		albums, err := useCase.repoAlbum.GetByTrackId(t.Id)
+		if err != nil {
+			return nil, err
+		}
+		tracks[index].Album = albums
 	}
-	return tracks[:requiredNumOfTracks], nil
+	return tracks, nil
 }
 
 func (useCase *Default) getTracks(trackIds []uint64) ([]track.Response, error) {

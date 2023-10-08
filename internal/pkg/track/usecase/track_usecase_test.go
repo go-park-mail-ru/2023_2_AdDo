@@ -101,13 +101,39 @@ func TestGetPopular(t *testing.T) {
 		repoAlbum:  mockAlbumRepo,
 	}
 
+	tracks := []track.Response{
+		{
+			Id:        1,
+			Name:      "Track 1",
+			PlayCount: 100,
+		},
+		{
+			Id:        2,
+			Name:      "Track 2",
+			PlayCount: 20,
+		},
+		{
+			Id:        3,
+			Name:      "Track 3",
+			PlayCount: 10,
+		},
+	}
+	var limit uint32 = 3
+	mockTrackRepo.EXPECT().GetPopular(limit).Return(tracks, nil)
+	mockArtistRepo.EXPECT().GetByTrackId(uint64(1)).Return([]artist.Response{{Name: "Artist 1"}}, nil)
+	mockAlbumRepo.EXPECT().GetByTrackId(uint64(1)).Return([]album.Response{{Name: "Album 1"}}, nil)
+	mockArtistRepo.EXPECT().GetByTrackId(uint64(2)).Return([]artist.Response{{Name: "Artist 2"}}, nil)
+	mockAlbumRepo.EXPECT().GetByTrackId(uint64(2)).Return([]album.Response{{Name: "Album 2"}}, nil)
+	mockArtistRepo.EXPECT().GetByTrackId(uint64(3)).Return([]artist.Response{{Name: "Artist 3"}}, nil)
+	mockAlbumRepo.EXPECT().GetByTrackId(uint64(3)).Return([]album.Response{{Name: "Album 3"}}, nil)
+
 	expectedTracks := []track.Response{
 		{
 			Id:        1,
 			Name:      "Track 1",
 			Artist:    []artist.Response{{Name: "Artist 1"}},
 			Album:     []album.Response{{Name: "Album 1"}},
-			PlayCount: 10,
+			PlayCount: 100,
 		},
 		{
 			Id:        2,
@@ -121,29 +147,13 @@ func TestGetPopular(t *testing.T) {
 			Name:      "Track 3",
 			Artist:    []artist.Response{{Name: "Artist 3"}},
 			Album:     []album.Response{{Name: "Album 3"}},
-			PlayCount: 100,
+			PlayCount: 10,
 		},
 	}
 
-	mockTrackRepo.EXPECT().GetAll().Return(expectedTracks, nil)
-	mockArtistRepo.EXPECT().GetByTrackId(uint64(1)).Return([]artist.Response{{Name: "Artist 1"}}, nil)
-	mockAlbumRepo.EXPECT().GetByTrackId(uint64(1)).Return([]album.Response{{Name: "Album 1"}}, nil)
-	mockArtistRepo.EXPECT().GetByTrackId(uint64(2)).Return([]artist.Response{{Name: "Artist 2"}}, nil)
-	mockAlbumRepo.EXPECT().GetByTrackId(uint64(2)).Return([]album.Response{{Name: "Album 2"}}, nil)
-	mockArtistRepo.EXPECT().GetByTrackId(uint64(3)).Return([]artist.Response{{Name: "Artist 3"}}, nil)
-	mockAlbumRepo.EXPECT().GetByTrackId(uint64(3)).Return([]album.Response{{Name: "Album 3"}}, nil)
-
-	popularTracks, err := useCase.GetPopular(4)
+	popularTracks, err := useCase.GetPopular(limit)
 	assert.Nil(t, err)
-	assert.Equal(t, "Track 3", popularTracks[0].Name)
-	assert.Equal(t, uint64(100), popularTracks[0].PlayCount)
-	assert.Equal(t, "Artist 3", popularTracks[0].Artist[0].Name)
-	assert.Equal(t, "Album 3", popularTracks[0].Album[0].Name)
-
-	assert.Equal(t, "Track 2", popularTracks[1].Name)
-	assert.Equal(t, uint64(20), popularTracks[1].PlayCount)
-	assert.Equal(t, "Artist 2", popularTracks[1].Artist[0].Name)
-	assert.Equal(t, "Album 2", popularTracks[1].Album[0].Name)
+	assert.Equal(t, expectedTracks, popularTracks)
 }
 
 func TestGetByPlaylist(t *testing.T) {
@@ -167,8 +177,6 @@ func TestGetByPlaylist(t *testing.T) {
 		{
 			Id:        1,
 			Name:      "Track 1",
-			Artist:    make([]artist.Response, 0),
-			Album:     make([]album.Response, 0),
 			Preview:   "Preview 1",
 			Content:   "Content 1",
 			PlayCount: 10,
@@ -176,8 +184,6 @@ func TestGetByPlaylist(t *testing.T) {
 		{
 			Id:        2,
 			Name:      "Track 2",
-			Artist:    make([]artist.Response, 0),
-			Album:     make([]album.Response, 0),
 			Preview:   "Preview 2",
 			Content:   "Content 2",
 			PlayCount: 20,
@@ -217,6 +223,5 @@ func TestGetByPlaylist(t *testing.T) {
 
 	actual, err := useCase.GetByPlaylist(playlistId)
 	assert.Nil(t, err)
-	assert.Equal(t, expected[0], actual[0])
-	assert.Equal(t, expected[1], actual[1])
+	assert.Equal(t, expected, actual)
 }
