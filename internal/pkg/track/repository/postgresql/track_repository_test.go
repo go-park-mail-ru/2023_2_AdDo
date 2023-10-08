@@ -83,21 +83,23 @@ func TestTrackRepository_GetByTrackId(t *testing.T) {
 	}
 
 	expected := track.Response{
-		Id:        1,
-		Name:      "ArtistName",
-		Preview:   "Url to track preview",
-		Content:   "Url to song",
-		PlayCount: 10,
+		Id:          1,
+		Name:        "ArtistName",
+		Preview:     "Url to track preview",
+		Content:     "Url to song",
+		PlayCount:   10,
+		ReleaseDate: "2023-10-09",
 	}
 
-	result := sqlmock.NewRows([]string{"id", "name", "preview", "content", "playcount"}).
-		AddRow(expected.Id, expected.Name, expected.Preview, expected.Content, expected.PlayCount)
+	result := sqlmock.NewRows([]string{"id", "name", "preview", "content", "play_count", "release_date"}).
+		AddRow(expected.Id, expected.Name, expected.Preview, expected.Content, expected.PlayCount, expected.ReleaseDate)
+	query := "select id, name, preview, content, play_count, release_date from track"
 	var trackId uint64 = 1
-	mock.ExpectQuery("select id, name, preview, content, play_count from track").WithArgs(trackId).WillReturnRows(result)
+	mock.ExpectQuery(query).WithArgs(trackId).WillReturnRows(result)
 
 	received, err := repo.GetByTrackId(trackId)
 	if err != nil {
-		t.Errorf("Error getting track ids by artist: %v", err)
+		t.Errorf("Error getting track info: %v", err)
 	}
 	assert.Equal(t, expected, received)
 
