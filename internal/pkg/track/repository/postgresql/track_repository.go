@@ -83,10 +83,10 @@ func (db *Postgres) GetTrackIdsByPlaylist(playlistId uint64) ([]uint64, error) {
 }
 
 func (db *Postgres) GetByTrackId(trackId uint64) (track.Response, error) {
-	query := "select id, name, preview, content, play_count from track where id = $1"
+	query := "select id, name, preview, content, play_count, release_date from track where id = $1"
 
 	var t track.Response
-	err := db.database.QueryRow(query, trackId).Scan(&t.Id, &t.Name, &t.Preview, &t.Content, &t.PlayCount)
+	err := db.database.QueryRow(query, trackId).Scan(&t.Id, &t.Name, &t.Preview, &t.Content, &t.PlayCount, &t.ReleaseDate)
 	if err != nil {
 		var empty track.Response
 		return empty, err
