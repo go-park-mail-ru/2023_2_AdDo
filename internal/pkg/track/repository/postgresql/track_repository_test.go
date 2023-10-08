@@ -44,7 +44,7 @@ func TestTrackRepository_getTracks(t *testing.T) {
 	}
 }
 
-func TestTrackRepository_GetTrackIdsByAlbum(t *testing.T) {
+func TestTrackRepository_getIds(t *testing.T) {
 	db, mock, err := sqlmock.New()
 	if err != nil {
 		t.Fatalf("Failed to create mock database: %v", err)
@@ -56,64 +56,13 @@ func TestTrackRepository_GetTrackIdsByAlbum(t *testing.T) {
 	}
 
 	result := sqlmock.NewRows([]string{"track_id"}).AddRow(1).AddRow(2).AddRow(3)
+	query := "select track_id from album_track"
 	var albumId uint64 = 1
-	mock.ExpectQuery("select track_id from album_track").WithArgs(albumId).WillReturnRows(result)
+	mock.ExpectQuery(query).WithArgs(albumId).WillReturnRows(result)
 
-	received, err := repo.GetTrackIdsByAlbum(albumId)
+	received, err := repo.getIds(query, albumId)
 	if err != nil {
-		t.Errorf("Error getting track ids by album: %v", err)
-	}
-	assert.Equal(t, []uint64{1, 2, 3}, received)
-
-	if err := mock.ExpectationsWereMet(); err != nil {
-		t.Errorf("Unfulfilled expectations: %v", err)
-	}
-}
-
-func TestTrackRepository_GetTrackIdsByArtist(t *testing.T) {
-	db, mock, err := sqlmock.New()
-	if err != nil {
-		t.Fatalf("Failed to create mock database: %v", err)
-	}
-	defer db.Close()
-
-	repo := Postgres{
-		database: db,
-	}
-
-	result := sqlmock.NewRows([]string{"track_id"}).AddRow(1).AddRow(2).AddRow(3)
-	var artistId uint64 = 1
-	mock.ExpectQuery("select track_id from artist_track").WithArgs(artistId).WillReturnRows(result)
-
-	received, err := repo.GetTrackIdsByArtist(artistId)
-	if err != nil {
-		t.Errorf("Error getting track ids by artist: %v", err)
-	}
-	assert.Equal(t, []uint64{1, 2, 3}, received)
-
-	if err := mock.ExpectationsWereMet(); err != nil {
-		t.Errorf("Unfulfilled expectations: %v", err)
-	}
-}
-
-func TestTrackRepository_GetTrackIdsByPlaylist(t *testing.T) {
-	db, mock, err := sqlmock.New()
-	if err != nil {
-		t.Fatalf("Failed to create mock database: %v", err)
-	}
-	defer db.Close()
-
-	repo := Postgres{
-		database: db,
-	}
-
-	result := sqlmock.NewRows([]string{"track_id"}).AddRow(1).AddRow(2).AddRow(3)
-	var playlistId uint64 = 1
-	mock.ExpectQuery("select track_id from playlist_track").WithArgs(playlistId).WillReturnRows(result)
-
-	received, err := repo.GetTrackIdsByPlaylist(playlistId)
-	if err != nil {
-		t.Errorf("Error getting track ids by artist: %v", err)
+		t.Errorf("Error getting track ids: %v", err)
 	}
 	assert.Equal(t, []uint64{1, 2, 3}, received)
 
