@@ -19,28 +19,31 @@ type ArtistAlbumResponse struct {
 }
 
 type Track struct {
-	Id        uint64
-	Name      string
-	Artist    []uint64
-	Album     []uint64
-	Preview   string
-	Content   string
-	PlayCount uint64
+	Id          uint64
+	Name        string
+	Artist      []uint64
+	Album       []uint64
+	Preview     string
+	Content     string
+	PlayCount   uint64
+	ReleaseDate string
 }
 
 type Response struct {
-	Id        uint64
-	Name      string
-	Artist    []artist.Response
-	Album     []album.Response
-	Preview   string
-	Content   string
-	PlayCount uint64
+	Id          uint64
+	Name        string
+	Artist      []artist.Response
+	Album       []album.Response
+	Preview     string
+	Content     string
+	PlayCount   uint64
+	ReleaseDate string
 }
 
 type UseCase interface {
 	GetAll() ([]Response, error)
 	GetPopular(limit uint32) ([]Response, error)
+	GetLatest(limit uint32) ([]Response, error)
 	GetByAlbum(albumId uint64) ([]Response, error)
 	GetByArtist(artistId uint64) ([]Response, error)
 	GetByPlaylist(playlistId uint64) ([]Response, error)
@@ -50,6 +53,7 @@ type UseCase interface {
 type Repository interface {
 	GetAll() ([]Response, error)
 	GetPopular(limit uint32) ([]Response, error)
+	GetLatest(limit uint32) ([]Response, error)
 	GetTrackIdsByAlbum(albumId uint64) ([]uint64, error)
 	GetTrackIdsByArtist(artistId uint64) ([]uint64, error)
 	GetTrackIdsByPlaylist(playlistId uint64) ([]uint64, error)
