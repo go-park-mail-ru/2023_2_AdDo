@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-func TestTrackRepository_GetAll(t *testing.T) {
+func TestTrackRepository_getTracks(t *testing.T) {
 	db, mock, err := sqlmock.New()
 	if err != nil {
 		t.Fatalf("Failed to create mock database: %v", err)
@@ -19,20 +19,20 @@ func TestTrackRepository_GetAll(t *testing.T) {
 	}
 
 	expected := []track.Response{{
-		Id:        1,
-		Name:      "ArtistName",
-		Preview:   "Url to track preview",
-		Content:   "Url to song",
-		PlayCount: 10,
+		Id:          1,
+		Name:        "ArtistName",
+		Preview:     "Url to track preview",
+		Content:     "Url to song",
+		PlayCount:   10,
+		ReleaseDate: "2023-10-09",
 	}}
 
-	profileTable := sqlmock.NewRows([]string{"id", "name", "preview", "content", "playcount"}).
-		AddRow(expected[0].Id, expected[0].Name, expected[0].Preview, expected[0].Content, expected[0].PlayCount)
+	result := sqlmock.NewRows([]string{"id", "name", "preview", "content", "play_count", "release_date"}).
+		AddRow(expected[0].Id, expected[0].Name, expected[0].Preview, expected[0].Content, expected[0].PlayCount, expected[0].ReleaseDate)
+	query := "select id, name, preview, content, play_count, release_date from track"
+	mock.ExpectQuery(query).WillReturnRows(result)
 
-	mock.ExpectQuery("select id, name, preview, content, play_count from track").
-		WillReturnRows(profileTable)
-
-	received, err := repo.GetAll()
+	received, err := repo.getTracks(query, 0)
 	if err != nil {
 		t.Errorf("Error getting all tracks: %v", err)
 	}

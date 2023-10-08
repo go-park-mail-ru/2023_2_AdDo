@@ -13,29 +13,7 @@ func NewPostgres(db *sql.DB) *Postgres {
 	return &Postgres{database: db}
 }
 
-func (db *Postgres) GetAll() ([]track.Response, error) {
-	query := "select id, name, preview, content, play_count from track"
-	rows, err := db.database.Query(query)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	result := make([]track.Response, 0)
-	for rows.Next() {
-		var t track.Response
-		err = rows.Scan(&t.Id, &t.Name, &t.Preview, &t.Content, &t.PlayCount)
-		if err != nil {
-			return nil, err
-		}
-
-		result = append(result, t)
-	}
-	return result, nil
-}
-
-func (db *Postgres) GetPopular(limit uint32) ([]track.Response, error) {
-	query := "select id, name, preview, content, play_count from track order by play_count desc limit $1"
+func (db *Postgres) getTracks(query string, limit uint32) ([]track.Response, error) {
 	rows, err := db.database.Query(query, limit)
 	if err != nil {
 		return nil, err
@@ -45,7 +23,7 @@ func (db *Postgres) GetPopular(limit uint32) ([]track.Response, error) {
 	result := make([]track.Response, 0)
 	for rows.Next() {
 		var t track.Response
-		err = rows.Scan(&t.Id, &t.Name, &t.Preview, &t.Content, &t.PlayCount)
+		err = rows.Scan(&t.Id, &t.Name, &t.Preview, &t.Content, &t.PlayCount, &t.ReleaseDate)
 		if err != nil {
 			return nil, err
 		}
@@ -53,6 +31,21 @@ func (db *Postgres) GetPopular(limit uint32) ([]track.Response, error) {
 		result = append(result, t)
 	}
 	return result, nil
+}
+
+func (db *Postgres) GetAll() ([]track.Response, error) {
+	query := "select id, name, preview, content, play_count, release_date from track"
+	return db.getTracks(query, 0)
+}
+
+func (db *Postgres) GetPopular(limit uint32) ([]track.Response, error) {
+	query := "select id, name, preview, content, play_count, release_date from track order by play_count desc limit $1"
+	return db.getTracks(query, limit)
+}
+
+func (db *Postgres) GetLatest(limit uint32) ([]track.Response, error) {
+	query := "select id, name, preview, content, play_count, release_date from track order by release_date desc limit $1"
+	return db.getTracks(query, limit)
 }
 
 func (db *Postgres) getIds(query string, id uint64) ([]uint64, error) {
