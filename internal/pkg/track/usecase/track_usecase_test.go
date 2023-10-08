@@ -145,3 +145,78 @@ func TestGetPopular(t *testing.T) {
 	assert.Equal(t, "Artist 2", popularTracks[1].Artist[0].Name)
 	assert.Equal(t, "Album 2", popularTracks[1].Album[0].Name)
 }
+
+func TestGetByPlaylist(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockTrackRepo := track_mock.NewMockRepository(ctrl)
+	mockArtistRepo := artist_mock.NewMockRepository(ctrl)
+	mockAlbumRepo := album_mock.NewMockRepository(ctrl)
+
+	useCase := Default{
+		repoTrack:  mockTrackRepo,
+		repoArtist: mockArtistRepo,
+		repoAlbum:  mockAlbumRepo,
+	}
+
+	playlistId := uint64(1)
+	trackIds := []uint64{1, 2}
+
+	tracks := []track.Response{
+		{
+			Id:        1,
+			Name:      "Track 1",
+			Artist:    make([]artist.Response, 0),
+			Album:     make([]album.Response, 0),
+			Preview:   "Preview 1",
+			Content:   "Content 1",
+			PlayCount: 10,
+		},
+		{
+			Id:        2,
+			Name:      "Track 2",
+			Artist:    make([]artist.Response, 0),
+			Album:     make([]album.Response, 0),
+			Preview:   "Preview 2",
+			Content:   "Content 2",
+			PlayCount: 20,
+		},
+	}
+
+	mockTrackRepo.EXPECT().GetTrackIdsByPlaylist(playlistId).Return(trackIds, nil)
+
+	mockTrackRepo.EXPECT().GetByTrackId(trackIds[0]).Return(tracks[0], nil)
+	mockTrackRepo.EXPECT().GetByTrackId(trackIds[1]).Return(tracks[1], nil)
+
+	mockArtistRepo.EXPECT().GetByTrackId(trackIds[0]).Return([]artist.Response{{Name: "Artist 1"}}, nil)
+	mockArtistRepo.EXPECT().GetByTrackId(trackIds[1]).Return([]artist.Response{{Name: "Artist 2"}}, nil)
+	mockAlbumRepo.EXPECT().GetByTrackId(trackIds[0]).Return([]album.Response{{Name: "Album 1"}}, nil)
+	mockAlbumRepo.EXPECT().GetByTrackId(trackIds[1]).Return([]album.Response{{Name: "Album 2"}}, nil)
+
+	expected := []track.Response{
+		{
+			Id:        1,
+			Name:      "Track 1",
+			Artist:    []artist.Response{{Name: "Artist 1"}},
+			Album:     []album.Response{{Name: "Album 1"}},
+			Preview:   "Preview 1",
+			Content:   "Content 1",
+			PlayCount: 10,
+		},
+		{
+			Id:        2,
+			Name:      "Track 2",
+			Artist:    []artist.Response{{Name: "Artist 2"}},
+			Album:     []album.Response{{Name: "Album 2"}},
+			Preview:   "Preview 2",
+			Content:   "Content 2",
+			PlayCount: 20,
+		},
+	}
+
+	actual, err := useCase.GetByPlaylist(playlistId)
+	assert.Nil(t, err)
+	assert.Equal(t, expected[0], actual[0])
+	assert.Equal(t, expected[1], actual[1])
+}
