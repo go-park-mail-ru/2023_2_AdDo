@@ -63,21 +63,37 @@ func (useCase *Default) GetPopular(requiredNumOfTracks int) ([]track.Response, e
 	return tracks[:requiredNumOfTracks], nil
 }
 
-func (useCase *Default) GetByAlbum(albumId uint64) ([]track.Response, error) {
-	trackIds, err := useCase.repoTrack.GetTrackIdsByAlbum(albumId)
-	if err != nil {
-		return nil, err
-	}
-
+func (useCase *Default) getTracks(trackIds []uint64) ([]track.Response, error) {
 	tracks := make([]track.Response, 0)
 	for _, trackId := range trackIds {
 		t, err := useCase.repoTrack.GetByTrackId(trackId)
 		if err != nil {
 			return nil, err
 		}
+
+		artists, err := useCase.repoArtist.GetByTrackId(t.Id)
+		if err != nil {
+			return nil, err
+		}
+		t.Artist = artists
+
+		albums, err := useCase.repoAlbum.GetByTrackId(t.Id)
+		if err != nil {
+			return nil, err
+		}
+		t.Album = albums
+
 		tracks = append(tracks, t)
 	}
 	return tracks, nil
+}
+
+func (useCase *Default) GetByAlbum(albumId uint64) ([]track.Response, error) {
+	trackIds, err := useCase.repoTrack.GetTrackIdsByAlbum(albumId)
+	if err != nil {
+		return nil, err
+	}
+	return useCase.getTracks(trackIds)
 }
 
 func (useCase *Default) GetByArtist(artistId uint64) ([]track.Response, error) {
@@ -85,15 +101,7 @@ func (useCase *Default) GetByArtist(artistId uint64) ([]track.Response, error) {
 	if err != nil {
 		return nil, err
 	}
-	tracks := make([]track.Response, 0)
-	for _, trackId := range trackIds {
-		t, err := useCase.repoTrack.GetByTrackId(trackId)
-		if err != nil {
-			return nil, err
-		}
-		tracks = append(tracks, t)
-	}
-	return tracks, nil
+	return useCase.getTracks(trackIds)
 }
 
 func (useCase *Default) GetByPlaylist(artistId uint64) ([]track.Response, error) {
@@ -101,15 +109,7 @@ func (useCase *Default) GetByPlaylist(artistId uint64) ([]track.Response, error)
 	if err != nil {
 		return nil, err
 	}
-	tracks := make([]track.Response, 0)
-	for _, trackId := range trackIds {
-		t, err := useCase.repoTrack.GetByTrackId(trackId)
-		if err != nil {
-			return nil, err
-		}
-		tracks = append(tracks, t)
-	}
-	return tracks, nil
+	return useCase.getTracks(trackIds)
 }
 
 //func (useCase *Default) GetFavourite(userId uint64) ([]track.Response, error) {
