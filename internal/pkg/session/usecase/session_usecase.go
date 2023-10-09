@@ -2,7 +2,6 @@ package session_usecase
 
 import (
 	"main/internal/pkg/session"
-	user_domain "main/internal/pkg/user"
 )
 
 type Default struct {
@@ -15,10 +14,11 @@ func NewDefault(repository session.Repository) Default {
 	}
 }
 
-func (s *Default) CheckSession(sessionId string, userId uint64) (bool, error) {
-	id, err := s.repoSession.GetByUserId(userId)
+func (s *Default) CheckSession(sessionId string) (bool, error) {
+	_, err := s.repoSession.Get(sessionId)
 	if err != nil {
-		return false, user_domain.ErrSessionDoesNotExist
+		return false, session.ErrSessionDoesNotExist
 	}
-	return sessionId == id, nil
+
+	return true, nil
 }

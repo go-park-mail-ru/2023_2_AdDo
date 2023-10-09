@@ -36,6 +36,7 @@ func (useCase *Default) addArtistAndAlbum(tracks []track.Response) ([]track.Resp
 	}
 	return tracks, nil
 }
+<<<<<<< HEAD
 
 func (useCase *Default) GetAll() ([]track.Response, error) {
 	tracks, err := useCase.repoTrack.GetAll()
@@ -107,3 +108,5 @@ func (useCase *Default) GetByPlaylist(artistId uint64) ([]track.Response, error)
 //
 //	return tracks, nil
 //}
+=======
+>>>>>>> PK-2

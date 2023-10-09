@@ -1,29 +1,46 @@
 version: '3.0'
 
 services:
-  
-  service-db:
+  service-db-redis:
+    restart: always
+    image: redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  service-db-postgres:
     restart: always
     image: postgres:14
     env_file: ./database/db.env
     ports:
       - "5432:5432"
     volumes:
-      - ./database/db_schema.sql:/db_schema.sql
-      - ./database/data_init.sql:/data_init.sql
-      - ./database/startup.sh:/docker-entrypoint-initdb.d/startup.sh
+      - ./database/migration_1.sql:/docker-entrypoint-initdb.d/migration_1.sql
+      - ./database/migration_2.sql:/docker-entrypoint-initdb.d/migration_2.sql
       - ~/db-data:/var/lib/postgresql/data
-  
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U musicon" ]
+      interval: 10s
+      retries: 3
+      timeout: 5s
+
   musicon:
     build:
       context: .
       dockerfile: Dockerfile
     depends_on:
-      - service-db
+      service-db-postgres:
+        condition: service_healthy
+      service-db-redis:
+        condition: service_healthy
     ports:
       - "8080:8080"
     environment:
-      - POSTGRES_QUERY=host=service-db port=5432 user=musicon password=musicon dbname=musicon sslmode=disable
+      - DATABASE_URL=postgres://musicon:musicon@service-db-postgres:5432/musicon
 
   wait-musicon:
     image: alpine
