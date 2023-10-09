@@ -28,11 +28,9 @@ create table if not exists album (
 
 create table if not exists track(
     id serial primary key,
-    name varchar(50) not null,
+    name varchar(32) not null,
     preview varchar(1024),
-    content varchar(1024),
-    play_count int default 0,
-    release_date date
+    content varchar(1024)
     -- song_text text
 );
 

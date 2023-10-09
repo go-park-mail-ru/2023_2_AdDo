@@ -19,14 +19,12 @@ type ArtistAlbumResponse struct {
 }
 
 type Track struct {
-	Id          uint64
-	Name        string
-	Artist      []uint64
-	Album       []uint64
-	Preview     string
-	Content     string
-	PlayCount   uint64
-	ReleaseDate string
+	Id      uint64
+	Name    string
+	Artist  []uint64
+	Album   []uint64
+	Preview string
+	Content string
 }
 
 type Response struct {
@@ -36,26 +34,17 @@ type Response struct {
 	Album   []album.Response `json:"Album"`
 	Preview string `json:"Preview" example:"TrackPreview"`
 	Content string `json:"Content" example:"TrackContent"`
-  PlayCount   uint64
-	ReleaseDate string
 }
 
 type UseCase interface {
+	//Add(track Track) (uint64, error)
 	GetAll() ([]Response, error)
-	GetPopular(limit uint32) ([]Response, error)
-	GetLatest(limit uint32) ([]Response, error)
-	GetByAlbum(albumId uint64) ([]Response, error)
-	GetByArtist(artistId uint64) ([]Response, error)
-	GetByPlaylist(playlistId uint64) ([]Response, error)
+	//GetPopular() ([]Response, error)
+	//GetFavourite(userId uint64) ([]Response, error)
 }
 
 type Repository interface {
 	GetAll() ([]Response, error)
-	GetPopular(limit uint32) ([]Response, error)
-	GetLatest(limit uint32) ([]Response, error)
-	GetByAlbum(albumId uint64) ([]Response, error)
-	GetByArtist(artistId uint64) ([]Response, error)
-	GetByPlaylist(playlistId uint64) ([]Response, error)
 }
 
 var (
