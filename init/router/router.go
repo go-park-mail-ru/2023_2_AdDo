@@ -30,7 +30,7 @@ import (
 
 //	@SecurityDefinitions.apikey	csrfToken
 //	@in							header
-//	@name						X-CSRF-Token
+//	@name						X-Csrf-Token
 
 // @host		musicon.space
 // @BasePath	/api/v1
@@ -41,8 +41,10 @@ func New(userHandler user_delivery.UserHandler, trackHandler track_delivery.Trac
 	router.Handle("/api/v1/sign_up", common_handler.Handler{H: userHandler.SignUp}).Methods("POST")
 	router.Handle("/api/v1/login", common_handler.Handler{H: userHandler.Login}).Methods("POST")
 	router.Handle("/api/v1/logout", common_handler.Handler{H: userHandler.LogOut}).Methods("POST")
+	router.Handle("/api/v1/listen", common_handler.Handler{H: userHandler.Listen}).Methods("POST")
 
 	router.Handle("/api/v1/auth", common_handler.Handler{H: userHandler.Auth}).Methods("GET")
+	router.Handle("/api/v1/me", common_handler.Handler{H: userHandler.Me}).Methods("GET")
 	router.Handle("/api/v1/music", common_handler.Handler{H: trackHandler.Music}).Methods("GET")
 
 	corsMiddleware := handlers.CORS(

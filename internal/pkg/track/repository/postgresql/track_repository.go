@@ -1,21 +1,22 @@
 package track_repository
 
 import (
-	"database/sql"
+	"context"
+	"github.com/jackc/pgx/v5"
 	"main/internal/pkg/track"
 )
 
 type Postgres struct {
-	database *sql.DB
+	database *pgx.Conn
 }
 
-func NewPostgres(db *sql.DB) *Postgres {
+func NewPostgres(db *pgx.Conn) *Postgres {
 	return &Postgres{database: db}
 }
 
 func (db *Postgres) GetAll() ([]track.Response, error) {
 	query := "select id, name, preview, content from track"
-	rows, err := db.database.Query(query)
+	rows, err := db.database.Query(context.Background(), query)
 	if err != nil {
 		return nil, err
 	}
