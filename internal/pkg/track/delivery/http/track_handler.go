@@ -6,7 +6,6 @@ import (
 	"main/internal/pkg/session"
 	"main/internal/pkg/track"
 	"net/http"
-	"strconv"
 )
 
 type TrackHandler struct {
@@ -20,6 +19,7 @@ func NewHandler(track track.UseCase, session session.UseCase) TrackHandler {
 		sessionUseCase: session,
 	}
 }
+
 
 //{
 //	"Id":1,
@@ -38,6 +38,17 @@ func NewHandler(track track.UseCase, session session.UseCase) TrackHandler {
 //	"Content":"http://82.146.45.164:9000/audio/Travis_Scott/albums/Astroworld/Stargazing.mp3"
 //}
 
+//	@Description	return all tracks
+//	@Tags			track
+//	@Produce		json
+//	@Param			id	query	int	false	"user id"
+//	@Security		cookieAuth
+//	@Security		csrfToken
+//	@Success		200	{array}		track.Response
+//	@Failure		400	{string}	errMsg
+//	@Failure		401	{string}	errMsg	
+//	@Failure		500	{string}	errMsg	
+//	@Router			/music [get]
 func (handler *TrackHandler) Music(w http.ResponseWriter, r *http.Request) error {
 	tracks, err := handler.trackUseCase.GetAll()
 	if err != nil {
@@ -48,37 +59,8 @@ func (handler *TrackHandler) Music(w http.ResponseWriter, r *http.Request) error
 	if err != nil {
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}
-
-	cookie, err := response.GetCookie(r)
-	if err != nil {
-		w.WriteHeader(http.StatusUnauthorized)
-		return nil
-	}
-
-	userId, err := strconv.Atoi(r.URL.Query().Get("id"))
-	if err != nil {
-		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
-	}
-
-	isAuth, err := handler.sessionUseCase.CheckSession(cookie, uint64(userId))
-
-	if err != nil || !isAuth {
-		return common_handler.StatusError{Code: http.StatusUnauthorized, Err: err}
-	}
 	// TODO На текущий момент мы не возвращаем пользовательскую музыку, потому что нет смысла возвращать то, что у пользователя в добавленных
 	// TODO Поэтому к первому рк можно сделать так, что мы возвращаем просто общую музыку
 	// TODO После того как придумаем простейшую систему рекомендаций, будет смысл возвращать что-то из пользовательских подборок
-	//userTracks, err := handler.trackUseCase.GetFavourite(uint64(userId))
-	//if err != nil {
-	//	return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
-	//}
-
-	//err = response.RenderJSON(w, userTracks)
-	//return err
-
-	// track_repo
-	// track_useCase
-	// track_delivery
-	// common
 	return nil
 }

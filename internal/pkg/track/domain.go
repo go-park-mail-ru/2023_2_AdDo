@@ -30,13 +30,13 @@ type Track struct {
 }
 
 type Response struct {
-	Id          uint64
-	Name        string
-	Artist      []artist.Response
-	Album       []album.Response
-	Preview     string
-	Content     string
-	PlayCount   uint64
+	Id      uint64 `json:"Id" example:"1"`
+	Name    string `json:"Name" example:"TrackName"`
+	Artist  []artist.Response `json:"Artist"`
+	Album   []album.Response `json:"Album"`
+	Preview string `json:"Preview" example:"TrackPreview"`
+	Content string `json:"Content" example:"TrackContent"`
+  PlayCount   uint64
 	ReleaseDate string
 }
 

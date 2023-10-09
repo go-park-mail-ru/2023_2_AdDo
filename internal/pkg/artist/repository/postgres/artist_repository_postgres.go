@@ -31,7 +31,6 @@ func (repo *Postgres) GetByTrackId(trackId uint64) ([]artist.Response, error) {
 		}
 		result = append(result, artist)
 	}
-	//log.Println(result)
 	return result, nil
 }
 

@@ -17,12 +17,13 @@ func NewWithStatefulSessions(userRepo user_domain.Repository, authRepo session.R
 	}
 }
 
-func (useCase *WithStatefulSessions) Register(user user_domain.User) (uint64, error) {
-	id, err := useCase.UserRepo.Create(user)
+func (useCase *WithStatefulSessions) Register(user user_domain.User) error {
+	err := useCase.UserRepo.Create(user)
 	if err != nil {
-		return 0, user_domain.ErrUserAlreadyExist
+		return err
 	}
-	return id, nil
+
+	return nil
 }
 
 func (useCase *WithStatefulSessions) Login(email, password string) (uint64, string, error) {
