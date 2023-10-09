@@ -7,6 +7,7 @@ ENV GOOS linux
 
 COPY cmd ./cmd
 COPY internal ./internal
+COPY api ./api
 COPY init ./init
 COPY go.mod go.sum ./
 

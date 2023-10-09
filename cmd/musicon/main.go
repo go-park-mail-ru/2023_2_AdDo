@@ -1,17 +1,15 @@
 package main
 
 import (
-	"github.com/gorilla/handlers"
-	"github.com/gorilla/mux"
+	"context"
 	_ "github.com/lib/pq"
-	"log"
-	init_db "main/init/database"
+	logger_init "main/init/logger"
+	init_db "main/init/postgres_db"
+	init_redis "main/init/redis_db"
 	router_init "main/init/router"
 	album_repository "main/internal/pkg/album/repository/postgres"
 	artist_repository "main/internal/pkg/artist/repository/postgres"
-	common_middleware "main/internal/pkg/common/middleware"
-	"main/internal/pkg/session"
-	session_repository "main/internal/pkg/session/repository/postgresql"
+	session_repository_redis "main/internal/pkg/session/repository/redis"
 	session_usecase "main/internal/pkg/session/usecase"
 	track_delivery "main/internal/pkg/track/delivery/http"
 	track_repository "main/internal/pkg/track/repository/postgresql"
@@ -22,43 +20,41 @@ import (
 	"net/http"
 )
 
-const EnvPostgresQueryName = "POSTGRES_QUERY"
+const EnvPostgresQueryName = "DATABASE_URL"
 const ServerPort = ":8080"
 
 func main() {
-	db, err := init_db.InitPostgres(EnvPostgresQueryName)
+	logger := logger_init.LogRusInit()
+
+	postgres, err := init_db.InitPostgres(EnvPostgresQueryName)
 	if err != nil {
-		log.Fatalf("error database connecting %v", err)
+		logger.Fatalf("error postgres_db connecting %v", err)
 	}
-	defer db.Close()
+	defer postgres.Close(context.Background())
 
-	router := mux.NewRouter()
+	redis, err := init_redis.InitRedis()
+	if err != nil {
+		logger.Fatalf("error redis_db connecting %v", err)
+	}
+	defer redis.Close()
 
-	sessionRepo := session_repository.NewPostgres(db)
-	userRepo := user_repository.NewPostgres(db)
-	trackRepo := track_repository.NewPostgres(db)
-	albumRepo := album_repository.NewPostgres(db)
-	artistRepo := artist_repository.NewPostgres(db)
-	log.Println("Repositories initialized")
+	sessionRepo := session_repository_redis.NewRedis(redis)
+	userRepo := user_repository.NewPostgres(postgres)
+	trackRepo := track_repository.NewPostgres(postgres)
+	albumRepo := album_repository.NewPostgres(postgres)
+	artistRepo := artist_repository.NewPostgres(postgres)
+	logger.Infoln("Repositories initialized")
 
 	sessionUseCase := session_usecase.NewDefault(sessionRepo)
 	userUseCase := user_usecase.NewWithStatefulSessions(userRepo, sessionRepo)
 	trackUseCase := track_usecase.NewDefault(trackRepo, &artistRepo, albumRepo)
-	log.Println("UseCases initialized")
+	logger.Infoln("UseCases initialized")
 
 	userHandler := user_delivery.NewHandler(&userUseCase)
 	trackHandler := track_delivery.NewHandler(&trackUseCase, &sessionUseCase)
-	log.Println("Deliveries initialized")
+	logger.Infoln("Deliveries initialized")
 
-	router = router_init.New(router, userHandler, trackHandler)
+	router := router_init.New(userHandler, trackHandler, logger)
 
-	routerCORS := handlers.CORS(
-		handlers.AllowedOrigins([]string{"http://82.146.45.164:8081"}),
-		handlers.AllowedMethods([]string{"POST", "GET", "PUT", "DELETE", "OPTIONS"}),
-		handlers.AllowedHeaders([]string{"Content-Type"}),
-		handlers.ExposedHeaders([]string{session.CookieName}),
-		handlers.AllowCredentials(),
-	)(router)
-
-	log.Fatal(http.ListenAndServe(ServerPort, common_middleware.Logging(routerCORS)))
+	logger.Fatalln(http.ListenAndServe(ServerPort, router))
 }

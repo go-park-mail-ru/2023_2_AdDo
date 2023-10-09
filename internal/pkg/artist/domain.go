@@ -9,9 +9,9 @@ type Artist struct {
 }
 
 type Response struct {
-	Id     uint64
-	Name   string
-	Avatar string
+	Id     uint64 `json:"Id" example:"1"`
+	Name   string `json:"Name" example:"ArtistName"`
+	Avatar string `json:"Avatar" example:"ArtistAvatar"`
 }
 
 type Repository interface {

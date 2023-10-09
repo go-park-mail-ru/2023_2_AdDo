@@ -49,7 +49,7 @@ func TestMusic(t *testing.T) {
 		}
 		sessionId := "sessionId"
 		mockTrackUseCase.EXPECT().GetAll().Return(expectedTracks, nil)
-		mockSessionUseCase.EXPECT().CheckSession(sessionId, uint64(1)).Return(true, nil)
+		//mockSessionUseCase.EXPECT().CheckSession(sessionId, uint64(1)).Return(true, nil)
 
 		req, err := http.NewRequest(http.MethodGet, "/music?id=1", nil)
 

@@ -46,7 +46,7 @@ with open("data_for_db_filling.json") as file:
     conf = json.load(file)
 
 
-with open("data_init.sql", "w") as file:
+with open("migration_2.sql", "w") as file:
     for artist in conf["artists"]:
         artist_name = artist["artist_name"]
 

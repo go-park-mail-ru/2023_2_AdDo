@@ -10,7 +10,7 @@ import (
 func TestArtistRepository_GetByTrackId(t *testing.T) {
 	db, mock, err := sqlmock.New()
 	if err != nil {
-		t.Fatalf("Failed to create mock database: %v", err)
+		t.Fatalf("Failed to create mock postgres_db: %v", err)
 	}
 	defer db.Close()
 
@@ -47,7 +47,7 @@ func TestArtistRepository_GetByTrackId(t *testing.T) {
 func TestArtistRepository_GetByAlbumId(t *testing.T) {
 	db, mock, err := sqlmock.New()
 	if err != nil {
-		t.Fatalf("Failed to create mock database: %v", err)
+		t.Fatalf("Failed to create mock postgres_db: %v", err)
 	}
 	defer db.Close()
 

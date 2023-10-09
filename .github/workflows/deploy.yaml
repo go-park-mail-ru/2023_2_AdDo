@@ -30,12 +30,12 @@ jobs:
       #   with:
       #     python-version: '3.10'
       # - name: Create db_init
-      #   run: python3 ./database/fill_db_script.py
+      #   run: python3 ./postgres_db/fill_db_script.py
       # - name: Upload db_init
       #   uses: actions/upload-artifact@v3
       #   with:
       #     name: db_init
-      #     path: ./database/
+      #     path: ./postgres_db/
 
   test:
     needs: build
@@ -73,7 +73,7 @@ jobs:
       #   uses: actions/download-artifact@v3
       #   with:
       #     name: db_init
-      #     path: ~/addo-backend/database
+      #     path: ~/addo-backend/postgres_db
       - name: Executing remote command
         uses: appleboy/ssh-action@master
         with:
