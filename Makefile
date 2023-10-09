@@ -30,23 +30,11 @@ database-clean:
 	@echo "Database cleaning..."
 	@-sudo rm -r ~/db-data
 
-#запуск интеграционных тестов на пустой базе данных
-docker-service-empty-db-test:
-	@make docker-service-start
-	@echo "Running tests with empty database..."
-	@python3 test/testsuite/test_empty.py
-
-#запуск интеграционных тестов на заполненной базе данных
-docker-service-filled-db-test:
-	@make database-clean
-	@make fill_database_mock_data
-	@make docker-service-start
-	@echo "Running tests with filled database..."
-	@python3 test/testsuite/test_filled.py
-
 # запуск интеграционных тестов
 docker-service-test:
-	@make docker-service-empty-db-test
+	@make hard_deploy
+	@echo "Running tests with empty database..."
+	@python3 test/testsuite/simple_case.py
 
 #генерируем скрипт для заполнения базы данных основными данными
 fill_database:
