@@ -24,7 +24,7 @@ services:
       - ~/db-data:/var/lib/postgresql/data
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U musicon" ]
-      interval: 30s
+      interval: 10s
       retries: 3
       timeout: 5s
 
