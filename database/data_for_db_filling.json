@@ -1,0 +1,93 @@
+{
+  "artists": [
+    {
+      "artist_name": "Doja Cat",
+      "albums": [
+        {
+          "album_name": "Scarlet",
+          "album_release_date": "2023-09-22",
+          "tracks": [
+            "97",
+            "Agora Hills",
+            "Attention",
+            "Balut",
+            "Can't Wait.mp3",
+            "Demons",
+            "Fuck The Girls",
+            "Go Off",
+            "Gun",
+            "Love Life",
+            "Often",
+            "Ouchies",
+            "Paint The Town Red",
+            "Shutcho",
+            "Skull And Bones",
+            "Wym Freestyle"
+          ]
+        }
+      ],
+      "singles": []
+    },
+    {
+      "artist_name": "Drake",
+      "albums": [
+        {
+          "album_name": "Dark Lane Demo Tapes",
+          "album_release_date": "2020-05-01",
+          "tracks": [
+            "Chicago Freestyle",
+            "D4L (feat. Young Thug, Future)",
+            "Deep Pockets",
+            "Demons (feat. Fivio Foreign)",
+            "Desires (feat. Future)",
+            "From Florida With Love",
+            "Landed",
+            "Losses",
+            "Not You Too (feat. Chris Brown)",
+            "Pain 1993 (feat. Playboi Carti)",
+            "Time Flies",
+            "Toosie Slide",
+            "War",
+            "When To Say When"
+          ]
+        }
+      ],
+      "singles": [
+        "Slime You Out (feat. SZA)",
+        "On The Radar Freestyle (feat. Central Cee)"
+      ]
+    },
+    {
+      "artist_name": "Travis Scott",
+      "albums": [
+        {
+          "album_name": "Astroworld",
+          "album_release_date": "2018-08-03",
+          "tracks": [
+            "Stargazing",
+            "NC-17 (feat. 21 Savage)",
+            "Houstonfornication",
+            "Coffee Bean",
+            "Astrothunder",
+            "Stop Trying To Be God",
+            "Wake Up",
+            "Can't Say",
+            "Carousel",
+            "5% Tint",
+            "Skeletons (feat. The Weekend)",
+            "No Bystanders (feat. Juice WRLD)",
+            "Yosemite",
+            "R.I.P. Screw (feat. Swae Lee)",
+            "Butterfly Effect",
+            "Sicko Mode (feat. Drake)",
+            "Who What! (feat. Quavo)"
+          ]
+        }
+      ],
+      "singles": [
+        "Escape Plan",
+        "Highest In The Room"
+      ]
+    }
+  ]
+}
