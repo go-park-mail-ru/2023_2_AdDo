@@ -1,27 +1,29 @@
 package init_postgres
 
 import (
-	"database/sql"
+	"context"
 	"fmt"
+	"github.com/jackc/pgx/v5"
 	"log"
 	"os"
 )
 
-func InitPostgres(env string) (*sql.DB, error) {
+func InitPostgres(env string) (*pgx.Conn, error) {
 	psqlInfo := os.Getenv(env)
 	log.Printf(psqlInfo)
 
-	db, err := sql.Open("postgres", psqlInfo)
-	if err != nil {
-		return nil, err
-	}
-	fmt.Println("Postgres database opened")
-
-	err = db.Ping()
+	conn, err := pgx.Connect(context.Background(), os.Getenv(env))
 	if err != nil {
 		return nil, err
 	}
 	fmt.Println("Postgres database successfully connected!")
 
-	return db, nil
+	err = conn.Ping(context.Background())
+
+	if err != nil {
+		return nil, err
+	}
+	fmt.Println("Postgres database pinged")
+
+	return conn, nil
 }

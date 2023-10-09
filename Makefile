@@ -28,16 +28,15 @@ mocks-clean:
 #очистка базы данных
 database-clean:
 	@echo "Database cleaning..."
-	@-rm -r ~/db-data
+	@-sudo rm -r ~/db-data
 
 #запуск интеграционных тестов на пустой базе данных
 docker-service-empty-db-test:
-	@make database-clean
 	@make docker-service-start
 	@echo "Running tests with empty database..."
 	@python3 test/testsuite/test_empty.py
 
-#запуск интеграционных тестов на пустой базе данных
+#запуск интеграционных тестов на заполненной базе данных
 docker-service-filled-db-test:
 	@make database-clean
 	@make fill_database_mock_data
@@ -74,7 +73,7 @@ clean:
 	@echo "Removing networks..."
 	@-docker network rm $$(docker network ls -q)
 	@echo "Removing volumes..."
-	@-docker-compose down --volumes
+	@-docker  compose down --volumes
 
 # Деплой без очистки данных - мы не теряем созданных пользователей и их лайки
 deploy:
@@ -83,8 +82,7 @@ deploy:
 
 #Деплой полностью сервиса без пользователей только с музыкой
 hard_deploy:
-	@make clean
 	@make database-clean
+	@make clean
 	@make fill_database
 	@make docker-service-start
-

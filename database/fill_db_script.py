@@ -51,7 +51,7 @@ singles = conf["singles"]
 
 artist_avatar_url = "/images/avatars/artists/" + artist_name.replace(" ", "_") + ".jpg"
 
-with open("data_init.sql", "w") as file:
+with open("migration_2.sql", "w") as file:
     file.write(create_artist_command(artist_name, artist_avatar_url) + '\n')
 
     for album in albums:
