@@ -9,17 +9,16 @@ import (
 
 type Redis struct {
 	database *redis.Client
-	ctx      context.Context
 }
 
-func NewRedis(db *redis.Client, ctx context.Context) *Redis {
-	return &Redis{database: db, ctx: ctx}
+func NewRedis(db *redis.Client) *Redis {
+	return &Redis{database: db}
 }
 
 func (redis *Redis) Create(userId uint64) (string, error) {
 	sessionId := uuid.New().String()
 
-	err := redis.database.Set(redis.ctx, sessionId, userId, session.TimeToLiveCookie).Err()
+	err := redis.database.Set(context.Background(), sessionId, userId, session.TimeToLiveCookie).Err()
 	if err != nil {
 		return "", err
 	}
@@ -28,7 +27,7 @@ func (redis *Redis) Create(userId uint64) (string, error) {
 }
 
 func (redis *Redis) Get(sessionId string) (uint64, error) {
-	userId, err := redis.database.Get(redis.ctx, sessionId).Uint64()
+	userId, err := redis.database.Get(context.Background(), sessionId).Uint64()
 	if err != nil {
 		return 0, err
 	}
@@ -37,7 +36,7 @@ func (redis *Redis) Get(sessionId string) (uint64, error) {
 }
 
 func (redis *Redis) Delete(sessionId string) error {
-	err := redis.database.Del(redis.ctx, sessionId).Err()
+	err := redis.database.Del(context.Background(), sessionId).Err()
 	if err != nil {
 		return err
 	}

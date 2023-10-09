@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	_ "github.com/lib/pq"
-	"log"
 	logger_init "main/init/logger"
 	init_db "main/init/postgres_db"
 	init_redis "main/init/redis_db"
@@ -21,26 +20,25 @@ import (
 	"net/http"
 )
 
-const EnvPostgresQueryName = "POSTGRES_QUERY"
+const EnvPostgresQueryName = "DATABASE_URL"
 const ServerPort = ":8080"
 
 func main() {
+	logger := logger_init.LogRusInit()
+
 	postgres, err := init_db.InitPostgres(EnvPostgresQueryName)
 	if err != nil {
-		log.Fatalf("error postgres_db connecting %v", err)
+		logger.Fatalf("error postgres_db connecting %v", err)
 	}
-	defer postgres.Close()
+	defer postgres.Close(context.Background())
 
-	ctx := context.Background()
-	redis, err := init_redis.InitRedis(ctx)
+	redis, err := init_redis.InitRedis()
 	if err != nil {
-		log.Fatalf("error redis_db connecting %v", err)
+		logger.Fatalf("error redis_db connecting %v", err)
 	}
 	defer redis.Close()
 
-	logger := logger_init.LogRusInit()
-
-	sessionRepo := session_repository_redis.NewRedis(redis, ctx)
+	sessionRepo := session_repository_redis.NewRedis(redis)
 	userRepo := user_repository.NewPostgres(postgres)
 	trackRepo := track_repository.NewPostgres(postgres)
 	albumRepo := album_repository.NewPostgres(postgres)
@@ -58,5 +56,5 @@ func main() {
 
 	router := router_init.New(userHandler, trackHandler, logger)
 
-	log.Fatal(http.ListenAndServe(ServerPort, router))
+	logger.Fatalln(http.ListenAndServe(ServerPort, router))
 }

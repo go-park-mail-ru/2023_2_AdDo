@@ -7,8 +7,8 @@ import (
 )
 
 type UserCredentials struct {
-	Email    string `json:"Email" example:"example@gmail.com"`
-	Password string `json:"Password" example:"password"`
+	Email    string `valid:"length(1|30), email, required" json:"Email" example:"example@gmail.com"`
+	Password string `valid:"length(6|30), required" json:"Password" example:"password"`
 }
 
 type User struct {
@@ -22,6 +22,14 @@ type User struct {
 
 func (u *User) Validate() error {
 	_, err := govalidator.ValidateStruct(u)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (uC *UserCredentials) Validate() error {
+	_, err := govalidator.ValidateStruct(uC)
 	if err != nil {
 		return err
 	}
