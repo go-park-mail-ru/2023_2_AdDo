@@ -20,12 +20,7 @@ func NewDefault(trackRepo track.Repository, artistRepo artist.Repository, albumR
 	}
 }
 
-func (useCase *Default) GetAll() ([]track.Response, error) {
-	tracks, err := useCase.repoTrack.GetAll()
-	if err != nil {
-		return nil, track.ErrNoTracks
-	}
-
+func (useCase *Default) addArtistAndAlbum(tracks []track.Response) ([]track.Response, error) {
 	for index, t := range tracks {
 		artists, err := useCase.repoArtist.GetByTrackId(t.Id)
 		if err != nil {
@@ -41,3 +36,74 @@ func (useCase *Default) GetAll() ([]track.Response, error) {
 	}
 	return tracks, nil
 }
+
+func (useCase *Default) GetAll() ([]track.Response, error) {
+	tracks, err := useCase.repoTrack.GetAll()
+	if err != nil {
+		return nil, track.ErrNoTracks
+	}
+	return useCase.addArtistAndAlbum(tracks)
+}
+
+func (useCase *Default) GetPopular(limit uint32) ([]track.Response, error) {
+	tracks, err := useCase.repoTrack.GetPopular(limit)
+	if err != nil {
+		return nil, track.ErrNoTracks
+	}
+	return useCase.addArtistAndAlbum(tracks)
+}
+
+func (useCase *Default) GetLatest(limit uint32) ([]track.Response, error) {
+	tracks, err := useCase.repoTrack.GetLatest(limit)
+	if err != nil {
+		return nil, track.ErrNoTracks
+	}
+	return useCase.addArtistAndAlbum(tracks)
+}
+
+func (useCase *Default) GetByAlbum(albumId uint64) ([]track.Response, error) {
+	tracks, err := useCase.repoTrack.GetByAlbum(albumId)
+	if err != nil {
+		return nil, track.ErrNoTracks
+	}
+	return useCase.addArtistAndAlbum(tracks)
+}
+
+func (useCase *Default) GetByArtist(artistId uint64) ([]track.Response, error) {
+	tracks, err := useCase.repoTrack.GetByArtist(artistId)
+	if err != nil {
+		return nil, track.ErrNoTracks
+	}
+	return useCase.addArtistAndAlbum(tracks)
+}
+
+func (useCase *Default) GetByPlaylist(artistId uint64) ([]track.Response, error) {
+	tracks, err := useCase.repoTrack.GetByPlaylist(artistId)
+	if err != nil {
+		return nil, track.ErrNoTracks
+	}
+	return useCase.addArtistAndAlbum(tracks)
+}
+
+//func (useCase *Default) GetFavourite(userId uint64) ([]track.Response, error) {
+//	tracks, err := useCase.repoTrack.GetByUserId(userId)
+//	if err != nil {
+//		return nil, track.ErrNoTracks
+//	}
+//
+//	for _, t := range tracks {
+//		artists, err := useCase.repoArtist.GetByTrackId(t.Id)
+//		if err != nil {
+//			return nil, err
+//		}
+//		t.Artist = artists
+//
+//		albums, err := useCase.repoAlbum.GetByTrackId(t.Id)
+//		if err != nil {
+//			return nil, err
+//		}
+//		t.Album = albums
+//	}
+//
+//	return tracks, nil
+//}

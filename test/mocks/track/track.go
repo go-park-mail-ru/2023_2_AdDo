@@ -49,6 +49,81 @@ func (mr *MockUseCaseMockRecorder) GetAll() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAll", reflect.TypeOf((*MockUseCase)(nil).GetAll))
 }
 
+// GetByAlbum mocks base method.
+func (m *MockUseCase) GetByAlbum(albumId uint64) ([]track.Response, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetByAlbum", albumId)
+	ret0, _ := ret[0].([]track.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetByAlbum indicates an expected call of GetByAlbum.
+func (mr *MockUseCaseMockRecorder) GetByAlbum(albumId interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByAlbum", reflect.TypeOf((*MockUseCase)(nil).GetByAlbum), albumId)
+}
+
+// GetByArtist mocks base method.
+func (m *MockUseCase) GetByArtist(artistId uint64) ([]track.Response, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetByArtist", artistId)
+	ret0, _ := ret[0].([]track.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetByArtist indicates an expected call of GetByArtist.
+func (mr *MockUseCaseMockRecorder) GetByArtist(artistId interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByArtist", reflect.TypeOf((*MockUseCase)(nil).GetByArtist), artistId)
+}
+
+// GetByPlaylist mocks base method.
+func (m *MockUseCase) GetByPlaylist(playlistId uint64) ([]track.Response, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetByPlaylist", playlistId)
+	ret0, _ := ret[0].([]track.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetByPlaylist indicates an expected call of GetByPlaylist.
+func (mr *MockUseCaseMockRecorder) GetByPlaylist(playlistId interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByPlaylist", reflect.TypeOf((*MockUseCase)(nil).GetByPlaylist), playlistId)
+}
+
+// GetLatest mocks base method.
+func (m *MockUseCase) GetLatest(limit uint32) ([]track.Response, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetLatest", limit)
+	ret0, _ := ret[0].([]track.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetLatest indicates an expected call of GetLatest.
+func (mr *MockUseCaseMockRecorder) GetLatest(limit interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetLatest", reflect.TypeOf((*MockUseCase)(nil).GetLatest), limit)
+}
+
+// GetPopular mocks base method.
+func (m *MockUseCase) GetPopular(limit uint32) ([]track.Response, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetPopular", limit)
+	ret0, _ := ret[0].([]track.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetPopular indicates an expected call of GetPopular.
+func (mr *MockUseCaseMockRecorder) GetPopular(limit interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPopular", reflect.TypeOf((*MockUseCase)(nil).GetPopular), limit)
+}
+
 // MockRepository is a mock of Repository interface.
 type MockRepository struct {
 	ctrl     *gomock.Controller
@@ -85,4 +160,79 @@ func (m *MockRepository) GetAll() ([]track.Response, error) {
 func (mr *MockRepositoryMockRecorder) GetAll() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAll", reflect.TypeOf((*MockRepository)(nil).GetAll))
+}
+
+// GetByAlbum mocks base method.
+func (m *MockRepository) GetByAlbum(albumId uint64) ([]track.Response, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetByAlbum", albumId)
+	ret0, _ := ret[0].([]track.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetByAlbum indicates an expected call of GetByAlbum.
+func (mr *MockRepositoryMockRecorder) GetByAlbum(albumId interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByAlbum", reflect.TypeOf((*MockRepository)(nil).GetByAlbum), albumId)
+}
+
+// GetByArtist mocks base method.
+func (m *MockRepository) GetByArtist(artistId uint64) ([]track.Response, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetByArtist", artistId)
+	ret0, _ := ret[0].([]track.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetByArtist indicates an expected call of GetByArtist.
+func (mr *MockRepositoryMockRecorder) GetByArtist(artistId interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByArtist", reflect.TypeOf((*MockRepository)(nil).GetByArtist), artistId)
+}
+
+// GetByPlaylist mocks base method.
+func (m *MockRepository) GetByPlaylist(playlistId uint64) ([]track.Response, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetByPlaylist", playlistId)
+	ret0, _ := ret[0].([]track.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetByPlaylist indicates an expected call of GetByPlaylist.
+func (mr *MockRepositoryMockRecorder) GetByPlaylist(playlistId interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByPlaylist", reflect.TypeOf((*MockRepository)(nil).GetByPlaylist), playlistId)
+}
+
+// GetLatest mocks base method.
+func (m *MockRepository) GetLatest(limit uint32) ([]track.Response, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetLatest", limit)
+	ret0, _ := ret[0].([]track.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetLatest indicates an expected call of GetLatest.
+func (mr *MockRepositoryMockRecorder) GetLatest(limit interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetLatest", reflect.TypeOf((*MockRepository)(nil).GetLatest), limit)
+}
+
+// GetPopular mocks base method.
+func (m *MockRepository) GetPopular(limit uint32) ([]track.Response, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetPopular", limit)
+	ret0, _ := ret[0].([]track.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetPopular indicates an expected call of GetPopular.
+func (mr *MockRepositoryMockRecorder) GetPopular(limit interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPopular", reflect.TypeOf((*MockRepository)(nil).GetPopular), limit)
 }
