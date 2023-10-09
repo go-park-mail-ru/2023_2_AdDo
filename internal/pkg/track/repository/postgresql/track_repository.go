@@ -48,41 +48,30 @@ func (db *Postgres) GetLatest(limit uint32) ([]track.Response, error) {
 	return db.getTracks(query, limit)
 }
 
-func (db *Postgres) getIds(query string, id uint64) ([]uint64, error) {
+func (db *Postgres) getTracksById(query string, id uint64) ([]track.Response, error) {
 	rows, err := db.database.Query(query, id)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	trackIds := make([]uint64, 0)
+	tracks := make([]track.Response, 0)
 	for rows.Next() {
 		var trackId uint64
 		err = rows.Scan(&trackId)
 		if err != nil {
 			return nil, err
 		}
-		trackIds = append(trackIds, trackId)
+		t, err := db.getById(trackId)
+		if err != nil {
+			return nil, err
+		}
+		tracks = append(tracks, t)
 	}
-	return trackIds, nil
+	return tracks, nil
 }
 
-func (db *Postgres) GetTrackIdsByAlbum(albumId uint64) ([]uint64, error) {
-	query := "select track_id from album_track where album_id = $1"
-	return db.getIds(query, albumId)
-}
-
-func (db *Postgres) GetTrackIdsByArtist(artistId uint64) ([]uint64, error) {
-	query := "select track_id from artist_track where artist_id = $1"
-	return db.getIds(query, artistId)
-}
-
-func (db *Postgres) GetTrackIdsByPlaylist(playlistId uint64) ([]uint64, error) {
-	query := "select track_id from playlist_track where playlist_id = $1"
-	return db.getIds(query, playlistId)
-}
-
-func (db *Postgres) GetByTrackId(trackId uint64) (track.Response, error) {
+func (db *Postgres) getById(trackId uint64) (track.Response, error) {
 	query := "select id, name, preview, content, play_count, release_date from track where id = $1"
 
 	var t track.Response
@@ -92,4 +81,19 @@ func (db *Postgres) GetByTrackId(trackId uint64) (track.Response, error) {
 		return empty, err
 	}
 	return t, nil
+}
+
+func (db *Postgres) GetByAlbum(albumId uint64) ([]track.Response, error) {
+	query := "select track_id from album_track where album_id = $1"
+	return db.getTracksById(query, albumId)
+}
+
+func (db *Postgres) GetByArtist(artistId uint64) ([]track.Response, error) {
+	query := "select track_id from artist_track where artist_id = $1"
+	return db.getTracksById(query, artistId)
+}
+
+func (db *Postgres) GetByPlaylist(playlistId uint64) ([]track.Response, error) {
+	query := "select track_id from playlist_track where playlist_id = $1"
+	return db.getTracksById(query, playlistId)
 }
