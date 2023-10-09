@@ -24,11 +24,12 @@ create table if not exists album (
     release_date date
 );
 
-create table if not exists track (
-    id      serial primary key,
-    name    varchar(32) not null,
+create table if not exists track(
+    id serial primary key,
+    name varchar(50) not null,
     preview varchar(1024),
-    content varchar(1024)
+    content varchar(1024),
+    release_date date
     -- song_text text
 );
 
