@@ -21,18 +21,18 @@ func NewDefault(trackRepo track.Repository, artistRepo artist.Repository, albumR
 }
 
 func (useCase *Default) addArtistAndAlbum(tracks []track.Response) ([]track.Response, error) {
-	for _, t := range tracks {
+	for index, t := range tracks {
 		artists, err := useCase.repoArtist.GetByTrackId(t.Id)
 		if err != nil {
 			return nil, err
 		}
-		t.Artist = artists
+		tracks[index].Artist = artists
 
 		albums, err := useCase.repoAlbum.GetByTrackId(t.Id)
 		if err != nil {
 			return nil, err
 		}
-		t.Album = albums
+		tracks[index].Album = albums
 	}
 	return tracks, nil
 }
@@ -61,40 +61,28 @@ func (useCase *Default) GetLatest(limit uint32) ([]track.Response, error) {
 	return useCase.addArtistAndAlbum(tracks)
 }
 
-func (useCase *Default) getTracksByIds(trackIds []uint64) ([]track.Response, error) {
-	tracks := make([]track.Response, 0)
-	for _, trackId := range trackIds {
-		t, err := useCase.repoTrack.GetByTrackId(trackId)
-		if err != nil {
-			return nil, err
-		}
-		tracks = append(tracks, t)
+func (useCase *Default) GetByAlbum(albumId uint64) ([]track.Response, error) {
+	tracks, err := useCase.repoTrack.GetByAlbum(albumId)
+	if err != nil {
+		return nil, track.ErrNoTracks
 	}
 	return useCase.addArtistAndAlbum(tracks)
 }
 
-func (useCase *Default) GetByAlbum(albumId uint64) ([]track.Response, error) {
-	trackIds, err := useCase.repoTrack.GetTrackIdsByAlbum(albumId)
-	if err != nil {
-		return nil, err
-	}
-	return useCase.getTracksByIds(trackIds)
-}
-
 func (useCase *Default) GetByArtist(artistId uint64) ([]track.Response, error) {
-	trackIds, err := useCase.repoTrack.GetTrackIdsByArtist(artistId)
+	tracks, err := useCase.repoTrack.GetByArtist(artistId)
 	if err != nil {
-		return nil, err
+		return nil, track.ErrNoTracks
 	}
-	return useCase.getTracksByIds(trackIds)
+	return useCase.addArtistAndAlbum(tracks)
 }
 
 func (useCase *Default) GetByPlaylist(artistId uint64) ([]track.Response, error) {
-	trackIds, err := useCase.repoTrack.GetTrackIdsByPlaylist(artistId)
+	tracks, err := useCase.repoTrack.GetByPlaylist(artistId)
 	if err != nil {
-		return nil, err
+		return nil, track.ErrNoTracks
 	}
-	return useCase.getTracksByIds(trackIds)
+	return useCase.addArtistAndAlbum(tracks)
 }
 
 //func (useCase *Default) GetFavourite(userId uint64) ([]track.Response, error) {

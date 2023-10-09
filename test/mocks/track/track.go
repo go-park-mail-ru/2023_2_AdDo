@@ -162,19 +162,49 @@ func (mr *MockRepositoryMockRecorder) GetAll() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAll", reflect.TypeOf((*MockRepository)(nil).GetAll))
 }
 
-// GetByTrackId mocks base method.
-func (m *MockRepository) GetByTrackId(trackId uint64) (track.Response, error) {
+// GetByAlbum mocks base method.
+func (m *MockRepository) GetByAlbum(albumId uint64) ([]track.Response, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetByTrackId", trackId)
-	ret0, _ := ret[0].(track.Response)
+	ret := m.ctrl.Call(m, "GetByAlbum", albumId)
+	ret0, _ := ret[0].([]track.Response)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// GetByTrackId indicates an expected call of GetByTrackId.
-func (mr *MockRepositoryMockRecorder) GetByTrackId(trackId interface{}) *gomock.Call {
+// GetByAlbum indicates an expected call of GetByAlbum.
+func (mr *MockRepositoryMockRecorder) GetByAlbum(albumId interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByTrackId", reflect.TypeOf((*MockRepository)(nil).GetByTrackId), trackId)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByAlbum", reflect.TypeOf((*MockRepository)(nil).GetByAlbum), albumId)
+}
+
+// GetByArtist mocks base method.
+func (m *MockRepository) GetByArtist(artistId uint64) ([]track.Response, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetByArtist", artistId)
+	ret0, _ := ret[0].([]track.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetByArtist indicates an expected call of GetByArtist.
+func (mr *MockRepositoryMockRecorder) GetByArtist(artistId interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByArtist", reflect.TypeOf((*MockRepository)(nil).GetByArtist), artistId)
+}
+
+// GetByPlaylist mocks base method.
+func (m *MockRepository) GetByPlaylist(playlistId uint64) ([]track.Response, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetByPlaylist", playlistId)
+	ret0, _ := ret[0].([]track.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetByPlaylist indicates an expected call of GetByPlaylist.
+func (mr *MockRepositoryMockRecorder) GetByPlaylist(playlistId interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByPlaylist", reflect.TypeOf((*MockRepository)(nil).GetByPlaylist), playlistId)
 }
 
 // GetLatest mocks base method.
@@ -205,49 +235,4 @@ func (m *MockRepository) GetPopular(limit uint32) ([]track.Response, error) {
 func (mr *MockRepositoryMockRecorder) GetPopular(limit interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPopular", reflect.TypeOf((*MockRepository)(nil).GetPopular), limit)
-}
-
-// GetTrackIdsByAlbum mocks base method.
-func (m *MockRepository) GetTrackIdsByAlbum(albumId uint64) ([]uint64, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetTrackIdsByAlbum", albumId)
-	ret0, _ := ret[0].([]uint64)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetTrackIdsByAlbum indicates an expected call of GetTrackIdsByAlbum.
-func (mr *MockRepositoryMockRecorder) GetTrackIdsByAlbum(albumId interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTrackIdsByAlbum", reflect.TypeOf((*MockRepository)(nil).GetTrackIdsByAlbum), albumId)
-}
-
-// GetTrackIdsByArtist mocks base method.
-func (m *MockRepository) GetTrackIdsByArtist(artistId uint64) ([]uint64, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetTrackIdsByArtist", artistId)
-	ret0, _ := ret[0].([]uint64)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetTrackIdsByArtist indicates an expected call of GetTrackIdsByArtist.
-func (mr *MockRepositoryMockRecorder) GetTrackIdsByArtist(artistId interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTrackIdsByArtist", reflect.TypeOf((*MockRepository)(nil).GetTrackIdsByArtist), artistId)
-}
-
-// GetTrackIdsByPlaylist mocks base method.
-func (m *MockRepository) GetTrackIdsByPlaylist(playlistId uint64) ([]uint64, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetTrackIdsByPlaylist", playlistId)
-	ret0, _ := ret[0].([]uint64)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetTrackIdsByPlaylist indicates an expected call of GetTrackIdsByPlaylist.
-func (mr *MockRepositoryMockRecorder) GetTrackIdsByPlaylist(playlistId interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTrackIdsByPlaylist", reflect.TypeOf((*MockRepository)(nil).GetTrackIdsByPlaylist), playlistId)
 }

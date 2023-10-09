@@ -47,17 +47,15 @@ type UseCase interface {
 	GetByAlbum(albumId uint64) ([]Response, error)
 	GetByArtist(artistId uint64) ([]Response, error)
 	GetByPlaylist(playlistId uint64) ([]Response, error)
-	//GetFavourite(userId uint64) ([]Response, error)
 }
 
 type Repository interface {
 	GetAll() ([]Response, error)
 	GetPopular(limit uint32) ([]Response, error)
 	GetLatest(limit uint32) ([]Response, error)
-	GetTrackIdsByAlbum(albumId uint64) ([]uint64, error)
-	GetTrackIdsByArtist(artistId uint64) ([]uint64, error)
-	GetTrackIdsByPlaylist(playlistId uint64) ([]uint64, error)
-	GetByTrackId(trackId uint64) (Response, error)
+	GetByAlbum(albumId uint64) ([]Response, error)
+	GetByArtist(artistId uint64) ([]Response, error)
+	GetByPlaylist(playlistId uint64) ([]Response, error)
 }
 
 var (
