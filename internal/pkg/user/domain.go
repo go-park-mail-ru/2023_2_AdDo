@@ -7,8 +7,8 @@ import (
 )
 
 type UserCredentials struct {
-	Email    string `valid:"length(1|30), email, required" json:"Email" example:"example@gmail.com"`
-	Password string `valid:"length(6|30), required" json:"Password" example:"password"`
+	Email    string `valid:"length(1|30), email, required, printableascii" json:"Email" example:"example@gmail.com"`
+	Password string `valid:"length(6|30), required, printableascii" json:"Password" example:"password"`
 }
 
 type User struct {

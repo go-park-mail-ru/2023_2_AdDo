@@ -70,6 +70,11 @@ func (handler *UserHandler) SignUp(w http.ResponseWriter, r *http.Request) error
 func (handler *UserHandler) Login(w http.ResponseWriter, r *http.Request) error {
 	var credentials user_domain.UserCredentials
 
+	err := credentials.Validate()
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusBadRequest, Err: err}
+	}
+
 	if err := json.NewDecoder(r.Body).Decode(&credentials); err != nil {
 		return common_handler.StatusError{Code: http.StatusBadRequest, Err: err}
 	}

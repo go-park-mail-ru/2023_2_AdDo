@@ -34,7 +34,13 @@ database-clean:
 docker-service-test:
 	@make hard_deploy
 	@echo "Running tests with empty database..."
-	@python3 test/testsuite/simple_case.py
+	@python3 test/testsuite/sign_up_test.py
+	@python3 test/testsuite/music_test.py
+	@python3 test/testsuite/me_test.py
+	@python3 test/testsuite/logout_test.py
+	@python3 test/testsuite/login_test.py
+	@python3 test/testsuite/listen_test.py
+	@python3 test/testsuite/auth_test.py
 
 #генерируем скрипт для заполнения базы данных основными данными
 fill_database:

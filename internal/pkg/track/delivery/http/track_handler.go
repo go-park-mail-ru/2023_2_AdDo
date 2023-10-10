@@ -21,23 +21,6 @@ func NewHandler(track track.UseCase, session session.UseCase) TrackHandler {
 	}
 }
 
-//{
-//	"Id":1,
-//	"Name":"Stargazing",
-//	"Artist":[{
-//		"Id":1,
-//		"Name":"Travis Scott",
-//		"Avatar":"http://82.146.45.164:9000/images/avatars/artists/Travis_Scott.jpg"
-//	}],
-//	"Album":[{
-//		"Id":1,
-//		"Name":"Astroworld",
-//		"Preview":"http://82.146.45.164:9000/audio/Travis_Scott/albums/Astroworld"
-//	}],
-//	"Preview":"http://82.146.45.164:9000/images/tracks/Travis_Scott/albums/Astroworld.jpg",
-//	"Content":"http://82.146.45.164:9000/audio/Travis_Scott/albums/Astroworld/Stargazing.mp3"
-//}
-
 // @Description	return all tracks
 // @Tags			track
 // @Produce		json
