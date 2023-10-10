@@ -1,11 +1,17 @@
 package artist
 
-type Artist struct {
+type TrackInfoResponse struct {
+}
+
+type AlbumInfoResponse struct {
+}
+
+type InfoResponse struct {
 	Id     uint64
 	Name   string
 	Avatar string
-	Album  []uint64
-	Track  []uint64
+	Track  []TrackInfoResponse
+	Album  []AlbumInfoResponse
 }
 
 type Response struct {
@@ -14,7 +20,14 @@ type Response struct {
 	Avatar string `json:"Avatar" example:"ArtistAvatar"`
 }
 
+type UseCase interface {
+	GetArtistInfo(artistId uint64) (InfoResponse, error)
+}
+
 type Repository interface {
 	GetByTrackId(trackId uint64) ([]Response, error)
 	GetByAlbumId(albumId uint64) (Response, error)
+	GetTracks(artistId uint64) ([]TrackInfoResponse, error)
+	GetAlbums(artistId uint64) ([]AlbumInfoResponse, error)
+	Get(artistId uint64) (Response, error)
 }

@@ -18,15 +18,8 @@ type ArtistAlbumResponse struct {
 	Preview string
 }
 
-type Track struct {
-	Id          uint64
-	Name        string
-	Artist      []uint64
-	Album       []uint64
-	Preview     string
-	Content     string
-	PlayCount   uint64
-	ReleaseDate string
+type Id struct {
+	Id uint64 `json:"Id" example:"1"`
 }
 
 type Response struct {
@@ -47,6 +40,8 @@ type UseCase interface {
 	GetByAlbum(albumId uint64) ([]Response, error)
 	GetByArtist(artistId uint64) ([]Response, error)
 	GetByPlaylist(playlistId uint64) ([]Response, error)
+	Listen(trackId uint64) error
+	Like(userId, trackId uint64) error
 }
 
 type Repository interface {
@@ -56,6 +51,8 @@ type Repository interface {
 	GetByAlbum(albumId uint64) ([]Response, error)
 	GetByArtist(artistId uint64) ([]Response, error)
 	GetByPlaylist(playlistId uint64) ([]Response, error)
+	CreateLike(userId, trackId uint64) error
+	AddListen(trackId uint64) error
 }
 
 var (

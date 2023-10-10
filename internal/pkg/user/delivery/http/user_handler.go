@@ -162,8 +162,3 @@ func (handler *UserHandler) Me(w http.ResponseWriter, r *http.Request) error {
 
 	return nil
 }
-
-func (handler *UserHandler) Listen(w http.ResponseWriter, r *http.Request) error {
-
-	return nil
-}

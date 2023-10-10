@@ -7,6 +7,7 @@ import (
 	"github.com/sirupsen/logrus"
 	httpSwagger "github.com/swaggo/http-swagger/v2"
 	_ "main/api/openapi"
+	artist_delivery "main/internal/pkg/artist/delivery/http"
 	common_handler "main/internal/pkg/common/handler"
 	common_middleware "main/internal/pkg/common/middleware"
 	"main/internal/pkg/session"
@@ -34,15 +35,16 @@ import (
 
 // @host		musicon.space
 // @BasePath	/api/v1
-func New(userHandler user_delivery.UserHandler, trackHandler track_delivery.TrackHandler, logger *logrus.Logger) http.Handler {
+func New(userHandler user_delivery.UserHandler, trackHandler track_delivery.TrackHandler, artistHandler artist_delivery.ArtistHandler, logger *logrus.Logger) http.Handler {
 	router := mux.NewRouter()
 
 	router.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
 	router.Handle("/api/v1/sign_up", common_handler.Handler{H: userHandler.SignUp}).Methods("POST")
 	router.Handle("/api/v1/login", common_handler.Handler{H: userHandler.Login}).Methods("POST")
 	router.Handle("/api/v1/logout", common_handler.Handler{H: userHandler.LogOut}).Methods("POST")
-	router.Handle("/api/v1/listen", common_handler.Handler{H: userHandler.Listen}).Methods("POST")
+	router.Handle("/api/v1/listen", common_handler.Handler{H: trackHandler.Listen}).Methods("POST")
 
+	router.Handle("/api/v1/artist", common_handler.Handler{H: artistHandler.ArtistInfo}).Methods("GET")
 	router.Handle("/api/v1/auth", common_handler.Handler{H: userHandler.Auth}).Methods("GET")
 	router.Handle("/api/v1/me", common_handler.Handler{H: userHandler.Me}).Methods("GET")
 	router.Handle("/api/v1/music", common_handler.Handler{H: trackHandler.Music}).Methods("GET")
