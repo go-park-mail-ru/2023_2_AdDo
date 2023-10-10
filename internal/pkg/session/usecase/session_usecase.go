@@ -14,6 +14,14 @@ func NewDefault(repository session.Repository) Default {
 	}
 }
 
+func (s *Default) GetUserId(sessionId string) (uint64, error) {
+	userId, err := s.repoSession.Get(sessionId)
+	if err != nil {
+		return 0, err
+	}
+	return userId, nil
+}
+
 func (s *Default) CheckSession(sessionId string) (bool, error) {
 	_, err := s.repoSession.Get(sessionId)
 	if err != nil {

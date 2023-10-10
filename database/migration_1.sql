@@ -101,18 +101,34 @@ create table if not exists profile_podcast (
     foreign key (podcast_id) references podcast (id)
 );
 
--- table with like for songs:
---      id like_author
---      id like_song
+create table if not exists like_track (
+    id         serial primary key,
+    profile_id int not null,
+    foreign key (profile_id) references profile (id),
+    track_id int not null,
+    foreign key (track_id) references track (id)
+);
 
--- table with like for albums:
---      id like_author
---      id like_albums
+create table if not exists like_artist (
+    id         serial primary key,
+    profile_id int not null,
+    foreign key (profile_id) references profile (id),
+    artist_id int not null,
+    foreign key (artist_id) references artist (id)
+);
 
--- table with like for playlist:
---      id like_author
---      id like_playlist
+create table if not exists like_album (
+    id         serial primary key,
+    profile_id int not null,
+    foreign key (profile_id) references profile (id),
+    album_id int not null,
+    foreign key (album_id) references album (id)
+);
 
--- table with like for podcasts:
---      id like_author
---      id like_podcast
+create table if not exists like_playlist (
+    id         serial primary key,
+    profile_id int not null,
+    foreign key (profile_id) references profile (id),
+    playlist_id int not null,
+    foreign key (playlist_id) references playlist (id)
+);

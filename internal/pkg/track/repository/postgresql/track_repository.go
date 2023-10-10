@@ -99,3 +99,23 @@ func (db *Postgres) GetByPlaylist(playlistId uint64) ([]track.Response, error) {
 	query := "select track_id from playlist_track where playlist_id = $1"
 	return db.getTracksById(query, playlistId)
 }
+
+func (db *Postgres) CreateLike(userId, trackId uint64) error {
+	query := "insert into like_track (profile_id, track_id) values ($1, $2)"
+	_, err := db.Pool.Exec(context.Background(), query, userId, trackId)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (db *Postgres) AddListen(trackId uint64) error {
+	query := "update track set play_count = play_count + 1 where id = $1"
+	_, err := db.Pool.Exec(context.Background(), query, trackId)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

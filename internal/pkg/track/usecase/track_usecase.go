@@ -85,6 +85,22 @@ func (useCase *Default) GetByPlaylist(artistId uint64) ([]track.Response, error)
 	return useCase.addArtistAndAlbum(tracks)
 }
 
+func (useCase *Default) Listen(trackId uint64) error {
+	err := useCase.repoTrack.AddListen(trackId)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (useCase *Default) Like(userId, trackId uint64) error {
+	err := useCase.repoTrack.CreateLike(userId, trackId)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 //func (useCase *Default) GetFavourite(userId uint64) ([]track.Response, error) {
 //	tracks, err := useCase.repoTrack.GetByUserId(userId)
 //	if err != nil {

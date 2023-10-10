@@ -10,6 +10,28 @@ type Postgres struct {
 	Pool postgres.PgxIFace
 }
 
+func (repo *Postgres) GetTracks(artistId uint64) ([]artist.TrackInfoResponse, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (repo *Postgres) GetAlbums(artistId uint64) ([]artist.AlbumInfoResponse, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (repo *Postgres) Get(artistId uint64) (artist.Response, error) {
+	var result artist.Response
+
+	query := "select artist.id, name, avatar from artist where artist.id = $1"
+	err := repo.Pool.QueryRow(context.Background(), query, artistId).Scan(&result.Id, &result.Name, &result.Avatar)
+	if err != nil {
+		return result, err
+	}
+
+	return result, nil
+}
+
 func NewPostgres(pool postgres.PgxIFace) Postgres {
 	return Postgres{
 		Pool: pool,
