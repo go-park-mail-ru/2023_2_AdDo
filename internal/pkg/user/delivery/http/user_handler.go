@@ -2,8 +2,10 @@ package user_delivery
 
 import (
 	"encoding/json"
+	"github.com/gorilla/csrf"
 	common_handler "main/internal/pkg/common/handler"
 	"main/internal/pkg/common/response"
+	"main/internal/pkg/session"
 	user_domain "main/internal/pkg/user"
 	"net/http"
 	"time"
@@ -20,7 +22,7 @@ func NewHandler(userUseCase user_domain.UseCase) UserHandler {
 	return handler
 }
 
-// @Description	register user
+// SignUp @Description	register user
 // @Tags			user
 // @Accept			json
 // @Produce		json
@@ -54,7 +56,7 @@ func (handler *UserHandler) SignUp(w http.ResponseWriter, r *http.Request) error
 	return nil
 }
 
-// @Description	login user
+// Login @Description	login user
 // @Tags			user
 // @Accept			json
 // @Param			user_domain.UserCredentials	body		userCrds	true	"User email and password"
@@ -81,7 +83,7 @@ func (handler *UserHandler) Login(w http.ResponseWriter, r *http.Request) error 
 	return nil
 }
 
-// @Description	check user's authentication by cookie and user_id
+// Auth @Description	check user's authentication by cookie and user_id
 // @Tags			user
 // @Security		cookieAuth
 // @Security		csrfToken
@@ -90,6 +92,7 @@ func (handler *UserHandler) Login(w http.ResponseWriter, r *http.Request) error 
 // @Failure		500	{string}	errMsg
 // @Router			/auth [get]
 func (handler *UserHandler) Auth(w http.ResponseWriter, r *http.Request) error {
+	w.Header().Set(session.XCsrfToken, csrf.Token(r))
 	sessionId, err := response.GetCookie(r)
 	if err != nil {
 		return common_handler.StatusError{Code: http.StatusUnauthorized, Err: err}
@@ -104,7 +107,7 @@ func (handler *UserHandler) Auth(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
-// @Description	logout user
+// LogOut @Description	logout user
 // @Tags			user
 // @Security		cookieAuth
 // @Security		csrfToken
@@ -128,7 +131,7 @@ func (handler *UserHandler) LogOut(w http.ResponseWriter, r *http.Request) error
 	return nil
 }
 
-// @Description	get user info
+// Me @Description	get user info
 // @Tags			user
 // @Security		cookieAuth
 // @Security		csrfToken

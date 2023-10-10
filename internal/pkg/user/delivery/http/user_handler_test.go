@@ -52,6 +52,21 @@ func TestSignUp(t *testing.T) {
 		assert.Equal(t, http.StatusBadRequest, err.(common_handler.StatusError).Code)
 	})
 
+	t.Run("Invalid password", func(t *testing.T) {
+		user := user_domain.User{Username: "John", Email: "john@example.com", Password: "gshdfghlsdhflgkhslkdfhglkhskdfhglksdfhgshkfhgksdhghslsdfgkjdgf", BirthDate: "12-12-2003"}
+
+		requestBody, err := json.Marshal(user)
+		assert.NoError(t, err)
+
+		req := httptest.NewRequest(http.MethodPost, "/signup", bytes.NewBuffer(requestBody))
+		w := httptest.NewRecorder()
+
+		err = handler.SignUp(w, req)
+
+		assert.NotNil(t, err)
+		assert.Equal(t, http.StatusBadRequest, err.(common_handler.StatusError).Code)
+	})
+
 	t.Run("Success", func(t *testing.T) {
 		user := user_domain.User{Id: 1, Username: "John", Email: "john@example.com", BirthDate: "12-12-2003", Password: "password"}
 		const sessionId = "sesId"
