@@ -29,7 +29,8 @@ create table if not exists track(
     name varchar(50) not null,
     preview varchar(1024),
     content varchar(1024),
-    release_date date
+    release_date date,
+    play_count int not null default 0
     -- song_text text
 );
 

@@ -2,20 +2,20 @@ package track_repository
 
 import (
 	"context"
-	"github.com/jackc/pgx/v5"
+	postgres "main/internal/pkg/common/pgxiface"
 	"main/internal/pkg/track"
 )
 
 type Postgres struct {
-	database *pgx.Conn
+	Pool postgres.PgxIFace
 }
 
-func NewPostgres(db *pgx.Conn) *Postgres {
-	return &Postgres{database: db}
+func NewPostgres(pool postgres.PgxIFace) *Postgres {
+	return &Postgres{Pool: pool}
 }
 
 func (db *Postgres) getTracks(query string, limit uint32) ([]track.Response, error) {
-	rows, err := db.database.Query(context.Background(), query, limit)
+	rows, err := db.Pool.Query(context.Background(), query, limit)
 
 	if err != nil {
 		return nil, err
@@ -51,7 +51,7 @@ func (db *Postgres) GetLatest(limit uint32) ([]track.Response, error) {
 }
 
 func (db *Postgres) getTracksById(query string, id uint64) ([]track.Response, error) {
-	rows, err := db.database.Query(context.Background(), query, id)
+	rows, err := db.Pool.Query(context.Background(), query, id)
 	if err != nil {
 		return nil, err
 	}
@@ -59,12 +59,12 @@ func (db *Postgres) getTracksById(query string, id uint64) ([]track.Response, er
 
 	tracks := make([]track.Response, 0)
 	for rows.Next() {
-		var trackId uint64
+		var trackId int
 		err = rows.Scan(&trackId)
 		if err != nil {
 			return nil, err
 		}
-		t, err := db.getById(trackId)
+		t, err := db.getById(uint64(trackId))
 		if err != nil {
 			return nil, err
 		}
@@ -77,7 +77,7 @@ func (db *Postgres) getById(trackId uint64) (track.Response, error) {
 	query := "select id, name, preview, content, play_count, release_date from track where id = $1"
 
 	var t track.Response
-	err := db.database.QueryRow(context.Background(), query, trackId).Scan(&t.Id, &t.Name, &t.Preview, &t.Content, &t.PlayCount, &t.ReleaseDate)
+	err := db.Pool.QueryRow(context.Background(), query, trackId).Scan(&t.Id, &t.Name, &t.Preview, &t.Content, &t.PlayCount, &t.ReleaseDate)
 	if err != nil {
 		var empty track.Response
 		return empty, err
