@@ -21,6 +21,8 @@ const TimeToLiveCSRF = 24 * 60 * 60
 
 var CSRFKey = []byte("6rOD7Jb4gwBISPPd4T2CVDHEILjr4rq2")
 
+const XCsrfToken = "X-Csrf-Token"
+
 var (
 	ErrSessionDoesNotExist   = errors.New("session does not exist")
 	ErrSessionCreatingFailed = errors.New("session hasn't created")

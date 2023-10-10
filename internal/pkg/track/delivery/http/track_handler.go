@@ -49,10 +49,9 @@ func NewHandler(track track.UseCase, session session.UseCase) TrackHandler {
 // @Failure		401	{string}	errMsg
 // @Failure		500	{string}	errMsg
 // @Router			/music [get]
-const XCsrfToken = "X-Csrf-Token"
 
 func (handler *TrackHandler) Music(w http.ResponseWriter, r *http.Request) error {
-	w.Header().Set("X-Csrf-Token", csrf.Token(r))
+	w.Header().Set(session.XCsrfToken, csrf.Token(r))
 	tracks, err := handler.trackUseCase.GetAll()
 	if err != nil {
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
