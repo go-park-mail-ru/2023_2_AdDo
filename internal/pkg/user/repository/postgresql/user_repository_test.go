@@ -1,24 +1,23 @@
 package user_repository
 
 import (
-	"github.com/DATA-DOG/go-sqlmock"
+	"github.com/pashagolub/pgxmock/v3"
 	user_domain "main/internal/pkg/user"
 	"testing"
 )
 
 func TestUserRepository_Create(t *testing.T) {
-	db, mock, err := sqlmock.New()
-	if err != nil {
-		t.Fatalf("Failed to create mock postgres_db: %v", err)
-	}
-	defer db.Close()
+	mock, err := pgxmock.NewPool()
+	defer mock.Close()
+
 	repo := Postgres{
-		Database: db,
+		Pool: mock,
 	}
+
 	data := user_domain.User{Email: "John@email.com", Password: "John's password", Username: "John's username", BirthDate: "2003-12-01"}
 
 	query := "insert into profile"
-	mock.ExpectExec(query).WithArgs(data.Email, sqlmock.AnyArg(), data.Username, data.BirthDate).WillReturnResult(sqlmock.NewResult(1, 1))
+	mock.ExpectExec(query).WithArgs(data.Email, pgxmock.AnyArg(), data.Username, data.BirthDate).WillReturnResult(pgxmock.NewResult("insert", 1))
 
 	err = repo.Create(data)
 	if err != nil {
@@ -31,14 +30,11 @@ func TestUserRepository_Create(t *testing.T) {
 }
 
 func TestUserRepository_GetById(t *testing.T) {
-	db, mock, err := sqlmock.New()
-	if err != nil {
-		t.Fatalf("Failed to create mock postgres_db: %v", err)
-	}
-	defer db.Close()
+	mock, err := pgxmock.NewPool()
+	defer mock.Close()
 
 	repo := Postgres{
-		Database: db,
+		Pool: mock,
 	}
 
 	expectedUser := user_domain.User{
@@ -49,7 +45,7 @@ func TestUserRepository_GetById(t *testing.T) {
 		Avatar:    "https://example.com/avatar.jpg",
 	}
 
-	profileTable := sqlmock.NewRows([]string{"email", "nickname", "birth_date", "avatar_url"}).
+	profileTable := pgxmock.NewRows([]string{"email", "nickname", "birth_date", "avatar_url"}).
 		AddRow(expectedUser.Email, expectedUser.Username, expectedUser.BirthDate, expectedUser.Avatar)
 
 	mock.ExpectQuery("select email, nickname, birth_date, avatar_url from profile where id = ?").
@@ -70,22 +66,20 @@ func TestUserRepository_GetById(t *testing.T) {
 }
 
 func TestUserRepository_CheckEmailAndPassword(t *testing.T) {
-	db, mock, err := sqlmock.New()
-	if err != nil {
-		t.Fatalf("Failed to create mock postgres_db: %v", err)
-	}
-	defer db.Close()
+	mock, err := pgxmock.NewPool()
+	defer mock.Close()
 
 	repo := Postgres{
-		Database: db,
+		Pool: mock,
 	}
+
 	expectedUserId := uint64(1)
 
-	rows := sqlmock.NewRows([]string{"id"}).
-		AddRow(1)
+	rows := pgxmock.NewRows([]string{"id"}).
+		AddRow(expectedUserId)
 
 	mock.ExpectQuery("select id from profile").
-		WithArgs("test@example.com", sqlmock.AnyArg()).
+		WithArgs("test@example.com", pgxmock.AnyArg()).
 		WillReturnRows(rows)
 
 	userId, err := repo.CheckEmailAndPassword("test@example.com", "password")

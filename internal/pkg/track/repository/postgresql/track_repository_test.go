@@ -1,21 +1,18 @@
 package track_repository
 
 import (
-	"github.com/DATA-DOG/go-sqlmock"
+	"github.com/pashagolub/pgxmock/v3"
 	"github.com/stretchr/testify/assert"
 	"main/internal/pkg/track"
 	"testing"
 )
 
 func TestTrackRepository_getTracks(t *testing.T) {
-	db, mock, err := sqlmock.New()
-	if err != nil {
-		t.Fatalf("Failed to create mock postgres_db: %v", err)
-	}
-	defer db.Close()
+	mock, err := pgxmock.NewPool()
+	defer mock.Close()
 
 	repo := Postgres{
-		database: db,
+		Pool: mock,
 	}
 
 	expected := []track.Response{{
@@ -26,13 +23,13 @@ func TestTrackRepository_getTracks(t *testing.T) {
 		PlayCount:   10,
 		ReleaseDate: "2023-10-09",
 	}}
-
-	result := sqlmock.NewRows([]string{"id", "name", "preview", "content", "play_count", "release_date"}).
+	const limit = uint32(0)
+	result := pgxmock.NewRows([]string{"id", "name", "preview", "content", "play_count", "release_date"}).
 		AddRow(expected[0].Id, expected[0].Name, expected[0].Preview, expected[0].Content, expected[0].PlayCount, expected[0].ReleaseDate)
 	query := "select id, name, preview, content, play_count, release_date from track"
-	mock.ExpectQuery(query).WillReturnRows(result)
+	mock.ExpectQuery(query).WithArgs(limit).WillReturnRows(result)
 
-	received, err := repo.getTracks(query, 0)
+	received, err := repo.getTracks(query, limit)
 	if err != nil {
 		t.Errorf("Error getting all tracks: %v", err)
 	}
@@ -45,14 +42,11 @@ func TestTrackRepository_getTracks(t *testing.T) {
 }
 
 func TestTrackRepository_getTracksById(t *testing.T) {
-	db, mock, err := sqlmock.New()
-	if err != nil {
-		t.Fatalf("Failed to create mock database: %v", err)
-	}
-	defer db.Close()
+	mock, err := pgxmock.NewPool()
+	defer mock.Close()
 
 	repo := Postgres{
-		database: db,
+		Pool: mock,
 	}
 
 	expected := []track.Response{
@@ -73,19 +67,19 @@ func TestTrackRepository_getTracksById(t *testing.T) {
 		},
 	}
 
-	result := sqlmock.NewRows([]string{"track_id"}).AddRow(1).AddRow(2)
+	result := pgxmock.NewRows([]string{"track_id"}).AddRow(1).AddRow(2)
 	query := "select track_id from album_track"
 	var albumId uint64 = 1
 	mock.ExpectQuery(query).WithArgs(albumId).WillReturnRows(result)
 
-	result2 := sqlmock.NewRows([]string{"id", "name", "preview", "content", "play_count", "release_date"}).
+	result2 := pgxmock.NewRows([]string{"id", "name", "preview", "content", "play_count", "release_date"}).
 		AddRow(expected[0].Id, expected[0].Name, expected[0].Preview, expected[0].Content, expected[0].PlayCount, expected[0].ReleaseDate)
 	query2 := "select id, name, preview, content, play_count, release_date from track"
-	mock.ExpectQuery(query2).WillReturnRows(result2)
+	mock.ExpectQuery(query2).WithArgs(expected[0].Id).WillReturnRows(result2)
 
-	result3 := sqlmock.NewRows([]string{"id", "name", "preview", "content", "play_count", "release_date"}).
+	result3 := pgxmock.NewRows([]string{"id", "name", "preview", "content", "play_count", "release_date"}).
 		AddRow(expected[1].Id, expected[1].Name, expected[1].Preview, expected[1].Content, expected[1].PlayCount, expected[1].ReleaseDate)
-	mock.ExpectQuery(query2).WillReturnRows(result3)
+	mock.ExpectQuery(query2).WithArgs(expected[1].Id).WillReturnRows(result3)
 
 	received, err := repo.getTracksById(query, albumId)
 	if err != nil {
@@ -99,14 +93,11 @@ func TestTrackRepository_getTracksById(t *testing.T) {
 }
 
 func TestTrackRepository_getById(t *testing.T) {
-	db, mock, err := sqlmock.New()
-	if err != nil {
-		t.Fatalf("Failed to create mock database: %v", err)
-	}
-	defer db.Close()
+	mock, err := pgxmock.NewPool()
+	defer mock.Close()
 
 	repo := Postgres{
-		database: db,
+		Pool: mock,
 	}
 
 	expected := track.Response{
@@ -118,7 +109,7 @@ func TestTrackRepository_getById(t *testing.T) {
 		ReleaseDate: "2023-10-09",
 	}
 
-	result := sqlmock.NewRows([]string{"id", "name", "preview", "content", "play_count", "release_date"}).
+	result := pgxmock.NewRows([]string{"id", "name", "preview", "content", "play_count", "release_date"}).
 		AddRow(expected.Id, expected.Name, expected.Preview, expected.Content, expected.PlayCount, expected.ReleaseDate)
 	query := "select id, name, preview, content, play_count, release_date from track"
 	var trackId uint64 = 1

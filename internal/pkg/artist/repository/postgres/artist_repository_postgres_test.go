@@ -1,21 +1,18 @@
 package artist_repository
 
 import (
-	"github.com/DATA-DOG/go-sqlmock"
+	"github.com/pashagolub/pgxmock/v3"
 	"github.com/stretchr/testify/assert"
 	"main/internal/pkg/artist"
 	"testing"
 )
 
 func TestArtistRepository_GetByTrackId(t *testing.T) {
-	db, mock, err := sqlmock.New()
-	if err != nil {
-		t.Fatalf("Failed to create mock postgres_db: %v", err)
-	}
-	defer db.Close()
+	mock, err := pgxmock.NewPool()
+	defer mock.Close()
 
 	repo := Postgres{
-		db: db,
+		Pool: mock,
 	}
 
 	trackId := uint64(1)
@@ -26,7 +23,7 @@ func TestArtistRepository_GetByTrackId(t *testing.T) {
 		Avatar: "Url to artist name avatar",
 	}}
 
-	profileTable := sqlmock.NewRows([]string{"id", "name", "avatar"}).
+	profileTable := pgxmock.NewRows([]string{"id", "name", "avatar"}).
 		AddRow(expectedArtists[0].Id, expectedArtists[0].Name, expectedArtists[0].Avatar)
 
 	mock.ExpectQuery("select artist.id, name, avatar from artist").
@@ -45,14 +42,14 @@ func TestArtistRepository_GetByTrackId(t *testing.T) {
 }
 
 func TestArtistRepository_GetByAlbumId(t *testing.T) {
-	db, mock, err := sqlmock.New()
+	mock, err := pgxmock.NewPool()
 	if err != nil {
-		t.Fatalf("Failed to create mock postgres_db: %v", err)
+		t.Fatal(err)
 	}
-	defer db.Close()
+	defer mock.Close()
 
 	repo := Postgres{
-		db: db,
+		Pool: mock,
 	}
 
 	albumId := uint64(1)
@@ -63,7 +60,7 @@ func TestArtistRepository_GetByAlbumId(t *testing.T) {
 		Avatar: "Url to artist name avatar",
 	}
 
-	profileTable := sqlmock.NewRows([]string{"id", "name", "avatar"}).
+	profileTable := pgxmock.NewRows([]string{"id", "name", "avatar"}).
 		AddRow(expectedArtists.Id, expectedArtists.Name, expectedArtists.Avatar)
 
 	mock.ExpectQuery("select artist.id, artist.name, avatar from artist").

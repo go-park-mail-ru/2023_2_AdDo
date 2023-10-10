@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	_ "github.com/lib/pq"
 	logger_init "main/init/logger"
 	init_db "main/init/postgres_db"
@@ -30,7 +29,7 @@ func main() {
 	if err != nil {
 		logger.Fatalf("error postgres_db connecting %v", err)
 	}
-	defer postgres.Close(context.Background())
+	defer postgres.Close()
 
 	redis, err := init_redis.InitRedis()
 	if err != nil {

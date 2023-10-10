@@ -3,16 +3,16 @@ package init_postgres
 import (
 	"context"
 	"fmt"
-	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"log"
 	"os"
 )
 
-func InitPostgres(env string) (*pgx.Conn, error) {
+func InitPostgres(env string) (*pgxpool.Pool, error) {
 	psqlInfo := os.Getenv(env)
 	log.Printf(psqlInfo)
 
-	conn, err := pgx.Connect(context.Background(), os.Getenv(env))
+	conn, err := pgxpool.New(context.Background(), os.Getenv(env))
 	if err != nil {
 		return nil, err
 	}
