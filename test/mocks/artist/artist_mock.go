@@ -11,6 +11,44 @@ import (
 	gomock "github.com/golang/mock/gomock"
 )
 
+// MockUseCase is a mock of UseCase interface.
+type MockUseCase struct {
+	ctrl     *gomock.Controller
+	recorder *MockUseCaseMockRecorder
+}
+
+// MockUseCaseMockRecorder is the mock recorder for MockUseCase.
+type MockUseCaseMockRecorder struct {
+	mock *MockUseCase
+}
+
+// NewMockUseCase creates a new mock instance.
+func NewMockUseCase(ctrl *gomock.Controller) *MockUseCase {
+	mock := &MockUseCase{ctrl: ctrl}
+	mock.recorder = &MockUseCaseMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockUseCase) EXPECT() *MockUseCaseMockRecorder {
+	return m.recorder
+}
+
+// GetArtistInfo mocks base method.
+func (m *MockUseCase) GetArtistInfo(artistId uint64) (artist.Response, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetArtistInfo", artistId)
+	ret0, _ := ret[0].(artist.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetArtistInfo indicates an expected call of GetArtistInfo.
+func (mr *MockUseCaseMockRecorder) GetArtistInfo(artistId interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetArtistInfo", reflect.TypeOf((*MockUseCase)(nil).GetArtistInfo), artistId)
+}
+
 // MockRepository is a mock of Repository interface.
 type MockRepository struct {
 	ctrl     *gomock.Controller
@@ -32,6 +70,21 @@ func NewMockRepository(ctrl *gomock.Controller) *MockRepository {
 // EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockRepository) EXPECT() *MockRepositoryMockRecorder {
 	return m.recorder
+}
+
+// Get mocks base method.
+func (m *MockRepository) Get(artistId uint64) (artist.Base, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Get", artistId)
+	ret0, _ := ret[0].(artist.Base)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Get indicates an expected call of Get.
+func (mr *MockRepositoryMockRecorder) Get(artistId interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockRepository)(nil).Get), artistId)
 }
 
 // GetByAlbumId mocks base method.

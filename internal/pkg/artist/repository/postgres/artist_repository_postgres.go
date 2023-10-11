@@ -10,14 +10,10 @@ type Postgres struct {
 	Pool postgres.PgxIFace
 }
 
-func (repo *Postgres) GetTracks(artistId uint64) ([]artist.TrackInfoResponse, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (repo *Postgres) GetAlbums(artistId uint64) ([]artist.AlbumInfoResponse, error) {
-	//TODO implement me
-	panic("implement me")
+func NewPostgres(pool postgres.PgxIFace) Postgres {
+	return Postgres{
+		Pool: pool,
+	}
 }
 
 func (repo *Postgres) Get(artistId uint64) (artist.Base, error) {
@@ -32,28 +28,27 @@ func (repo *Postgres) Get(artistId uint64) (artist.Base, error) {
 	return result, nil
 }
 
-func NewPostgres(pool postgres.PgxIFace) Postgres {
-	return Postgres{
-		Pool: pool,
-	}
-}
-
 func (repo *Postgres) GetByTrackId(trackId uint64) ([]artist.Base, error) {
 	result := make([]artist.Base, 0)
+
 	query := "select artist.id, name, avatar from artist join artist_track on artist.id = artist_track.artist_id where artist_track.track_id = $1"
 	rows, err := repo.Pool.Query(context.Background(), query, trackId)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
+
 	for rows.Next() {
 		var a artist.Base
+
 		err := rows.Scan(&a.Id, &a.Name, &a.Avatar)
 		if err != nil {
 			return nil, err
 		}
+
 		result = append(result, a)
 	}
+
 	return result, nil
 }
 
