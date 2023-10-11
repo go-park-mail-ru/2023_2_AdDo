@@ -1,5 +1,6 @@
 import json
-
+#somebody please replace me asap
+DANGER_CONST = '2018-08-03'
 
 def create_artist_command(artist_name, artist_avatar):
     command = (
@@ -19,7 +20,7 @@ def create_album_command(artist_name, album_name, album_preview, release_album):
 
 def create_track_command(track_name, track_preview, track_content, album_name, artist_name):
     command = (
-        f"INSERT INTO track (name, preview, content)"
+        f"INSERT INTO track (name, preview, content, release_date)"
         f" VALUES ('{track_name}', '{track_preview}', '{track_content}');"
 
         f"INSERT INTO album_track (album_id, track_id)"
@@ -46,7 +47,7 @@ with open("data_for_db_filling.json") as file:
     conf = json.load(file)
 
 
-with open("migration_2.sql", "w") as file:
+with open("migrations/migration_2.sql", "w") as file:
     for artist in conf["artists"]:
         artist_name = artist["artist_name"]
 
@@ -70,6 +71,7 @@ with open("migration_2.sql", "w") as file:
             single = single.replace("'", "''")
             single_url = "/audio/" + artist_name.replace(" ", "_") + "/" + single.replace(" ", "_") + ".mp3"
             single_image = "/images/tracks/" + artist_name.replace(" ", "_") + "/" + single.replace(" ", "_") + ".jpg"
-            file.write(create_single_command(single, single_image, single_url, artist_name) + '\n')
+            file.write(create_album_command(artist_name, single, single_image, DANGER_CONST) + '\n')
+            file.write(create_track_command(single, single_image, single_url, single, artist_name) + '\n')
 
 file.close()

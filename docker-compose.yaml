@@ -19,8 +19,8 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - ./database/migration_1.sql:/docker-entrypoint-initdb.d/migration_1.sql
-      - ./database/migration_2.sql:/docker-entrypoint-initdb.d/migration_2.sql
+      - ./database/migrations/migration_1.sql:/docker-entrypoint-initdb.d/migration_1.sql
+      - ./database/migrations/migration_2.sql:/docker-entrypoint-initdb.d/migration_2.sql
       - ~/db-data:/var/lib/postgresql/data
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U musicon" ]
