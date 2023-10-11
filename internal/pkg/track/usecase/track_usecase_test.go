@@ -33,21 +33,21 @@ func TestGetAll(t *testing.T) {
 			{
 				Id:     1,
 				Name:   "Track 1",
-				Artist: []artist.Response{{Name: "Artist 1"}},
+				Artist: []artist.Base{{Name: "Artist 1"}},
 				Album:  []album.Response{{Name: "Album 1"}},
 			},
 			{
 				Id:     2,
 				Name:   "Track 2",
-				Artist: []artist.Response{{Name: "Artist 2"}},
+				Artist: []artist.Base{{Name: "Artist 2"}},
 				Album:  []album.Response{{Name: "Album 2"}},
 			},
 		}
 
 		mockTrackRepo.EXPECT().GetAll().Return(expectedTracks, nil)
-		mockArtistRepo.EXPECT().GetByTrackId(uint64(1)).Return([]artist.Response{{Name: "Artist 1"}}, nil)
+		mockArtistRepo.EXPECT().GetByTrackId(uint64(1)).Return([]artist.Base{{Name: "Artist 1"}}, nil)
 		mockAlbumRepo.EXPECT().GetByTrackId(uint64(1)).Return([]album.Response{{Name: "Album 1"}}, nil)
-		mockArtistRepo.EXPECT().GetByTrackId(uint64(2)).Return([]artist.Response{{Name: "Artist 2"}}, nil)
+		mockArtistRepo.EXPECT().GetByTrackId(uint64(2)).Return([]artist.Base{{Name: "Artist 2"}}, nil)
 		mockAlbumRepo.EXPECT().GetByTrackId(uint64(2)).Return([]album.Response{{Name: "Album 2"}}, nil)
 
 		tracks, err := useCase.GetAll()
@@ -77,7 +77,7 @@ func TestGetAll(t *testing.T) {
 
 	t.Run("ErrorGettingAlbums", func(t *testing.T) {
 		mockTrackRepo.EXPECT().GetAll().Return([]track.Response{{Id: 1}}, nil)
-		mockArtistRepo.EXPECT().GetByTrackId(uint64(1)).Return([]artist.Response{artist.Response{Name: "Artist 1"}}, nil)
+		mockArtistRepo.EXPECT().GetByTrackId(uint64(1)).Return([]artist.Base{artist.Base{Name: "Artist 1"}}, nil)
 		mockAlbumRepo.EXPECT().GetByTrackId(uint64(1)).Return(nil, errors.New("error getting albums"))
 
 		tracks, err := useCase.GetAll()
@@ -119,11 +119,11 @@ func TestTrack_addArtistAndAlbum(t *testing.T) {
 		},
 	}
 
-	mockArtistRepo.EXPECT().GetByTrackId(uint64(1)).Return([]artist.Response{{Name: "Artist 1"}}, nil)
+	mockArtistRepo.EXPECT().GetByTrackId(uint64(1)).Return([]artist.Base{{Name: "Artist 1"}}, nil)
 	mockAlbumRepo.EXPECT().GetByTrackId(uint64(1)).Return([]album.Response{{Name: "Album 1"}}, nil)
-	mockArtistRepo.EXPECT().GetByTrackId(uint64(2)).Return([]artist.Response{{Name: "Artist 2"}}, nil)
+	mockArtistRepo.EXPECT().GetByTrackId(uint64(2)).Return([]artist.Base{{Name: "Artist 2"}}, nil)
 	mockAlbumRepo.EXPECT().GetByTrackId(uint64(2)).Return([]album.Response{{Name: "Album 2"}}, nil)
-	mockArtistRepo.EXPECT().GetByTrackId(uint64(3)).Return([]artist.Response{{Name: "Artist 3"}}, nil)
+	mockArtistRepo.EXPECT().GetByTrackId(uint64(3)).Return([]artist.Base{{Name: "Artist 3"}}, nil)
 	mockAlbumRepo.EXPECT().GetByTrackId(uint64(3)).Return([]album.Response{{Name: "Album 3"}}, nil)
 
 	actual, err := useCase.addArtistAndAlbum(tracks)
@@ -132,21 +132,21 @@ func TestTrack_addArtistAndAlbum(t *testing.T) {
 		{
 			Id:        1,
 			Name:      "Track 1",
-			Artist:    []artist.Response{{Name: "Artist 1"}},
+			Artist:    []artist.Base{{Name: "Artist 1"}},
 			Album:     []album.Response{{Name: "Album 1"}},
 			PlayCount: 100,
 		},
 		{
 			Id:        2,
 			Name:      "Track 2",
-			Artist:    []artist.Response{{Name: "Artist 2"}},
+			Artist:    []artist.Base{{Name: "Artist 2"}},
 			Album:     []album.Response{{Name: "Album 2"}},
 			PlayCount: 20,
 		},
 		{
 			Id:        3,
 			Name:      "Track 3",
-			Artist:    []artist.Response{{Name: "Artist 3"}},
+			Artist:    []artist.Base{{Name: "Artist 3"}},
 			Album:     []album.Response{{Name: "Album 3"}},
 			PlayCount: 10,
 		},

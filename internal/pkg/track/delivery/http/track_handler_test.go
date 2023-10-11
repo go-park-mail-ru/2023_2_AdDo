@@ -37,13 +37,13 @@ func TestMusic(t *testing.T) {
 			{
 				Id:     1,
 				Name:   "Track 1",
-				Artist: []artist.Response{artist.Response{Name: "Artist 1"}},
+				Artist: []artist.Base{artist.Base{Name: "Artist 1"}},
 				Album:  []album.Response{album.Response{Name: "Album 1"}},
 			},
 			{
 				Id:     2,
 				Name:   "Track 2",
-				Artist: []artist.Response{artist.Response{Name: "Artist 2"}},
+				Artist: []artist.Base{artist.Base{Name: "Artist 2"}},
 				Album:  []album.Response{album.Response{Name: "Album 2"}},
 			},
 		}

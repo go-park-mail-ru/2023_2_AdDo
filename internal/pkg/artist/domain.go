@@ -1,33 +1,31 @@
 package artist
 
-type TrackInfoResponse struct {
-}
+import (
+	"main/internal/pkg/album"
+	"main/internal/pkg/track"
+)
 
-type AlbumInfoResponse struct {
-}
-
-type InfoResponse struct {
-	Id     uint64
-	Name   string
-	Avatar string
-	Track  []TrackInfoResponse
-	Album  []AlbumInfoResponse
+type Base struct {
+	Id     uint64 `json:"Id" example:"1"`
+	Name   string `json:"Name" example:"ArtistName"`
+	Avatar string `json:"Avatar" example:"ArtistAvatar"`
 }
 
 type Response struct {
 	Id     uint64 `json:"Id" example:"1"`
 	Name   string `json:"Name" example:"ArtistName"`
 	Avatar string `json:"Avatar" example:"ArtistAvatar"`
+	Albums []album.Base
+	Tracks []track.Response
 }
 
 type UseCase interface {
-	GetArtistInfo(artistId uint64) (InfoResponse, error)
+	GetArtistInfo(artistId uint64) (Response, error)
 }
 
 type Repository interface {
-	GetByTrackId(trackId uint64) ([]Response, error)
-	GetByAlbumId(albumId uint64) (Response, error)
-	GetTracks(artistId uint64) ([]TrackInfoResponse, error)
-	GetAlbums(artistId uint64) ([]AlbumInfoResponse, error)
-	Get(artistId uint64) (Response, error)
+	GetByTrackId(trackId uint64) ([]Base, error)
+	GetByAlbumId(albumId uint64) (Base, error)
+	GetTracks(artistId uint64) ([]track.Response, error)
+	Get(artistId uint64) (Base, error)
 }

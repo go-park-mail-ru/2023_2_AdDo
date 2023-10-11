@@ -2,6 +2,7 @@ package artist_delivery
 
 import (
 	"github.com/gorilla/csrf"
+	"github.com/gorilla/mux"
 	"main/internal/pkg/artist"
 	common_handler "main/internal/pkg/common/handler"
 	"main/internal/pkg/common/response"
@@ -20,10 +21,11 @@ func NewHandler(artistUseCase artist.UseCase) ArtistHandler {
 	}
 }
 
+// docs here
 func (handler *ArtistHandler) ArtistInfo(w http.ResponseWriter, r *http.Request) error {
 	w.Header().Set(session.XCsrfToken, csrf.Token(r))
 
-	artistId, err := strconv.Atoi(r.URL.Query().Get("id"))
+	artistId, err := strconv.Atoi(mux.Vars(r)["id"])
 	if err != nil {
 		return common_handler.StatusError{Code: http.StatusBadRequest, Err: err}
 	}

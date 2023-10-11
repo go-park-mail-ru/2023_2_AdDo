@@ -7,6 +7,7 @@ import (
 	"github.com/sirupsen/logrus"
 	httpSwagger "github.com/swaggo/http-swagger/v2"
 	_ "main/api/openapi"
+	album_delivery "main/internal/pkg/album/delivery/http"
 	artist_delivery "main/internal/pkg/artist/delivery/http"
 	common_handler "main/internal/pkg/common/handler"
 	common_middleware "main/internal/pkg/common/middleware"
@@ -35,7 +36,7 @@ import (
 
 // @host		musicon.space
 // @BasePath	/api/v1
-func New(userHandler user_delivery.UserHandler, trackHandler track_delivery.TrackHandler, artistHandler artist_delivery.ArtistHandler, logger *logrus.Logger) http.Handler {
+func New(userHandler user_delivery.UserHandler, trackHandler track_delivery.TrackHandler, artistHandler artist_delivery.ArtistHandler, albumHandler album_delivery.AlbumHandler, logger *logrus.Logger) http.Handler {
 	router := mux.NewRouter()
 
 	router.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
@@ -43,11 +44,17 @@ func New(userHandler user_delivery.UserHandler, trackHandler track_delivery.Trac
 	router.Handle("/api/v1/login", common_handler.Handler{H: userHandler.Login}).Methods("POST")
 	router.Handle("/api/v1/logout", common_handler.Handler{H: userHandler.LogOut}).Methods("POST")
 	router.Handle("/api/v1/listen", common_handler.Handler{H: trackHandler.Listen}).Methods("POST")
+	router.Handle("/api/v1/like/{id}", common_handler.Handler{H: trackHandler.Like}).Methods("POST")
 
-	router.Handle("/api/v1/artist", common_handler.Handler{H: artistHandler.ArtistInfo}).Methods("GET")
+	router.Handle("/api/v1/artist/{id}", common_handler.Handler{H: artistHandler.ArtistInfo}).Methods("GET")
+	router.Handle("/api/v1/album/{id}", common_handler.Handler{H: albumHandler.AlbumTracks}).Methods("GET")
+
 	router.Handle("/api/v1/auth", common_handler.Handler{H: userHandler.Auth}).Methods("GET")
 	router.Handle("/api/v1/me", common_handler.Handler{H: userHandler.Me}).Methods("GET")
-	router.Handle("/api/v1/music", common_handler.Handler{H: trackHandler.Music}).Methods("GET")
+	router.Handle("/api/v1/feed", common_handler.Handler{H: albumHandler.Feed}).Methods("GET")
+	router.Handle("/api/v1/new", common_handler.Handler{H: albumHandler.New}).Methods("GET")
+	router.Handle("/api/v1/most_liked", common_handler.Handler{H: albumHandler.MostLiked}).Methods("GET")
+	router.Handle("/api/v1/popular", common_handler.Handler{H: albumHandler.Popular}).Methods("GET")
 
 	corsMiddleware := handlers.CORS(
 		handlers.AllowedOrigins([]string{"http://82.146.45.164:8081"}),
