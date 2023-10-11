@@ -35,10 +35,10 @@ func (m *MockRepository) EXPECT() *MockRepositoryMockRecorder {
 }
 
 // GetByAlbumId mocks base method.
-func (m *MockRepository) GetByAlbumId(albumId uint64) (artist.Response, error) {
+func (m *MockRepository) GetByAlbumId(albumId uint64) (artist.Base, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetByAlbumId", albumId)
-	ret0, _ := ret[0].(artist.Response)
+	ret0, _ := ret[0].(artist.Base)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -50,10 +50,10 @@ func (mr *MockRepositoryMockRecorder) GetByAlbumId(albumId interface{}) *gomock.
 }
 
 // GetByTrackId mocks base method.
-func (m *MockRepository) GetByTrackId(trackId uint64) ([]artist.Response, error) {
+func (m *MockRepository) GetByTrackId(trackId uint64) ([]artist.Base, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetByTrackId", trackId)
-	ret0, _ := ret[0].([]artist.Response)
+	ret0, _ := ret[0].([]artist.Base)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

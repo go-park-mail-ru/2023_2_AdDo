@@ -56,3 +56,58 @@ func (p Postgres) GetByArtistId(artistId uint64) ([]album.Response, error) {
 
 	return result, nil
 }
+
+// query := "select id, name, preview, content from track order by release_date desc limit $1"
+
+func (p Postgres) GetByReleaseDate(limit uint32) ([]album.Base, error) {
+	query := "select id, name, preview from album order by release_date limit $1"
+	return p.getWithQuery(context.Background(), query, limit)
+}
+
+func (p Postgres) GetRandom(limit uint32) ([]album.Base, error) {
+	//query := "select id, name, preview from album group by rating limit $1"
+	query := "select id, name, preview from album limit $1"
+	return p.getWithQuery(context.Background(), query, limit)
+}
+
+func (p Postgres) GetByListenCount(limit uint32) ([]album.Base, error) {
+	query := "select id, name, preview from album order by play_count desc limit $1"
+	return p.getWithQuery(context.Background(), query, limit)
+}
+
+func (p Postgres) GetByLikeCount(limit uint32) ([]album.Base, error) {
+	query := "select id, name, preview from album order by rating desc limit $1"
+	return p.getWithQuery(context.Background(), query, limit)
+}
+
+func (p Postgres) Get(albumId uint64) (album.Base, error) {
+	var result album.Base
+
+	query := "select id, name, preview from album where id = $1"
+	err := p.Pool.QueryRow(context.Background(), query, albumId).Scan(&result.Id, &result.Name, &result.Preview)
+	if err != nil {
+		return result, err
+	}
+
+	return result, nil
+}
+
+func (p Postgres) getWithQuery(ctx context.Context, query string, args ...any) ([]album.Base, error) {
+	result := make([]album.Base, 0)
+	rows, err := p.Pool.Query(ctx, query, args...)
+	if err != nil {
+		return result, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var base album.Base
+		err = rows.Scan(&base.Id, base.Name, base.Preview)
+		if err != nil {
+			return nil, err
+		}
+		result = append(result, base)
+	}
+
+	return result, nil
+}

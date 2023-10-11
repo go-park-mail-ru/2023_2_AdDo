@@ -101,7 +101,7 @@ func (useCase *Default) Like(userId, trackId uint64) error {
 	return nil
 }
 
-//func (useCase *Default) GetFavourite(userId uint64) ([]track.Response, error) {
+//func (useCase *Default) GetFavourite(userId uint64) ([]track.Base, error) {
 //	tracks, err := useCase.repoTrack.GetByUserId(userId)
 //	if err != nil {
 //		return nil, track.ErrNoTracks

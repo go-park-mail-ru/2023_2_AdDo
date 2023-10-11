@@ -1,21 +1,28 @@
 package artist_usecase
 
 import (
+	"main/internal/pkg/album"
 	"main/internal/pkg/artist"
+	"main/internal/pkg/track"
 )
 
 type Default struct {
 	repoArtist artist.Repository
+	repoTrack  track.Repository
+	repoAlbum  album.Repository
 }
 
-func NewDefault(repository artist.Repository) Default {
+func NewDefault(artistRepo artist.Repository, repoTrack track.Repository, repoAlbum album.Repository) Default {
 	return Default{
-		repoArtist: repository,
+		repoArtist: artistRepo,
+		repoTrack:  repoTrack,
+		repoAlbum:  repoAlbum,
 	}
 }
 
-func (repo *Default) GetArtistInfo(artistId uint64) (artist.InfoResponse, error) {
-	var result artist.InfoResponse
+// в этой ручке получаем инфо, все альбомы, как в юзкейсе альбома, все треки, потом можно сделать пагинацию
+func (repo *Default) GetArtistInfo(artistId uint64) (artist.Response, error) {
+	var result artist.Response
 
 	artistBase, err := repo.repoArtist.Get(artistId)
 	if err != nil {
@@ -26,17 +33,18 @@ func (repo *Default) GetArtistInfo(artistId uint64) (artist.InfoResponse, error)
 	result.Name = artistBase.Name
 	result.Avatar = artistBase.Avatar
 
-	albums, err := repo.repoArtist.GetAlbums(artistId)
+	albums, err := repo.repoAlbum.GetByArtistId(artistId)
 	if err != nil {
 		return result, err
 	}
-	result.Album = albums
 
-	singles, err := repo.repoArtist.GetTracks(artistId)
+	result.Albums = albums
+
+	tracks, err := repo.repoTrack.GetByArtist(artistId)
 	if err != nil {
 		return result, err
 	}
-	result.Track = singles
+	result.Tracks = tracks
 
 	return result, nil
 }
