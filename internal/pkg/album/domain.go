@@ -27,8 +27,8 @@ type UseCase interface {
 
 type Repository interface {
 	Get(albumId uint64) (Base, error)
-	GetByTrackId(trackId uint64) ([]Response, error)
-	GetByArtistId(artistId uint64) ([]Response, error)
+	GetByTrackId(trackId uint64) ([]Base, error)
+	GetByArtistId(artistId uint64) ([]Base, error)
 	GetByLikeCount(limit uint32) ([]Base, error)
 	GetByReleaseDate(limit uint32) ([]Base, error)
 	GetByListenCount(limit uint32) ([]Base, error)
