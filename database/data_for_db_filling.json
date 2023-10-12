@@ -25,8 +25,7 @@
             "Wym Freestyle"
           ]
         }
-      ],
-      "singles": []
+      ]
     },
     {
       "artist_name": "Drake",
@@ -50,11 +49,21 @@
             "War",
             "When To Say When"
           ]
+        },
+        {
+          "album_name": "Slime You Out (feat. SZA)",
+          "album_release_date": "2023-09-15",
+          "tracks": [
+            "Slime You Out (feat. SZA)"
+          ]
+        },
+        {
+          "album_name": "On The Radar Freestyle (feat. Central Cee)",
+          "album_release_date": "2023-07-21",
+          "tracks": [
+            "On The Radar Freestyle (feat. Central Cee)"
+          ]
         }
-      ],
-      "singles": [
-        "Slime You Out (feat. SZA)",
-        "On The Radar Freestyle (feat. Central Cee)"
       ]
     },
     {
@@ -82,11 +91,21 @@
             "Sicko Mode (feat. Drake)",
             "Who What! (feat. Quavo)"
           ]
+        },
+        {
+          "album_name": "Escape Plan",
+          "album_release_date": "2021-11-05",
+          "tracks": [
+            "Escape Plan"
+          ]
+        },
+        {
+          "album_name": "Highest In The Room",
+          "album_release_date": "2019-10-04",
+          "tracks": [
+            "Highest In The Room"
+          ]
         }
-      ],
-      "singles": [
-        "Escape Plan",
-        "Highest In The Room"
       ]
     }
   ]
