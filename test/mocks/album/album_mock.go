@@ -11,6 +11,104 @@ import (
 	gomock "github.com/golang/mock/gomock"
 )
 
+// MockUseCase is a mock of UseCase interface.
+type MockUseCase struct {
+	ctrl     *gomock.Controller
+	recorder *MockUseCaseMockRecorder
+}
+
+// MockUseCaseMockRecorder is the mock recorder for MockUseCase.
+type MockUseCaseMockRecorder struct {
+	mock *MockUseCase
+}
+
+// NewMockUseCase creates a new mock instance.
+func NewMockUseCase(ctrl *gomock.Controller) *MockUseCase {
+	mock := &MockUseCase{ctrl: ctrl}
+	mock.recorder = &MockUseCaseMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockUseCase) EXPECT() *MockUseCaseMockRecorder {
+	return m.recorder
+}
+
+// GetAlbum mocks base method.
+func (m *MockUseCase) GetAlbum(albumId uint64) (album.Response, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetAlbum", albumId)
+	ret0, _ := ret[0].(album.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetAlbum indicates an expected call of GetAlbum.
+func (mr *MockUseCaseMockRecorder) GetAlbum(albumId interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAlbum", reflect.TypeOf((*MockUseCase)(nil).GetAlbum), albumId)
+}
+
+// GetMostLiked mocks base method.
+func (m *MockUseCase) GetMostLiked() ([]album.Response, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetMostLiked")
+	ret0, _ := ret[0].([]album.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetMostLiked indicates an expected call of GetMostLiked.
+func (mr *MockUseCaseMockRecorder) GetMostLiked() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetMostLiked", reflect.TypeOf((*MockUseCase)(nil).GetMostLiked))
+}
+
+// GetNew mocks base method.
+func (m *MockUseCase) GetNew() ([]album.Response, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetNew")
+	ret0, _ := ret[0].([]album.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetNew indicates an expected call of GetNew.
+func (mr *MockUseCaseMockRecorder) GetNew() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetNew", reflect.TypeOf((*MockUseCase)(nil).GetNew))
+}
+
+// GetPopular mocks base method.
+func (m *MockUseCase) GetPopular() ([]album.Response, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetPopular")
+	ret0, _ := ret[0].([]album.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetPopular indicates an expected call of GetPopular.
+func (mr *MockUseCaseMockRecorder) GetPopular() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPopular", reflect.TypeOf((*MockUseCase)(nil).GetPopular))
+}
+
+// GetRandom mocks base method.
+func (m *MockUseCase) GetRandom() ([]album.Response, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetRandom")
+	ret0, _ := ret[0].([]album.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetRandom indicates an expected call of GetRandom.
+func (mr *MockUseCaseMockRecorder) GetRandom() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetRandom", reflect.TypeOf((*MockUseCase)(nil).GetRandom))
+}
+
 // MockRepository is a mock of Repository interface.
 type MockRepository struct {
 	ctrl     *gomock.Controller
@@ -34,11 +132,26 @@ func (m *MockRepository) EXPECT() *MockRepositoryMockRecorder {
 	return m.recorder
 }
 
+// Get mocks base method.
+func (m *MockRepository) Get(albumId uint64) (album.Base, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Get", albumId)
+	ret0, _ := ret[0].(album.Base)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Get indicates an expected call of Get.
+func (mr *MockRepositoryMockRecorder) Get(albumId interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockRepository)(nil).Get), albumId)
+}
+
 // GetByArtistId mocks base method.
-func (m *MockRepository) GetByArtistId(artistId uint64) ([]album.Response, error) {
+func (m *MockRepository) GetByArtistId(artistId uint64) ([]album.Base, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetByArtistId", artistId)
-	ret0, _ := ret[0].([]album.Response)
+	ret0, _ := ret[0].([]album.Base)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -49,11 +162,56 @@ func (mr *MockRepositoryMockRecorder) GetByArtistId(artistId interface{}) *gomoc
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByArtistId", reflect.TypeOf((*MockRepository)(nil).GetByArtistId), artistId)
 }
 
+// GetByLikeCount mocks base method.
+func (m *MockRepository) GetByLikeCount(limit uint32) ([]album.Base, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetByLikeCount", limit)
+	ret0, _ := ret[0].([]album.Base)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetByLikeCount indicates an expected call of GetByLikeCount.
+func (mr *MockRepositoryMockRecorder) GetByLikeCount(limit interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByLikeCount", reflect.TypeOf((*MockRepository)(nil).GetByLikeCount), limit)
+}
+
+// GetByListenCount mocks base method.
+func (m *MockRepository) GetByListenCount(limit uint32) ([]album.Base, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetByListenCount", limit)
+	ret0, _ := ret[0].([]album.Base)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetByListenCount indicates an expected call of GetByListenCount.
+func (mr *MockRepositoryMockRecorder) GetByListenCount(limit interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByListenCount", reflect.TypeOf((*MockRepository)(nil).GetByListenCount), limit)
+}
+
+// GetByReleaseDate mocks base method.
+func (m *MockRepository) GetByReleaseDate(limit uint32) ([]album.Base, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetByReleaseDate", limit)
+	ret0, _ := ret[0].([]album.Base)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetByReleaseDate indicates an expected call of GetByReleaseDate.
+func (mr *MockRepositoryMockRecorder) GetByReleaseDate(limit interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByReleaseDate", reflect.TypeOf((*MockRepository)(nil).GetByReleaseDate), limit)
+}
+
 // GetByTrackId mocks base method.
-func (m *MockRepository) GetByTrackId(trackId uint64) ([]album.Response, error) {
+func (m *MockRepository) GetByTrackId(trackId uint64) ([]album.Base, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetByTrackId", trackId)
-	ret0, _ := ret[0].([]album.Response)
+	ret0, _ := ret[0].([]album.Base)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -62,4 +220,19 @@ func (m *MockRepository) GetByTrackId(trackId uint64) ([]album.Response, error) 
 func (mr *MockRepositoryMockRecorder) GetByTrackId(trackId interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByTrackId", reflect.TypeOf((*MockRepository)(nil).GetByTrackId), trackId)
+}
+
+// GetRandom mocks base method.
+func (m *MockRepository) GetRandom(limit uint32) ([]album.Base, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetRandom", limit)
+	ret0, _ := ret[0].([]album.Base)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetRandom indicates an expected call of GetRandom.
+func (mr *MockRepositoryMockRecorder) GetRandom(limit interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetRandom", reflect.TypeOf((*MockRepository)(nil).GetRandom), limit)
 }

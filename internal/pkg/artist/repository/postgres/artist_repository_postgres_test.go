@@ -17,7 +17,7 @@ func TestArtistRepository_GetByTrackId(t *testing.T) {
 
 	trackId := uint64(1)
 
-	expectedArtists := []artist.Response{artist.Response{
+	expectedArtists := []artist.Base{artist.Base{
 		Id:     1,
 		Name:   "ArtistName",
 		Avatar: "Url to artist name avatar",
@@ -54,7 +54,7 @@ func TestArtistRepository_GetByAlbumId(t *testing.T) {
 
 	albumId := uint64(1)
 
-	expectedArtists := artist.Response{
+	expectedArtists := artist.Base{
 		Id:     1,
 		Name:   "ArtistName",
 		Avatar: "Url to artist name avatar",
