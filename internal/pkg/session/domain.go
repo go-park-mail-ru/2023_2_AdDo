@@ -7,6 +7,7 @@ import (
 
 type UseCase interface {
 	CheckSession(sessionId string) (bool, error)
+	GetUserId(sessionId string) (uint64, error)
 }
 
 type Repository interface {

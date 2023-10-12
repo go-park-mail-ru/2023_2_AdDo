@@ -48,6 +48,21 @@ func (mr *MockUseCaseMockRecorder) CheckSession(sessionId interface{}) *gomock.C
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CheckSession", reflect.TypeOf((*MockUseCase)(nil).CheckSession), sessionId)
 }
 
+// GetUserId mocks base method.
+func (m *MockUseCase) GetUserId(sessionId string) (uint64, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetUserId", sessionId)
+	ret0, _ := ret[0].(uint64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetUserId indicates an expected call of GetUserId.
+func (mr *MockUseCaseMockRecorder) GetUserId(sessionId interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserId", reflect.TypeOf((*MockUseCase)(nil).GetUserId), sessionId)
+}
+
 // MockRepository is a mock of Repository interface.
 type MockRepository struct {
 	ctrl     *gomock.Controller
