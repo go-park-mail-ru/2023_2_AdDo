@@ -17,50 +17,13 @@ func NewPostgres(pool postgres.PgxIFace) Postgres {
 }
 
 func (p Postgres) GetByTrackId(trackId uint64) ([]album.Base, error) {
-	result := make([]album.Base, 0)
-
 	query := "select album.id, name, preview from album join album_track on album.id = album_track.album_id where album_track.track_id = $1"
-	rows, err := p.Pool.Query(context.Background(), query, trackId)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	for rows.Next() {
-		var a album.Base
-
-		err := rows.Scan(&a.Id, &a.Name, &a.Preview)
-		if err != nil {
-			return nil, err
-		}
-
-		result = append(result, a)
-	}
-	return result, nil
+	return p.getWithQuery(context.Background(), query, trackId)
 }
 
 func (p Postgres) GetByArtistId(artistId uint64) ([]album.Base, error) {
-	result := make([]album.Base, 0)
 	query := "select id, name, preview from album where artist_id = $1"
-
-	rows, err := p.Pool.Query(context.Background(), query, artistId)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	for rows.Next() {
-		var a album.Base
-
-		err := rows.Scan(&a.Id, &a.Name, &a.Preview)
-		if err != nil {
-			return nil, err
-		}
-
-		result = append(result, a)
-	}
-
-	return result, nil
+	return p.getWithQuery(context.Background(), query, artistId)
 }
 
 // query := "select id, name, preview, content from track order by release_date desc limit $1"
@@ -108,7 +71,7 @@ func (p Postgres) getWithQuery(ctx context.Context, query string, args ...any) (
 
 	for rows.Next() {
 		var base album.Base
-		err = rows.Scan(&base.Id, base.Name, base.Preview)
+		err = rows.Scan(&base.Id, &base.Name, &base.Preview)
 		if err != nil {
 			return nil, err
 		}
