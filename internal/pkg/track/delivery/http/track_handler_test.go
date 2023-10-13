@@ -5,12 +5,14 @@ import (
 	"encoding/json"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
+	"main/internal/pkg/session"
 	"main/internal/pkg/track"
 	session_mock "main/test/mocks/session"
 	track_mock "main/test/mocks/track"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 )
 
 //func TestMusic(t *testing.T) {
@@ -114,6 +116,47 @@ func TestListen(t *testing.T) {
 
 		mockTrackUseCase.EXPECT().Listen(trackId.Id).Return(nil)
 		err = handler.Listen(w, req)
+
+		assert.Nil(t, err)
+		assert.Equal(t, http.StatusOK, w.Code)
+	})
+}
+
+func TestLike(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockTrackUseCase := track_mock.NewMockUseCase(ctrl)
+	mockSessionUseCase := session_mock.NewMockUseCase(ctrl)
+
+	handler := &TrackHandler{
+		trackUseCase:   mockTrackUseCase,
+		sessionUseCase: mockSessionUseCase,
+	}
+
+	t.Run("Success", func(t *testing.T) {
+		trackId := track.Id{Id: 1}
+		requestBody, err := json.Marshal(trackId)
+		assert.NoError(t, err)
+
+		const sessionId = "sessionID"
+		const userId uint64 = 999
+		cookie := http.Cookie{
+			Name:     session.CookieName,
+			Value:    sessionId,
+			Expires:  time.Now().Add(session.TimeToLiveCookie),
+			Secure:   true,
+			HttpOnly: true,
+		}
+
+		req := httptest.NewRequest(http.MethodPost, "/like", bytes.NewBuffer(requestBody))
+		req.AddCookie(&cookie)
+		w := httptest.NewRecorder()
+
+		mockSessionUseCase.EXPECT().GetUserId(sessionId).Return(userId, nil)
+		mockTrackUseCase.EXPECT().Like(userId, trackId.Id).Return(nil)
+
+		err = handler.Like(w, req)
 
 		assert.Nil(t, err)
 		assert.Equal(t, http.StatusOK, w.Code)
