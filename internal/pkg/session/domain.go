@@ -17,7 +17,7 @@ type Repository interface {
 }
 
 const CookieName = "JSESSIONID"
-const TimeToLiveCookie = 1 * time.Minute
+const TimeToLiveCookie = 240 * time.Minute
 const TimeToLiveCSRF = 24 * 60 * 60
 
 var CSRFKey = []byte("6rOD7Jb4gwBISPPd4T2CVDHEILjr4rq2")

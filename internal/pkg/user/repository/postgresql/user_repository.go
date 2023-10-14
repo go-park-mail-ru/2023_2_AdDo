@@ -2,9 +2,10 @@ package user_repository
 
 import (
 	"context"
+	"fmt"
 	postgres "main/internal/pkg/common/pgxiface"
 	"main/internal/pkg/common/utils"
-	"main/internal/pkg/user"
+	user_domain "main/internal/pkg/user"
 )
 
 type Postgres struct {
@@ -42,4 +43,33 @@ func (db *Postgres) CheckEmailAndPassword(email, password string) (uint64, error
 	}
 
 	return id, nil
+}
+
+func (db *Postgres) UpdateAvatarPath(userId uint64, path string) error {
+	_, err := db.Pool.Exec(context.Background(), "update profile set avatar_url = $1 where id = $2", path, userId)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (db *Postgres) GetAvatarPath(userId uint64) (string, error) {
+	var path string
+	err := db.Pool.QueryRow(context.Background(), "select avatar_url from profile where id = $1", userId).Scan(&path)
+	fmt.Printf("avatar_url is <%s>\n", path)
+	if err != nil {
+		return "", err
+	}
+
+	return path, nil
+}
+
+func (db *Postgres) RemoveAvatarPath(userId uint64) error {
+	_, err := db.Pool.Exec(context.Background(), "update profile set avatar_url = NULL where id = $1", userId)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

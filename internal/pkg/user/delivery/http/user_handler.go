@@ -2,13 +2,14 @@ package user_delivery
 
 import (
 	"encoding/json"
-	"github.com/gorilla/csrf"
 	common_handler "main/internal/pkg/common/handler"
 	"main/internal/pkg/common/response"
 	"main/internal/pkg/session"
 	user_domain "main/internal/pkg/user"
 	"net/http"
 	"time"
+
+	"github.com/gorilla/csrf"
 )
 
 type UserHandler struct {
@@ -69,11 +70,6 @@ func (handler *UserHandler) SignUp(w http.ResponseWriter, r *http.Request) error
 // @Router			/login [post]
 func (handler *UserHandler) Login(w http.ResponseWriter, r *http.Request) error {
 	var credentials user_domain.UserCredentials
-
-	err := credentials.Validate()
-	if err != nil {
-		return common_handler.StatusError{Code: http.StatusBadRequest, Err: err}
-	}
 
 	if err := json.NewDecoder(r.Body).Decode(&credentials); err != nil {
 		return common_handler.StatusError{Code: http.StatusBadRequest, Err: err}
@@ -160,5 +156,53 @@ func (handler *UserHandler) Me(w http.ResponseWriter, r *http.Request) error {
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}
 
+	return nil
+}
+
+// Me @Description	get user info
+// @Tags			user
+// @Security		cookieAuth
+// @Security		csrfToken
+// @Success		200
+// @Failure		401	{string}	errMsg
+// @Failure		409	{string}	errMsg
+// @Failure		500	{string}	errMsg
+// @Router			/upload_avatar [post]
+func (handler *UserHandler) UploadAvatar(w http.ResponseWriter, r *http.Request) error {
+	sessionId, err := response.GetCookie(r)
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusUnauthorized, Err: err}
+	}
+
+	_, err = handler.userUseCase.Auth(sessionId)
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusUnauthorized, Err: err}
+	}
+
+	src, hdr, err := r.FormFile("photo")
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusBadRequest, Err: err}
+	}
+	defer src.Close()
+
+	err = handler.userUseCase.UploadAvatar(sessionId, src, hdr.Size)
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusConflict, Err: err}
+	}
+
+	return nil
+}
+
+// docs here
+func (handler *UserHandler) RemoveAvatar(w http.ResponseWriter, r *http.Request) error {
+	sessionId, err := response.GetCookie(r)
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusUnauthorized, Err: err}
+	}
+
+	if err = handler.userUseCase.RemoveAvatar(sessionId); err != nil {
+		return common_handler.StatusError{Code: http.StatusConflict, Err: err}
+	}
+	
 	return nil
 }
