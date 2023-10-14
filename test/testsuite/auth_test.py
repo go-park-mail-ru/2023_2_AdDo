@@ -25,10 +25,7 @@ class AuthTest(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertNotEqual(response.cookies['JSESSIONID'], "")
 
-        cookies = {
-            'X-Csrf-Token': pre_response.cookies['X-Csrf-Token'],
-            'JSESSIONID': response.cookies['JSESSIONID']
-        }
+        cookies['JSESSIONID'] = response.cookies['JSESSIONID']
 
         response = requests.get(url + '/auth', headers=headers, cookies=cookies)
         self.assertEqual(response.status_code, 200)
