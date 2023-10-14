@@ -29,7 +29,7 @@ func (p Postgres) GetByArtistId(artistId uint64) ([]album.Base, error) {
 // query := "select id, name, preview, content from track order by release_date desc limit $1"
 
 func (p Postgres) GetByReleaseDate(limit uint32) ([]album.Base, error) {
-	query := "select id, name, preview from album order by release_date limit $1"
+	query := "select id, name, preview from album order by release_date desc limit $1"
 	return p.getWithQuery(context.Background(), query, limit)
 }
 
