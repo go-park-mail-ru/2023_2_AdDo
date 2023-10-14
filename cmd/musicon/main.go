@@ -1,8 +1,8 @@
 package main
 
 import (
-	_ "github.com/lib/pq"
 	logger_init "main/init/logger"
+	init_minio "main/init/minio"
 	init_db "main/init/postgres_db"
 	init_redis "main/init/redis_db"
 	router_init "main/init/router"
@@ -12,6 +12,7 @@ import (
 	artist_delivery "main/internal/pkg/artist/delivery/http"
 	artist_repository "main/internal/pkg/artist/repository/postgres"
 	artist_usecase "main/internal/pkg/artist/usecase"
+	avatar_repository "main/internal/pkg/avatar/repository"
 	session_repository_redis "main/internal/pkg/session/repository/redis"
 	session_usecase "main/internal/pkg/session/usecase"
 	track_delivery "main/internal/pkg/track/delivery/http"
@@ -21,6 +22,8 @@ import (
 	user_repository "main/internal/pkg/user/repository/postgresql"
 	user_usecase "main/internal/pkg/user/usecase"
 	"net/http"
+
+	_ "github.com/lib/pq"
 )
 
 const EnvPostgresQueryName = "DATABASE_URL"
@@ -41,17 +44,24 @@ func main() {
 	}
 	defer redis.Close()
 
+	minio, err := init_minio.InitMinio()
+	if err != nil {
+		logger.Fatalf("error minio connecting %v", err)
+	}
+	// defer minio.Close()
+
 	sessionRepo := session_repository_redis.NewRedis(redis)
 	userRepo := user_repository.NewPostgres(postgres)
 	trackRepo := track_repository.NewPostgres(postgres)
 	albumRepo := album_repository.NewPostgres(postgres)
 	artistRepo := artist_repository.NewPostgres(postgres)
+	avatarRepo := avatar_repository.NewMinio(minio)
 	logger.Infoln("Repositories initialized")
 
 	albumUseCase := album_usecase.NewDefault(&artistRepo, trackRepo, albumRepo)
 	artistUseCase := artist_usecase.NewDefault(&artistRepo, trackRepo, albumRepo)
 	sessionUseCase := session_usecase.NewDefault(sessionRepo)
-	userUseCase := user_usecase.NewWithStatefulSessions(userRepo, sessionRepo)
+	userUseCase := user_usecase.NewWithStatefulSessions(userRepo, sessionRepo, avatarRepo)
 	trackUseCase := track_usecase.NewDefault(trackRepo, &artistRepo, albumRepo)
 	logger.Infoln("UseCases initialized")
 

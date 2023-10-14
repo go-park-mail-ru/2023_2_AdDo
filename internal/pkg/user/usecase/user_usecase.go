@@ -1,19 +1,24 @@
 package user_usecase
 
 import (
+	"fmt"
+	avatar_domain "main/internal/pkg/avatar"
 	"main/internal/pkg/session"
-	"main/internal/pkg/user"
+	user_domain "main/internal/pkg/user"
+	"mime/multipart"
 )
 
 type WithStatefulSessions struct {
-	UserRepo user_domain.Repository
-	AuthRepo session.Repository
+	UserRepo   user_domain.Repository
+	AuthRepo   session.Repository
+	AvatarRepo avatar_domain.S3Repository
 }
 
-func NewWithStatefulSessions(userRepo user_domain.Repository, authRepo session.Repository) WithStatefulSessions {
+func NewWithStatefulSessions(userRepo user_domain.Repository, authRepo session.Repository, avatarRepo avatar_domain.S3Repository) WithStatefulSessions {
 	return WithStatefulSessions{
-		UserRepo: userRepo,
-		AuthRepo: authRepo,
+		UserRepo:   userRepo,
+		AuthRepo:   authRepo,
+		AvatarRepo: avatarRepo,
 	}
 }
 
@@ -68,5 +73,64 @@ func (useCase *WithStatefulSessions) Logout(sessionId string) error {
 	if err != nil {
 		return session.ErrSessionDoesNotExist
 	}
+	return nil
+}
+
+func (useCase *WithStatefulSessions) UploadAvatar(sessionId string, src multipart.File, size int64) error {
+	id, err := useCase.AuthRepo.Get(sessionId)
+	if err != nil {
+		return session.ErrSessionDoesNotExist
+	}
+
+	oldPath, _ := useCase.UserRepo.GetAvatarPath(id)
+	fmt.Printf("oldPath is <%s>\n", oldPath)
+
+	path, err := useCase.AvatarRepo.Create(avatar_domain.Avatar{
+		Payload:     src,
+		PayloadSize: size,
+		UserId:      id,
+	})
+	if err != nil {
+		return err
+	}
+	fmt.Println("Create avatar record")
+
+	err = useCase.UserRepo.UpdateAvatarPath(id, path)
+	if err != nil {
+		return err
+	}
+	fmt.Println("Update db")
+
+	if oldPath != "" {
+		useCase.AvatarRepo.Remove(oldPath)
+	}
+	fmt.Println("Remove old file")
+
+	return nil
+}
+
+// docs here
+func (useCase *WithStatefulSessions) RemoveAvatar(sessionId string) error {
+	id, err := useCase.AuthRepo.Get(sessionId)
+	if err != nil {
+		return session.ErrSessionDoesNotExist
+	}
+
+	oldPath, _ := useCase.UserRepo.GetAvatarPath(id)
+	fmt.Printf("oldPath is <%s>\n", oldPath)
+
+	if oldPath == "" {
+		return user_domain.ErrAvatarDoesNotExist
+	}
+
+	useCase.AvatarRepo.Remove(oldPath)
+	fmt.Println("Remove old file")
+
+	err = useCase.UserRepo.RemoveAvatarPath(id)
+	if err != nil {
+		return err
+	}
+	fmt.Println("Remove record from db")
+
 	return nil
 }

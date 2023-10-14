@@ -56,6 +56,9 @@ func New(userHandler user_delivery.UserHandler, trackHandler track_delivery.Trac
 	router.Handle("/api/v1/most_liked", common_handler.Handler{H: albumHandler.MostLiked}).Methods("GET")
 	router.Handle("/api/v1/popular", common_handler.Handler{H: albumHandler.Popular}).Methods("GET")
 
+	router.Handle("/api/v1/upload_avatar", common_handler.Handler{H: userHandler.UploadAvatar}).Methods("POST")
+	router.Handle("/api/v1/remove_avatar", common_handler.Handler{H: userHandler.RemoveAvatar}).Methods("PUT")
+
 	corsMiddleware := handlers.CORS(
 		handlers.AllowedOrigins([]string{"http://82.146.45.164:8081"}),
 		handlers.AllowedMethods([]string{"POST", "GET", "PUT", "DELETE", "OPTIONS"}),

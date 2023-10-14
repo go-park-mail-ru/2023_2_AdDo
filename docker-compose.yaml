@@ -1,11 +1,32 @@
 version: '3.0'
 
 services:
+
+  service-minio:
+    image: minio/minio:latest
+    command: server --console-address ":9001" /data/
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: musicon
+      MINIO_ROOT_PASSWORD: tfteSlswRu7BJ86wekitnifILbZam1KYY3TG
+    volumes:
+      - ~/minio:/data
+      - /etc/localtime:/etc/localtime:ro
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+ 
   service-db-redis:
     restart: always
     image: redis
     ports:
       - "6379:6379"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
     healthcheck:
       test: [ "CMD", "redis-cli", "ping" ]
       interval: 10s
@@ -22,6 +43,7 @@ services:
       - ./database/migrations/migration_1.sql:/docker-entrypoint-initdb.d/migration_1.sql
       - ./database/migrations/migration_2.sql:/docker-entrypoint-initdb.d/migration_2.sql
       - ~/db-data:/var/lib/postgresql/data
+      - /etc/localtime:/etc/localtime:ro
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U musicon" ]
       interval: 10s
@@ -37,10 +59,13 @@ services:
         condition: service_healthy
       service-db-redis:
         condition: service_healthy
+      service-minio:
+        condition: service_healthy
     ports:
       - "8080:8080"
     environment:
       - DATABASE_URL=postgres://musicon:musicon@service-db-postgres:5432/musicon
+      - /etc/localtime:/etc/localtime:ro
 
   wait-musicon:
     image: alpine
