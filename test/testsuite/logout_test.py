@@ -4,7 +4,7 @@ import requests
 url = 'http://localhost:8080/api/v1'
 
 
-class LoginTest(unittest.TestCase):
+class LogoutTest(unittest.TestCase):
     def test_logout_success(self):
         pre_response = requests.get(url + '/album/1')
 

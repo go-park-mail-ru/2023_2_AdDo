@@ -4,8 +4,8 @@ import requests
 url = 'http://localhost:8080/api/v1'
 
 
-class AuthTest(unittest.TestCase):
-    def test_auth_success(self):
+class MeTest(unittest.TestCase):
+    def test_me_success(self):
         pre_response = requests.get(url + '/album/1')
 
         headers = {
