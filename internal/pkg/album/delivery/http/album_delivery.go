@@ -1,6 +1,7 @@
 package album_delivery
 
 import (
+	"github.com/gorilla/csrf"
 	"github.com/gorilla/mux"
 	"main/internal/pkg/album"
 	common_handler "main/internal/pkg/common/handler"
@@ -75,6 +76,7 @@ func (handler *AlbumHandler) Popular(w http.ResponseWriter, r *http.Request) err
 
 // docs here
 func (handler *AlbumHandler) AlbumTracks(w http.ResponseWriter, r *http.Request) error {
+	w.Header().Set(session.XCsrfToken, csrf.Token(r))
 	albumId, err := strconv.Atoi(mux.Vars(r)["id"])
 	if err != nil {
 		return common_handler.StatusError{Code: http.StatusBadRequest, Err: err}
