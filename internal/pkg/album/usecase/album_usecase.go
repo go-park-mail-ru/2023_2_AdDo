@@ -6,16 +6,6 @@ import (
 	"main/internal/pkg/track"
 )
 
-//type UseCase interface {
-//	GetRandom() ([]Base, error)
-//	GetMostLiked() ([]Base, error)
-//	GetPopular() ([]Base, error)
-//	GetNew() ([]Base, error)
-//
-//	GetByTrackId(trackId uint64) ([]Base, error)
-//	GetByArtistId(artistId uint64) ([]Base, error)
-//}
-
 type Default struct {
 	repoArtist artist.Repository
 	repoTrack  track.Repository
