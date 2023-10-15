@@ -2,6 +2,7 @@ package user_repository
 
 import (
 	"context"
+	"github.com/jackc/pgx/v5/pgtype"
 	postgres "main/internal/pkg/common/pgxiface"
 	"main/internal/pkg/common/utils"
 	"main/internal/pkg/user"
@@ -26,11 +27,14 @@ func (db *Postgres) Create(user user_domain.User) error {
 
 func (db *Postgres) GetById(id uint64) (user_domain.User, error) {
 	user := user_domain.User{Id: id}
-	err := db.Pool.QueryRow(context.Background(), "select email, nickname, birth_date, avatar_url from profile where id = $1", id).Scan(&user.Email, &user.Username, &user.BirthDate, &user.Avatar)
-	if err != nil {
-		return user, err
-	}
-	return user, nil
+	var dt pgtype.Date
+	var avatar pgtype.Text
+
+	err := db.Pool.QueryRow(context.Background(), "select email, nickname, birth_date, avatar_url from profile where id = $1", id).Scan(&user.Email, &user.Username, &dt, &avatar)
+
+	user.BirthDate = dt.Time.Format("2006-01-02")
+	user.Avatar = avatar.String
+	return user, err
 }
 
 func (db *Postgres) CheckEmailAndPassword(email, password string) (uint64, error) {
