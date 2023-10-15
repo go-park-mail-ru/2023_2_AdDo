@@ -34,6 +34,7 @@ require (
 	github.com/go-openapi/spec v0.20.6 // indirect
 	github.com/go-openapi/swag v0.19.15 // indirect
 	github.com/gorilla/securecookie v1.1.1 // indirect
+	github.com/infiniteloopcloud/xss-validator v0.0.0-20220701051113-03673195f8e1 // indirect
 	github.com/jackc/chunkreader/v2 v2.0.1 // indirect
 	github.com/jackc/pgconn v1.14.1 // indirect
 	github.com/jackc/pgio v1.0.0 // indirect

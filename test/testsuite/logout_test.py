@@ -30,3 +30,6 @@ class LogoutTest(unittest.TestCase):
         response = requests.post(url + '/logout', headers=headers, cookies=cookies)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.cookies, {})
+
+logout_test = LogoutTest()
+logout_test.test_logout_success()

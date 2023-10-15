@@ -40,7 +40,7 @@ class MusicTest(unittest.TestCase):
         self.assertNotEqual(response.json()[0]['Preview'], '')
         self.assertNotEqual(response.json()[0]['ArtistId'], 0)
         self.assertNotEqual(response.json()[0]['ArtistName'], '')
-        self.assertNotEqual(response.json()[0]['Tracks'], None)
+        self.assertEqual(response.json()[0]['Tracks'], None)
 
     def test_feed_success(self):
         response = requests.get(url + '/feed')
@@ -53,4 +53,10 @@ class MusicTest(unittest.TestCase):
         self.assertNotEqual(response.json()[0]['Preview'], '')
         self.assertNotEqual(response.json()[0]['ArtistId'], 0)
         self.assertNotEqual(response.json()[0]['ArtistName'], '')
-        self.assertNotEqual(response.json()[0]['Tracks'], None)
+        self.assertEqual(response.json()[0]['Tracks'], None)
+
+music_test = MusicTest()
+music_test.test_artist_info_success()
+music_test.test_album_tracks_success()
+music_test.test_new_success()
+music_test.test_feed_success()

@@ -47,6 +47,7 @@ func (useCase *WithStatefulSessions) GetUserInfo(sessionId string) (user_domain.
 	}
 
 	u, err := useCase.UserRepo.GetById(id)
+
 	if err != nil {
 		return u, err
 	}

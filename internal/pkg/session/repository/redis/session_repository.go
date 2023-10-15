@@ -28,6 +28,7 @@ func (redis *Redis) Create(userId uint64) (string, error) {
 
 func (redis *Redis) Get(sessionId string) (uint64, error) {
 	userId, err := redis.database.Get(context.Background(), sessionId).Uint64()
+
 	if err != nil {
 		return 0, err
 	}

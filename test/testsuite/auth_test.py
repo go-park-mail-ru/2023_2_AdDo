@@ -29,3 +29,6 @@ class AuthTest(unittest.TestCase):
 
         response = requests.get(url + '/auth', headers=headers, cookies=cookies)
         self.assertEqual(response.status_code, 200)
+
+auth_test = AuthTest()
+auth_test.test_auth_success()
