@@ -24,15 +24,18 @@ class MeTest(unittest.TestCase):
         response = requests.post(url + "/sign_up", headers=headers, json=register_data, cookies=cookies)
         self.assertEqual(response.status_code, 200)
         self.assertNotEqual(response.cookies['JSESSIONID'], "")
-
         cookies['JSESSIONID'] = response.cookies['JSESSIONID']
 
         response = requests.get(url + '/me', headers=headers, cookies=cookies)
-        self.assertEqual(response.status_code, 200)
+        print(response.text)
 
+        self.assertEqual(response.status_code, 200)
         self.assertNotEqual(response.json()['Id'], 0)
         self.assertEqual(response.json()['Username'], 'username')
         self.assertEqual(response.json()['Email'], 'alex@mail.ru')
         self.assertEqual(response.json()['Password'], 'userPassword')
         self.assertEqual(response.json()['BirthDate'], '12-01-2003')
         self.assertEqual(response.json()['Avatar'], '')
+
+me_test = MeTest()
+me_test.test_me_success()

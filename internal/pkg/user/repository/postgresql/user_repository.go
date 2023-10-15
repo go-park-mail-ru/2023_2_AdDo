@@ -21,7 +21,6 @@ func (db *Postgres) Create(user user_domain.User) error {
 	if err != nil {
 		return err
 	}
-
 	return nil
 }
 
