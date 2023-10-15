@@ -2,6 +2,7 @@ package user_domain
 
 import (
 	"errors"
+	xssvalidator "github.com/infiniteloopcloud/xss-validator"
 
 	"github.com/asaskevich/govalidator"
 )
@@ -26,6 +27,26 @@ func (u *User) Validate() error {
 		return err
 	}
 
+	err = xssvalidator.Validate(u.Email, xssvalidator.DefaultRules...)
+	if err != nil {
+		return err
+	}
+
+	err = xssvalidator.Validate(u.Password, xssvalidator.DefaultRules...)
+	if err != nil {
+		return err
+	}
+
+	err = xssvalidator.Validate(u.Username, xssvalidator.DefaultRules...)
+	if err != nil {
+		return err
+	}
+
+	err = xssvalidator.Validate(u.BirthDate, xssvalidator.DefaultRules...)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -34,6 +55,17 @@ func (uC *UserCredentials) Validate() error {
 	if err != nil {
 		return err
 	}
+
+	err = xssvalidator.Validate(uC.Email, xssvalidator.DefaultRules...)
+	if err != nil {
+		return err
+	}
+
+	err = xssvalidator.Validate(uC.Password, xssvalidator.DefaultRules...)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
