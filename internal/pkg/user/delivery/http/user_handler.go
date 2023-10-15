@@ -69,13 +69,12 @@ func (handler *UserHandler) SignUp(w http.ResponseWriter, r *http.Request) error
 // @Router			/login [post]
 func (handler *UserHandler) Login(w http.ResponseWriter, r *http.Request) error {
 	var credentials user_domain.UserCredentials
-
-	err := credentials.Validate()
-	if err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&credentials); err != nil {
 		return common_handler.StatusError{Code: http.StatusBadRequest, Err: err}
 	}
 
-	if err := json.NewDecoder(r.Body).Decode(&credentials); err != nil {
+	err := credentials.Validate()
+	if err != nil {
 		return common_handler.StatusError{Code: http.StatusBadRequest, Err: err}
 	}
 
@@ -146,6 +145,7 @@ func (handler *UserHandler) LogOut(w http.ResponseWriter, r *http.Request) error
 // @Router			/me [get]
 func (handler *UserHandler) Me(w http.ResponseWriter, r *http.Request) error {
 	sessionId, err := response.GetCookie(r)
+
 	if err != nil {
 		return common_handler.StatusError{Code: http.StatusUnauthorized, Err: err}
 	}

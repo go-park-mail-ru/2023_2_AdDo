@@ -7,7 +7,7 @@ url = 'http://localhost:8080/api/v1'
 class LoginTest(unittest.TestCase):
     def test_login_endpoint_success(self):
         # get csrf token
-        pre_response = requests.get(url + '/album/1')
+        pre_response = requests.get(url + '/auth')
 
         # use it in post header and cookies (double submit)
         headers = {
@@ -19,18 +19,19 @@ class LoginTest(unittest.TestCase):
 
         # our register data
         register_data = {
-            'Email': 'lets.login@mail.ru',
+            'Email': 'new@mail.ru',
             'Password': 'userPassword',
             'Username': 'username',
             'BirthDate': '12-01-2003',
         }
         response = requests.post(url + "/sign_up", headers=headers, json=register_data, cookies=cookies)
+        print(response.text)
         # get ok code and sessionId
         self.assertEqual(response.status_code, 200)
         self.assertNotEqual(response.cookies['JSESSIONID'], "")
 
         login_data = {
-            'Email': 'lets.login@mail.ru',
+            'Email': 'new@mail.ru',
             'Password': 'userPassword',
         }
         response = requests.post(url + '/login', headers=headers, json=login_data, cookies=cookies)

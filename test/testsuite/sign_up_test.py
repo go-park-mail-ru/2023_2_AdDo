@@ -107,12 +107,3 @@ sign_up_test.test_signup_endpoint_success()
 sign_up_test.test_signup_endpoint_without_csrf()
 sign_up_test.test_signup_endpoint_with_invalid_data()
 sign_up_test.test_signup_endpoint_create_same_user()
-# Makefile и идея интеграционного тестирования для полной базы данных и пустой
-# gomock + test connection
-# как очистить базу между тестами, норм ли прям из питона
-# не надо вообще чистить базу
-# как отдавать csrf токен? сделать отдельную ручку для этого? или в любом гете
-# Нужно ли поднимать сервак на https (http.ListenAndServeTLS) или мы обеспечиваем это только nginx'ом
-# поднимаем на хттп, остальное через нгинкс
-# Есть ли некое подобие макросов, если нужно делать что-то в дебаг сборке, а что-то в релиз
-# что такое хром драйвер, имелись в виду полные тесты вместе с фронтом
