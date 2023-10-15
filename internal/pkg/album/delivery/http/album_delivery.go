@@ -101,3 +101,27 @@ func (handler *AlbumHandler) handleQuery(albums []album.Response, w http.Respons
 	}
 	return nil
 }
+
+func (handler *AlbumHandler) Like(w http.ResponseWriter, r *http.Request) error {
+	albumId, err := strconv.Atoi(mux.Vars(r)["id"])
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusBadRequest, Err: err}
+	}
+
+	sessionId, err := response.GetCookie(r)
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusUnauthorized, Err: err}
+	}
+
+	userId, err := handler.sessionUseCase.GetUserId(sessionId)
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusUnauthorized, Err: err}
+	}
+
+	err = handler.albumUseCase.Like(userId, uint64(albumId))
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
+	}
+
+	return nil
+}
