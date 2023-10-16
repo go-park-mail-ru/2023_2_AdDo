@@ -20,7 +20,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/album/id": {
+        "/album/{id}": {
             "get": {
                 "description": "return all tracks from album",
                 "produces": [
@@ -28,6 +28,15 @@ const docTemplate = `{
                 ],
                 "tags": [
                     "album"
+                ],
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "album id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
                 ],
                 "responses": {
                     "200": {
@@ -54,7 +63,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/artist/id": {
+        "/artist/{id}": {
             "get": {
                 "description": "return artist info",
                 "produces": [
@@ -62,6 +71,15 @@ const docTemplate = `{
                 ],
                 "tags": [
                     "artist"
+                ],
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "artist id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
                 ],
                 "responses": {
                     "200": {
@@ -146,7 +164,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/like/id": {
+        "/like/{id}": {
             "post": {
                 "security": [
                     {
@@ -159,6 +177,15 @@ const docTemplate = `{
                 "description": "like track",
                 "tags": [
                     "track"
+                ],
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "track id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
                 ],
                 "responses": {
                     "200": {
@@ -191,7 +218,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/listen/id": {
+        "/listen/{id}": {
             "post": {
                 "security": [
                     {
@@ -201,6 +228,15 @@ const docTemplate = `{
                 "description": "listen track",
                 "tags": [
                     "track"
+                ],
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "track id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
                 ],
                 "responses": {
                     "200": {

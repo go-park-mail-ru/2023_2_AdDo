@@ -95,11 +95,12 @@ func (handler *AlbumHandler) Popular(w http.ResponseWriter, r *http.Request) err
 //	@Description	return all tracks from album
 //	@Tags			album
 //	@Produce		json
+//	@Param			id	path	integer	true	"album id"
 //	@Success		200
 //	@Failure		400	{string}	errMsg
 //	@Failure		500	{string}	errMsg
 //	@Header			200	{string}	X-CSRFTOKEN	"csrf token"
-//	@Router			/album/id [get]
+//	@Router			/album/{id} [get]
 func (handler *AlbumHandler) AlbumTracks(w http.ResponseWriter, r *http.Request) error {
 	w.Header().Set(session.XCsrfToken, csrf.Token(r))
 	albumId, err := strconv.Atoi(mux.Vars(r)["id"])

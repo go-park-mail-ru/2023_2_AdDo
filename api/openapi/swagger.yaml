@@ -41,9 +41,15 @@ info:
   title: MusicOn API
   version: "1.0"
 paths:
-  /album/id:
+  /album/{id}:
     get:
       description: return all tracks from album
+      parameters:
+      - description: album id
+        in: path
+        name: id
+        required: true
+        type: integer
       produces:
       - application/json
       responses:
@@ -63,9 +69,15 @@ paths:
             type: string
       tags:
       - album
-  /artist/id:
+  /artist/{id}:
     get:
       description: return artist info
+      parameters:
+      - description: artist id
+        in: path
+        name: id
+        required: true
+        type: integer
       produces:
       - application/json
       responses:
@@ -120,9 +132,15 @@ paths:
             type: string
       tags:
       - album
-  /like/id:
+  /like/{id}:
     post:
       description: like track
+      parameters:
+      - description: track id
+        in: path
+        name: id
+        required: true
+        type: integer
       responses:
         "200":
           description: OK
@@ -147,9 +165,15 @@ paths:
       - csrfToken: []
       tags:
       - track
-  /listen/id:
+  /listen/{id}:
     post:
       description: listen track
+      parameters:
+      - description: track id
+        in: path
+        name: id
+        required: true
+        type: integer
       responses:
         "200":
           description: OK

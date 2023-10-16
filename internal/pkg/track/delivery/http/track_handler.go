@@ -29,11 +29,12 @@ func NewHandler(track track.UseCase, session session.UseCase) TrackHandler {
 //	@Description	listen track
 //	@Tags			track
 //	@Security		csrfToken
+//	@Param			id	path	integer	true	"track id"
 //	@Success		200
 //	@Failure		400	{string}	errMsg
 //	@Failure		403	{string}	errMsg
 //	@Failure		500	{string}	errMsg
-//	@Router			/listen/id [post]
+//	@Router			/listen/{id} [post]
 func (handler *TrackHandler) Listen(w http.ResponseWriter, r *http.Request) error {
 	trackId, err := strconv.Atoi(mux.Vars(r)["id"])
 	if err != nil {
@@ -54,12 +55,13 @@ func (handler *TrackHandler) Listen(w http.ResponseWriter, r *http.Request) erro
 //	@Tags			track
 //	@Security		cookieAuth
 //	@Security		csrfToken
+//	@Param			id	path	integer	true	"track id"
 //	@Success		200
 //	@Failure		400	{string}	errMsg
 //	@Failure		401	{string}	errMsg
 //	@Failure		403	{string}	errMsg
 //	@Failure		500	{string}	errMsg
-//	@Router			/like/id [post]
+//	@Router			/like/{id} [post]
 func (handler *TrackHandler) Like(w http.ResponseWriter, r *http.Request) error {
 	trackId, err := strconv.Atoi(mux.Vars(r)["id"])
 	if err != nil {

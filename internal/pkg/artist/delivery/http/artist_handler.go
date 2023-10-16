@@ -26,11 +26,12 @@ func NewHandler(artistUseCase artist.UseCase) ArtistHandler {
 //	@Description	return artist info
 //	@Tags			artist
 //	@Produce		json
+//	@Param			id	path	integer	true	"artist id"
 //	@Success		200
 //	@Failure		400	{string}	errMsg
 //	@Failure		500	{string}	errMsg
 //	@Header			200	{string}	X-CSRFTOKEN	"csrf token"
-//	@Router			/artist/id [get]
+//	@Router			/artist/{id} [get]
 func (handler *ArtistHandler) ArtistInfo(w http.ResponseWriter, r *http.Request) error {
 	w.Header().Set(session.XCsrfToken, csrf.Token(r))
 
