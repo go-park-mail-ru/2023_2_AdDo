@@ -24,7 +24,16 @@ func NewHandler(track track.UseCase, session session.UseCase) TrackHandler {
 	}
 }
 
-// TODO artist/id информация об исполнителе, список всех его треков, всех альбомов
+// Listen
+//
+//	@Description	listen track
+//	@Tags			track
+//	@Security		csrfToken
+//	@Success		200
+//	@Failure		400	{string}	errMsg
+//	@Failure		403	{string}	errMsg
+//	@Failure		500	{string}	errMsg
+//	@Router			/listen/id [post]
 func (handler *TrackHandler) Listen(w http.ResponseWriter, r *http.Request) error {
 	trackId, err := strconv.Atoi(mux.Vars(r)["id"])
 	if err != nil {
@@ -39,6 +48,18 @@ func (handler *TrackHandler) Listen(w http.ResponseWriter, r *http.Request) erro
 	return nil
 }
 
+// Like
+//
+//	@Description	like track
+//	@Tags			track
+//	@Security		cookieAuth
+//	@Security		csrfToken
+//	@Success		200
+//	@Failure		400	{string}	errMsg
+//	@Failure		401	{string}	errMsg
+//	@Failure		403	{string}	errMsg
+//	@Failure		500	{string}	errMsg
+//	@Router			/like/id [post]
 func (handler *TrackHandler) Like(w http.ResponseWriter, r *http.Request) error {
 	trackId, err := strconv.Atoi(mux.Vars(r)["id"])
 	if err != nil {
