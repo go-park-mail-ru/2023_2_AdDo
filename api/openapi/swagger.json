@@ -14,7 +14,7 @@
     "host": "musicon.space",
     "basePath": "/api/v1",
     "paths": {
-        "/album/id": {
+        "/album/{id}": {
             "get": {
                 "description": "return all tracks from album",
                 "produces": [
@@ -22,6 +22,15 @@
                 ],
                 "tags": [
                     "album"
+                ],
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "album id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
                 ],
                 "responses": {
                     "200": {
@@ -48,7 +57,7 @@
                 }
             }
         },
-        "/artist/id": {
+        "/artist/{id}": {
             "get": {
                 "description": "return artist info",
                 "produces": [
@@ -56,6 +65,15 @@
                 ],
                 "tags": [
                     "artist"
+                ],
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "artist id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
                 ],
                 "responses": {
                     "200": {
@@ -140,7 +158,7 @@
                 }
             }
         },
-        "/like/id": {
+        "/like/{id}": {
             "post": {
                 "security": [
                     {
@@ -153,6 +171,15 @@
                 "description": "like track",
                 "tags": [
                     "track"
+                ],
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "track id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
                 ],
                 "responses": {
                     "200": {
@@ -185,7 +212,7 @@
                 }
             }
         },
-        "/listen/id": {
+        "/listen/{id}": {
             "post": {
                 "security": [
                     {
@@ -195,6 +222,15 @@
                 "description": "listen track",
                 "tags": [
                     "track"
+                ],
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "track id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
                 ],
                 "responses": {
                     "200": {
