@@ -140,7 +140,7 @@ func TestLike(t *testing.T) {
 		assert.NoError(t, err)
 
 		const sessionId = "sessionID"
-		const userId uint64 = 999
+		const userId = "qwer-qwer-qwer"
 		cookie := http.Cookie{
 			Name:     session.CookieName,
 			Value:    sessionId,

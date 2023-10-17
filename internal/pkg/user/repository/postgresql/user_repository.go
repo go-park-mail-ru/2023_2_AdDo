@@ -22,27 +22,33 @@ func (db *Postgres) Create(user user_domain.User) error {
 	if err != nil {
 		return err
 	}
+
 	return nil
 }
 
-func (db *Postgres) GetById(id uint64) (user_domain.User, error) {
+func (db *Postgres) GetById(id string) (user_domain.User, error) {
 	user := user_domain.User{Id: id}
 	var dt pgtype.Date
 	var avatar pgtype.Text
 
 	err := db.Pool.QueryRow(context.Background(), "select email, nickname, birth_date, avatar_url from profile where id = $1", id).Scan(&user.Email, &user.Username, &dt, &avatar)
+	if err != nil {
+		return user, err
+	}
 
 	user.BirthDate = dt.Time.Format("2006-01-02")
 	user.Avatar = avatar.String
+
 	return user, err
 }
 
-func (db *Postgres) CheckEmailAndPassword(email, password string) (uint64, error) {
-	var id uint64
-	err := db.Pool.QueryRow(context.Background(), "select id from profile where email = $1 and password = $2", email, utils.GetMD5Sum(password)).Scan(&id)
+func (db *Postgres) CheckEmailAndPassword(email, password string) (string, error) {
+	var userId string
+
+	err := db.Pool.QueryRow(context.Background(), "select id from profile where email = $1 and password = $2", email, utils.GetMD5Sum(password)).Scan(&userId)
 	if err != nil {
-		return 0, err
+		return "", err
 	}
 
-	return id, nil
+	return userId, nil
 }

@@ -102,7 +102,7 @@ func (r *Default) formResponse(albumBase []album.Base) ([]album.Response, error)
 	return result, nil
 }
 
-func (r *Default) Like(userId, albumId uint64) error {
+func (r *Default) Like(userId string, albumId uint64) error {
 	err := r.repoAlbum.CreateLike(userId, albumId)
 	if err != nil {
 		return err
