@@ -36,6 +36,10 @@ definitions:
     type: object
   artist.Response:
     properties:
+      Albums:
+        items:
+          $ref: '#/definitions/album.Base'
+        type: array
       Avatar:
         example: ArtistAvatar
         type: string
@@ -45,11 +49,7 @@ definitions:
       Name:
         example: ArtistName
         type: string
-      albums:
-        items:
-          $ref: '#/definitions/album.Base'
-        type: array
-      tracks:
+      Tracks:
         items:
           $ref: '#/definitions/track.Response'
         type: array
@@ -124,10 +124,6 @@ paths:
       responses:
         "200":
           description: OK
-          headers:
-            X-CSRFTOKEN:
-              description: csrf token
-              type: string
           schema:
             $ref: '#/definitions/album.Response'
         "400":
@@ -154,10 +150,6 @@ paths:
       responses:
         "200":
           description: OK
-          headers:
-            X-CSRFTOKEN:
-              description: csrf token
-              type: string
           schema:
             $ref: '#/definitions/artist.Response'
         "400":
@@ -172,16 +164,26 @@ paths:
       - artist
   /auth:
     get:
-      description: check user's authentication by cookie and user_id
+      description: check user's authentication by cookie and set csrf-token
       responses:
         "200":
           description: OK
           headers:
-            X-CSRFTOKEN:
-              description: csrf token
+            Set-Cookie:
+              description: Set X-Csrf-Token in Cookie
+              type: string
+            X-Csrf-Token:
+              description: Set X-Csrf-Token in header
               type: string
         "401":
           description: Unauthorized
+          headers:
+            Set-Cookie:
+              description: Set X-Csrf-Token in Cookie
+              type: string
+            X-Csrf-Token:
+              description: Set X-Csrf-Token in header
+              type: string
           schema:
             type: string
         "500":
@@ -190,7 +192,6 @@ paths:
             type: string
       security:
       - cookieAuth: []
-      - csrfToken: []
       tags:
       - user
   /feed:
@@ -211,18 +212,23 @@ paths:
             type: string
       tags:
       - album
-  /like/{id}:
+  /like:
     post:
+      consumes:
+      - application/json
       description: like track
       parameters:
       - description: track id
-        in: path
-        name: id
+        in: body
+        name: trackId
         required: true
-        type: integer
+        schema:
+          type: integer
       responses:
         "200":
           description: OK
+          schema:
+            $ref: '#/definitions/track.Response'
         "400":
           description: Bad Request
           schema:
@@ -240,19 +246,22 @@ paths:
           schema:
             type: string
       security:
-      - cookieAuth: []
       - csrfToken: []
+      - cookieCsrfToken: []
       tags:
       - track
-  /listen/{id}:
+  /listen:
     post:
+      consumes:
+      - application/json
       description: listen track
       parameters:
       - description: track id
-        in: path
-        name: id
+        in: body
+        name: trackId
         required: true
-        type: integer
+        schema:
+          type: integer
       responses:
         "200":
           description: OK
@@ -270,6 +279,7 @@ paths:
             type: string
       security:
       - csrfToken: []
+      - cookieCsrfToken: []
       tags:
       - track
   /login:
@@ -288,11 +298,8 @@ paths:
         "200":
           description: OK
           headers:
-            JSESSIONID:
-              description: cookie
-              type: string
-            X-CSRFTOKEN:
-              description: csrf token
+            Set-Cookie:
+              description: Set JSESSIONID in Cookie
               type: string
         "400":
           description: Bad Request
@@ -306,6 +313,9 @@ paths:
           description: Internal Server Error
           schema:
             type: string
+      security:
+      - csrfToken: []
+      - cookieCsrfToken: []
       tags:
       - user
   /logout:
@@ -329,6 +339,7 @@ paths:
       security:
       - cookieAuth: []
       - csrfToken: []
+      - cookieCsrfToken: []
       tags:
       - user
   /me:
@@ -356,6 +367,7 @@ paths:
       security:
       - cookieAuth: []
       - csrfToken: []
+      - cookieCsrfToken: []
       tags:
       - user
   /most_liked:
@@ -427,6 +439,10 @@ paths:
       responses:
         "200":
           description: OK
+          headers:
+            Set-Cookie:
+              description: Set JSESSIONID in Cookie
+              type: string
         "400":
           description: Bad Request
           schema:
@@ -443,12 +459,19 @@ paths:
           description: Internal Server Error
           schema:
             type: string
+      security:
+      - csrfToken: []
+      - cookieCsrfToken: []
       tags:
       - user
 securityDefinitions:
   cookieAuth:
-    in: header
+    in: cookie
     name: JSESSIONID
+    type: apiKey
+  cookieCsrfToken:
+    in: cookie
+    name: X-Csrf-Token
     type: apiKey
   csrfToken:
     in: header

@@ -1,14 +1,15 @@
 package artist_delivery
 
 import (
-	"github.com/gorilla/csrf"
-	"github.com/gorilla/mux"
 	"main/internal/pkg/artist"
 	common_handler "main/internal/pkg/common/handler"
 	"main/internal/pkg/common/response"
 	"main/internal/pkg/session"
 	"net/http"
 	"strconv"
+
+	"github.com/gorilla/csrf"
+	"github.com/gorilla/mux"
 )
 
 type ArtistHandler struct {
@@ -30,7 +31,6 @@ func NewHandler(artistUseCase artist.UseCase) ArtistHandler {
 //	@Success		200	{object}	artist.Response
 //	@Failure		400	{string}	errMsg
 //	@Failure		500	{string}	errMsg
-//	@Header			200	{string}	X-CSRFTOKEN	"csrf token"
 //	@Router			/artist/{id} [get]
 func (handler *ArtistHandler) ArtistInfo(w http.ResponseWriter, r *http.Request) error {
 	w.Header().Set(session.XCsrfToken, csrf.Token(r))
