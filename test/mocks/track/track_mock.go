@@ -35,7 +35,7 @@ func (m *MockUseCase) EXPECT() *MockUseCaseMockRecorder {
 }
 
 // Like mocks base method.
-func (m *MockUseCase) Like(userId, trackId uint64) error {
+func (m *MockUseCase) Like(userId string, trackId uint64) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Like", userId, trackId)
 	ret0, _ := ret[0].(error)
@@ -100,7 +100,7 @@ func (mr *MockRepositoryMockRecorder) AddListen(trackId interface{}) *gomock.Cal
 }
 
 // CreateLike mocks base method.
-func (m *MockRepository) CreateLike(userId, trackId uint64) error {
+func (m *MockRepository) CreateLike(userId string, trackId uint64) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateLike", userId, trackId)
 	ret0, _ := ret[0].(error)

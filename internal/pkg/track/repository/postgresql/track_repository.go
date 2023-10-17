@@ -58,7 +58,7 @@ func (db *Postgres) GetByArtist(artistId uint64) ([]track.Response, error) {
 	return db.getWithQuery(context.Background(), query, artistId)
 }
 
-func (db *Postgres) CreateLike(userId, trackId uint64) error {
+func (db *Postgres) CreateLike(userId string, trackId uint64) error {
 	query := "insert into profile_track (profile_id, track_id) values ($1, $2)"
 	_, err := db.Pool.Exec(context.Background(), query, userId, trackId)
 	if err != nil {

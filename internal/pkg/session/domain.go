@@ -7,12 +7,12 @@ import (
 
 type UseCase interface {
 	CheckSession(sessionId string) (bool, error)
-	GetUserId(sessionId string) (uint64, error)
+	GetUserId(sessionId string) (string, error)
 }
 
 type Repository interface {
-	Create(userId uint64) (string, error)
-	Get(sessionId string) (uint64, error)
+	Create(userId string) (string, error)
+	Get(sessionId string) (string, error)
 	Delete(sessionId string) error
 }
 

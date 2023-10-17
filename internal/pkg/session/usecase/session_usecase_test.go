@@ -19,9 +19,9 @@ func TestDefault_CheckSession_Success(t *testing.T) {
 
 	const isAuthExpected = true
 	const sessionId = "sessionId"
-	const anyUserId = 1
+	const anyUserId = "qwer-qwer-qwer"
 
-	mockSessionRepo.EXPECT().Get(sessionId).Return(uint64(anyUserId), nil)
+	mockSessionRepo.EXPECT().Get(sessionId).Return(anyUserId, nil)
 	isAuth, err := useCase.CheckSession(sessionId)
 
 	assert.Equal(t, nil, err)

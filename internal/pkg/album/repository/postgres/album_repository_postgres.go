@@ -84,7 +84,7 @@ func (p Postgres) getWithQuery(ctx context.Context, query string, args ...any) (
 	return result, nil
 }
 
-func (p Postgres) CreateLike(userId, albumId uint64) error {
+func (p Postgres) CreateLike(userId string, albumId uint64) error {
 	query := "insert into profile_album (profile_id, album_id) values ($1, $2)"
 	_, err := p.Pool.Exec(context.Background(), query, userId, albumId)
 	if err != nil {
