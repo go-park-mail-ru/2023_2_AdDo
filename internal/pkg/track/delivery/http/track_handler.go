@@ -1,14 +1,13 @@
 package track_delivery
 
 import (
-	"github.com/gorilla/mux"
+	"encoding/json"
 	"main/internal/pkg/album"
 	common_handler "main/internal/pkg/common/handler"
 	"main/internal/pkg/common/response"
 	"main/internal/pkg/session"
 	"main/internal/pkg/track"
 	"net/http"
-	"strconv"
 )
 
 type TrackHandler struct {
@@ -28,20 +27,22 @@ func NewHandler(track track.UseCase, session session.UseCase) TrackHandler {
 //
 //	@Description	listen track
 //	@Tags			track
+//	@Accept			json
+//	@Param			trackId	body	integer	true	"track id"
 //	@Security		csrfToken
-//	@Param			id	path	integer	true	"track id"
+//	@Security		cookieCsrfToken
 //	@Success		200
 //	@Failure		400	{string}	errMsg
 //	@Failure		403	{string}	errMsg
 //	@Failure		500	{string}	errMsg
-//	@Router			/listen/{id} [post]
+//	@Router			/listen [post]
 func (handler *TrackHandler) Listen(w http.ResponseWriter, r *http.Request) error {
-	trackId, err := strconv.Atoi(mux.Vars(r)["id"])
-	if err != nil {
+	var trackId int
+	if err := json.NewDecoder(r.Body).Decode(&trackId); err != nil {
 		return common_handler.StatusError{Code: http.StatusBadRequest, Err: err}
 	}
 
-	err = handler.trackUseCase.Listen(uint64(trackId))
+	err := handler.trackUseCase.Listen(uint64(trackId))
 	if err != nil {
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}
@@ -53,18 +54,19 @@ func (handler *TrackHandler) Listen(w http.ResponseWriter, r *http.Request) erro
 //
 //	@Description	like track
 //	@Tags			track
-//	@Security		cookieAuth
 //	@Security		csrfToken
-//	@Param			id	path	integer	true	"track id"
-//	@Success		200
-//	@Failure		400	{string}	errMsg
-//	@Failure		401	{string}	errMsg
-//	@Failure		403	{string}	errMsg
-//	@Failure		500	{string}	errMsg
-//	@Router			/like/{id} [post]
+//	@Security		cookieCsrfToken
+//	@Accept			json
+//	@Param			trackId	body		integer	true	"track id"
+//	@Success		200		{object}	track.Response
+//	@Failure		400		{string}	errMsg
+//	@Failure		401		{string}	errMsg
+//	@Failure		403		{string}	errMsg
+//	@Failure		500		{string}	errMsg
+//	@Router			/like [post]
 func (handler *TrackHandler) Like(w http.ResponseWriter, r *http.Request) error {
-	trackId, err := strconv.Atoi(mux.Vars(r)["id"])
-	if err != nil {
+	var trackId int
+	if err := json.NewDecoder(r.Body).Decode(&trackId); err != nil {
 		return common_handler.StatusError{Code: http.StatusBadRequest, Err: err}
 	}
 

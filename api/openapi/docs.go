@@ -43,12 +43,6 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/album.Response"
-                        },
-                        "headers": {
-                            "X-CSRFTOKEN": {
-                                "type": "string",
-                                "description": "csrf token"
-                            }
                         }
                     },
                     "400": {
@@ -89,12 +83,6 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/artist.Response"
-                        },
-                        "headers": {
-                            "X-CSRFTOKEN": {
-                                "type": "string",
-                                "description": "csrf token"
-                            }
                         }
                     },
                     "400": {
@@ -117,12 +105,9 @@ const docTemplate = `{
                 "security": [
                     {
                         "cookieAuth": []
-                    },
-                    {
-                        "csrfToken": []
                     }
                 ],
-                "description": "check user's authentication by cookie and user_id",
+                "description": "check user's authentication by cookie and set csrf-token",
                 "tags": [
                     "user"
                 ],
@@ -130,9 +115,13 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "headers": {
-                            "X-CSRFTOKEN": {
+                            "Set-Cookie": {
                                 "type": "string",
-                                "description": "csrf token"
+                                "description": "Set X-Csrf-Token in Cookie"
+                            },
+                            "X-Csrf-Token": {
+                                "type": "string",
+                                "description": "Set X-Csrf-Token in header"
                             }
                         }
                     },
@@ -140,6 +129,16 @@ const docTemplate = `{
                         "description": "Unauthorized",
                         "schema": {
                             "type": "string"
+                        },
+                        "headers": {
+                            "Set-Cookie": {
+                                "type": "string",
+                                "description": "Set X-Csrf-Token in Cookie"
+                            },
+                            "X-Csrf-Token": {
+                                "type": "string",
+                                "description": "Set X-Csrf-Token in header"
+                            }
                         }
                     },
                     "500": {
@@ -179,32 +178,40 @@ const docTemplate = `{
                 }
             }
         },
-        "/like/{id}": {
+        "/like": {
             "post": {
                 "security": [
                     {
-                        "cookieAuth": []
+                        "csrfToken": []
                     },
                     {
-                        "csrfToken": []
+                        "cookieCsrfToken": []
                     }
                 ],
                 "description": "like track",
+                "consumes": [
+                    "application/json"
+                ],
                 "tags": [
                     "track"
                 ],
                 "parameters": [
                     {
-                        "type": "integer",
                         "description": "track id",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
+                        "name": "trackId",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK"
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/track.Response"
+                        }
                     },
                     "400": {
                         "description": "Bad Request",
@@ -233,24 +240,32 @@ const docTemplate = `{
                 }
             }
         },
-        "/listen/{id}": {
+        "/listen": {
             "post": {
                 "security": [
                     {
                         "csrfToken": []
+                    },
+                    {
+                        "cookieCsrfToken": []
                     }
                 ],
                 "description": "listen track",
+                "consumes": [
+                    "application/json"
+                ],
                 "tags": [
                     "track"
                 ],
                 "parameters": [
                     {
-                        "type": "integer",
                         "description": "track id",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
+                        "name": "trackId",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
                     }
                 ],
                 "responses": {
@@ -280,6 +295,14 @@ const docTemplate = `{
         },
         "/login": {
             "post": {
+                "security": [
+                    {
+                        "csrfToken": []
+                    },
+                    {
+                        "cookieCsrfToken": []
+                    }
+                ],
                 "description": "login user",
                 "consumes": [
                     "application/json"
@@ -302,13 +325,9 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "headers": {
-                            "JSESSIONID": {
+                            "Set-Cookie": {
                                 "type": "string",
-                                "description": "cookie"
-                            },
-                            "X-CSRFTOKEN": {
-                                "type": "string",
-                                "description": "csrf token"
+                                "description": "Set JSESSIONID in Cookie"
                             }
                         }
                     },
@@ -341,6 +360,9 @@ const docTemplate = `{
                     },
                     {
                         "csrfToken": []
+                    },
+                    {
+                        "cookieCsrfToken": []
                     }
                 ],
                 "description": "logout user",
@@ -380,6 +402,9 @@ const docTemplate = `{
                     },
                     {
                         "csrfToken": []
+                    },
+                    {
+                        "cookieCsrfToken": []
                     }
                 ],
                 "description": "get user info",
@@ -503,6 +528,14 @@ const docTemplate = `{
         },
         "/sign_up": {
             "post": {
+                "security": [
+                    {
+                        "csrfToken": []
+                    },
+                    {
+                        "cookieCsrfToken": []
+                    }
+                ],
                 "description": "register user",
                 "consumes": [
                     "application/json"
@@ -523,7 +556,13 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK"
+                        "description": "OK",
+                        "headers": {
+                            "Set-Cookie": {
+                                "type": "string",
+                                "description": "Set JSESSIONID in Cookie"
+                            }
+                        }
                     },
                     "400": {
                         "description": "Bad Request",
@@ -605,6 +644,12 @@ const docTemplate = `{
         "artist.Response": {
             "type": "object",
             "properties": {
+                "Albums": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/album.Base"
+                    }
+                },
                 "Avatar": {
                     "type": "string",
                     "example": "ArtistAvatar"
@@ -617,13 +662,7 @@ const docTemplate = `{
                     "type": "string",
                     "example": "ArtistName"
                 },
-                "albums": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/album.Base"
-                    }
-                },
-                "tracks": {
+                "Tracks": {
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/track.Response"
@@ -699,7 +738,12 @@ const docTemplate = `{
         "cookieAuth": {
             "type": "apiKey",
             "name": "JSESSIONID",
-            "in": "header"
+            "in": "cookie"
+        },
+        "cookieCsrfToken": {
+            "type": "apiKey",
+            "name": "X-Csrf-Token",
+            "in": "cookie"
         },
         "csrfToken": {
             "type": "apiKey",

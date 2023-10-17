@@ -99,7 +99,6 @@ func (handler *AlbumHandler) Popular(w http.ResponseWriter, r *http.Request) err
 //	@Success		200	{object}	album.Response
 //	@Failure		400	{string}	errMsg
 //	@Failure		500	{string}	errMsg
-//	@Header			200	{string}	X-CSRFTOKEN	"csrf token"
 //	@Router			/album/{id} [get]
 func (handler *AlbumHandler) AlbumTracks(w http.ResponseWriter, r *http.Request) error {
 	w.Header().Set(session.XCsrfToken, csrf.Token(r))
