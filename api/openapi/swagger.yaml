@@ -1,5 +1,74 @@
 basePath: /api/v1
 definitions:
+  album.Base:
+    properties:
+      Id:
+        example: 1
+        type: integer
+      Name:
+        example: AlbumName
+        type: string
+      Preview:
+        example: AlbumPreview
+        type: string
+    type: object
+  album.Response:
+    properties:
+      ArtistId:
+        example: 1
+        type: integer
+      ArtistName:
+        example: ArtistName
+        type: string
+      Id:
+        example: 1
+        type: integer
+      Name:
+        example: AlbumName
+        type: string
+      Preview:
+        example: AlbumPreview
+        type: string
+      Tracks:
+        items:
+          $ref: '#/definitions/track.Response'
+        type: array
+    type: object
+  artist.Response:
+    properties:
+      Avatar:
+        example: ArtistAvatar
+        type: string
+      Id:
+        example: 1
+        type: integer
+      Name:
+        example: ArtistName
+        type: string
+      albums:
+        items:
+          $ref: '#/definitions/album.Base'
+        type: array
+      tracks:
+        items:
+          $ref: '#/definitions/track.Response'
+        type: array
+    type: object
+  track.Response:
+    properties:
+      Content:
+        example: TrackContent
+        type: string
+      Id:
+        example: 1
+        type: integer
+      Name:
+        example: TrackName
+        type: string
+      Preview:
+        example: TrackPreview
+        type: string
+    type: object
   user_domain.User:
     properties:
       Avatar:
@@ -43,7 +112,7 @@ info:
 paths:
   /album/{id}:
     get:
-      description: return all tracks from album
+      description: return album info with all tracks
       parameters:
       - description: album id
         in: path
@@ -59,6 +128,8 @@ paths:
             X-CSRFTOKEN:
               description: csrf token
               type: string
+          schema:
+            $ref: '#/definitions/album.Response'
         "400":
           description: Bad Request
           schema:
@@ -87,6 +158,8 @@ paths:
             X-CSRFTOKEN:
               description: csrf token
               type: string
+          schema:
+            $ref: '#/definitions/artist.Response'
         "400":
           description: Bad Request
           schema:
@@ -103,8 +176,10 @@ paths:
       responses:
         "200":
           description: OK
-          schema:
-            $ref: '#/definitions/user_domain.User'
+          headers:
+            X-CSRFTOKEN:
+              description: csrf token
+              type: string
         "401":
           description: Unauthorized
           schema:
@@ -126,6 +201,10 @@ paths:
       responses:
         "200":
           description: OK
+          schema:
+            items:
+              $ref: '#/definitions/album.Response'
+            type: array
         "500":
           description: Internal Server Error
           schema:
@@ -260,6 +339,8 @@ paths:
       responses:
         "200":
           description: OK
+          schema:
+            $ref: '#/definitions/user_domain.User'
         "401":
           description: Unauthorized
           schema:
@@ -285,6 +366,10 @@ paths:
       responses:
         "200":
           description: OK
+          schema:
+            items:
+              $ref: '#/definitions/album.Response'
+            type: array
         "500":
           description: Internal Server Error
           schema:
@@ -299,6 +384,10 @@ paths:
       responses:
         "200":
           description: OK
+          schema:
+            items:
+              $ref: '#/definitions/album.Response'
+            type: array
         "500":
           description: Internal Server Error
           schema:
@@ -313,6 +402,10 @@ paths:
       responses:
         "200":
           description: OK
+          schema:
+            items:
+              $ref: '#/definitions/album.Response'
+            type: array
         "500":
           description: Internal Server Error
           schema:
@@ -331,9 +424,9 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/user_domain.User'
-      produces:
-      - application/json
       responses:
+        "200":
+          description: OK
         "400":
           description: Bad Request
           schema:

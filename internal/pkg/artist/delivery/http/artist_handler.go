@@ -26,8 +26,8 @@ func NewHandler(artistUseCase artist.UseCase) ArtistHandler {
 //	@Description	return artist info
 //	@Tags			artist
 //	@Produce		json
-//	@Param			id	path	integer	true	"artist id"
-//	@Success		200
+//	@Param			id	path		integer	true	"artist id"
+//	@Success		200	{object}	artist.Response
 //	@Failure		400	{string}	errMsg
 //	@Failure		500	{string}	errMsg
 //	@Header			200	{string}	X-CSRFTOKEN	"csrf token"

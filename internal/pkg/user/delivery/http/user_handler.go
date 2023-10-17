@@ -27,12 +27,12 @@ func NewHandler(userUseCase user_domain.UseCase) UserHandler {
 //	@Description	register user
 //	@Tags			user
 //	@Accept			json
-//	@Produce		json
-//	@Param			userData	body		user_domain.User	true	"User data"
-//	@Failure		400			{string}	errMsg
-//	@Failure		403			{string}	errMsg
-//	@Failure		409			{string}	errMsg
-//	@Failure		500			{string}	errMsg
+//	@Param			userData	body	user_domain.User	true	"User data"
+//	@Success		200
+//	@Failure		400	{string}	errMsg
+//	@Failure		403	{string}	errMsg
+//	@Failure		409	{string}	errMsg
+//	@Failure		500	{string}	errMsg
 //	@Router			/sign_up [post]
 func (handler *UserHandler) SignUp(w http.ResponseWriter, r *http.Request) error {
 	var u user_domain.User
@@ -98,9 +98,10 @@ func (handler *UserHandler) Login(w http.ResponseWriter, r *http.Request) error 
 //	@Tags			user
 //	@Security		cookieAuth
 //	@Security		csrfToken
-//	@Success		200	{object}	user_domain.User
+//	@Success		200
 //	@Failure		401	{string}	errMsg
 //	@Failure		500	{string}	errMsg
+//	@Header			200	{string}	X-CSRFTOKEN	"csrf token"
 //	@Router			/auth [get]
 func (handler *UserHandler) Auth(w http.ResponseWriter, r *http.Request) error {
 	w.Header().Set(session.XCsrfToken, csrf.Token(r))
@@ -152,7 +153,7 @@ func (handler *UserHandler) LogOut(w http.ResponseWriter, r *http.Request) error
 //	@Produce		json
 //	@Security		cookieAuth
 //	@Security		csrfToken
-//	@Success		200
+//	@Success		200	{object}	user_domain.User
 //	@Failure		401	{string}	errMsg
 //	@Failure		403	{string}	errMsg
 //	@Failure		500	{string}	errMsg
