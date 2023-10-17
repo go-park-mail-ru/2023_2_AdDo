@@ -1,6 +1,7 @@
 package album_delivery
 
 import (
+	"encoding/json"
 	"github.com/gorilla/csrf"
 	"github.com/gorilla/mux"
 	"main/internal/pkg/album"
@@ -103,8 +104,8 @@ func (handler *AlbumHandler) handleQuery(albums []album.Response, w http.Respons
 }
 
 func (handler *AlbumHandler) Like(w http.ResponseWriter, r *http.Request) error {
-	albumId, err := strconv.Atoi(mux.Vars(r)["id"])
-	if err != nil {
+	var albumId track.Id
+	if err := json.NewDecoder(r.Body).Decode(&albumId); err != nil {
 		return common_handler.StatusError{Code: http.StatusBadRequest, Err: err}
 	}
 
@@ -118,7 +119,7 @@ func (handler *AlbumHandler) Like(w http.ResponseWriter, r *http.Request) error 
 		return common_handler.StatusError{Code: http.StatusUnauthorized, Err: err}
 	}
 
-	err = handler.albumUseCase.Like(userId, uint64(albumId))
+	err = handler.albumUseCase.Like(userId, albumId.Id)
 	if err != nil {
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}

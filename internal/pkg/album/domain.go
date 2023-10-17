@@ -2,6 +2,10 @@ package album
 
 import "main/internal/pkg/track"
 
+type Id struct {
+	Id uint64 `json:"Id" example:"1"`
+}
+
 type Base struct {
 	Id      uint64 `json:"Id" example:"1"`
 	Name    string `json:"Name" example:"AlbumName"`

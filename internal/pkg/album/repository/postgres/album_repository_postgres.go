@@ -63,6 +63,7 @@ func (p Postgres) Get(albumId uint64) (album.Base, error) {
 
 func (p Postgres) getWithQuery(ctx context.Context, query string, args ...any) ([]album.Base, error) {
 	result := make([]album.Base, 0)
+
 	rows, err := p.Pool.Query(ctx, query, args...)
 	if err != nil {
 		return result, err
@@ -71,10 +72,12 @@ func (p Postgres) getWithQuery(ctx context.Context, query string, args ...any) (
 
 	for rows.Next() {
 		var base album.Base
+
 		err = rows.Scan(&base.Id, &base.Name, &base.Preview)
 		if err != nil {
 			return nil, err
 		}
+
 		result = append(result, base)
 	}
 
