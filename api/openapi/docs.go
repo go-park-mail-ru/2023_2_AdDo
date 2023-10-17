@@ -22,7 +22,7 @@ const docTemplate = `{
     "paths": {
         "/album/{id}": {
             "get": {
-                "description": "return all tracks from album",
+                "description": "return album info with all tracks",
                 "produces": [
                     "application/json"
                 ],
@@ -41,6 +41,9 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/album.Response"
+                        },
                         "headers": {
                             "X-CSRFTOKEN": {
                                 "type": "string",
@@ -84,6 +87,9 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/artist.Response"
+                        },
                         "headers": {
                             "X-CSRFTOKEN": {
                                 "type": "string",
@@ -123,8 +129,11 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/user_domain.User"
+                        "headers": {
+                            "X-CSRFTOKEN": {
+                                "type": "string",
+                                "description": "csrf token"
+                            }
                         }
                     },
                     "401": {
@@ -153,7 +162,13 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK"
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/album.Response"
+                            }
+                        }
                     },
                     "500": {
                         "description": "Internal Server Error",
@@ -376,7 +391,10 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK"
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/user_domain.User"
+                        }
                     },
                     "401": {
                         "description": "Unauthorized",
@@ -410,7 +428,13 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK"
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/album.Response"
+                            }
+                        }
                     },
                     "500": {
                         "description": "Internal Server Error",
@@ -432,7 +456,13 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK"
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/album.Response"
+                            }
+                        }
                     },
                     "500": {
                         "description": "Internal Server Error",
@@ -454,7 +484,13 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK"
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/album.Response"
+                            }
+                        }
                     },
                     "500": {
                         "description": "Internal Server Error",
@@ -469,9 +505,6 @@ const docTemplate = `{
             "post": {
                 "description": "register user",
                 "consumes": [
-                    "application/json"
-                ],
-                "produces": [
                     "application/json"
                 ],
                 "tags": [
@@ -489,6 +522,9 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
@@ -518,6 +554,104 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "album.Base": {
+            "type": "object",
+            "properties": {
+                "Id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "Name": {
+                    "type": "string",
+                    "example": "AlbumName"
+                },
+                "Preview": {
+                    "type": "string",
+                    "example": "AlbumPreview"
+                }
+            }
+        },
+        "album.Response": {
+            "type": "object",
+            "properties": {
+                "ArtistId": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "ArtistName": {
+                    "type": "string",
+                    "example": "ArtistName"
+                },
+                "Id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "Name": {
+                    "type": "string",
+                    "example": "AlbumName"
+                },
+                "Preview": {
+                    "type": "string",
+                    "example": "AlbumPreview"
+                },
+                "Tracks": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/track.Response"
+                    }
+                }
+            }
+        },
+        "artist.Response": {
+            "type": "object",
+            "properties": {
+                "Avatar": {
+                    "type": "string",
+                    "example": "ArtistAvatar"
+                },
+                "Id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "Name": {
+                    "type": "string",
+                    "example": "ArtistName"
+                },
+                "albums": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/album.Base"
+                    }
+                },
+                "tracks": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/track.Response"
+                    }
+                }
+            }
+        },
+        "track.Response": {
+            "type": "object",
+            "properties": {
+                "Content": {
+                    "type": "string",
+                    "example": "TrackContent"
+                },
+                "Id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "Name": {
+                    "type": "string",
+                    "example": "TrackName"
+                },
+                "Preview": {
+                    "type": "string",
+                    "example": "TrackPreview"
+                }
+            }
+        },
         "user_domain.User": {
             "type": "object",
             "properties": {

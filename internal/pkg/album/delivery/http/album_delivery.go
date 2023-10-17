@@ -31,7 +31,7 @@ func NewHandler(trackUseCase track.UseCase, albumUseCase album.UseCase, session 
 //	@Description	return all albums
 //	@Tags			album
 //	@Produce		json
-//	@Success		200
+//	@Success		200	{array}		album.Response
 //	@Failure		500	{string}	errMsg
 //	@Router			/feed [get]
 func (handler *AlbumHandler) Feed(w http.ResponseWriter, r *http.Request) error {
@@ -47,7 +47,7 @@ func (handler *AlbumHandler) Feed(w http.ResponseWriter, r *http.Request) error 
 //	@Description	return new albums
 //	@Tags			album
 //	@Produce		json
-//	@Success		200
+//	@Success		200	{array}		album.Response
 //	@Failure		500	{string}	errMsg
 //	@Router			/new [get]
 func (handler *AlbumHandler) New(w http.ResponseWriter, r *http.Request) error {
@@ -63,7 +63,7 @@ func (handler *AlbumHandler) New(w http.ResponseWriter, r *http.Request) error {
 //	@Description	return albums sorted by likes count
 //	@Tags			album
 //	@Produce		json
-//	@Success		200
+//	@Success		200	{array}		album.Response
 //	@Failure		500	{string}	errMsg
 //	@Router			/most_liked [get]
 func (handler *AlbumHandler) MostLiked(w http.ResponseWriter, r *http.Request) error {
@@ -79,7 +79,7 @@ func (handler *AlbumHandler) MostLiked(w http.ResponseWriter, r *http.Request) e
 //	@Description	return albums sorted by listen count
 //	@Tags			album
 //	@Produce		json
-//	@Success		200
+//	@Success		200	{array}		album.Response
 //	@Failure		500	{string}	errMsg
 //	@Router			/popular [get]
 func (handler *AlbumHandler) Popular(w http.ResponseWriter, r *http.Request) error {
@@ -92,11 +92,11 @@ func (handler *AlbumHandler) Popular(w http.ResponseWriter, r *http.Request) err
 
 // AlbumTracks
 //
-//	@Description	return all tracks from album
+//	@Description	return album info with all tracks
 //	@Tags			album
 //	@Produce		json
-//	@Param			id	path	integer	true	"album id"
-//	@Success		200
+//	@Param			id	path		integer	true	"album id"
+//	@Success		200	{object}	album.Response
 //	@Failure		400	{string}	errMsg
 //	@Failure		500	{string}	errMsg
 //	@Header			200	{string}	X-CSRFTOKEN	"csrf token"
