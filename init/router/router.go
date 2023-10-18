@@ -55,7 +55,6 @@ func New(userHandler user_delivery.UserHandler, trackHandler track_delivery.Trac
 	router.Handle("/api/v1/like_track", common_handler.Handler{H: trackHandler.Like}).Methods("POST")
 	router.Handle("/api/v1/like_album", common_handler.Handler{H: albumHandler.Like}).Methods("POST")
 
-
 	router.Handle("/api/v1/artist/{id}", common_handler.Handler{H: artistHandler.ArtistInfo}).Methods("GET")
 	router.Handle("/api/v1/album/{id}", common_handler.Handler{H: albumHandler.AlbumTracks}).Methods("GET")
 
@@ -84,7 +83,7 @@ func New(userHandler user_delivery.UserHandler, trackHandler track_delivery.Trac
 	router.Use(corsMiddleware, csrfMiddleware)
 
 	routerWithMiddleware := common_middleware.Logging(router, logger)
-	routerWithMiddleware = common_middleware.PanicRecovery(routerWithMiddleware)
+	routerWithMiddleware = common_middleware.PanicRecovery(routerWithMiddleware, logger)
 
 	return routerWithMiddleware
 }

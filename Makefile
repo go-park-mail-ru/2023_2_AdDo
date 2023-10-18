@@ -32,7 +32,7 @@ database-clean:
 
 # запуск интеграционных тестов
 docker-service-test:
-	@make hard_deploy
+	#@make hard_deploy
 	@echo "Running tests with empty database..."
 	@python3 test/testsuite/sign_up_test.py
 	@python3 test/testsuite/music_test.py

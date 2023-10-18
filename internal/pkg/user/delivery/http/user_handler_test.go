@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"github.com/sirupsen/logrus"
 	common_handler "main/internal/pkg/common/handler"
 	"main/internal/pkg/session"
 	user_domain "main/internal/pkg/user"
@@ -23,7 +24,7 @@ func TestSignUp(t *testing.T) {
 
 	mockUseCase := user_mock.NewMockUseCase(ctrl)
 
-	handler := NewHandler(mockUseCase)
+	handler := NewHandler(mockUseCase, logrus.New())
 
 	t.Run("DecodeRequestBodyError", func(t *testing.T) {
 		requestBody := bytes.NewBufferString(`{"name": "John"`) // некорректный JSON
@@ -92,7 +93,7 @@ func TestLogin(t *testing.T) {
 	defer ctrl.Finish()
 
 	mockUseCase := user_mock.NewMockUseCase(ctrl)
-	handler := NewHandler(mockUseCase)
+	handler := NewHandler(mockUseCase, logrus.New())
 
 	t.Run("DecodeRequestBodyError", func(t *testing.T) {
 		requestBody := bytes.NewBufferString(`{"email": "john@example.`) // некорректный JSON
@@ -154,7 +155,7 @@ func TestAuth(t *testing.T) {
 
 	mockUseCase := user_mock.NewMockUseCase(ctrl)
 
-	handler := NewHandler(mockUseCase)
+	handler := NewHandler(mockUseCase, logrus.New())
 
 	t.Run("GetCookieError", func(t *testing.T) {
 		req := httptest.NewRequest(http.MethodGet, "/auth", nil)
@@ -215,7 +216,7 @@ func TestLogOut(t *testing.T) {
 	defer ctrl.Finish()
 
 	mockUseCase := user_mock.NewMockUseCase(ctrl)
-	handler := UserHandler{userUseCase: mockUseCase}
+	handler := UserHandler{userUseCase: mockUseCase, logger: logrus.New()}
 
 	t.Run("Success", func(t *testing.T) {
 		const sessionId = "sessionID"
