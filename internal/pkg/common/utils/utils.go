@@ -10,3 +10,7 @@ func GetMD5Sum(s string) string {
 	hashString := hex.EncodeToString(hash[:])
 	return hashString
 }
+
+func GenReqId(s string) string {
+	return GetMD5Sum(s)
+}
