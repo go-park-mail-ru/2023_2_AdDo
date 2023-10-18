@@ -12,11 +12,11 @@ type Base struct {
 }
 
 type Response struct {
-	Id     uint64 `json:"Id" example:"1"`
-	Name   string `json:"Name" example:"ArtistName"`
-	Avatar string `json:"Avatar" example:"ArtistAvatar"`
-	Albums []album.Base
-	Tracks []track.Response
+	Id     uint64           `json:"Id" example:"1"`
+	Name   string           `json:"Name" example:"ArtistName"`
+	Avatar string           `json:"Avatar" example:"ArtistAvatar"`
+	Albums []album.Base     `json:"Albums"`
+	Tracks []track.Response `json:"Tracks"`
 }
 
 type UseCase interface {
