@@ -20,29 +20,21 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/auth": {
+        "/album/{id}": {
             "get": {
-                "security": [
-                    {
-                        "cookieAuth": []
-                    },
-                    {
-                        "csrfToken": []
-                    }
-                ],
-                "description": "check user's authentication by cookie and user_id",
+                "description": "return album info with all tracks",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "user"
+                    "album"
                 ],
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "user id",
+                        "description": "album id",
                         "name": "id",
-                        "in": "query",
+                        "in": "path",
                         "required": true
                     }
                 ],
@@ -50,7 +42,175 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/user_domain.User"
+                            "$ref": "#/definitions/album.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/artist/{id}": {
+            "get": {
+                "description": "return artist info",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "artist"
+                ],
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "artist id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/artist.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth": {
+            "get": {
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "description": "check user's authentication by cookie and set csrf-token",
+                "tags": [
+                    "user"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "headers": {
+                            "Set-Cookie": {
+                                "type": "string",
+                                "description": "Set X-Csrf-Token in Cookie"
+                            },
+                            "X-Csrf-Token": {
+                                "type": "string",
+                                "description": "Set X-Csrf-Token in header"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "headers": {
+                            "Set-Cookie": {
+                                "type": "string",
+                                "description": "Set X-Csrf-Token in Cookie"
+                            },
+                            "X-Csrf-Token": {
+                                "type": "string",
+                                "description": "Set X-Csrf-Token in header"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/feed": {
+            "get": {
+                "description": "return all albums",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "album"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/album.Response"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/like": {
+            "post": {
+                "security": [
+                    {
+                        "csrfToken": []
+                    },
+                    {
+                        "cookieCsrfToken": []
+                    }
+                ],
+                "description": "like track",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "track"
+                ],
+                "parameters": [
+                    {
+                        "description": "track id",
+                        "name": "trackId",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/track.Response"
                         }
                     },
                     "400": {
@@ -61,6 +221,65 @@ const docTemplate = `{
                     },
                     "401": {
                         "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/listen": {
+            "post": {
+                "security": [
+                    {
+                        "csrfToken": []
+                    },
+                    {
+                        "cookieCsrfToken": []
+                    }
+                ],
+                "description": "listen track",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "track"
+                ],
+                "parameters": [
+                    {
+                        "description": "track id",
+                        "name": "trackId",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
                         "schema": {
                             "type": "string"
                         }
@@ -76,11 +295,16 @@ const docTemplate = `{
         },
         "/login": {
             "post": {
+                "security": [
+                    {
+                        "csrfToken": []
+                    },
+                    {
+                        "cookieCsrfToken": []
+                    }
+                ],
                 "description": "login user",
                 "consumes": [
-                    "application/json"
-                ],
-                "produces": [
                     "application/json"
                 ],
                 "tags": [
@@ -93,24 +317,17 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/user_delivery.userCrds"
+                            "$ref": "#/definitions/user_domain.UserCredentials"
                         }
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/user_domain.ResponseId"
-                        },
                         "headers": {
-                            "JSESSIONID": {
+                            "Set-Cookie": {
                                 "type": "string",
-                                "description": "cookie"
-                            },
-                            "X-CSRFTOKEN": {
-                                "type": "string",
-                                "description": "csrf token"
+                                "description": "Set JSESSIONID in Cookie"
                             }
                         }
                     },
@@ -143,38 +360,27 @@ const docTemplate = `{
                     },
                     {
                         "csrfToken": []
+                    },
+                    {
+                        "cookieCsrfToken": []
                     }
                 ],
                 "description": "logout user",
-                "consumes": [
-                    "application/json"
-                ],
                 "tags": [
                     "user"
-                ],
-                "parameters": [
-                    {
-                        "description": "user id",
-                        "name": "id",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
                 ],
                 "responses": {
                     "200": {
                         "description": "OK"
                     },
-                    "400": {
-                        "description": "Bad Request",
+                    "401": {
+                        "description": "Unauthorized",
                         "schema": {
                             "type": "string"
                         }
                     },
-                    "401": {
-                        "description": "Unauthorized",
+                    "403": {
+                        "description": "Forbidden",
                         "schema": {
                             "type": "string"
                         }
@@ -188,7 +394,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/music": {
+        "/me": {
             "get": {
                 "security": [
                     {
@@ -196,22 +402,54 @@ const docTemplate = `{
                     },
                     {
                         "csrfToken": []
+                    },
+                    {
+                        "cookieCsrfToken": []
                     }
                 ],
-                "description": "return all tracks",
+                "description": "get user info",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "track"
+                    "user"
                 ],
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "user id",
-                        "name": "id",
-                        "in": "query"
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/user_domain.User"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
                     }
+                }
+            }
+        },
+        "/most_liked": {
+            "get": {
+                "description": "return albums sorted by likes count",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "album"
                 ],
                 "responses": {
                     "200": {
@@ -219,20 +457,64 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/track.Response"
+                                "$ref": "#/definitions/album.Response"
                             }
                         }
                     },
-                    "400": {
-                        "description": "Bad Request",
+                    "500": {
+                        "description": "Internal Server Error",
                         "schema": {
                             "type": "string"
                         }
+                    }
+                }
+            }
+        },
+        "/new": {
+            "get": {
+                "description": "return new albums",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "album"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/album.Response"
+                            }
+                        }
                     },
-                    "401": {
-                        "description": "Unauthorized",
+                    "500": {
+                        "description": "Internal Server Error",
                         "schema": {
                             "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/popular": {
+            "get": {
+                "description": "return albums sorted by listen count",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "album"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/album.Response"
+                            }
                         }
                     },
                     "500": {
@@ -246,11 +528,16 @@ const docTemplate = `{
         },
         "/sign_up": {
             "post": {
+                "security": [
+                    {
+                        "csrfToken": []
+                    },
+                    {
+                        "cookieCsrfToken": []
+                    }
+                ],
                 "description": "register user",
                 "consumes": [
-                    "application/json"
-                ],
-                "produces": [
                     "application/json"
                 ],
                 "tags": [
@@ -270,12 +557,21 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/user_domain.ResponseId"
+                        "headers": {
+                            "Set-Cookie": {
+                                "type": "string",
+                                "description": "Set JSESSIONID in Cookie"
+                            }
                         }
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
                         "schema": {
                             "type": "string"
                         }
@@ -297,7 +593,7 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "album.Response": {
+        "album.Base": {
             "type": "object",
             "properties": {
                 "Id": {
@@ -314,9 +610,46 @@ const docTemplate = `{
                 }
             }
         },
+        "album.Response": {
+            "type": "object",
+            "properties": {
+                "ArtistId": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "ArtistName": {
+                    "type": "string",
+                    "example": "ArtistName"
+                },
+                "Id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "Name": {
+                    "type": "string",
+                    "example": "AlbumName"
+                },
+                "Preview": {
+                    "type": "string",
+                    "example": "AlbumPreview"
+                },
+                "Tracks": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/track.Response"
+                    }
+                }
+            }
+        },
         "artist.Response": {
             "type": "object",
             "properties": {
+                "Albums": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/album.Base"
+                    }
+                },
                 "Avatar": {
                     "type": "string",
                     "example": "ArtistAvatar"
@@ -328,24 +661,18 @@ const docTemplate = `{
                 "Name": {
                     "type": "string",
                     "example": "ArtistName"
+                },
+                "Tracks": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/track.Response"
+                    }
                 }
             }
         },
         "track.Response": {
             "type": "object",
             "properties": {
-                "Album": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/album.Response"
-                    }
-                },
-                "Artist": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/artist.Response"
-                    }
-                },
                 "Content": {
                     "type": "string",
                     "example": "TrackContent"
@@ -361,28 +688,6 @@ const docTemplate = `{
                 "Preview": {
                     "type": "string",
                     "example": "TrackPreview"
-                }
-            }
-        },
-        "user_delivery.userCrds": {
-            "type": "object",
-            "properties": {
-                "Email": {
-                    "type": "string",
-                    "example": "example@gmail.com"
-                },
-                "Password": {
-                    "type": "string",
-                    "example": "password"
-                }
-            }
-        },
-        "user_domain.ResponseId": {
-            "type": "object",
-            "properties": {
-                "Id": {
-                    "type": "integer",
-                    "example": 1
                 }
             }
         },
@@ -414,17 +719,35 @@ const docTemplate = `{
                     "example": "john"
                 }
             }
+        },
+        "user_domain.UserCredentials": {
+            "type": "object",
+            "properties": {
+                "Email": {
+                    "type": "string",
+                    "example": "example@gmail.com"
+                },
+                "Password": {
+                    "type": "string",
+                    "example": "password"
+                }
+            }
         }
     },
     "securityDefinitions": {
         "cookieAuth": {
             "type": "apiKey",
             "name": "JSESSIONID",
-            "in": "header"
+            "in": "cookie"
+        },
+        "cookieCsrfToken": {
+            "type": "apiKey",
+            "name": "X-Csrf-Token",
+            "in": "cookie"
         },
         "csrfToken": {
             "type": "apiKey",
-            "name": "X-CSRFTOKEN",
+            "name": "X-Csrf-Token",
             "in": "header"
         }
     }

@@ -23,7 +23,19 @@ func NewHandler(track track.UseCase, session session.UseCase) TrackHandler {
 	}
 }
 
-// TODO artist/id информация об исполнителе, список всех его треков, всех альбомов
+// Listen
+//
+//	@Description	listen track
+//	@Tags			track
+//	@Accept			json
+//	@Param			trackId	body	integer	true	"track id"
+//	@Security		csrfToken
+//	@Security		cookieCsrfToken
+//	@Success		200
+//	@Failure		400	{string}	errMsg
+//	@Failure		403	{string}	errMsg
+//	@Failure		500	{string}	errMsg
+//	@Router			/listen [post]
 func (handler *TrackHandler) Listen(w http.ResponseWriter, r *http.Request) error {
 	var trackId track.Id
 	if err := json.NewDecoder(r.Body).Decode(&trackId); err != nil {
@@ -38,6 +50,20 @@ func (handler *TrackHandler) Listen(w http.ResponseWriter, r *http.Request) erro
 	return nil
 }
 
+// Like
+//
+//	@Description	like track
+//	@Tags			track
+//	@Security		csrfToken
+//	@Security		cookieCsrfToken
+//	@Accept			json
+//	@Param			trackId	body		integer	true	"track id"
+//	@Success		200		{object}	track.Response
+//	@Failure		400		{string}	errMsg
+//	@Failure		401		{string}	errMsg
+//	@Failure		403		{string}	errMsg
+//	@Failure		500		{string}	errMsg
+//	@Router			/like [post]
 func (handler *TrackHandler) Like(w http.ResponseWriter, r *http.Request) error {
 	var trackId track.Id
 	if err := json.NewDecoder(r.Body).Decode(&trackId); err != nil {
