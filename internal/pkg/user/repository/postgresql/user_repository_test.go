@@ -2,6 +2,7 @@ package user_repository
 
 import (
 	"github.com/pashagolub/pgxmock/v3"
+	"github.com/sirupsen/logrus"
 	user_domain "main/internal/pkg/user"
 	"testing"
 )
@@ -11,7 +12,8 @@ func TestUserRepository_Create(t *testing.T) {
 	defer mock.Close()
 
 	repo := Postgres{
-		Pool: mock,
+		Pool:   mock,
+		logger: logrus.New(),
 	}
 
 	data := user_domain.User{Email: "John@email.com", Password: "John's password", Username: "John's username", BirthDate: "2003-12-01"}
@@ -34,7 +36,8 @@ func TestUserRepository_GetById(t *testing.T) {
 	defer mock.Close()
 
 	repo := Postgres{
-		Pool: mock,
+		Pool:   mock,
+		logger: logrus.New(),
 	}
 
 	expectedUser := user_domain.User{
@@ -69,7 +72,8 @@ func TestUserRepository_CheckEmailAndPassword(t *testing.T) {
 	defer mock.Close()
 
 	repo := Postgres{
-		Pool: mock,
+		Pool:   mock,
+		logger: logrus.New(),
 	}
 
 	expectedUserId := "rand-strs-uuid"

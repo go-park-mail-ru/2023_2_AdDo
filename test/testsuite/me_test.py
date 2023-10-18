@@ -7,7 +7,7 @@ url = 'http://localhost:8080/api/v1'
 
 class MeTest(unittest.TestCase):
     def test_me_success(self):
-        pre_response = requests.get(url + '/album/1')
+        pre_response = requests.get(url + '/auth')
 
         headers = {
             'X-Csrf-Token': pre_response.headers['X-Csrf-Token']

@@ -2,6 +2,7 @@ package artist_usecase
 
 import (
 	"github.com/golang/mock/gomock"
+	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"main/internal/pkg/album"
 	"main/internal/pkg/artist"
@@ -24,6 +25,7 @@ func Test_GetArtistInfo(t *testing.T) {
 		repoTrack:  mockTrackRepo,
 		repoArtist: mockArtistRepo,
 		repoAlbum:  mockAlbumRepo,
+		logger:     logrus.New(),
 	}
 
 	art := artist.Base{
