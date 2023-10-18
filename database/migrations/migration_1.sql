@@ -1,5 +1,7 @@
+create extension if not exists "uuid-ossp";
+
 create table if not exists profile (
-    id         serial primary key,
+    id uuid default uuid_generate_v4() primary key,
     email      varchar(32) unique not null,
     password   varchar(32)        not null,
     nickname   varchar(32)        not null,
@@ -16,7 +18,7 @@ create table if not exists artist (
 create table if not exists playlist (
     id         serial primary key,
     name       varchar(32) not null unique,
-    creator_id int         not null,
+    creator_id uuid         not null,
     foreign key (creator_id) references profile (id),
     preview    varchar(1024),
     creating_date date not null default now()
@@ -65,7 +67,7 @@ create table if not exists playlist_track (
 
 create table if not exists profile_track (
     id         serial primary key,
-    profile_id int not null,
+    profile_id uuid not null,
     foreign key (profile_id) references profile (id),
     track_id int not null,
     foreign key (track_id) references track (id)
@@ -73,7 +75,7 @@ create table if not exists profile_track (
 
 create table if not exists profile_artist (
     id         serial primary key,
-    profile_id int not null,
+    profile_id uuid not null,
     foreign key (profile_id) references profile (id),
     artist_id int not null,
     foreign key (artist_id) references artist (id)
@@ -81,7 +83,7 @@ create table if not exists profile_artist (
 
 create table if not exists profile_album (
     id         serial primary key,
-    profile_id int not null,
+    profile_id uuid not null,
     foreign key (profile_id) references profile (id),
     album_id int not null,
     foreign key (album_id) references album (id)
@@ -89,8 +91,18 @@ create table if not exists profile_album (
 
 create table if not exists profile_playlist (
     id         serial primary key,
-    profile_id int not null,
+    profile_id uuid not null,
     foreign key (profile_id) references profile (id),
     playlist_id int not null,
     foreign key (playlist_id) references playlist (id)
 );
+
+--create table if not exists podcast (
+--    id           serial primary key,
+--    name         varchar(32) not null,
+--   artist_id    int         not null,
+--  foreign key (artist_id) references artist (id),
+-- preview      varchar(1024),
+--description  varchar(256),
+-- release_date date
+--);
