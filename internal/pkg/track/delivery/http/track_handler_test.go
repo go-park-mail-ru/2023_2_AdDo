@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"github.com/golang/mock/gomock"
+	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"main/internal/pkg/session"
 	"main/internal/pkg/track"
@@ -104,6 +105,7 @@ func TestListen(t *testing.T) {
 	handler := &TrackHandler{
 		trackUseCase:   mockTrackUseCase,
 		sessionUseCase: mockSessionUseCase,
+		logger:         logrus.New(),
 	}
 
 	t.Run("Success", func(t *testing.T) {
@@ -132,6 +134,7 @@ func TestLike(t *testing.T) {
 	handler := &TrackHandler{
 		trackUseCase:   mockTrackUseCase,
 		sessionUseCase: mockSessionUseCase,
+		logger:         logrus.New(),
 	}
 
 	t.Run("Success", func(t *testing.T) {

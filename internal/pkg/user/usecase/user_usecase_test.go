@@ -3,6 +3,7 @@ package user_usecase
 import (
 	"errors"
 	"github.com/golang/mock/gomock"
+	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	user_domain "main/internal/pkg/user"
 	session_mock "main/test/mocks/session"
@@ -18,6 +19,7 @@ func TestRegister_Success(t *testing.T) {
 
 	useCase := &WithStatefulSessions{
 		UserRepo: mockUserRepo,
+		logger:   logrus.New(),
 	}
 
 	mockUser := user_domain.User{
@@ -41,6 +43,7 @@ func TestRegister_UserAlreadyExists(t *testing.T) {
 
 	useCase := &WithStatefulSessions{
 		UserRepo: mockUserRepo,
+		logger:   logrus.New(),
 	}
 
 	mockUser := user_domain.User{
@@ -66,6 +69,7 @@ func TestLogin_Success(t *testing.T) {
 	useCase := &WithStatefulSessions{
 		UserRepo: mockUserRepo,
 		AuthRepo: mockAuthRepo,
+		logger:   logrus.New(),
 	}
 
 	mockUser := user_domain.User{
@@ -93,6 +97,7 @@ func TestGetUserInfo_Success(t *testing.T) {
 	useCase := &WithStatefulSessions{
 		UserRepo: mockUserRepo,
 		AuthRepo: mockAuthRepo,
+		logger:   logrus.New(),
 	}
 
 	mockUser := user_domain.User{
@@ -118,6 +123,7 @@ func TestAuth_Success(t *testing.T) {
 
 	useCase := &WithStatefulSessions{
 		AuthRepo: mockAuthRepo,
+		logger:   logrus.New(),
 	}
 
 	mockUser := user_domain.User{
@@ -142,6 +148,7 @@ func TestLogOut_Success(t *testing.T) {
 
 	useCase := &WithStatefulSessions{
 		AuthRepo: mockAuthRepo,
+		logger:   logrus.New(),
 	}
 
 	const sessionId = "sessionId"

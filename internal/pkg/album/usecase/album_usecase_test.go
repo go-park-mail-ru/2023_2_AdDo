@@ -2,6 +2,7 @@ package album_usecase
 
 import (
 	"github.com/golang/mock/gomock"
+	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"main/internal/pkg/album"
 	"main/internal/pkg/artist"
@@ -24,6 +25,7 @@ func Test_formResponse(t *testing.T) {
 		repoTrack:  mockTrackRepo,
 		repoArtist: mockArtistRepo,
 		repoAlbum:  mockAlbumRepo,
+		logger:     logrus.New(),
 	}
 
 	albums := []album.Base{
@@ -86,6 +88,7 @@ func Test_GetAlbum(t *testing.T) {
 		repoTrack:  mockTrackRepo,
 		repoArtist: mockArtistRepo,
 		repoAlbum:  mockAlbumRepo,
+		logger:     logrus.New(),
 	}
 
 	alb := album.Base{

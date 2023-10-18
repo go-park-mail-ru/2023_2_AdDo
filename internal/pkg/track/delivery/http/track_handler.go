@@ -2,9 +2,11 @@ package track_delivery
 
 import (
 	"encoding/json"
+	"github.com/sirupsen/logrus"
 	"main/internal/pkg/album"
 	common_handler "main/internal/pkg/common/handler"
 	"main/internal/pkg/common/response"
+	"main/internal/pkg/common/utils"
 	"main/internal/pkg/session"
 	"main/internal/pkg/track"
 	"net/http"
@@ -14,12 +16,14 @@ type TrackHandler struct {
 	trackUseCase   track.UseCase
 	albumUseCase   album.UseCase
 	sessionUseCase session.UseCase
+	logger         *logrus.Logger
 }
 
-func NewHandler(track track.UseCase, session session.UseCase) TrackHandler {
+func NewHandler(track track.UseCase, session session.UseCase, logger *logrus.Logger) TrackHandler {
 	return TrackHandler{
 		trackUseCase:   track,
 		sessionUseCase: session,
+		logger:         logger,
 	}
 }
 
@@ -37,15 +41,21 @@ func NewHandler(track track.UseCase, session session.UseCase) TrackHandler {
 //	@Failure		500	{string}	errMsg
 //	@Router			/listen [post]
 func (handler *TrackHandler) Listen(w http.ResponseWriter, r *http.Request) error {
+	handler.logger.WithFields(logrus.Fields{
+		"request_id": utils.GenReqId(r.RequestURI + r.Method),
+	}).Infoln("Listen Handler entered")
+
 	var trackId track.Id
 	if err := json.NewDecoder(r.Body).Decode(&trackId); err != nil {
 		return common_handler.StatusError{Code: http.StatusBadRequest, Err: err}
 	}
+	handler.logger.Infoln("track id decoded")
 
 	err := handler.trackUseCase.Listen(trackId.Id)
 	if err != nil {
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}
+	handler.logger.Infoln("play count for track ", trackId, "incremented")
 
 	return nil
 }
@@ -65,25 +75,33 @@ func (handler *TrackHandler) Listen(w http.ResponseWriter, r *http.Request) erro
 //	@Failure		500		{string}	errMsg
 //	@Router			/like [post]
 func (handler *TrackHandler) Like(w http.ResponseWriter, r *http.Request) error {
+	handler.logger.WithFields(logrus.Fields{
+		"request_id": utils.GenReqId(r.RequestURI + r.Method),
+	}).Infoln("Like TrackHandler entered")
+
 	var trackId track.Id
 	if err := json.NewDecoder(r.Body).Decode(&trackId); err != nil {
 		return common_handler.StatusError{Code: http.StatusBadRequest, Err: err}
 	}
+	handler.logger.Infoln("track id decoded")
 
 	sessionId, err := response.GetCookie(r)
 	if err != nil {
 		return common_handler.StatusError{Code: http.StatusUnauthorized, Err: err}
 	}
+	handler.logger.Infoln("got cookie")
 
 	userId, err := handler.sessionUseCase.GetUserId(sessionId)
 	if err != nil {
 		return common_handler.StatusError{Code: http.StatusUnauthorized, Err: err}
 	}
+	handler.logger.Infoln("got user id by session id")
 
 	err = handler.trackUseCase.Like(userId, trackId.Id)
 	if err != nil {
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}
+	handler.logger.Infoln("like for track ", trackId, "created")
 
 	return nil
 }
