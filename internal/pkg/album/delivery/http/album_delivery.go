@@ -26,19 +26,14 @@ func NewHandler(trackUseCase track.UseCase, albumUseCase album.UseCase, session 
 	}
 }
 
-// @Description	return all tracks
-// @Tags			track
-// @Produce		json
-// @Param			id	query	int	false	"user id"
-// @Security		cookieAuth
-// @Security		csrfToken
-// @Success		200	{array}		track.Response
-// @Failure		400	{string}	errMsg
-// @Failure		401	{string}	errMsg
-// @Failure		500	{string}	errMsg
-// @Router			/music [get]
-
-// docs here
+// Feed
+//
+//	@Description	return all albums
+//	@Tags			album
+//	@Produce		json
+//	@Success		200	{array}		album.Response
+//	@Failure		500	{string}	errMsg
+//	@Router			/feed [get]
 func (handler *AlbumHandler) Feed(w http.ResponseWriter, r *http.Request) error {
 	albums, err := handler.albumUseCase.GetRandom()
 	if err != nil {
@@ -47,7 +42,14 @@ func (handler *AlbumHandler) Feed(w http.ResponseWriter, r *http.Request) error 
 	return handler.handleQuery(albums, w, r)
 }
 
-// docs here
+// New
+//
+//	@Description	return new albums
+//	@Tags			album
+//	@Produce		json
+//	@Success		200	{array}		album.Response
+//	@Failure		500	{string}	errMsg
+//	@Router			/new [get]
 func (handler *AlbumHandler) New(w http.ResponseWriter, r *http.Request) error {
 	albums, err := handler.albumUseCase.GetNew()
 	if err != nil {
@@ -56,7 +58,14 @@ func (handler *AlbumHandler) New(w http.ResponseWriter, r *http.Request) error {
 	return handler.handleQuery(albums, w, r)
 }
 
-// docs here
+// MostLiked
+//
+//	@Description	return albums sorted by likes count
+//	@Tags			album
+//	@Produce		json
+//	@Success		200	{array}		album.Response
+//	@Failure		500	{string}	errMsg
+//	@Router			/most_liked [get]
 func (handler *AlbumHandler) MostLiked(w http.ResponseWriter, r *http.Request) error {
 	albums, err := handler.albumUseCase.GetMostLiked()
 	if err != nil {
@@ -65,7 +74,14 @@ func (handler *AlbumHandler) MostLiked(w http.ResponseWriter, r *http.Request) e
 	return handler.handleQuery(albums, w, r)
 }
 
-// docs here
+// Popular
+//
+//	@Description	return albums sorted by listen count
+//	@Tags			album
+//	@Produce		json
+//	@Success		200	{array}		album.Response
+//	@Failure		500	{string}	errMsg
+//	@Router			/popular [get]
 func (handler *AlbumHandler) Popular(w http.ResponseWriter, r *http.Request) error {
 	albums, err := handler.albumUseCase.GetPopular()
 	if err != nil {
@@ -74,7 +90,16 @@ func (handler *AlbumHandler) Popular(w http.ResponseWriter, r *http.Request) err
 	return handler.handleQuery(albums, w, r)
 }
 
-// docs here
+// AlbumTracks
+//
+//	@Description	return album info with all tracks
+//	@Tags			album
+//	@Produce		json
+//	@Param			id	path		integer	true	"album id"
+//	@Success		200	{object}	album.Response
+//	@Failure		400	{string}	errMsg
+//	@Failure		500	{string}	errMsg
+//	@Router			/album/{id} [get]
 func (handler *AlbumHandler) AlbumTracks(w http.ResponseWriter, r *http.Request) error {
 	w.Header().Set(session.XCsrfToken, csrf.Token(r))
 	albumId, err := strconv.Atoi(mux.Vars(r)["id"])
