@@ -1,6 +1,7 @@
 package artist_usecase
 
 import (
+	"github.com/sirupsen/logrus"
 	"main/internal/pkg/album"
 	"main/internal/pkg/artist"
 	"main/internal/pkg/track"
@@ -10,24 +11,28 @@ type Default struct {
 	repoArtist artist.Repository
 	repoTrack  track.Repository
 	repoAlbum  album.Repository
+	logger     *logrus.Logger
 }
 
-func NewDefault(artistRepo artist.Repository, repoTrack track.Repository, repoAlbum album.Repository) Default {
+func NewDefault(artistRepo artist.Repository, repoTrack track.Repository, repoAlbum album.Repository, logger *logrus.Logger) Default {
 	return Default{
 		repoArtist: artistRepo,
 		repoTrack:  repoTrack,
 		repoAlbum:  repoAlbum,
+		logger:     logger,
 	}
 }
 
-// в этой ручке получаем инфо, все альбомы, как в юзкейсе альбома, все треки, потом можно сделать пагинацию
 func (repo *Default) GetArtistInfo(artistId uint64) (artist.Response, error) {
+	repo.logger.Infoln("Artist UseCase GetArtistInfo entered")
+
 	var result artist.Response
 
 	artistBase, err := repo.repoArtist.Get(artistId)
 	if err != nil {
 		return result, err
 	}
+	repo.logger.Infoln("Got artist base")
 
 	result.Id = artistBase.Id
 	result.Name = artistBase.Name
@@ -37,6 +42,7 @@ func (repo *Default) GetArtistInfo(artistId uint64) (artist.Response, error) {
 	if err != nil {
 		return result, err
 	}
+	repo.logger.Infoln("Got artist albums")
 
 	result.Albums = albums
 
@@ -44,6 +50,8 @@ func (repo *Default) GetArtistInfo(artistId uint64) (artist.Response, error) {
 	if err != nil {
 		return result, err
 	}
+	repo.logger.Infoln("Got artist tracks")
+
 	result.Tracks = tracks
 
 	return result, nil
