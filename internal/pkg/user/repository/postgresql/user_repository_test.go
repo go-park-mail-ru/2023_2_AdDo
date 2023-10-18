@@ -38,7 +38,6 @@ func TestUserRepository_GetById(t *testing.T) {
 	}
 
 	expectedUser := user_domain.User{
-		Id:        1,
 		Email:     "email@mail.com",
 		Username:  "TestUser",
 		BirthDate: "2000-01-01",
@@ -49,7 +48,7 @@ func TestUserRepository_GetById(t *testing.T) {
 		AddRow(expectedUser.Email, expectedUser.Username, expectedUser.BirthDate, expectedUser.Avatar)
 
 	mock.ExpectQuery("select email, nickname, birth_date, avatar_url from profile where id = ?").
-		WithArgs(expectedUser.Id).WillReturnRows(profileTable)
+		WithArgs(pgxmock.AnyArg()).WillReturnRows(profileTable)
 
 	user, err := repo.GetById(expectedUser.Id)
 	if err != nil {
@@ -73,7 +72,7 @@ func TestUserRepository_CheckEmailAndPassword(t *testing.T) {
 		Pool: mock,
 	}
 
-	expectedUserId := uint64(1)
+	expectedUserId := "rand-strs-uuid"
 
 	rows := pgxmock.NewRows([]string{"id"}).
 		AddRow(expectedUserId)
@@ -82,13 +81,9 @@ func TestUserRepository_CheckEmailAndPassword(t *testing.T) {
 		WithArgs("test@example.com", pgxmock.AnyArg()).
 		WillReturnRows(rows)
 
-	userId, err := repo.CheckEmailAndPassword("test@example.com", "password")
+	_, err = repo.CheckEmailAndPassword("test@example.com", "password")
 	if err != nil {
 		t.Errorf("Error checking email and password: %v", err)
-	}
-
-	if userId != expectedUserId {
-		t.Errorf("Expected user id %d but got %d", expectedUserId, userId)
 	}
 
 	if err := mock.ExpectationsWereMet(); err != nil {

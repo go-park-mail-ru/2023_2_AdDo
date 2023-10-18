@@ -15,11 +15,11 @@ class ListenTest(unittest.TestCase):
             'X-Csrf-Token': pre_response.cookies['X-Csrf-Token']
         }
 
-        response = requests.post(url + '/listen/1', headers=headers, cookies=cookies)
+        response = requests.post(url + '/listen', headers=headers, cookies=cookies, json={'Id': 1})
         self.assertEqual(200, response.status_code)
 
     def test_listen_without_csrf(self):
-        response = requests.post(url + '/listen/1')
+        response = requests.post(url + '/listen', json={'Id': 1})
         self.assertEqual(403, response.status_code)
 
 test_listen = ListenTest()

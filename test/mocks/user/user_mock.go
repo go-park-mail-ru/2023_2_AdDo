@@ -131,10 +131,10 @@ func (m *MockRepository) EXPECT() *MockRepositoryMockRecorder {
 }
 
 // CheckEmailAndPassword mocks base method.
-func (m *MockRepository) CheckEmailAndPassword(email, password string) (uint64, error) {
+func (m *MockRepository) CheckEmailAndPassword(email, password string) (string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CheckEmailAndPassword", email, password)
-	ret0, _ := ret[0].(uint64)
+	ret0, _ := ret[0].(string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -160,7 +160,7 @@ func (mr *MockRepositoryMockRecorder) Create(user interface{}) *gomock.Call {
 }
 
 // GetById mocks base method.
-func (m *MockRepository) GetById(id uint64) (user_domain.User, error) {
+func (m *MockRepository) GetById(id string) (user_domain.User, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetById", id)
 	ret0, _ := ret[0].(user_domain.User)

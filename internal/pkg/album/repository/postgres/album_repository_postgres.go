@@ -63,6 +63,7 @@ func (p Postgres) Get(albumId uint64) (album.Base, error) {
 
 func (p Postgres) getWithQuery(ctx context.Context, query string, args ...any) ([]album.Base, error) {
 	result := make([]album.Base, 0)
+
 	rows, err := p.Pool.Query(ctx, query, args...)
 	if err != nil {
 		return result, err
@@ -71,12 +72,24 @@ func (p Postgres) getWithQuery(ctx context.Context, query string, args ...any) (
 
 	for rows.Next() {
 		var base album.Base
+
 		err = rows.Scan(&base.Id, &base.Name, &base.Preview)
 		if err != nil {
 			return nil, err
 		}
+
 		result = append(result, base)
 	}
 
 	return result, nil
+}
+
+func (p Postgres) CreateLike(userId string, albumId uint64) error {
+	query := "insert into profile_album (profile_id, album_id) values ($1, $2)"
+	_, err := p.Pool.Exec(context.Background(), query, userId, albumId)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
