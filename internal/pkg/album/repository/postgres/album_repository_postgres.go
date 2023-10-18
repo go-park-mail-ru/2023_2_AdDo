@@ -45,13 +45,13 @@ func (p Postgres) GetRandom(limit uint32) ([]album.Base, error) {
 
 func (p Postgres) GetByListenCount(limit uint32) ([]album.Base, error) {
 	p.logger.Infoln("Album Repo GetByListenCount entered")
-	query := "select id, name, preview from album order by play_count desc limit $1"
+	query := "select album.id, album.name, album.preview from album inner join album_track on album_track.album_id = album.id inner join track on track_id = track.id group by album.id order by sum(track.play_count) desc limit $1"
 	return p.getWithQuery(context.Background(), query, limit)
 }
 
 func (p Postgres) GetByLikeCount(limit uint32) ([]album.Base, error) {
 	p.logger.Infoln("Album Repo GetByLikeCount entered")
-	query := "select id, name, preview from album order by rating desc limit $1"
+	query := "select album.id, name, preview from album left join profile_album on album.id = profile_album.album_id group by album.id order by count(*) desc limit $1"
 	return p.getWithQuery(context.Background(), query, limit)
 }
 
