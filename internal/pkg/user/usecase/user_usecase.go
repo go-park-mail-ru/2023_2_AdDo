@@ -55,7 +55,7 @@ func (useCase *WithStatefulSessions) GetUserInfo(sessionId string) (user_domain.
 
 	id, err := useCase.AuthRepo.Get(sessionId)
 	if err != nil {
-		return user_domain.User{}, nil
+		return user_domain.User{}, err
 	}
 	useCase.logger.Infoln("Got user id ", id)
 
