@@ -37,12 +37,12 @@ func NewHandler(track track.UseCase, session session.UseCase) TrackHandler {
 //	@Failure		500	{string}	errMsg
 //	@Router			/listen [post]
 func (handler *TrackHandler) Listen(w http.ResponseWriter, r *http.Request) error {
-	var trackId int
+	var trackId track.Id
 	if err := json.NewDecoder(r.Body).Decode(&trackId); err != nil {
 		return common_handler.StatusError{Code: http.StatusBadRequest, Err: err}
 	}
 
-	err := handler.trackUseCase.Listen(uint64(trackId))
+	err := handler.trackUseCase.Listen(trackId.Id)
 	if err != nil {
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}
@@ -65,7 +65,7 @@ func (handler *TrackHandler) Listen(w http.ResponseWriter, r *http.Request) erro
 //	@Failure		500		{string}	errMsg
 //	@Router			/like [post]
 func (handler *TrackHandler) Like(w http.ResponseWriter, r *http.Request) error {
-	var trackId int
+	var trackId track.Id
 	if err := json.NewDecoder(r.Body).Decode(&trackId); err != nil {
 		return common_handler.StatusError{Code: http.StatusBadRequest, Err: err}
 	}
@@ -80,7 +80,7 @@ func (handler *TrackHandler) Like(w http.ResponseWriter, r *http.Request) error 
 		return common_handler.StatusError{Code: http.StatusUnauthorized, Err: err}
 	}
 
-	err = handler.trackUseCase.Like(userId, uint64(trackId))
+	err = handler.trackUseCase.Like(userId, trackId.Id)
 	if err != nil {
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}

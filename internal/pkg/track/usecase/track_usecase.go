@@ -116,7 +116,7 @@ func (useCase *Default) Listen(trackId uint64) error {
 //	return tracks, nil
 //}
 
-func (useCase *Default) Like(userId, trackId uint64) error {
+func (useCase *Default) Like(userId string, trackId uint64) error {
 	err := useCase.repoTrack.CreateLike(userId, trackId)
 	if err != nil {
 		return err

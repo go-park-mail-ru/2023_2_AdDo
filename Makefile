@@ -7,7 +7,7 @@ docker-service-build:
 
 # Запуск юнит-тестов в файл
 unit-test:
-	@make mocks-clean
+	@-make mocks-clean
 	@echo "Generating mocks..."
 	@mockgen -source=internal/pkg/user/domain.go -destination=test/mocks/user/user_mock.go -package=user_mock;
 	@mockgen -source=internal/pkg/session/domain.go -destination=test/mocks/session/session_mock.go -package=session_mock;

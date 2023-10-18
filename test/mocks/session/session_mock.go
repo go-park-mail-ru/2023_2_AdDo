@@ -49,10 +49,10 @@ func (mr *MockUseCaseMockRecorder) CheckSession(sessionId interface{}) *gomock.C
 }
 
 // GetUserId mocks base method.
-func (m *MockUseCase) GetUserId(sessionId string) (uint64, error) {
+func (m *MockUseCase) GetUserId(sessionId string) (string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetUserId", sessionId)
-	ret0, _ := ret[0].(uint64)
+	ret0, _ := ret[0].(string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -87,7 +87,7 @@ func (m *MockRepository) EXPECT() *MockRepositoryMockRecorder {
 }
 
 // Create mocks base method.
-func (m *MockRepository) Create(userId uint64) (string, error) {
+func (m *MockRepository) Create(userId string) (string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Create", userId)
 	ret0, _ := ret[0].(string)
@@ -116,10 +116,10 @@ func (mr *MockRepositoryMockRecorder) Delete(sessionId interface{}) *gomock.Call
 }
 
 // Get mocks base method.
-func (m *MockRepository) Get(sessionId string) (uint64, error) {
+func (m *MockRepository) Get(sessionId string) (string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Get", sessionId)
-	ret0, _ := ret[0].(uint64)
+	ret0, _ := ret[0].(string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

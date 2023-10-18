@@ -2,6 +2,10 @@ package album
 
 import "main/internal/pkg/track"
 
+type Id struct {
+	Id uint64 `json:"Id" example:"1"`
+}
+
 type Base struct {
 	Id      uint64 `json:"Id" example:"1"`
 	Name    string `json:"Name" example:"AlbumName"`
@@ -23,6 +27,7 @@ type UseCase interface {
 	GetPopular() ([]Response, error)
 	GetNew() ([]Response, error)
 	GetAlbum(albumId uint64) (Response, error)
+	Like(userId string, albumId uint64) error
 }
 
 type Repository interface {
@@ -33,6 +38,7 @@ type Repository interface {
 	GetByReleaseDate(limit uint32) ([]Base, error)
 	GetByListenCount(limit uint32) ([]Base, error)
 	GetRandom(limit uint32) ([]Base, error)
+	CreateLike(userId string, albumId uint64) error
 }
 
 const LimitForMainPage = 10

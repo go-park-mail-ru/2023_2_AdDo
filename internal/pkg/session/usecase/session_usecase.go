@@ -14,10 +14,10 @@ func NewDefault(repository session.Repository) Default {
 	}
 }
 
-func (s *Default) GetUserId(sessionId string) (uint64, error) {
+func (s *Default) GetUserId(sessionId string) (string, error) {
 	userId, err := s.repoSession.Get(sessionId)
 	if err != nil {
-		return 0, err
+		return "", err
 	}
 	return userId, nil
 }

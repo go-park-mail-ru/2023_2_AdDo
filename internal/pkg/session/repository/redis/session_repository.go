@@ -15,7 +15,7 @@ func NewRedis(db *redis.Client) *Redis {
 	return &Redis{database: db}
 }
 
-func (redis *Redis) Create(userId uint64) (string, error) {
+func (redis *Redis) Create(userId string) (string, error) {
 	sessionId := uuid.New().String()
 
 	err := redis.database.Set(context.Background(), sessionId, userId, session.TimeToLiveCookie).Err()
@@ -26,11 +26,10 @@ func (redis *Redis) Create(userId uint64) (string, error) {
 	return sessionId, nil
 }
 
-func (redis *Redis) Get(sessionId string) (uint64, error) {
-	userId, err := redis.database.Get(context.Background(), sessionId).Uint64()
-
+func (redis *Redis) Get(sessionId string) (string, error) {
+	userId, err := redis.database.Get(context.Background(), sessionId).Result()
 	if err != nil {
-		return 0, err
+		return "", err
 	}
 
 	return userId, nil

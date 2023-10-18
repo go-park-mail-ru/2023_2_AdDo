@@ -13,7 +13,7 @@ type UserCredentials struct {
 }
 
 type User struct {
-	Id        uint64 `valid:"-" json:"Id" example:"1"`
+	Id        string `valid:"-" json:"Id" example:"qwer-werw-we4w"`
 	Username  string `valid:"length(2|30), required, printableascii" json:"Username" example:"john"`
 	Email     string `valid:"length(1|30), email, required, printableascii" json:"Email" example:"example@gmail.com"`
 	Password  string `valid:"length(6|30), required, printableascii" json:"Password" example:"password"`
@@ -69,8 +69,8 @@ func (uC *UserCredentials) Validate() error {
 	return nil
 }
 
-type ResponseId struct {
-	Id uint64 `json:"Id" example:"1"`
+type Id struct {
+	Id string `json:"Id" example:"1"`
 }
 
 type UseCase interface {
@@ -83,8 +83,8 @@ type UseCase interface {
 
 type Repository interface {
 	Create(user User) error
-	GetById(id uint64) (User, error)
-	CheckEmailAndPassword(email string, password string) (uint64, error)
+	GetById(id string) (User, error)
+	CheckEmailAndPassword(email string, password string) (string, error)
 }
 
 var (

@@ -47,14 +47,18 @@ func New(userHandler user_delivery.UserHandler, trackHandler track_delivery.Trac
 	router.Handle("/api/v1/sign_up", common_handler.Handler{H: userHandler.SignUp}).Methods("POST")
 	router.Handle("/api/v1/login", common_handler.Handler{H: userHandler.Login}).Methods("POST")
 	router.Handle("/api/v1/logout", common_handler.Handler{H: userHandler.LogOut}).Methods("POST")
+
+	router.Handle("/api/v1/auth", common_handler.Handler{H: userHandler.Auth}).Methods("GET")
+	router.Handle("/api/v1/me", common_handler.Handler{H: userHandler.Me}).Methods("GET")
+
 	router.Handle("/api/v1/listen", common_handler.Handler{H: trackHandler.Listen}).Methods("POST")
-	router.Handle("/api/v1/like", common_handler.Handler{H: trackHandler.Like}).Methods("POST")
+	router.Handle("/api/v1/like_track", common_handler.Handler{H: trackHandler.Like}).Methods("POST")
+	router.Handle("/api/v1/like_album", common_handler.Handler{H: albumHandler.Like}).Methods("POST")
+
 
 	router.Handle("/api/v1/artist/{id}", common_handler.Handler{H: artistHandler.ArtistInfo}).Methods("GET")
 	router.Handle("/api/v1/album/{id}", common_handler.Handler{H: albumHandler.AlbumTracks}).Methods("GET")
 
-	router.Handle("/api/v1/auth", common_handler.Handler{H: userHandler.Auth}).Methods("GET")
-	router.Handle("/api/v1/me", common_handler.Handler{H: userHandler.Me}).Methods("GET")
 	router.Handle("/api/v1/feed", common_handler.Handler{H: albumHandler.Feed}).Methods("GET")
 	router.Handle("/api/v1/new", common_handler.Handler{H: albumHandler.New}).Methods("GET")
 	router.Handle("/api/v1/most_liked", common_handler.Handler{H: albumHandler.MostLiked}).Methods("GET")

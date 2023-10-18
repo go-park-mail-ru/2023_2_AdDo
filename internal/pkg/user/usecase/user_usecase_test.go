@@ -21,7 +21,7 @@ func TestRegister_Success(t *testing.T) {
 	}
 
 	mockUser := user_domain.User{
-		Id:       1,
+		Id:       "qwer-qwer-qwer",
 		Email:    "user@example.com",
 		Username: "user1",
 	}
@@ -44,7 +44,7 @@ func TestRegister_UserAlreadyExists(t *testing.T) {
 	}
 
 	mockUser := user_domain.User{
-		Id:       1,
+		Id:       "qwer-qwer-qwer",
 		Email:    "user@example.com",
 		Username: "user1",
 	}
@@ -69,13 +69,13 @@ func TestLogin_Success(t *testing.T) {
 	}
 
 	mockUser := user_domain.User{
-		Id:       1,
+		Id:       "qwer-qwer-qwer",
 		Email:    "user@example.com",
 		Password: "my_password",
 	}
 	mockSessionId := "mockSessId"
 
-	mockUserRepo.EXPECT().CheckEmailAndPassword(mockUser.Email, mockUser.Password).Return(uint64(mockUser.Id), nil)
+	mockUserRepo.EXPECT().CheckEmailAndPassword(mockUser.Email, mockUser.Password).Return(mockUser.Id, nil)
 	mockAuthRepo.EXPECT().Create(mockUser.Id).Return(mockSessionId, nil)
 	session, err := useCase.Login(mockUser.Email, mockUser.Password)
 
@@ -96,7 +96,7 @@ func TestGetUserInfo_Success(t *testing.T) {
 	}
 
 	mockUser := user_domain.User{
-		Id:       1,
+		Id:       "qwer-qwer-qwer",
 		Email:    "user@example.com",
 		Password: "my_password",
 	}
@@ -121,7 +121,7 @@ func TestAuth_Success(t *testing.T) {
 	}
 
 	mockUser := user_domain.User{
-		Id:       1,
+		Id:       "qwer-qwer-qwer",
 		Email:    "user@example.com",
 		Password: "my_password",
 	}

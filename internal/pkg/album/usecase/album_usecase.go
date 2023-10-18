@@ -96,13 +96,16 @@ func (r *Default) formResponse(albumBase []album.Base) ([]album.Response, error)
 		a.ArtistId = art.Id
 		a.ArtistName = art.Name
 
-		//tracks, err := r.repoTrack.GetByAlbum(base.Id)
-		//if err != nil {
-		//			return nil, err
-		//		}
-		//		a.Tracks = tracks
 		result = append(result, a)
 	}
 
 	return result, nil
+}
+
+func (r *Default) Like(userId string, albumId uint64) error {
+	err := r.repoAlbum.CreateLike(userId, albumId)
+	if err != nil {
+		return err
+	}
+	return nil
 }

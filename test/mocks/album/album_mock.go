@@ -109,6 +109,20 @@ func (mr *MockUseCaseMockRecorder) GetRandom() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetRandom", reflect.TypeOf((*MockUseCase)(nil).GetRandom))
 }
 
+// Like mocks base method.
+func (m *MockUseCase) Like(userId string, albumId uint64) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Like", userId, albumId)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Like indicates an expected call of Like.
+func (mr *MockUseCaseMockRecorder) Like(userId, albumId interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Like", reflect.TypeOf((*MockUseCase)(nil).Like), userId, albumId)
+}
+
 // MockRepository is a mock of Repository interface.
 type MockRepository struct {
 	ctrl     *gomock.Controller
@@ -130,6 +144,20 @@ func NewMockRepository(ctrl *gomock.Controller) *MockRepository {
 // EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockRepository) EXPECT() *MockRepositoryMockRecorder {
 	return m.recorder
+}
+
+// CreateLike mocks base method.
+func (m *MockRepository) CreateLike(userId string, albumId uint64) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateLike", userId, albumId)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// CreateLike indicates an expected call of CreateLike.
+func (mr *MockRepositoryMockRecorder) CreateLike(userId, albumId interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateLike", reflect.TypeOf((*MockRepository)(nil).CreateLike), userId, albumId)
 }
 
 // Get mocks base method.
