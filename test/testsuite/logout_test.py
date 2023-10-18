@@ -6,7 +6,7 @@ url = 'http://localhost:8080/api/v1'
 
 class LogoutTest(unittest.TestCase):
     def test_logout_success(self):
-        pre_response = requests.get(url + '/album/1')
+        pre_response = requests.get(url + '/auth')
 
         headers = {
             'X-Csrf-Token': pre_response.headers['X-Csrf-Token']

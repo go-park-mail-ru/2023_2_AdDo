@@ -3,6 +3,7 @@ package track_repository
 import (
 	"context"
 	"github.com/pashagolub/pgxmock/v3"
+	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"main/internal/pkg/track"
 	"testing"
@@ -16,7 +17,8 @@ func TestTrackRepository_getWithQuery(t *testing.T) {
 	defer mock.Close()
 
 	repo := Postgres{
-		Pool: mock,
+		Pool:   mock,
+		logger: logrus.New(),
 	}
 
 	expected := []track.Response{{

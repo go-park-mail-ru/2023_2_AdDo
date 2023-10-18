@@ -3,6 +3,7 @@ package album_repository
 import (
 	"context"
 	"github.com/pashagolub/pgxmock/v3"
+	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"main/internal/pkg/album"
 	"testing"
@@ -16,7 +17,8 @@ func TestAlbumRepository_getWithQuery(t *testing.T) {
 	defer mock.Close()
 
 	repo := Postgres{
-		Pool: mock,
+		Pool:   mock,
+		logger: logrus.New(),
 	}
 
 	const artistId uint64 = 1
@@ -52,7 +54,8 @@ func TestAlbumRepository_Get(t *testing.T) {
 	defer mock.Close()
 
 	repo := Postgres{
-		Pool: mock,
+		Pool:   mock,
+		logger: logrus.New(),
 	}
 
 	const albumId uint64 = 1

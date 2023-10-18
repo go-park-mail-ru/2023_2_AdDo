@@ -2,6 +2,7 @@ package session_usecase
 
 import (
 	"github.com/golang/mock/gomock"
+	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	session_mock "main/test/mocks/session"
 	"testing"
@@ -15,6 +16,7 @@ func TestDefault_CheckSession_Success(t *testing.T) {
 
 	useCase := &Default{
 		repoSession: mockSessionRepo,
+		logger:      logrus.New(),
 	}
 
 	const isAuthExpected = true

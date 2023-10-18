@@ -47,7 +47,7 @@ class LoginTest(unittest.TestCase):
 
     def test_login_without_account(self):
         # get csrf token
-        pre_response = requests.get(url + '/album/1')
+        pre_response = requests.get(url + '/auth')
 
         # use it in post header and cookies (double submit)
         headers = {
