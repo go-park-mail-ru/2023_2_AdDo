@@ -33,6 +33,7 @@ require (
 	github.com/go-openapi/jsonreference v0.20.0 // indirect
 	github.com/go-openapi/spec v0.20.6 // indirect
 	github.com/go-openapi/swag v0.19.15 // indirect
+	github.com/go-redis/redismock/v8 v8.11.5 // indirect
 	github.com/gorilla/securecookie v1.1.1 // indirect
 	github.com/infiniteloopcloud/xss-validator v0.0.0-20220701051113-03673195f8e1 // indirect
 	github.com/jackc/chunkreader/v2 v2.0.1 // indirect
