@@ -28,4 +28,10 @@ func TestDefault_CheckSession_Success(t *testing.T) {
 
 	assert.Equal(t, nil, err)
 	assert.Equal(t, isAuthExpected, isAuth)
+
+	mockSessionRepo.EXPECT().Get(sessionId).Return(anyUserId, nil)
+	userId, err := useCase.GetUserId(sessionId)
+
+	assert.Equal(t, nil, err)
+	assert.Equal(t, anyUserId, userId)
 }

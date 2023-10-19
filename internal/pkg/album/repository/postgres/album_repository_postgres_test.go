@@ -2,6 +2,7 @@ package album_repository
 
 import (
 	"context"
+	"errors"
 	"github.com/pashagolub/pgxmock/v3"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
@@ -79,6 +80,42 @@ func TestAlbumRepository_Get(t *testing.T) {
 	assert.Equal(t, expectedAlbum, received)
 
 	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Errorf("Unfulfilled expectations: %v", err)
+	}
+}
+
+func TestAlbumRepository_CreateLike(t *testing.T) {
+	mock, err := pgxmock.NewPool()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer mock.Close()
+
+	repo := Postgres{
+		Pool:   mock,
+		logger: logrus.New(),
+	}
+
+	const userId = "1"
+	const albumId uint64 = 2
+
+	query := "insert into profile_album"
+
+	t.Run("Success", func(t *testing.T) {
+		mock.ExpectExec(query).WithArgs(userId, albumId).WillReturnResult(pgxmock.NewResult("insert", 1))
+
+		err = repo.CreateLike(userId, albumId)
+		assert.Nil(t, err)
+	})
+
+	t.Run("Error", func(t *testing.T) {
+		mock.ExpectExec(query).WithArgs(userId, albumId).WillReturnError(errors.New("error while creating like"))
+
+		err = repo.CreateLike(userId, albumId)
+		assert.Equal(t, errors.New("error while creating like"), err)
+	})
+
+	if err = mock.ExpectationsWereMet(); err != nil {
 		t.Errorf("Unfulfilled expectations: %v", err)
 	}
 }
