@@ -45,3 +45,53 @@ func TestTrackRepository_getWithQuery(t *testing.T) {
 		t.Errorf("Unfulfilled expectations: %v", err)
 	}
 }
+
+func TestTrackRepository_CreateLike(t *testing.T) {
+	mock, err := pgxmock.NewPool()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer mock.Close()
+
+	repo := Postgres{
+		Pool:   mock,
+		logger: logrus.New(),
+	}
+
+	const userId = "1"
+	const trackId uint64 = 2
+
+	query := "insert into profile_track"
+	mock.ExpectExec(query).WithArgs(userId, trackId).WillReturnResult(pgxmock.NewResult("insert", 1))
+
+	err = repo.CreateLike(userId, trackId)
+	assert.Nil(t, err)
+
+	if err = mock.ExpectationsWereMet(); err != nil {
+		t.Errorf("Unfulfilled expectations: %v", err)
+	}
+}
+
+func TestTrackRepository_AddListen(t *testing.T) {
+	mock, err := pgxmock.NewPool()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer mock.Close()
+
+	repo := Postgres{
+		Pool:   mock,
+		logger: logrus.New(),
+	}
+
+	const trackId uint64 = 1
+	query := "update track"
+	mock.ExpectExec(query).WithArgs(trackId).WillReturnResult(pgxmock.NewResult("update", 1))
+
+	err = repo.AddListen(trackId)
+	assert.Nil(t, err)
+
+	if err = mock.ExpectationsWereMet(); err != nil {
+		t.Errorf("Unfulfilled expectations: %v", err)
+	}
+}
