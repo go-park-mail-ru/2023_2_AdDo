@@ -1,11 +1,13 @@
 package user_usecase
 
 import (
-	"fmt"
+	"bytes"
+	"io"
 	avatar_domain "main/internal/pkg/avatar"
 	"main/internal/pkg/session"
 	user_domain "main/internal/pkg/user"
-	"mime/multipart"
+	"net/http"
+	"strings"
 )
 
 type WithStatefulSessions struct {
@@ -76,61 +78,62 @@ func (useCase *WithStatefulSessions) Logout(sessionId string) error {
 	return nil
 }
 
-func (useCase *WithStatefulSessions) UploadAvatar(sessionId string, src multipart.File, size int64) error {
-	id, err := useCase.AuthRepo.Get(sessionId)
-	if err != nil {
-		return session.ErrSessionDoesNotExist
-	}
-
+func (useCase *WithStatefulSessions) UploadAvatar(id uint64, src io.Reader, size int64) error {
 	oldPath, _ := useCase.UserRepo.GetAvatarPath(id)
-	fmt.Printf("oldPath is <%s>\n", oldPath)
 
-	path, err := useCase.AvatarRepo.Create(avatar_domain.Avatar{
-		Payload:     src,
-		PayloadSize: size,
-		UserId:      id,
-	})
+	if size > avatar_domain.MaxAvatarSize {
+		return avatar_domain.ErrAvatarIsTooLarge
+	}
+
+	data, err := io.ReadAll(src)
+	if err != nil {
+		return avatar_domain.ErrCannotRead
+	}
+	metadata := data[:512]
+	contentType := http.DetectContentType(metadata)
+
+	if !strings.HasPrefix(contentType, "image/") {
+		return avatar_domain.ErrWrongAvatarType
+	}
+
+	src = bytes.NewReader(data)
+	url, err := useCase.AvatarRepo.Create(
+		avatar_domain.Avatar{
+			Payload:     src,
+			PayloadSize: size,
+			UserId:      id,
+			ContentType: contentType,
+		},
+	)
 	if err != nil {
 		return err
 	}
-	fmt.Println("Create avatar record")
 
-	err = useCase.UserRepo.UpdateAvatarPath(id, path)
+	err = useCase.UserRepo.UpdateAvatarPath(id, url)
 	if err != nil {
 		return err
 	}
-	fmt.Println("Update db")
 
 	if oldPath != "" {
 		useCase.AvatarRepo.Remove(oldPath)
 	}
-	fmt.Println("Remove old file")
 
 	return nil
 }
 
-// docs here
-func (useCase *WithStatefulSessions) RemoveAvatar(sessionId string) error {
-	id, err := useCase.AuthRepo.Get(sessionId)
-	if err != nil {
-		return session.ErrSessionDoesNotExist
-	}
-
+func (useCase *WithStatefulSessions) RemoveAvatar(id uint64) error {
 	oldPath, _ := useCase.UserRepo.GetAvatarPath(id)
-	fmt.Printf("oldPath is <%s>\n", oldPath)
 
 	if oldPath == "" {
-		return user_domain.ErrAvatarDoesNotExist
+		return avatar_domain.ErrAvatarDoesNotExist
 	}
 
 	useCase.AvatarRepo.Remove(oldPath)
-	fmt.Println("Remove old file")
 
-	err = useCase.UserRepo.RemoveAvatarPath(id)
+	err := useCase.UserRepo.RemoveAvatarPath(id)
 	if err != nil {
 		return err
 	}
-	fmt.Println("Remove record from db")
 
 	return nil
 }

@@ -1,67 +1,5 @@
 basePath: /api/v1
 definitions:
-  album.Response:
-    properties:
-      Id:
-        example: 1
-        type: integer
-      Name:
-        example: AlbumName
-        type: string
-      Preview:
-        example: AlbumPreview
-        type: string
-    type: object
-  artist.Response:
-    properties:
-      Avatar:
-        example: ArtistAvatar
-        type: string
-      Id:
-        example: 1
-        type: integer
-      Name:
-        example: ArtistName
-        type: string
-    type: object
-  track.Response:
-    properties:
-      Album:
-        items:
-          $ref: '#/definitions/album.Response'
-        type: array
-      Artist:
-        items:
-          $ref: '#/definitions/artist.Response'
-        type: array
-      Content:
-        example: TrackContent
-        type: string
-      Id:
-        example: 1
-        type: integer
-      Name:
-        example: TrackName
-        type: string
-      Preview:
-        example: TrackPreview
-        type: string
-    type: object
-  user_delivery.userCrds:
-    properties:
-      Email:
-        example: example@gmail.com
-        type: string
-      Password:
-        example: password
-        type: string
-    type: object
-  user_domain.ResponseId:
-    properties:
-      Id:
-        example: 1
-        type: integer
-    type: object
   user_domain.User:
     properties:
       Avatar:
@@ -83,6 +21,15 @@ definitions:
         example: john
         type: string
     type: object
+  user_domain.UserCredentials:
+    properties:
+      Email:
+        example: example@gmail.com
+        type: string
+      Password:
+        example: password
+        type: string
+    type: object
 host: musicon.space
 info:
   contact: {}
@@ -96,24 +43,11 @@ info:
 paths:
   /auth:
     get:
-      description: check user's authentication by cookie and user_id
-      parameters:
-      - description: user id
-        in: query
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
       responses:
         "200":
           description: OK
           schema:
             $ref: '#/definitions/user_domain.User'
-        "400":
-          description: Bad Request
-          schema:
-            type: string
         "401":
           description: Unauthorized
           schema:
@@ -131,16 +65,13 @@ paths:
     post:
       consumes:
       - application/json
-      description: login user
       parameters:
       - description: User email and password
         in: body
         name: userCrds
         required: true
         schema:
-          $ref: '#/definitions/user_delivery.userCrds'
-      produces:
-      - application/json
+          $ref: '#/definitions/user_domain.UserCredentials'
       responses:
         "200":
           description: OK
@@ -151,8 +82,6 @@ paths:
             X-CSRFTOKEN:
               description: csrf token
               type: string
-          schema:
-            $ref: '#/definitions/user_domain.ResponseId'
         "400":
           description: Bad Request
           schema:
@@ -169,23 +98,9 @@ paths:
       - user
   /logout:
     post:
-      consumes:
-      - application/json
-      description: logout user
-      parameters:
-      - description: user id
-        in: body
-        name: id
-        required: true
-        schema:
-          type: integer
       responses:
         "200":
           description: OK
-        "400":
-          description: Bad Request
-          schema:
-            type: string
         "401":
           description: Unauthorized
           schema:
@@ -199,27 +114,11 @@ paths:
       - csrfToken: []
       tags:
       - user
-  /music:
+  /me:
     get:
-      description: return all tracks
-      parameters:
-      - description: user id
-        in: query
-        name: id
-        type: integer
-      produces:
-      - application/json
       responses:
         "200":
           description: OK
-          schema:
-            items:
-              $ref: '#/definitions/track.Response'
-            type: array
-        "400":
-          description: Bad Request
-          schema:
-            type: string
         "401":
           description: Unauthorized
           schema:
@@ -232,12 +131,35 @@ paths:
       - cookieAuth: []
       - csrfToken: []
       tags:
-      - track
+      - user
+  /remove_avatar:
+    put:
+      description: Remove user avatar
+      responses:
+        "200":
+          description: OK
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "409":
+          description: Conflict
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - cookieAuth: []
+      - csrfToken: []
+      - cookieCsrfToken: []
+      tags:
+      - user
   /sign_up:
     post:
       consumes:
       - application/json
-      description: register user
       parameters:
       - description: User data
         in: body
@@ -248,10 +170,6 @@ paths:
       produces:
       - application/json
       responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/user_domain.ResponseId'
         "400":
           description: Bad Request
           schema:
@@ -266,6 +184,36 @@ paths:
             type: string
       tags:
       - user
+  /upload_avatar:
+    post:
+      description: Upload user avatar
+      parameters:
+      - description: User avatar
+        in: formData
+        name: avatar
+        required: true
+        type: file
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - cookieAuth: []
+      - csrfToken: []
+      - cookieCsrfToken: []
+      tags:
+      - user
 securityDefinitions:
   cookieAuth:
     in: header
@@ -273,6 +221,6 @@ securityDefinitions:
     type: apiKey
   csrfToken:
     in: header
-    name: X-CSRFTOKEN
+    name: X-Csrf-Token
     type: apiKey
 swagger: "2.0"

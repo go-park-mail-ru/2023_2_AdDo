@@ -14,6 +14,7 @@ unit-test:
 	@mockgen -source=internal/pkg/track/domain.go -destination=test/mocks/track/track_mock.go -package=track_mock;
 	@mockgen -source=internal/pkg/artist/domain.go -destination=test/mocks/artist/artist_mock.go -package=artist_mock;
 	@mockgen -source=internal/pkg/album/domain.go -destination=test/mocks/album/album_mock.go -package=album_mock;
+	@mockgen -source=internal/pkg/avatar/domain.go -destination=test/mocks/avatar/avatar_mock.go -package=avatar_mock;
 	@echo "Running unit tests..."
 	@go test ./...
 	@go test -coverprofile=all_files ./... -coverpkg=./...
