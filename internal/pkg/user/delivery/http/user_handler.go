@@ -13,12 +13,14 @@ import (
 )
 
 type UserHandler struct {
-	userUseCase user_domain.UseCase
+	userUseCase    user_domain.UseCase
+	sessionUseCase session.UseCase
 }
 
-func NewHandler(userUseCase user_domain.UseCase) UserHandler {
+func NewHandler(userUseCase user_domain.UseCase, sessionUseCase session.UseCase) UserHandler {
 	handler := UserHandler{
-		userUseCase: userUseCase,
+		userUseCase:    userUseCase,
+		sessionUseCase: sessionUseCase,
 	}
 	return handler
 }
@@ -60,7 +62,7 @@ func (handler *UserHandler) SignUp(w http.ResponseWriter, r *http.Request) error
 // Login @Description	login user
 // @Tags			user
 // @Accept			json
-// @Param			user_domain.UserCredentials	body		userCrds	true	"User email and password"
+// @Param			userCrds	body	user_domain.UserCredentials		true	"User email and password"
 // @Success		200
 // @Failure		400			{string}	errMsg
 // @Failure		403			{string}	errMsg
@@ -159,50 +161,70 @@ func (handler *UserHandler) Me(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
-// Me @Description	get user info
-// @Tags			user
-// @Security		cookieAuth
-// @Security		csrfToken
+// UploadAvatar
+//
+// @Description	Upload user avatar
+// @Tags		user
+// @Param		avatar	formData	file		true	"User avatar"
+// @Security	cookieAuth
+// @Security	csrfToken
+// @Security	cookieCsrfToken
 // @Success		200
+// @Failure		400	{string}	errMsg
 // @Failure		401	{string}	errMsg
-// @Failure		409	{string}	errMsg
 // @Failure		500	{string}	errMsg
-// @Router			/upload_avatar [post]
+// @Router		/upload_avatar [post]
 func (handler *UserHandler) UploadAvatar(w http.ResponseWriter, r *http.Request) error {
 	sessionId, err := response.GetCookie(r)
 	if err != nil {
 		return common_handler.StatusError{Code: http.StatusUnauthorized, Err: err}
 	}
 
-	_, err = handler.userUseCase.Auth(sessionId)
+	userId, err := handler.sessionUseCase.GetUserId(sessionId)
 	if err != nil {
 		return common_handler.StatusError{Code: http.StatusUnauthorized, Err: err}
 	}
-
-	src, hdr, err := r.FormFile("photo")
+	
+	src, hdr, err := r.FormFile("avatar")
 	if err != nil {
 		return common_handler.StatusError{Code: http.StatusBadRequest, Err: err}
 	}
 	defer src.Close()
 
-	err = handler.userUseCase.UploadAvatar(sessionId, src, hdr.Size)
+	err = handler.userUseCase.UploadAvatar(userId, src, hdr.Size)
 	if err != nil {
-		return common_handler.StatusError{Code: http.StatusConflict, Err: err}
+		return common_handler.StatusError{Code: http.StatusBadRequest, Err: err}
 	}
 
 	return nil
 }
 
-// docs here
+// RemoveAvatar
+//
+// @Description	Remove user avatar
+// @Tags		user
+// @Security	cookieAuth
+// @Security	csrfToken
+// @Security	cookieCsrfToken
+// @Success		200
+// @Failure		401	{string}	errMsg
+// @Failure		409	{string}	errMsg
+// @Failure		500	{string}	errMsg
+// @Router		/remove_avatar [put]
 func (handler *UserHandler) RemoveAvatar(w http.ResponseWriter, r *http.Request) error {
 	sessionId, err := response.GetCookie(r)
 	if err != nil {
 		return common_handler.StatusError{Code: http.StatusUnauthorized, Err: err}
 	}
 
-	if err = handler.userUseCase.RemoveAvatar(sessionId); err != nil {
+	userId, err := handler.sessionUseCase.GetUserId(sessionId)
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusUnauthorized, Err: err}
+	}
+
+	if err = handler.userUseCase.RemoveAvatar(userId); err != nil {
 		return common_handler.StatusError{Code: http.StatusConflict, Err: err}
 	}
-	
+
 	return nil
 }

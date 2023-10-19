@@ -48,7 +48,6 @@ func main() {
 	if err != nil {
 		logger.Fatalf("error minio connecting %v", err)
 	}
-	// defer minio.Close()
 
 	sessionRepo := session_repository_redis.NewRedis(redis)
 	userRepo := user_repository.NewPostgres(postgres)
@@ -67,7 +66,7 @@ func main() {
 
 	albumHandler := album_delivery.NewHandler(&trackUseCase, &albumUseCase, &sessionUseCase)
 	artistHandler := artist_delivery.NewHandler(&artistUseCase)
-	userHandler := user_delivery.NewHandler(&userUseCase)
+	userHandler := user_delivery.NewHandler(&userUseCase, &sessionUseCase)
 	trackHandler := track_delivery.NewHandler(&trackUseCase, &sessionUseCase)
 	logger.Infoln("Deliveries initialized")
 

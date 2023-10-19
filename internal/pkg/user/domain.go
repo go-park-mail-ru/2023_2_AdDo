@@ -2,7 +2,7 @@ package user_domain
 
 import (
 	"errors"
-	"mime/multipart"
+	avatar_domain "main/internal/pkg/avatar"
 
 	"github.com/asaskevich/govalidator"
 )
@@ -48,22 +48,18 @@ type UseCase interface {
 	Auth(sessionId string) (bool, error)
 	GetUserInfo(sessionId string) (User, error)
 	Logout(sessionId string) error
-	UploadAvatar(sessionId string, src multipart.File, size int64) error
-	RemoveAvatar(sessionId string) error
+	avatar_domain.UseCase
 }
 
 type Repository interface {
 	Create(user User) error
 	GetById(id uint64) (User, error)
 	CheckEmailAndPassword(email string, password string) (uint64, error)
-	UpdateAvatarPath(userId uint64, path string) error
-	GetAvatarPath(userId uint64) (string, error)
-	RemoveAvatarPath(userId uint64) error
+	avatar_domain.DbRepository
 }
 
 var (
 	ErrWrongCredentials   = errors.New("wrong user credentials")
 	ErrUserAlreadyExist   = errors.New("user already exist")
 	ErrUserDoesNotExist   = errors.New("user does not exist")
-	ErrAvatarDoesNotExist = errors.New("avatar does not exist")
 )

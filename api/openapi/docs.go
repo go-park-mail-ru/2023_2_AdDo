@@ -30,33 +30,14 @@ const docTemplate = `{
                         "csrfToken": []
                     }
                 ],
-                "description": "check user's authentication by cookie and user_id",
-                "produces": [
-                    "application/json"
-                ],
                 "tags": [
                     "user"
-                ],
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "user id",
-                        "name": "id",
-                        "in": "query",
-                        "required": true
-                    }
                 ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/user_domain.User"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "string"
                         }
                     },
                     "401": {
@@ -76,11 +57,7 @@ const docTemplate = `{
         },
         "/login": {
             "post": {
-                "description": "login user",
                 "consumes": [
-                    "application/json"
-                ],
-                "produces": [
                     "application/json"
                 ],
                 "tags": [
@@ -93,16 +70,13 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/user_delivery.userCrds"
+                            "$ref": "#/definitions/user_domain.UserCredentials"
                         }
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/user_domain.ResponseId"
-                        },
                         "headers": {
                             "JSESSIONID": {
                                 "type": "string",
@@ -145,8 +119,108 @@ const docTemplate = `{
                         "csrfToken": []
                     }
                 ],
-                "description": "logout user",
+                "tags": [
+                    "user"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/me": {
+            "get": {
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {
+                        "csrfToken": []
+                    }
+                ],
+                "tags": [
+                    "user"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/remove_avatar": {
+            "put": {
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {
+                        "csrfToken": []
+                    },
+                    {
+                        "cookieCsrfToken": []
+                    }
+                ],
+                "description": "Remove user avatar",
+                "tags": [
+                    "user"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/sign_up": {
+            "post": {
                 "consumes": [
+                    "application/json"
+                ],
+                "produces": [
                     "application/json"
                 ],
                 "tags": [
@@ -154,13 +228,61 @@ const docTemplate = `{
                 ],
                 "parameters": [
                     {
-                        "description": "user id",
-                        "name": "id",
+                        "description": "User data",
+                        "name": "userData",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "integer"
+                            "$ref": "#/definitions/user_domain.User"
                         }
+                    }
+                ],
+                "responses": {
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/upload_avatar": {
+            "post": {
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {
+                        "csrfToken": []
+                    },
+                    {
+                        "cookieCsrfToken": []
+                    }
+                ],
+                "description": "Upload user avatar",
+                "tags": [
+                    "user"
+                ],
+                "parameters": [
+                    {
+                        "type": "file",
+                        "description": "User avatar",
+                        "name": "avatar",
+                        "in": "formData",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -187,205 +309,9 @@ const docTemplate = `{
                     }
                 }
             }
-        },
-        "/music": {
-            "get": {
-                "security": [
-                    {
-                        "cookieAuth": []
-                    },
-                    {
-                        "csrfToken": []
-                    }
-                ],
-                "description": "return all tracks",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "track"
-                ],
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "user id",
-                        "name": "id",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/track.Response"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/sign_up": {
-            "post": {
-                "description": "register user",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "user"
-                ],
-                "parameters": [
-                    {
-                        "description": "User data",
-                        "name": "userData",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/user_domain.User"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/user_domain.ResponseId"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "409": {
-                        "description": "Conflict",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
         }
     },
     "definitions": {
-        "album.Response": {
-            "type": "object",
-            "properties": {
-                "Id": {
-                    "type": "integer",
-                    "example": 1
-                },
-                "Name": {
-                    "type": "string",
-                    "example": "AlbumName"
-                },
-                "Preview": {
-                    "type": "string",
-                    "example": "AlbumPreview"
-                }
-            }
-        },
-        "artist.Response": {
-            "type": "object",
-            "properties": {
-                "Avatar": {
-                    "type": "string",
-                    "example": "ArtistAvatar"
-                },
-                "Id": {
-                    "type": "integer",
-                    "example": 1
-                },
-                "Name": {
-                    "type": "string",
-                    "example": "ArtistName"
-                }
-            }
-        },
-        "track.Response": {
-            "type": "object",
-            "properties": {
-                "Album": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/album.Response"
-                    }
-                },
-                "Artist": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/artist.Response"
-                    }
-                },
-                "Content": {
-                    "type": "string",
-                    "example": "TrackContent"
-                },
-                "Id": {
-                    "type": "integer",
-                    "example": 1
-                },
-                "Name": {
-                    "type": "string",
-                    "example": "TrackName"
-                },
-                "Preview": {
-                    "type": "string",
-                    "example": "TrackPreview"
-                }
-            }
-        },
-        "user_delivery.userCrds": {
-            "type": "object",
-            "properties": {
-                "Email": {
-                    "type": "string",
-                    "example": "example@gmail.com"
-                },
-                "Password": {
-                    "type": "string",
-                    "example": "password"
-                }
-            }
-        },
-        "user_domain.ResponseId": {
-            "type": "object",
-            "properties": {
-                "Id": {
-                    "type": "integer",
-                    "example": 1
-                }
-            }
-        },
         "user_domain.User": {
             "type": "object",
             "properties": {
@@ -414,6 +340,19 @@ const docTemplate = `{
                     "example": "john"
                 }
             }
+        },
+        "user_domain.UserCredentials": {
+            "type": "object",
+            "properties": {
+                "Email": {
+                    "type": "string",
+                    "example": "example@gmail.com"
+                },
+                "Password": {
+                    "type": "string",
+                    "example": "password"
+                }
+            }
         }
     },
     "securityDefinitions": {
@@ -424,7 +363,7 @@ const docTemplate = `{
         },
         "csrfToken": {
             "type": "apiKey",
-            "name": "X-CSRFTOKEN",
+            "name": "X-Csrf-Token",
             "in": "header"
         }
     }
