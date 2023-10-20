@@ -1,7 +1,6 @@
-version: '3.0'
+version: '3.7'
 
 services:
-
   service-minio:
     image: minio/minio:latest
     command: server --console-address ":9001" /data/
@@ -9,8 +8,8 @@ services:
       - "9000:9000"
       - "9001:9001"
     environment:
-      MINIO_ROOT_USER: musicon
-      MINIO_ROOT_PASSWORD: tfteSlswRu7BJ86wekitnifILbZam1KYY3TG
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
     volumes:
       - ~/minio:/data
       - /etc/localtime:/etc/localtime:ro
@@ -19,7 +18,19 @@ services:
       interval: 30s
       timeout: 20s
       retries: 3
- 
+    
+  service-createbucket:
+    image: minio/mc
+    depends_on:
+      service-minio:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "
+      /usr/bin/mc alias set musicon http://service-minio:9000 ${MINIO_ROOT_USER} ${MINIO_ROOT_PASSWORD};
+      /usr/bin/mc mb --ignore-existing musicon/user-avatar;
+      exit 0;
+      "
+
   service-db-redis:
     restart: always
     image: redis
@@ -59,8 +70,8 @@ services:
         condition: service_healthy
       service-db-redis:
         condition: service_healthy
-      service-minio:
-        condition: service_healthy
+      service-createbucket:
+        condition: service_completed_successfully
     ports:
       - "8080:8080"
     environment:
