@@ -3,8 +3,8 @@ package artist_repository
 import (
 	"context"
 	"github.com/sirupsen/logrus"
+	"main/internal/common/pgxiface"
 	"main/internal/pkg/artist"
-	postgres "main/internal/pkg/common/pgxiface"
 )
 
 type Postgres struct {

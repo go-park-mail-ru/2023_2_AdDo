@@ -2,10 +2,10 @@ package artist_delivery
 
 import (
 	"github.com/sirupsen/logrus"
+	"main/internal/common/handler"
+	"main/internal/common/response"
+	"main/internal/common/utils"
 	"main/internal/pkg/artist"
-	common_handler "main/internal/pkg/common/handler"
-	"main/internal/pkg/common/response"
-	"main/internal/pkg/common/utils"
 	"net/http"
 	"strconv"
 

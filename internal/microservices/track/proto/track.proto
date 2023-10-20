@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+option go_package = "./;track";
+
+service TrackService {
+  rpc Listen (TrackId) returns (Status) {}
+  rpc Like (TrackToUserId) returns (Status) {}
+}
+
+message TrackId {
+  uint64 trackId = 1;
+}
+
+message TrackToUserId {
+  string userId = 1;
+  uint64 trackId = 2;
+}
+
+message Status {
+  bool isOk = 1;
+}
+
+message Track {
+  uint64 Id = 1;
+  string Name = 2;
+  string Preview = 3;
+  string Content = 4;
+  string ArtistName = 5;
+  uint32 Duration = 6;
+  bool isLiked = 7;
+}
+
+message TracksResponse {
+  repeated Track tracks = 1;
+}
