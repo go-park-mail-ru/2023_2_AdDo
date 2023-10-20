@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+option go_package = "./;session";
+
+service SessionService {
+  rpc CheckSession (SessionId) returns (Status) {}
+  rpc GetUserId (SessionId) returns (UserId) {}
+}
+
+message SessionId {
+  string sessionId = 1;
+}
+
+message UserId {
+  string userId = 1;
+}
+
+message Status {
+  bool isOk = 1;
+}

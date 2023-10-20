@@ -1,13 +1,13 @@
 syntax = "proto3";
 
-option go_package = "./;auth";
+option go_package = "./;session";
 
-service AuthService {
-  rpc SignUp (UserData) returns (SessionId) {}
+service UserService {
+  rpc Register (UserData) returns (Status) {}
   rpc LogIn (UserCredentials) returns (SessionId) {}
-  rpc LogOut (SessionId) returns (Status) {}
   rpc Auth (SessionId) returns (Status) {}
-  rpc UserInfo (SessionId) returns (UserData) {}
+  rpc GetUserInfo (SessionId) returns (UserData) {}
+  rpc LogOut (SessionId) returns (Status) {}
 }
 
 message UserData {
@@ -33,5 +33,5 @@ message SessionId {
 }
 
 message Status {
-  int32 code = 1;
+  bool isOk = 1;
 }

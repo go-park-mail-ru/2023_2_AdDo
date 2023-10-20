@@ -1,0 +1,45 @@
+syntax = "proto3";
+
+option go_package = "./;album";
+import "track.proto";
+
+service AlbumService {
+  rpc GetRandom (Status) returns (AlbumsResponse) {}
+  rpc GetMostLiked (Status) returns (AlbumsResponse) {}
+  rpc GetPopular (Status) returns (AlbumsResponse) {}
+  rpc GetNew (Status) returns (AlbumsResponse) {}
+  rpc GetAlbum (Status) returns (Album) {}
+  rpc Like (AlbumToUserId) returns (Status) {}
+}
+
+message AlbumToUserId {
+  string userId = 1;
+  uint64 albumId = 2;
+}
+
+message AlbumId {
+  uint64 albumId = 1;
+}
+
+message Base {
+  uint64 Id = 1;
+  string Name = 2;
+  string Preview = 3;
+}
+
+message AlbumsBase {
+  repeated Base albums = 1;
+}
+
+message Album {
+  uint64 Id = 1;
+  string Name = 2;
+  string Preview = 3;
+  uint64 ArtistId = 4;
+  string ArtistName = 5;
+  TracksResponse Tracks = 6;
+}
+
+message AlbumsResponse {
+  repeated Album albums = 1;
+}

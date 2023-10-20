@@ -3,7 +3,7 @@ package track_repository
 import (
 	"context"
 	"github.com/sirupsen/logrus"
-	postgres "main/internal/pkg/common/pgxiface"
+	"main/internal/common/pgxiface"
 	"main/internal/pkg/track"
 )
 

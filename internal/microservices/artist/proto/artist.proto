@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+option go_package = "./;artist";
+import "album.proto";
+import "track.proto";
+
+service ArtistService {
+  rpc GetArtistInfo(ArtistId) returns(Artist) {}
+}
+
+message ArtistId {
+  uint64 artistId = 1;
+}
+
+message Artist {
+  uint64 Id = 1;
+  string Name = 2;
+  string Avatar = 3;
+  AlbumsBase Albums = 4;
+  TracksResponse Tracks = 5;
+}

@@ -1,0 +1,50 @@
+syntax = "proto3";
+
+option go_package = "./;playlist";
+import "track.proto";
+
+service PlaylistService {
+  rpc Create (Base) returns (Status) {}
+  rpc Get (PlaylistId) returns (Response) {}
+  rpc GetUserPlaylists (UserId) returns (PlaylistsResponse) {}
+  rpc AddTrack (PlaylistToTrackId) returns (Status) {}
+  rpc UpdatePreview (PlaylistIdToImageUrl) returns (Status) {}
+  rpc DeleteById (PlaylistId) returns (Status) {}
+}
+
+message PlaylistId {
+  uint64 id = 1;
+}
+
+message PlaylistToTrackId {
+  uint64 playlistId = 1;
+  uint64 trackId = 2;
+}
+
+message UserId {
+  string id = 1;
+}
+
+message PlaylistIdToImageUrl {
+  uint64 id = 1;
+  string image = 2;
+}
+
+message Base {
+  uint64 Id = 1;
+  string Name = 2;
+  string Preview = 3;
+}
+
+message Response {
+  uint64 Id = 1;
+  string Name = 2;
+  string Preview = 3;
+  uint64 ArtistId = 4;
+  string ArtistName = 5;
+  TracksResponse Tracks = 6;
+}
+
+message PlaylistsResponse {
+  repeated Response playlists = 1;
+}
