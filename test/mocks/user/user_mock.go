@@ -50,11 +50,12 @@ func (mr *MockAvatarUseCaseMockRecorder) RemoveAvatar(userId interface{}) *gomoc
 }
 
 // UploadAvatar mocks base method.
-func (m *MockAvatarUseCase) UploadAvatar(userId uint64, src io.Reader, size int64) error {
+func (m *MockAvatarUseCase) UploadAvatar(userId uint64, src io.Reader, size int64) (string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UploadAvatar", userId, src, size)
-	ret0, _ := ret[0].(error)
-	return ret0
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // UploadAvatar indicates an expected call of UploadAvatar.
@@ -240,11 +241,12 @@ func (mr *MockUseCaseMockRecorder) RemoveAvatar(userId interface{}) *gomock.Call
 }
 
 // UploadAvatar mocks base method.
-func (m *MockUseCase) UploadAvatar(userId uint64, src io.Reader, size int64) error {
+func (m *MockUseCase) UploadAvatar(userId uint64, src io.Reader, size int64) (string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UploadAvatar", userId, src, size)
-	ret0, _ := ret[0].(error)
-	return ret0
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // UploadAvatar indicates an expected call of UploadAvatar.
