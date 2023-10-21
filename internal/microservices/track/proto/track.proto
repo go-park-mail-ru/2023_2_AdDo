@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-option go_package = "./;track";
+option go_package = "/track";
 
 service TrackService {
   rpc Listen (TrackId) returns (Status) {}
