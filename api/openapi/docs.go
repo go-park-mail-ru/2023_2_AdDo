@@ -526,6 +526,48 @@ const docTemplate = `{
                 }
             }
         },
+        "/remove_avatar": {
+            "post": {
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {
+                        "csrfToken": []
+                    },
+                    {
+                        "cookieCsrfToken": []
+                    }
+                ],
+                "description": "Remove user avatar",
+                "tags": [
+                    "user"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/sign_up": {
             "post": {
                 "security": [
@@ -578,6 +620,60 @@ const docTemplate = `{
                     },
                     "409": {
                         "description": "Conflict",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/upload_avatar": {
+            "post": {
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {
+                        "csrfToken": []
+                    },
+                    {
+                        "cookieCsrfToken": []
+                    }
+                ],
+                "description": "Upload user avatar",
+                "tags": [
+                    "user"
+                ],
+                "parameters": [
+                    {
+                        "type": "file",
+                        "description": "User avatar",
+                        "name": "Avatar",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/user_domain.UploadAvatarResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
                         "schema": {
                             "type": "string"
                         }
@@ -691,6 +787,15 @@ const docTemplate = `{
                 }
             }
         },
+        "user_domain.UploadAvatarResponse": {
+            "type": "object",
+            "properties": {
+                "AvatarUrl": {
+                    "type": "string",
+                    "example": "/user-avatar/avatar.png"
+                }
+            }
+        },
         "user_domain.User": {
             "type": "object",
             "properties": {
@@ -707,8 +812,8 @@ const docTemplate = `{
                     "example": "example@gmail.com"
                 },
                 "Id": {
-                    "type": "integer",
-                    "example": 1
+                    "type": "string",
+                    "example": "qwer-werw-we4w"
                 },
                 "Password": {
                     "type": "string",

@@ -2,6 +2,7 @@ package user_domain
 
 import (
 	"errors"
+	"io"
 	xssvalidator "github.com/infiniteloopcloud/xss-validator"
 
 	"github.com/asaskevich/govalidator"
@@ -69,8 +70,19 @@ func (uC *UserCredentials) Validate() error {
 	return nil
 }
 
-type Id struct {
-	Id string `json:"Id" example:"1"`
+type UploadAvatarResponse struct {
+	Url string `json:"AvatarUrl" example:"/user-avatar/avatar.png"`
+}
+
+type AvatarUseCase interface {
+	UploadAvatar(userId string, src io.Reader, size int64) (string, error)
+	RemoveAvatar(userId string) error
+}
+
+type AvatarDbRepository interface {
+	UpdateAvatarPath(userId string, path string) error
+	GetAvatarPath(userId string) (string, error)
+	RemoveAvatarPath(userId string) error
 }
 
 type UseCase interface {
@@ -79,12 +91,14 @@ type UseCase interface {
 	Auth(sessionId string) (bool, error)
 	GetUserInfo(sessionId string) (User, error)
 	Logout(sessionId string) error
+	AvatarUseCase
 }
 
 type Repository interface {
 	Create(user User) error
 	GetById(id string) (User, error)
 	CheckEmailAndPassword(email string, password string) (string, error)
+	AvatarDbRepository
 }
 
 var (
