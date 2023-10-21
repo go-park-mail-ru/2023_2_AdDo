@@ -2,7 +2,7 @@ package user_domain
 
 import (
 	"errors"
-	avatar_domain "main/internal/pkg/avatar"
+	"io"
 
 	"github.com/asaskevich/govalidator"
 )
@@ -42,24 +42,35 @@ type ResponseId struct {
 	Id uint64 `json:"Id" example:"1"`
 }
 
+type AvatarUseCase interface {
+	UploadAvatar(userId uint64, src io.Reader, size int64) error
+	RemoveAvatar(userId uint64) error
+}
+
+type AvatarDbRepository interface {
+	UpdateAvatarPath(userId uint64, path string) error
+	GetAvatarPath(userId uint64) (string, error)
+	RemoveAvatarPath(userId uint64) error
+}
+
 type UseCase interface {
 	Register(user User) error
 	Login(email, password string) (string, error)
 	Auth(sessionId string) (bool, error)
 	GetUserInfo(sessionId string) (User, error)
 	Logout(sessionId string) error
-	avatar_domain.UseCase
+	AvatarUseCase
 }
 
 type Repository interface {
 	Create(user User) error
 	GetById(id uint64) (User, error)
 	CheckEmailAndPassword(email string, password string) (uint64, error)
-	avatar_domain.DbRepository
+	AvatarDbRepository
 }
 
 var (
-	ErrWrongCredentials   = errors.New("wrong user credentials")
-	ErrUserAlreadyExist   = errors.New("user already exist")
-	ErrUserDoesNotExist   = errors.New("user does not exist")
+	ErrWrongCredentials = errors.New("wrong user credentials")
+	ErrUserAlreadyExist = errors.New("user already exist")
+	ErrUserDoesNotExist = errors.New("user does not exist")
 )
