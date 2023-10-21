@@ -20,12 +20,8 @@ message UserData {
 }
 
 message UserCredentials {
-  string Id = 1;
   string email = 2;
   string password = 3;
-  string username = 4;
-  string birthDate = 5;
-  string Avatar = 6;
 }
 
 message SessionId {
