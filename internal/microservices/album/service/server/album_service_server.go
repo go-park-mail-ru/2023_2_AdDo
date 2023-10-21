@@ -66,6 +66,23 @@ func SerializeAlbums(in []album.Response) *pb.AlbumsResponse {
 	return result
 }
 
+func SerializeBase(in album.Base) *pb.Base {
+	return &pb.Base{
+		Id:      in.Id,
+		Name:    in.Name,
+		Preview: in.Preview,
+	}
+}
+
+func SerializeAlbumsBase(in []album.Base) *pb.AlbumsBase {
+	var result *pb.AlbumsBase
+
+	for _, base := range in {
+		result.Albums = append(result.Albums, SerializeBase(base))
+	}
+	return result
+}
+
 func (am *AlbumManager) GetAlbum(ctx context.Context, in *pb.AlbumId) (*pb.Album, error) {
 	am.logger.Infoln("Album Micros GetAlbum entered")
 

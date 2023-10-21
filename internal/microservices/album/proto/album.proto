@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-option go_package = "/album";
+option go_package = "main/internal/microservices/album/proto";
 import "track.proto";
 //protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative -Imicroservices/album/proto -Imicroservices/track/proto  microservices/album/proto/album.proto
 service AlbumService {
