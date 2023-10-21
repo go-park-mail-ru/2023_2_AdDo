@@ -54,6 +54,40 @@ func (p *Postgres) Get(ctx context.Context, playlistId uint64) (playlist.Base, e
 	return result, nil
 }
 
+func (p *Postgres) GetByCreatorId(ctx context.Context, userId string) ([]playlist.Base, error) {
+	p.logger.Infoln("Playlist Repo GetByCreatorId entered")
+
+	result := make([]playlist.Base, 0)
+	query := "select id, name, creator_id, preview from playlist where creator_id = $1"
+	rows, err := p.Pool.Query(ctx, query, userId)
+	if err != nil {
+		p.logger.WithFields(logrus.Fields{
+			"query":   query,
+			"err":     err,
+			"user id": userId,
+		}).Errorln("error while getting playlists by user id")
+		return nil, err
+	}
+	p.logger.Infoln("Success getting rows from db")
+
+	for rows.Next() {
+		var base playlist.Base
+		err := rows.Scan(&base.Id, &base.Name, &base.AuthorId, &base.Preview)
+		if err != nil {
+			p.logger.WithFields(logrus.Fields{
+				"query":   query,
+				"err":     err,
+				"user id": userId,
+			}).Errorln("error scanning row")
+			return nil, err
+		}
+		result = append(result, base)
+	}
+	p.logger.Infoln("Scanning rows success")
+
+	return result, nil
+}
+
 func (p *Postgres) AddTrack(ctx context.Context, playlistId, trackId uint64) error {
 	p.logger.Infoln("Playlist Repo AddTrack entered")
 

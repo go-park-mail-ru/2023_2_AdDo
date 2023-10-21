@@ -33,7 +33,7 @@ type Repository interface {
 	//GetAll() ([]Response, error)
 	//GetPopular(limit uint32) ([]Response, error)
 	//GetLatest(limit uint32) ([]Response, error)
-	//GetByPlaylist(playlistId uint64) ([]Response, error)
+	GetByPlaylist(playlistId uint64) ([]Response, error)
 	GetByAlbum(albumId uint64) ([]Response, error)
 	GetByArtist(artistId uint64) ([]Response, error)
 	CreateLike(userId string, trackId uint64) error
