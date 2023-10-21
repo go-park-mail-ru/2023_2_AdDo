@@ -2,7 +2,7 @@ syntax = "proto3";
 
 option go_package = "./;artist";
 import "album.proto";
-import "track.proto";
+import "album.proto";
 
 service ArtistService {
   rpc GetArtistInfo(ArtistId) returns(Artist) {}

@@ -1,7 +1,7 @@
 syntax = "proto3";
 
 option go_package = "./;playlist";
-import "track.proto";
+import "album.proto";
 
 service PlaylistService {
   rpc Create (Base) returns (Status) {}
