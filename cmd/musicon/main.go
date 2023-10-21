@@ -12,7 +12,8 @@ import (
 	artist_delivery "main/internal/pkg/artist/delivery/http"
 	artist_repository "main/internal/pkg/artist/repository/postgres"
 	artist_usecase "main/internal/pkg/artist/usecase"
-	avatar_repository "main/internal/pkg/avatar/repository"
+	avatar_repository "main/internal/pkg/avatar/repository/minio"
+	avatar_usecase "main/internal/pkg/avatar/usecase"
 	session_repository_redis "main/internal/pkg/session/repository/redis"
 	session_usecase "main/internal/pkg/session/usecase"
 	track_delivery "main/internal/pkg/track/delivery/http"
@@ -59,8 +60,9 @@ func main() {
 
 	albumUseCase := album_usecase.NewDefault(&artistRepo, trackRepo, albumRepo)
 	artistUseCase := artist_usecase.NewDefault(&artistRepo, trackRepo, albumRepo)
+	avatarUseCase := avatar_usecase.NewDefault()
 	sessionUseCase := session_usecase.NewDefault(sessionRepo)
-	userUseCase := user_usecase.NewWithStatefulSessions(userRepo, sessionRepo, avatarRepo)
+	userUseCase := user_usecase.NewWithStatefulSessions(userRepo, sessionRepo, avatarRepo, avatarUseCase)
 	trackUseCase := track_usecase.NewDefault(trackRepo, &artistRepo, albumRepo)
 	logger.Infoln("UseCases initialized")
 

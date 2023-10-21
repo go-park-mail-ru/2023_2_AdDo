@@ -3,8 +3,6 @@ package user_usecase
 import (
 	"bytes"
 	"errors"
-	"image"
-	"image/png"
 	avatar_domain "main/internal/pkg/avatar"
 	user_domain "main/internal/pkg/user"
 	avatar_mock "main/test/mocks/avatar"
@@ -164,83 +162,52 @@ func TestUploadAvatar_Success(t *testing.T) {
 	defer ctrl.Finish()
 
 	mockUserRepo := user_mock.NewMockRepository(ctrl)
-	mockAvatarRepo := avatar_mock.NewMockS3Repository(ctrl)
+	mockAvatarRepo := avatar_mock.NewMockRepository(ctrl)
+	mockAvatarUseCase := avatar_mock.NewMockUseCase(ctrl)
 
 	useCase := &WithStatefulSessions{
-		UserRepo:   mockUserRepo,
-		AvatarRepo: mockAvatarRepo,
+		UserRepo:      mockUserRepo,
+		AvatarRepo:    mockAvatarRepo,
+		AvatarUseCase: mockAvatarUseCase,
 	}
 
 	const (
-		mockUserId  = uint64(1)
-		mockPath    = "/user-avatar/avatar.png"
-		mockOldPath = ""
+		mockUserId = uint64(1)
+		mockPath   = "/user-avatar/avatar.png"
 	)
-
-	width, height := 32, 24
-	img := image.NewRGBA(image.Rectangle{
-		image.Point{0, 0},
-		image.Point{width, height},
-	})
-
 	mockPayload := new(bytes.Buffer)
-	err := png.Encode(mockPayload, img)
-	if err != nil {
-		t.Error(err)
-	}
 	mockPayloadSize := int64(mockPayload.Len())
 
-
-	mockUserRepo.EXPECT().GetAvatarPath(mockUserId).Return(mockOldPath, nil)
-	mockAvatarRepo.EXPECT().Create(gomock.Any()).Return(mockPath, nil)
-	mockUserRepo.EXPECT().UpdateAvatarPath(mockUserId, mockPath)
-
-	err = useCase.UploadAvatar(mockUserId, mockPayload, mockPayloadSize)
-
-	assert.Equal(t, nil, err)
-}
-
-func TestUpdateAvatar_Success(t *testing.T) {
-
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
-
-	mockUserRepo := user_mock.NewMockRepository(ctrl)
-	mockAvatarRepo := avatar_mock.NewMockS3Repository(ctrl)
-
-	useCase := &WithStatefulSessions{
-		UserRepo:   mockUserRepo,
-		AvatarRepo: mockAvatarRepo,
+	avatar := avatar_domain.Avatar{
+		Name:        "avatar-name",
+		Payload:     mockPayload,
+		PayloadSize: mockPayloadSize,
+		ContentType: "image/png",
 	}
+	t.Run("Create avatar", func(t *testing.T) {
+		mockOldPath := ""
+		mockUserRepo.EXPECT().GetAvatarPath(mockUserId).Return(mockOldPath, nil)
+		mockAvatarUseCase.EXPECT().GetAvatar(mockUserId, mockPayload, mockPayloadSize).Return(avatar, nil)
+		mockAvatarRepo.EXPECT().UploadAvatar(avatar).Return(mockPath, nil)
+		mockUserRepo.EXPECT().UpdateAvatarPath(mockUserId, mockPath)
+		
+		err := useCase.UploadAvatar(mockUserId, mockPayload, mockPayloadSize)
 
-	const mockUserId = uint64(1)
-
-	mockOldPath := "/user_avatar/old_avatar.png"
-
-	width, height := 32, 24
-	img := image.NewRGBA(image.Rectangle{
-		image.Point{0, 0},
-		image.Point{width, height},
+		assert.Equal(t, nil, err)
 	})
+	
+	t.Run("Update avatar", func(t *testing.T) {
+		mockOldPath := "/user-avatar/avatar.png"
+		mockUserRepo.EXPECT().GetAvatarPath(mockUserId).Return(mockOldPath, nil)
+		mockAvatarUseCase.EXPECT().GetAvatar(mockUserId, mockPayload, mockPayloadSize).Return(avatar, nil)
+		mockAvatarRepo.EXPECT().UploadAvatar(avatar).Return(mockPath, nil)
+		mockUserRepo.EXPECT().UpdateAvatarPath(mockUserId, mockPath)
+		mockAvatarRepo.EXPECT().Remove(mockOldPath)
+		
+		err := useCase.UploadAvatar(mockUserId, mockPayload, mockPayloadSize)
 
-	mockPayload := new(bytes.Buffer)
-	err := png.Encode(mockPayload, img)
-	if err != nil {
-		t.Error(err)
-	}
-
-	mockPayloadSize := int64(mockPayload.Len())
-
-	mockPath := "/user-avatar/avatar.png"
-
-	mockUserRepo.EXPECT().GetAvatarPath(mockUserId).Return(mockOldPath, nil)
-	mockAvatarRepo.EXPECT().Create(gomock.Any()).Return(mockPath, nil)
-	mockUserRepo.EXPECT().UpdateAvatarPath(mockUserId, mockPath)
-	mockAvatarRepo.EXPECT().Remove(mockOldPath).Return(nil)
-
-	err = useCase.UploadAvatar(mockUserId, mockPayload, mockPayloadSize)
-
-	assert.Equal(t, nil, err)
+		assert.Equal(t, nil, err)
+	})
 
 }
 
@@ -249,7 +216,7 @@ func TestRemoveAvatar_Success(t *testing.T) {
 	defer ctrl.Finish()
 
 	mockUserRepo := user_mock.NewMockRepository(ctrl)
-	mockAvatarRepo := avatar_mock.NewMockS3Repository(ctrl)
+	mockAvatarRepo := avatar_mock.NewMockRepository(ctrl)
 
 	useCase := &WithStatefulSessions{
 		UserRepo:   mockUserRepo,

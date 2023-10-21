@@ -1,26 +1,30 @@
 package user_usecase
 
 import (
-	"bytes"
 	"io"
 	avatar_domain "main/internal/pkg/avatar"
 	"main/internal/pkg/session"
 	user_domain "main/internal/pkg/user"
-	"net/http"
-	"strings"
 )
 
 type WithStatefulSessions struct {
-	UserRepo   user_domain.Repository
-	AuthRepo   session.Repository
-	AvatarRepo avatar_domain.S3Repository
+	UserRepo      user_domain.Repository
+	AuthRepo      session.Repository
+	AvatarRepo    avatar_domain.Repository
+	AvatarUseCase avatar_domain.UseCase
 }
 
-func NewWithStatefulSessions(userRepo user_domain.Repository, authRepo session.Repository, avatarRepo avatar_domain.S3Repository) WithStatefulSessions {
+func NewWithStatefulSessions(
+	userRepo user_domain.Repository,
+	authRepo session.Repository,
+	avatarRepo avatar_domain.Repository,
+	avatarUseCase avatar_domain.UseCase,
+) WithStatefulSessions {
 	return WithStatefulSessions{
-		UserRepo:   userRepo,
-		AuthRepo:   authRepo,
-		AvatarRepo: avatarRepo,
+		UserRepo:      userRepo,
+		AuthRepo:      authRepo,
+		AvatarRepo:    avatarRepo,
+		AvatarUseCase: avatarUseCase,
 	}
 }
 
@@ -81,30 +85,12 @@ func (useCase *WithStatefulSessions) Logout(sessionId string) error {
 func (useCase *WithStatefulSessions) UploadAvatar(id uint64, src io.Reader, size int64) error {
 	oldPath, _ := useCase.UserRepo.GetAvatarPath(id)
 
-	if size > avatar_domain.MaxAvatarSize {
-		return avatar_domain.ErrAvatarIsTooLarge
-	}
-
-	data, err := io.ReadAll(src)
+	avatar, err := useCase.AvatarUseCase.GetAvatar(id, src, size)
 	if err != nil {
-		return avatar_domain.ErrCannotRead
-	}
-	metadata := data[:512]
-	contentType := http.DetectContentType(metadata)
-
-	if !strings.HasPrefix(contentType, "image/") {
-		return avatar_domain.ErrWrongAvatarType
+		return err
 	}
 
-	src = bytes.NewReader(data)
-	url, err := useCase.AvatarRepo.Create(
-		avatar_domain.Avatar{
-			Payload:     src,
-			PayloadSize: size,
-			UserId:      id,
-			ContentType: contentType,
-		},
-	)
+	url, err := useCase.AvatarRepo.UploadAvatar(avatar)
 	if err != nil {
 		return err
 	}
@@ -122,7 +108,10 @@ func (useCase *WithStatefulSessions) UploadAvatar(id uint64, src io.Reader, size
 }
 
 func (useCase *WithStatefulSessions) RemoveAvatar(id uint64) error {
-	oldPath, _ := useCase.UserRepo.GetAvatarPath(id)
+	oldPath, err := useCase.UserRepo.GetAvatarPath(id)
+	if err != nil {
+		return err
+	}
 
 	if oldPath == "" {
 		return avatar_domain.ErrAvatarDoesNotExist
@@ -130,7 +119,7 @@ func (useCase *WithStatefulSessions) RemoveAvatar(id uint64) error {
 
 	useCase.AvatarRepo.Remove(oldPath)
 
-	err := useCase.UserRepo.RemoveAvatarPath(id)
+	err = useCase.UserRepo.RemoveAvatarPath(id)
 	if err != nil {
 		return err
 	}
