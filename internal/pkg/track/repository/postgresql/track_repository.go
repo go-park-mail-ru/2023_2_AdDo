@@ -62,6 +62,12 @@ func (db *Postgres) GetByArtist(artistId uint64) ([]track.Response, error) {
 	return db.getWithQuery(context.Background(), query, artistId)
 }
 
+func (db *Postgres) GetByPlaylist(playlistId uint64) ([]track.Response, error) {
+	db.logger.Infoln("TrackRepo GetByPlaylist entered")
+	query := "select track.id, name, preview, content from track join musicon.public.playlist_track on track.id = playlist_track.track_id where playlist_track.playlist_id = $1"
+	return db.getWithQuery(context.Background(), query, playlistId)
+}
+
 func (db *Postgres) CreateLike(userId string, trackId uint64) error {
 	db.logger.Infoln("TrackRepo CreateLike entered")
 

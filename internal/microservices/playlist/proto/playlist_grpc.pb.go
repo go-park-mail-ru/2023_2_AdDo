@@ -21,7 +21,7 @@ const _ = grpc.SupportPackageIsVersion7
 type PlaylistServiceClient interface {
 	Create(ctx context.Context, in *Base, opts ...grpc.CallOption) (*proto.Status, error)
 	Get(ctx context.Context, in *PlaylistId, opts ...grpc.CallOption) (*Response, error)
-	GetUserPlaylists(ctx context.Context, in *UserId, opts ...grpc.CallOption) (*PlaylistsResponse, error)
+	GetUserPlaylists(ctx context.Context, in *UserId, opts ...grpc.CallOption) (*PlaylistsBase, error)
 	AddTrack(ctx context.Context, in *PlaylistToTrackId, opts ...grpc.CallOption) (*proto.Status, error)
 	UpdatePreview(ctx context.Context, in *PlaylistIdToImageUrl, opts ...grpc.CallOption) (*proto.Status, error)
 	DeleteById(ctx context.Context, in *PlaylistId, opts ...grpc.CallOption) (*proto.Status, error)
@@ -53,8 +53,8 @@ func (c *playlistServiceClient) Get(ctx context.Context, in *PlaylistId, opts ..
 	return out, nil
 }
 
-func (c *playlistServiceClient) GetUserPlaylists(ctx context.Context, in *UserId, opts ...grpc.CallOption) (*PlaylistsResponse, error) {
-	out := new(PlaylistsResponse)
+func (c *playlistServiceClient) GetUserPlaylists(ctx context.Context, in *UserId, opts ...grpc.CallOption) (*PlaylistsBase, error) {
+	out := new(PlaylistsBase)
 	err := c.cc.Invoke(ctx, "/PlaylistService/GetUserPlaylists", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -95,7 +95,7 @@ func (c *playlistServiceClient) DeleteById(ctx context.Context, in *PlaylistId, 
 type PlaylistServiceServer interface {
 	Create(context.Context, *Base) (*proto.Status, error)
 	Get(context.Context, *PlaylistId) (*Response, error)
-	GetUserPlaylists(context.Context, *UserId) (*PlaylistsResponse, error)
+	GetUserPlaylists(context.Context, *UserId) (*PlaylistsBase, error)
 	AddTrack(context.Context, *PlaylistToTrackId) (*proto.Status, error)
 	UpdatePreview(context.Context, *PlaylistIdToImageUrl) (*proto.Status, error)
 	DeleteById(context.Context, *PlaylistId) (*proto.Status, error)
@@ -112,7 +112,7 @@ func (UnimplementedPlaylistServiceServer) Create(context.Context, *Base) (*proto
 func (UnimplementedPlaylistServiceServer) Get(context.Context, *PlaylistId) (*Response, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Get not implemented")
 }
-func (UnimplementedPlaylistServiceServer) GetUserPlaylists(context.Context, *UserId) (*PlaylistsResponse, error) {
+func (UnimplementedPlaylistServiceServer) GetUserPlaylists(context.Context, *UserId) (*PlaylistsBase, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetUserPlaylists not implemented")
 }
 func (UnimplementedPlaylistServiceServer) AddTrack(context.Context, *PlaylistToTrackId) (*proto.Status, error) {
