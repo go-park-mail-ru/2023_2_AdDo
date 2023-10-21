@@ -1,21 +1,33 @@
 package user_usecase
 
 import (
+	"io"
+	avatar_domain "main/internal/pkg/avatar"
 	"github.com/sirupsen/logrus"
 	"main/internal/pkg/session"
-	"main/internal/pkg/user"
+	user_domain "main/internal/pkg/user"
 )
 
 type WithStatefulSessions struct {
-	UserRepo user_domain.Repository
-	AuthRepo session.Repository
+	UserRepo      user_domain.Repository
+	AuthRepo      session.Repository
+	AvatarRepo    avatar_domain.Repository
+	AvatarUseCase avatar_domain.UseCase
 	logger   *logrus.Logger
 }
 
-func NewWithStatefulSessions(userRepo user_domain.Repository, authRepo session.Repository, logger *logrus.Logger) WithStatefulSessions {
+func NewWithStatefulSessions(
+	userRepo user_domain.Repository,
+	authRepo session.Repository,
+	avatarRepo avatar_domain.Repository,
+	avatarUseCase avatar_domain.UseCase,
+	logger *logrus.Logger,
+) WithStatefulSessions {
 	return WithStatefulSessions{
-		UserRepo: userRepo,
-		AuthRepo: authRepo,
+		UserRepo:      userRepo,
+		AuthRepo:      authRepo,
+		AvatarRepo:    avatarRepo,
+		AvatarUseCase: avatarUseCase,
 		logger:   logger,
 	}
 }
@@ -88,6 +100,51 @@ func (useCase *WithStatefulSessions) Logout(sessionId string) error {
 		return session.ErrSessionDoesNotExist
 	}
 	useCase.logger.Infoln("session deleted from database")
+	
+	return nil
+}
+
+func (useCase *WithStatefulSessions) UploadAvatar(id string, src io.Reader, size int64) (string, error) {
+	oldPath, _ := useCase.UserRepo.GetAvatarPath(id)
+
+	avatar, err := useCase.AvatarUseCase.GetAvatar(id, src, size)
+	if err != nil {
+		return "", err
+	}
+
+	url, err := useCase.AvatarRepo.UploadAvatar(avatar)
+	if err != nil {
+		return "", err
+	}
+
+	err = useCase.UserRepo.UpdateAvatarPath(id, url)
+	if err != nil {
+		return "", err
+	}
+
+	if oldPath != "" {
+		useCase.AvatarRepo.Remove(oldPath)
+	}
+
+	return url, nil
+}
+
+func (useCase *WithStatefulSessions) RemoveAvatar(id string) error {
+	oldPath, err := useCase.UserRepo.GetAvatarPath(id)
+	if err != nil {
+		return err
+	}
+
+	if oldPath == "" {
+		return avatar_domain.ErrAvatarDoesNotExist
+	}
+
+	useCase.AvatarRepo.Remove(oldPath)
+
+	err = useCase.UserRepo.RemoveAvatarPath(id)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }

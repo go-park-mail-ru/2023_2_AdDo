@@ -5,11 +5,130 @@
 package user_mock
 
 import (
+	io "io"
 	user_domain "main/internal/pkg/user"
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
 )
+
+// MockAvatarUseCase is a mock of AvatarUseCase interface.
+type MockAvatarUseCase struct {
+	ctrl     *gomock.Controller
+	recorder *MockAvatarUseCaseMockRecorder
+}
+
+// MockAvatarUseCaseMockRecorder is the mock recorder for MockAvatarUseCase.
+type MockAvatarUseCaseMockRecorder struct {
+	mock *MockAvatarUseCase
+}
+
+// NewMockAvatarUseCase creates a new mock instance.
+func NewMockAvatarUseCase(ctrl *gomock.Controller) *MockAvatarUseCase {
+	mock := &MockAvatarUseCase{ctrl: ctrl}
+	mock.recorder = &MockAvatarUseCaseMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockAvatarUseCase) EXPECT() *MockAvatarUseCaseMockRecorder {
+	return m.recorder
+}
+
+// RemoveAvatar mocks base method.
+func (m *MockAvatarUseCase) RemoveAvatar(userId string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RemoveAvatar", userId)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// RemoveAvatar indicates an expected call of RemoveAvatar.
+func (mr *MockAvatarUseCaseMockRecorder) RemoveAvatar(userId interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RemoveAvatar", reflect.TypeOf((*MockAvatarUseCase)(nil).RemoveAvatar), userId)
+}
+
+// UploadAvatar mocks base method.
+func (m *MockAvatarUseCase) UploadAvatar(userId string, src io.Reader, size int64) (string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UploadAvatar", userId, src, size)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UploadAvatar indicates an expected call of UploadAvatar.
+func (mr *MockAvatarUseCaseMockRecorder) UploadAvatar(userId, src, size interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UploadAvatar", reflect.TypeOf((*MockAvatarUseCase)(nil).UploadAvatar), userId, src, size)
+}
+
+// MockAvatarDbRepository is a mock of AvatarDbRepository interface.
+type MockAvatarDbRepository struct {
+	ctrl     *gomock.Controller
+	recorder *MockAvatarDbRepositoryMockRecorder
+}
+
+// MockAvatarDbRepositoryMockRecorder is the mock recorder for MockAvatarDbRepository.
+type MockAvatarDbRepositoryMockRecorder struct {
+	mock *MockAvatarDbRepository
+}
+
+// NewMockAvatarDbRepository creates a new mock instance.
+func NewMockAvatarDbRepository(ctrl *gomock.Controller) *MockAvatarDbRepository {
+	mock := &MockAvatarDbRepository{ctrl: ctrl}
+	mock.recorder = &MockAvatarDbRepositoryMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockAvatarDbRepository) EXPECT() *MockAvatarDbRepositoryMockRecorder {
+	return m.recorder
+}
+
+// GetAvatarPath mocks base method.
+func (m *MockAvatarDbRepository) GetAvatarPath(userId string) (string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetAvatarPath", userId)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetAvatarPath indicates an expected call of GetAvatarPath.
+func (mr *MockAvatarDbRepositoryMockRecorder) GetAvatarPath(userId interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAvatarPath", reflect.TypeOf((*MockAvatarDbRepository)(nil).GetAvatarPath), userId)
+}
+
+// RemoveAvatarPath mocks base method.
+func (m *MockAvatarDbRepository) RemoveAvatarPath(userId string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RemoveAvatarPath", userId)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// RemoveAvatarPath indicates an expected call of RemoveAvatarPath.
+func (mr *MockAvatarDbRepositoryMockRecorder) RemoveAvatarPath(userId interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RemoveAvatarPath", reflect.TypeOf((*MockAvatarDbRepository)(nil).RemoveAvatarPath), userId)
+}
+
+// UpdateAvatarPath mocks base method.
+func (m *MockAvatarDbRepository) UpdateAvatarPath(userId, path string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateAvatarPath", userId, path)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateAvatarPath indicates an expected call of UpdateAvatarPath.
+func (mr *MockAvatarDbRepositoryMockRecorder) UpdateAvatarPath(userId, path interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateAvatarPath", reflect.TypeOf((*MockAvatarDbRepository)(nil).UpdateAvatarPath), userId, path)
+}
 
 // MockUseCase is a mock of UseCase interface.
 type MockUseCase struct {
@@ -107,6 +226,35 @@ func (mr *MockUseCaseMockRecorder) Register(user interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Register", reflect.TypeOf((*MockUseCase)(nil).Register), user)
 }
 
+// RemoveAvatar mocks base method.
+func (m *MockUseCase) RemoveAvatar(userId string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RemoveAvatar", userId)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// RemoveAvatar indicates an expected call of RemoveAvatar.
+func (mr *MockUseCaseMockRecorder) RemoveAvatar(userId interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RemoveAvatar", reflect.TypeOf((*MockUseCase)(nil).RemoveAvatar), userId)
+}
+
+// UploadAvatar mocks base method.
+func (m *MockUseCase) UploadAvatar(userId string, src io.Reader, size int64) (string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UploadAvatar", userId, src, size)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UploadAvatar indicates an expected call of UploadAvatar.
+func (mr *MockUseCaseMockRecorder) UploadAvatar(userId, src, size interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UploadAvatar", reflect.TypeOf((*MockUseCase)(nil).UploadAvatar), userId, src, size)
+}
+
 // MockRepository is a mock of Repository interface.
 type MockRepository struct {
 	ctrl     *gomock.Controller
@@ -159,6 +307,21 @@ func (mr *MockRepositoryMockRecorder) Create(user interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockRepository)(nil).Create), user)
 }
 
+// GetAvatarPath mocks base method.
+func (m *MockRepository) GetAvatarPath(userId string) (string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetAvatarPath", userId)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetAvatarPath indicates an expected call of GetAvatarPath.
+func (mr *MockRepositoryMockRecorder) GetAvatarPath(userId interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAvatarPath", reflect.TypeOf((*MockRepository)(nil).GetAvatarPath), userId)
+}
+
 // GetById mocks base method.
 func (m *MockRepository) GetById(id string) (user_domain.User, error) {
 	m.ctrl.T.Helper()
@@ -172,4 +335,32 @@ func (m *MockRepository) GetById(id string) (user_domain.User, error) {
 func (mr *MockRepositoryMockRecorder) GetById(id interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetById", reflect.TypeOf((*MockRepository)(nil).GetById), id)
+}
+
+// RemoveAvatarPath mocks base method.
+func (m *MockRepository) RemoveAvatarPath(userId string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RemoveAvatarPath", userId)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// RemoveAvatarPath indicates an expected call of RemoveAvatarPath.
+func (mr *MockRepositoryMockRecorder) RemoveAvatarPath(userId interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RemoveAvatarPath", reflect.TypeOf((*MockRepository)(nil).RemoveAvatarPath), userId)
+}
+
+// UpdateAvatarPath mocks base method.
+func (m *MockRepository) UpdateAvatarPath(userId, path string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateAvatarPath", userId, path)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateAvatarPath indicates an expected call of UpdateAvatarPath.
+func (mr *MockRepositoryMockRecorder) UpdateAvatarPath(userId, path interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateAvatarPath", reflect.TypeOf((*MockRepository)(nil).UpdateAvatarPath), userId, path)
 }

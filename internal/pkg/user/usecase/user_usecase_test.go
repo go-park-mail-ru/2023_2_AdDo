@@ -1,14 +1,19 @@
 package user_usecase
 
 import (
+	"bytes"
 	"errors"
-	"github.com/golang/mock/gomock"
-	"github.com/sirupsen/logrus"
-	"github.com/stretchr/testify/assert"
 	user_domain "main/internal/pkg/user"
+	avatar_mock "main/test/mocks/avatar"
+	avatar_domain "main/internal/pkg/avatar"
 	session_mock "main/test/mocks/session"
 	user_mock "main/test/mocks/user"
 	"testing"
+
+	"github.com/sirupsen/logrus"
+
+	"github.com/golang/mock/gomock"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestRegister_Success(t *testing.T) {
@@ -157,4 +162,107 @@ func TestLogOut_Success(t *testing.T) {
 	err := useCase.Logout(sessionId)
 
 	assert.Equal(t, nil, err)
+}
+
+func TestUploadAvatar_Success(t *testing.T) {
+
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockUserRepo := user_mock.NewMockRepository(ctrl)
+	mockAvatarRepo := avatar_mock.NewMockRepository(ctrl)
+	mockAvatarUseCase := avatar_mock.NewMockUseCase(ctrl)
+
+	useCase := &WithStatefulSessions{
+		UserRepo:      mockUserRepo,
+		AvatarRepo:    mockAvatarRepo,
+		AvatarUseCase: mockAvatarUseCase,
+	}
+
+	const (
+		mockUserId = "1"
+		mockPath   = "/user-avatar/avatar.png"
+	)
+	mockPayload := new(bytes.Buffer)
+	mockPayloadSize := int64(mockPayload.Len())
+
+	avatar := avatar_domain.Avatar{
+		Name:        "avatar-name",
+		Payload:     mockPayload,
+		PayloadSize: mockPayloadSize,
+		ContentType: "image/png",
+	}
+	t.Run("Create avatar", func(t *testing.T) {
+		mockOldPath := ""
+		mockUserRepo.EXPECT().GetAvatarPath(mockUserId).Return(mockOldPath, nil)
+		mockAvatarUseCase.EXPECT().GetAvatar(mockUserId, mockPayload, mockPayloadSize).Return(avatar, nil)
+		mockAvatarRepo.EXPECT().UploadAvatar(avatar).Return(mockPath, nil)
+		mockUserRepo.EXPECT().UpdateAvatarPath(mockUserId, mockPath)
+
+		_, err := useCase.UploadAvatar(mockUserId, mockPayload, mockPayloadSize)
+
+		assert.Equal(t, nil, err)
+	})
+
+	t.Run("Update avatar", func(t *testing.T) {
+		mockOldPath := "/user-avatar/avatar.png"
+		mockUserRepo.EXPECT().GetAvatarPath(mockUserId).Return(mockOldPath, nil)
+		mockAvatarUseCase.EXPECT().GetAvatar(mockUserId, mockPayload, mockPayloadSize).Return(avatar, nil)
+		mockAvatarRepo.EXPECT().UploadAvatar(avatar).Return(mockPath, nil)
+		mockUserRepo.EXPECT().UpdateAvatarPath(mockUserId, mockPath)
+		mockAvatarRepo.EXPECT().Remove(mockOldPath)
+
+		_, err := useCase.UploadAvatar(mockUserId, mockPayload, mockPayloadSize)
+
+		assert.Equal(t, nil, err)
+	})
+
+}
+
+func TestRemoveAvatar_Success(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockUserRepo := user_mock.NewMockRepository(ctrl)
+	mockAvatarRepo := avatar_mock.NewMockRepository(ctrl)
+
+	useCase := &WithStatefulSessions{
+		UserRepo:   mockUserRepo,
+		AvatarRepo: mockAvatarRepo,
+	}
+
+	const (
+		mockUserID  = "1"
+		mockOldPath = "/user_avatar/avatar.png"
+	)
+
+	mockUserRepo.EXPECT().GetAvatarPath(mockUserID).Return(mockOldPath, nil)
+	mockAvatarRepo.EXPECT().Remove(mockOldPath).Return(nil)
+	mockUserRepo.EXPECT().RemoveAvatarPath(mockUserID).Return(nil)
+
+	err := useCase.RemoveAvatar(mockUserID)
+
+	assert.Equal(t, nil, err)
+}
+
+func TestRemoveAvatar_AvatarDoesNotExist(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockUserRepo := user_mock.NewMockRepository(ctrl)
+
+	useCase := &WithStatefulSessions{
+		UserRepo: mockUserRepo,
+	}
+
+	const (
+		mockUserID  = "1"
+		mockOldPath = ""
+	)
+
+	mockUserRepo.EXPECT().GetAvatarPath(mockUserID).Return(mockOldPath, nil)
+
+	err := useCase.RemoveAvatar(mockUserID)
+
+	assert.Equal(t, avatar_domain.ErrAvatarDoesNotExist, err)
 }
