@@ -82,29 +82,29 @@ func (useCase *WithStatefulSessions) Logout(sessionId string) error {
 	return nil
 }
 
-func (useCase *WithStatefulSessions) UploadAvatar(id uint64, src io.Reader, size int64) error {
+func (useCase *WithStatefulSessions) UploadAvatar(id uint64, src io.Reader, size int64) (string, error) {
 	oldPath, _ := useCase.UserRepo.GetAvatarPath(id)
 
 	avatar, err := useCase.AvatarUseCase.GetAvatar(id, src, size)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	url, err := useCase.AvatarRepo.UploadAvatar(avatar)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	err = useCase.UserRepo.UpdateAvatarPath(id, url)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	if oldPath != "" {
 		useCase.AvatarRepo.Remove(oldPath)
 	}
 
-	return nil
+	return url, nil
 }
 
 func (useCase *WithStatefulSessions) RemoveAvatar(id uint64) error {

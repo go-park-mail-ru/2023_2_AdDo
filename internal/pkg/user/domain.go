@@ -38,12 +38,12 @@ func (uC *UserCredentials) Validate() error {
 	return nil
 }
 
-type ResponseId struct {
-	Id uint64 `json:"Id" example:"1"`
+type UploadAvatarResponse struct {
+	Url string `json:"AvatarUrl" example:"/user-avatar/avatar.png"`
 }
 
 type AvatarUseCase interface {
-	UploadAvatar(userId uint64, src io.Reader, size int64) error
+	UploadAvatar(userId uint64, src io.Reader, size int64) (string, error)
 	RemoveAvatar(userId uint64) error
 }
 

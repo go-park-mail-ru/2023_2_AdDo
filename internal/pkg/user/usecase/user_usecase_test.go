@@ -191,7 +191,7 @@ func TestUploadAvatar_Success(t *testing.T) {
 		mockAvatarRepo.EXPECT().UploadAvatar(avatar).Return(mockPath, nil)
 		mockUserRepo.EXPECT().UpdateAvatarPath(mockUserId, mockPath)
 		
-		err := useCase.UploadAvatar(mockUserId, mockPayload, mockPayloadSize)
+		_, err := useCase.UploadAvatar(mockUserId, mockPayload, mockPayloadSize)
 
 		assert.Equal(t, nil, err)
 	})
@@ -204,7 +204,7 @@ func TestUploadAvatar_Success(t *testing.T) {
 		mockUserRepo.EXPECT().UpdateAvatarPath(mockUserId, mockPath)
 		mockAvatarRepo.EXPECT().Remove(mockOldPath)
 		
-		err := useCase.UploadAvatar(mockUserId, mockPayload, mockPayloadSize)
+		_, err := useCase.UploadAvatar(mockUserId, mockPayload, mockPayloadSize)
 
 		assert.Equal(t, nil, err)
 	})

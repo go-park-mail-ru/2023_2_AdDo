@@ -165,11 +165,11 @@ func (handler *UserHandler) Me(w http.ResponseWriter, r *http.Request) error {
 //
 // @Description	Upload user avatar
 // @Tags		user
-// @Param		avatar	formData	file		true	"User avatar"
+// @Param		Avatar	formData	file		true	"User avatar"
 // @Security	cookieAuth
 // @Security	csrfToken
 // @Security	cookieCsrfToken
-// @Success		200
+// @Success		200	{object}	user_domain.UploadAvatarResponse
 // @Failure		400	{string}	errMsg
 // @Failure		401	{string}	errMsg
 // @Failure		500	{string}	errMsg
@@ -185,16 +185,23 @@ func (handler *UserHandler) UploadAvatar(w http.ResponseWriter, r *http.Request)
 		return common_handler.StatusError{Code: http.StatusUnauthorized, Err: err}
 	}
 	
-	src, hdr, err := r.FormFile("avatar")
+	src, hdr, err := r.FormFile("Avatar")
 	if err != nil {
 		return common_handler.StatusError{Code: http.StatusBadRequest, Err: err}
 	}
 	defer src.Close()
 
-	err = handler.userUseCase.UploadAvatar(userId, src, hdr.Size)
+	url, err := handler.userUseCase.UploadAvatar(userId, src, hdr.Size)
 	if err != nil {
 		return common_handler.StatusError{Code: http.StatusBadRequest, Err: err}
 	}
+
+	response, err := json.Marshal(user_domain.UploadAvatarResponse{Url: url})
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
+	}
+
+	w.Write(response)
 
 	return nil
 }
@@ -210,7 +217,7 @@ func (handler *UserHandler) UploadAvatar(w http.ResponseWriter, r *http.Request)
 // @Failure		401	{string}	errMsg
 // @Failure		409	{string}	errMsg
 // @Failure		500	{string}	errMsg
-// @Router		/remove_avatar [put]
+// @Router		/remove_avatar [post]
 func (handler *UserHandler) RemoveAvatar(w http.ResponseWriter, r *http.Request) error {
 	sessionId, err := response.GetCookie(r)
 	if err != nil {

@@ -1,5 +1,11 @@
 basePath: /api/v1
 definitions:
+  user_domain.UploadAvatarResponse:
+    properties:
+      AvatarUrl:
+        example: /user-avatar/avatar.png
+        type: string
+    type: object
   user_domain.User:
     properties:
       Avatar:
@@ -133,7 +139,7 @@ paths:
       tags:
       - user
   /remove_avatar:
-    put:
+    post:
       description: Remove user avatar
       responses:
         "200":
@@ -190,12 +196,14 @@ paths:
       parameters:
       - description: User avatar
         in: formData
-        name: avatar
+        name: Avatar
         required: true
         type: file
       responses:
         "200":
           description: OK
+          schema:
+            $ref: '#/definitions/user_domain.UploadAvatarResponse'
         "400":
           description: Bad Request
           schema:

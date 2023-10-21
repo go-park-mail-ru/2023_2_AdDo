@@ -2,7 +2,6 @@ package user_repository
 
 import (
 	"context"
-	"fmt"
 	postgres "main/internal/pkg/common/pgxiface"
 	"main/internal/pkg/common/utils"
 	user_domain "main/internal/pkg/user"
@@ -55,14 +54,16 @@ func (db *Postgres) UpdateAvatarPath(userId uint64, path string) error {
 }
 
 func (db *Postgres) GetAvatarPath(userId uint64) (string, error) {
-	var path string
+	var path any
 	err := db.Pool.QueryRow(context.Background(), "select avatar_url from profile where id = $1", userId).Scan(&path)
-	fmt.Printf("avatar_url is <%s>\n", path)
 	if err != nil {
 		return "", err
 	}
+	if path != nil {
+		return path.(string), nil
+	}
 
-	return path, nil
+	return "", nil
 }
 
 func (db *Postgres) RemoveAvatarPath(userId uint64) error {

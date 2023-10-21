@@ -174,7 +174,7 @@ const docTemplate = `{
             }
         },
         "/remove_avatar": {
-            "put": {
+            "post": {
                 "security": [
                     {
                         "cookieAuth": []
@@ -280,14 +280,17 @@ const docTemplate = `{
                     {
                         "type": "file",
                         "description": "User avatar",
-                        "name": "avatar",
+                        "name": "Avatar",
                         "in": "formData",
                         "required": true
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK"
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/user_domain.UploadAvatarResponse"
+                        }
                     },
                     "400": {
                         "description": "Bad Request",
@@ -312,6 +315,15 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "user_domain.UploadAvatarResponse": {
+            "type": "object",
+            "properties": {
+                "AvatarUrl": {
+                    "type": "string",
+                    "example": "/user-avatar/avatar.png"
+                }
+            }
+        },
         "user_domain.User": {
             "type": "object",
             "properties": {
