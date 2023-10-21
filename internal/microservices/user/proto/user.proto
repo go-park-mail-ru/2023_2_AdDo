@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-option go_package = "./;session";
+option go_package = "main/internal/microservices/user/proto";
 
 service UserService {
   rpc Register (UserData) returns (Status) {}

@@ -1,8 +1,8 @@
 syntax = "proto3";
 
-option go_package = "./;playlist";
-import "album.proto";
-
+option go_package = "main/internal/microservices/playlist/proto";
+import "track.proto";
+// protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative -I../proto -I../../track/proto  playlist.proto
 service PlaylistService {
   rpc Create (Base) returns (Status) {}
   rpc Get (PlaylistId) returns (Response) {}
