@@ -10,11 +10,11 @@ import (
 )
 
 type Client struct {
-	playlistManager grpc_playlist_server.PlaylistManager
+	playlistManager playlist_proto.PlaylistServiceClient
 	logger          *logrus.Logger
 }
 
-func NewClient(pm grpc_playlist_server.PlaylistManager, logger *logrus.Logger) Client {
+func NewClient(pm playlist_proto.PlaylistServiceClient, logger *logrus.Logger) Client {
 	return Client{playlistManager: pm, logger: logger}
 }
 
