@@ -13,6 +13,10 @@ type SessionManager struct {
 	pb.UnimplementedSessionServiceServer
 }
 
+func NewSessionManager(repoSession session.Repository, logger *logrus.Logger) SessionManager {
+	return SessionManager{logger: logger, repoSession: repoSession}
+}
+
 func (sm *SessionManager) CheckSession(ctx context.Context, in *pb.SessionId) (*pb.Status, error) {
 	sm.logger.Infoln("Session Micros CheckSession entered")
 
