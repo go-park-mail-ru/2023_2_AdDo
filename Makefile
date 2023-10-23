@@ -17,7 +17,7 @@ unit-test:
 	@echo "Running unit tests..."
 	@go test ./...
 	@go test -coverprofile=all_files ./... -coverpkg=./...
-	@cat all_files | grep -v "cmd" | grep -v "test" | grep -v "init" > testing_files
+	@cat all_files | grep -v "cmd" | grep -v "test" | grep -v "init" | grep -v "database" > testing_files
 	@go tool cover -func=testing_files
 
 #удаление моков
