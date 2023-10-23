@@ -2,25 +2,28 @@ package grpc_user
 
 import (
 	"context"
+	"github.com/sirupsen/logrus"
 	pb "main/internal/microservices/user/proto"
 	grpc_server_user "main/internal/microservices/user/service/server"
 	user_domain "main/internal/pkg/user"
 )
 
 type Client struct {
-	userManager grpc_server_user.UserManager
+	userClient pb.UserServiceClient
+	logger     *logrus.Logger
 }
 
-func NewClient(um grpc_server_user.UserManager) Client {
+func NewClient(client pb.UserServiceClient, logger *logrus.Logger) Client {
 	return Client{
-		userManager: um,
+		userClient: client,
+		logger:     logger,
 	}
 }
 
 func (c *Client) Register(user user_domain.User) error {
-	c.userManager.Logger.Infoln("Grpc client to UserService: Register Method")
+	c.logger.Infoln("Grpc client to UserService: Register Method")
 
-	_, err := c.userManager.Register(context.Background(), grpc_server_user.SerializeUserData(user))
+	_, err := c.userClient.Register(context.Background(), grpc_server_user.SerializeUserData(user))
 	if err != nil {
 		return err
 	}
@@ -29,9 +32,9 @@ func (c *Client) Register(user user_domain.User) error {
 }
 
 func (c *Client) Login(email, password string) (string, error) {
-	c.userManager.Logger.Infoln("Grpc client to UserService: Login Method")
+	c.logger.Infoln("Grpc client to UserService: Login Method")
 
-	pbSessionId, err := c.userManager.LogIn(context.Background(), &pb.UserCredentials{
+	pbSessionId, err := c.userClient.LogIn(context.Background(), &pb.UserCredentials{
 		Email:    email,
 		Password: password,
 	})
@@ -43,9 +46,9 @@ func (c *Client) Login(email, password string) (string, error) {
 }
 
 func (c *Client) Auth(sessionId string) (bool, error) {
-	c.userManager.Logger.Infoln("Grpc client to UserService: Auth Method")
+	c.logger.Infoln("Grpc client to UserService: Auth Method")
 
-	isAuth, err := c.userManager.Auth(context.Background(), &pb.SessionId{SessionId: sessionId})
+	isAuth, err := c.userClient.Auth(context.Background(), &pb.SessionId{SessionId: sessionId})
 	if err != nil || !isAuth.GetIsOk() {
 		return false, err
 	}
@@ -54,9 +57,9 @@ func (c *Client) Auth(sessionId string) (bool, error) {
 }
 
 func (c *Client) GetUserInfo(sessionId string) (user_domain.User, error) {
-	c.userManager.Logger.Infoln("Grpc client to UserService: GetUserInfo Method")
+	c.logger.Infoln("Grpc client to UserService: GetUserInfo Method")
 
-	u, err := c.userManager.GetUserInfo(context.Background(), &pb.SessionId{SessionId: sessionId})
+	u, err := c.userClient.GetUserInfo(context.Background(), &pb.SessionId{SessionId: sessionId})
 	if err != nil {
 		return user_domain.User{}, err
 	}
@@ -65,9 +68,9 @@ func (c *Client) GetUserInfo(sessionId string) (user_domain.User, error) {
 }
 
 func (c *Client) Logout(sessionId string) error {
-	c.userManager.Logger.Infoln("Grpc client to UserService: Logout Method")
+	c.logger.Infoln("Grpc client to UserService: Logout Method")
 
-	_, err := c.userManager.LogOut(context.Background(), &pb.SessionId{SessionId: sessionId})
+	_, err := c.userClient.LogOut(context.Background(), &pb.SessionId{SessionId: sessionId})
 	if err != nil {
 		return err
 	}
