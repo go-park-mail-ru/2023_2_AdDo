@@ -4,14 +4,13 @@ import (
 	"context"
 	"github.com/sirupsen/logrus"
 	"main/internal/microservices/album/proto"
-	grpc_album_server "main/internal/microservices/album/service/server"
 	pb "main/internal/microservices/track/proto"
 	"main/internal/pkg/album"
 	"main/internal/pkg/track"
 )
 
 type Client struct {
-	albumManager grpc_album_server.AlbumManager
+	albumManager proto.AlbumServiceClient
 	logger       *logrus.Logger
 }
 
@@ -54,7 +53,7 @@ func DeserializeAlbumsResponse(in *proto.AlbumsResponse) []album.Response {
 	return result
 }
 
-func NewClient(albumManager grpc_album_server.AlbumManager, logger *logrus.Logger) Client {
+func NewClient(albumManager proto.AlbumServiceClient, logger *logrus.Logger) Client {
 	return Client{albumManager: albumManager, logger: logger}
 }
 

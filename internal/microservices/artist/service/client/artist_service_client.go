@@ -6,17 +6,16 @@ import (
 	album_proto "main/internal/microservices/album/proto"
 	grpc_album "main/internal/microservices/album/service/client"
 	proto "main/internal/microservices/artist/proto"
-	grpc_artist_server "main/internal/microservices/artist/service/server"
 	"main/internal/pkg/album"
 	"main/internal/pkg/artist"
 )
 
 type Client struct {
-	artistManager grpc_artist_server.ArtistManager
+	artistManager proto.ArtistServiceClient
 	logger        *logrus.Logger
 }
 
-func NewClient(am grpc_artist_server.ArtistManager, logger *logrus.Logger) Client {
+func NewClient(am proto.ArtistServiceClient, logger *logrus.Logger) Client {
 	return Client{
 		artistManager: am,
 		logger:        logger,

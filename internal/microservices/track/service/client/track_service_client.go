@@ -4,15 +4,14 @@ import (
 	"context"
 	"github.com/sirupsen/logrus"
 	pb "main/internal/microservices/track/proto"
-	grpc_track_server "main/internal/microservices/track/service/server"
 )
 
 type Client struct {
-	trackManager grpc_track_server.TrackManager
+	trackManager pb.TrackServiceClient
 	logger       *logrus.Logger
 }
 
-func NewClient(tm grpc_track_server.TrackManager, logger *logrus.Logger) Client {
+func NewClient(tm pb.TrackServiceClient, logger *logrus.Logger) Client {
 	return Client{trackManager: tm, logger: logger}
 }
 
