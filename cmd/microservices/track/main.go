@@ -5,18 +5,18 @@ import (
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	init_db "main/init/postgres_db"
-	init_redis "main/init/redis_db"
-	user_proto "main/internal/microservices/user/proto"
-	grpc_server_user "main/internal/microservices/user/service/server"
-	session_repository_redis "main/internal/pkg/session/repository/redis"
-	user_repository "main/internal/pkg/user/repository/postgresql"
+	"main/internal/microservices/track/proto"
+	grpc_track_server "main/internal/microservices/track/service/server"
+	album_repository "main/internal/pkg/album/repository/postgres"
+	artist_repository "main/internal/pkg/artist/repository/postgres"
+	track_repository "main/internal/pkg/track/repository/postgresql"
 	"net"
 	"strconv"
 )
 
 const EnvPostgresQueryName = "DATABASE_URL"
 
-const Port = 8081
+const Port = 8083
 
 func main() {
 	logger := logrus.New()
@@ -30,18 +30,14 @@ func main() {
 		logger.Errorln("error connecting database: ", err)
 	}
 
-	redis, err := init_redis.InitRedis()
-	if err != nil {
-		logger.Fatalf("error while conneting redis databse %s", err.Error())
-	}
+	trackRepository := track_repository.NewPostgres(pool, logger)
+	albumRepository := album_repository.NewPostgres(pool, logger)
+	artistRepository := artist_repository.NewPostgres(pool, logger)
 
-	userRepository := user_repository.NewPostgres(pool, logger)
-	authRepository := session_repository_redis.NewRedis(redis, logger)
-
-	userManager := grpc_server_user.NewUserManager(userRepository, authRepository, logger)
+	trackManager := grpc_track_server.NewTrackManager(trackRepository, &artistRepository, albumRepository, logger)
 
 	server := grpc.NewServer()
-	user_proto.RegisterUserServiceServer(server, userManager)
+	proto.RegisterTrackServiceServer(server, &trackManager)
 
 	config := consulapi.DefaultConfig()
 	config.Address = "127.0.0.1:8500"
