@@ -83,7 +83,8 @@ func (db *Postgres) CheckEmailAndPassword(email, password string) (string, error
 }
 
 func (db *Postgres) UpdateAvatarPath(userId string, path string) error {
-	_, err := db.Pool.Exec(context.Background(), "update profile set avatar_url = $1 where id = $2", path, userId)
+	query := "update profile set avatar_url = $1 where id = $2"
+	_, err := db.Pool.Exec(context.Background(), query, path, userId)
 	if err != nil {
 		return err
 	}
@@ -93,7 +94,9 @@ func (db *Postgres) UpdateAvatarPath(userId string, path string) error {
 
 func (db *Postgres) GetAvatarPath(userId string) (string, error) {
 	var path any
-	err := db.Pool.QueryRow(context.Background(), "select avatar_url from profile where id = $1", userId).Scan(&path)
+
+	query := "select avatar_url from profile where id = $1"
+	err := db.Pool.QueryRow(context.Background(), query, userId).Scan(&path)
 	if err != nil {
 		return "", err
 	}
@@ -105,7 +108,8 @@ func (db *Postgres) GetAvatarPath(userId string) (string, error) {
 }
 
 func (db *Postgres) RemoveAvatarPath(userId string) error {
-	_, err := db.Pool.Exec(context.Background(), "update profile set avatar_url = NULL where id = $1", userId)
+	query := "update profile set avatar_url = null where id = $1"
+	_, err := db.Pool.Exec(context.Background(), query, userId)
 	if err != nil {
 		return err
 	}
