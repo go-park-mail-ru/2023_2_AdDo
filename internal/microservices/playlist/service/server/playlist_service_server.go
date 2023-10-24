@@ -55,12 +55,11 @@ func SerializePlaylistBase(in playlist.Base) *playlist_proto.PlaylistBase {
 }
 
 func SerializePlaylistsBase(in []playlist.Base) *playlist_proto.PlaylistsBase {
-	var result *playlist_proto.PlaylistsBase
-
+	playlists := make([]*playlist_proto.PlaylistBase, 0)
 	for _, base := range in {
-		result.Playlists = append(result.Playlists, SerializePlaylistBase(base))
+		playlists = append(playlists, SerializePlaylistBase(base))
 	}
-	return result
+	return &playlist_proto.PlaylistsBase{Playlists: playlists}
 }
 
 func (pm *PlaylistManager) Create(ctx context.Context, in *playlist_proto.PlaylistBase) (*google_proto.Empty, error) {
