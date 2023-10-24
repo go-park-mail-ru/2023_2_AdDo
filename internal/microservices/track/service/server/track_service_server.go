@@ -2,8 +2,9 @@ package grpc_track_server
 
 import (
 	"context"
+	google_proto "github.com/golang/protobuf/ptypes/empty"
 	"github.com/sirupsen/logrus"
-	pb "main/internal/microservices/track/proto"
+	track_proto "main/internal/microservices/track/proto"
 	"main/internal/pkg/album"
 	"main/internal/pkg/artist"
 	"main/internal/pkg/track"
@@ -14,7 +15,7 @@ type TrackManager struct {
 	repoArtist artist.Repository
 	repoAlbum  album.Repository
 	logger     *logrus.Logger
-	pb.UnimplementedTrackServiceServer
+	track_proto.UnimplementedTrackServiceServer
 }
 
 func NewTrackManager(repoTrack track.Repository, repoArtist artist.Repository, repoAlbum album.Repository, logger *logrus.Logger) TrackManager {
@@ -26,7 +27,7 @@ func NewTrackManager(repoTrack track.Repository, repoArtist artist.Repository, r
 	}
 }
 
-func (tm *TrackManager) Listen(ctx context.Context, in *pb.TrackId) (*pb.Status, error) {
+func (tm *TrackManager) Listen(ctx context.Context, in *track_proto.TrackId) (*google_proto.Empty, error) {
 	tm.logger.Infoln("Track Micros Listen entered")
 
 	err := tm.repoTrack.AddListen(in.GetTrackId())
@@ -35,10 +36,10 @@ func (tm *TrackManager) Listen(ctx context.Context, in *pb.TrackId) (*pb.Status,
 	}
 	tm.logger.Infoln("listen for track ", in.GetTrackId(), " added")
 
-	return &pb.Status{IsOk: true}, nil
+	return &google_proto.Empty{}, nil
 }
 
-func (tm *TrackManager) Like(ctx context.Context, in *pb.TrackToUserId) (*pb.Status, error) {
+func (tm *TrackManager) Like(ctx context.Context, in *track_proto.TrackToUserId) (*google_proto.Empty, error) {
 	tm.logger.Infoln("Track Micros Like entered")
 
 	err := tm.repoTrack.CreateLike(in.GetUserId(), in.GetTrackId())
@@ -47,5 +48,5 @@ func (tm *TrackManager) Like(ctx context.Context, in *pb.TrackToUserId) (*pb.Sta
 	}
 	tm.logger.Infoln("Like created for track ", in.GetTrackId(), " by user ", in.GetUserId())
 
-	return &pb.Status{IsOk: true}, nil
+	return &google_proto.Empty{}, nil
 }

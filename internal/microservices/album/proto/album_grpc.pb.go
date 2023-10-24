@@ -4,10 +4,10 @@ package proto
 
 import (
 	context "context"
+	empty "github.com/golang/protobuf/ptypes/empty"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
-	proto "main/internal/microservices/track/proto"
 )
 
 // This is a compile-time assertion to ensure that this generated file
@@ -19,12 +19,12 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type AlbumServiceClient interface {
-	GetRandom(ctx context.Context, in *proto.Status, opts ...grpc.CallOption) (*AlbumsResponse, error)
-	GetMostLiked(ctx context.Context, in *proto.Status, opts ...grpc.CallOption) (*AlbumsResponse, error)
-	GetPopular(ctx context.Context, in *proto.Status, opts ...grpc.CallOption) (*AlbumsResponse, error)
-	GetNew(ctx context.Context, in *proto.Status, opts ...grpc.CallOption) (*AlbumsResponse, error)
-	GetAlbum(ctx context.Context, in *AlbumId, opts ...grpc.CallOption) (*Album, error)
-	Like(ctx context.Context, in *AlbumToUserId, opts ...grpc.CallOption) (*proto.Status, error)
+	GetRandom(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*AlbumsResponse, error)
+	GetMostLiked(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*AlbumsResponse, error)
+	GetPopular(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*AlbumsResponse, error)
+	GetNew(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*AlbumsResponse, error)
+	GetAlbum(ctx context.Context, in *AlbumId, opts ...grpc.CallOption) (*AlbumResponse, error)
+	Like(ctx context.Context, in *AlbumToUserId, opts ...grpc.CallOption) (*empty.Empty, error)
 }
 
 type albumServiceClient struct {
@@ -35,7 +35,7 @@ func NewAlbumServiceClient(cc grpc.ClientConnInterface) AlbumServiceClient {
 	return &albumServiceClient{cc}
 }
 
-func (c *albumServiceClient) GetRandom(ctx context.Context, in *proto.Status, opts ...grpc.CallOption) (*AlbumsResponse, error) {
+func (c *albumServiceClient) GetRandom(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*AlbumsResponse, error) {
 	out := new(AlbumsResponse)
 	err := c.cc.Invoke(ctx, "/AlbumService/GetRandom", in, out, opts...)
 	if err != nil {
@@ -44,7 +44,7 @@ func (c *albumServiceClient) GetRandom(ctx context.Context, in *proto.Status, op
 	return out, nil
 }
 
-func (c *albumServiceClient) GetMostLiked(ctx context.Context, in *proto.Status, opts ...grpc.CallOption) (*AlbumsResponse, error) {
+func (c *albumServiceClient) GetMostLiked(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*AlbumsResponse, error) {
 	out := new(AlbumsResponse)
 	err := c.cc.Invoke(ctx, "/AlbumService/GetMostLiked", in, out, opts...)
 	if err != nil {
@@ -53,7 +53,7 @@ func (c *albumServiceClient) GetMostLiked(ctx context.Context, in *proto.Status,
 	return out, nil
 }
 
-func (c *albumServiceClient) GetPopular(ctx context.Context, in *proto.Status, opts ...grpc.CallOption) (*AlbumsResponse, error) {
+func (c *albumServiceClient) GetPopular(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*AlbumsResponse, error) {
 	out := new(AlbumsResponse)
 	err := c.cc.Invoke(ctx, "/AlbumService/GetPopular", in, out, opts...)
 	if err != nil {
@@ -62,7 +62,7 @@ func (c *albumServiceClient) GetPopular(ctx context.Context, in *proto.Status, o
 	return out, nil
 }
 
-func (c *albumServiceClient) GetNew(ctx context.Context, in *proto.Status, opts ...grpc.CallOption) (*AlbumsResponse, error) {
+func (c *albumServiceClient) GetNew(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*AlbumsResponse, error) {
 	out := new(AlbumsResponse)
 	err := c.cc.Invoke(ctx, "/AlbumService/GetNew", in, out, opts...)
 	if err != nil {
@@ -71,8 +71,8 @@ func (c *albumServiceClient) GetNew(ctx context.Context, in *proto.Status, opts 
 	return out, nil
 }
 
-func (c *albumServiceClient) GetAlbum(ctx context.Context, in *AlbumId, opts ...grpc.CallOption) (*Album, error) {
-	out := new(Album)
+func (c *albumServiceClient) GetAlbum(ctx context.Context, in *AlbumId, opts ...grpc.CallOption) (*AlbumResponse, error) {
+	out := new(AlbumResponse)
 	err := c.cc.Invoke(ctx, "/AlbumService/GetAlbum", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -80,8 +80,8 @@ func (c *albumServiceClient) GetAlbum(ctx context.Context, in *AlbumId, opts ...
 	return out, nil
 }
 
-func (c *albumServiceClient) Like(ctx context.Context, in *AlbumToUserId, opts ...grpc.CallOption) (*proto.Status, error) {
-	out := new(proto.Status)
+func (c *albumServiceClient) Like(ctx context.Context, in *AlbumToUserId, opts ...grpc.CallOption) (*empty.Empty, error) {
+	out := new(empty.Empty)
 	err := c.cc.Invoke(ctx, "/AlbumService/Like", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -93,12 +93,12 @@ func (c *albumServiceClient) Like(ctx context.Context, in *AlbumToUserId, opts .
 // All implementations must embed UnimplementedAlbumServiceServer
 // for forward compatibility
 type AlbumServiceServer interface {
-	GetRandom(context.Context, *proto.Status) (*AlbumsResponse, error)
-	GetMostLiked(context.Context, *proto.Status) (*AlbumsResponse, error)
-	GetPopular(context.Context, *proto.Status) (*AlbumsResponse, error)
-	GetNew(context.Context, *proto.Status) (*AlbumsResponse, error)
-	GetAlbum(context.Context, *AlbumId) (*Album, error)
-	Like(context.Context, *AlbumToUserId) (*proto.Status, error)
+	GetRandom(context.Context, *empty.Empty) (*AlbumsResponse, error)
+	GetMostLiked(context.Context, *empty.Empty) (*AlbumsResponse, error)
+	GetPopular(context.Context, *empty.Empty) (*AlbumsResponse, error)
+	GetNew(context.Context, *empty.Empty) (*AlbumsResponse, error)
+	GetAlbum(context.Context, *AlbumId) (*AlbumResponse, error)
+	Like(context.Context, *AlbumToUserId) (*empty.Empty, error)
 	mustEmbedUnimplementedAlbumServiceServer()
 }
 
@@ -106,22 +106,22 @@ type AlbumServiceServer interface {
 type UnimplementedAlbumServiceServer struct {
 }
 
-func (UnimplementedAlbumServiceServer) GetRandom(context.Context, *proto.Status) (*AlbumsResponse, error) {
+func (UnimplementedAlbumServiceServer) GetRandom(context.Context, *empty.Empty) (*AlbumsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetRandom not implemented")
 }
-func (UnimplementedAlbumServiceServer) GetMostLiked(context.Context, *proto.Status) (*AlbumsResponse, error) {
+func (UnimplementedAlbumServiceServer) GetMostLiked(context.Context, *empty.Empty) (*AlbumsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetMostLiked not implemented")
 }
-func (UnimplementedAlbumServiceServer) GetPopular(context.Context, *proto.Status) (*AlbumsResponse, error) {
+func (UnimplementedAlbumServiceServer) GetPopular(context.Context, *empty.Empty) (*AlbumsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetPopular not implemented")
 }
-func (UnimplementedAlbumServiceServer) GetNew(context.Context, *proto.Status) (*AlbumsResponse, error) {
+func (UnimplementedAlbumServiceServer) GetNew(context.Context, *empty.Empty) (*AlbumsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetNew not implemented")
 }
-func (UnimplementedAlbumServiceServer) GetAlbum(context.Context, *AlbumId) (*Album, error) {
+func (UnimplementedAlbumServiceServer) GetAlbum(context.Context, *AlbumId) (*AlbumResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetAlbum not implemented")
 }
-func (UnimplementedAlbumServiceServer) Like(context.Context, *AlbumToUserId) (*proto.Status, error) {
+func (UnimplementedAlbumServiceServer) Like(context.Context, *AlbumToUserId) (*empty.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Like not implemented")
 }
 func (UnimplementedAlbumServiceServer) mustEmbedUnimplementedAlbumServiceServer() {}
@@ -138,7 +138,7 @@ func RegisterAlbumServiceServer(s grpc.ServiceRegistrar, srv AlbumServiceServer)
 }
 
 func _AlbumService_GetRandom_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(proto.Status)
+	in := new(empty.Empty)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -150,13 +150,13 @@ func _AlbumService_GetRandom_Handler(srv interface{}, ctx context.Context, dec f
 		FullMethod: "/AlbumService/GetRandom",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AlbumServiceServer).GetRandom(ctx, req.(*proto.Status))
+		return srv.(AlbumServiceServer).GetRandom(ctx, req.(*empty.Empty))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _AlbumService_GetMostLiked_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(proto.Status)
+	in := new(empty.Empty)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -168,13 +168,13 @@ func _AlbumService_GetMostLiked_Handler(srv interface{}, ctx context.Context, de
 		FullMethod: "/AlbumService/GetMostLiked",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AlbumServiceServer).GetMostLiked(ctx, req.(*proto.Status))
+		return srv.(AlbumServiceServer).GetMostLiked(ctx, req.(*empty.Empty))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _AlbumService_GetPopular_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(proto.Status)
+	in := new(empty.Empty)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -186,13 +186,13 @@ func _AlbumService_GetPopular_Handler(srv interface{}, ctx context.Context, dec 
 		FullMethod: "/AlbumService/GetPopular",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AlbumServiceServer).GetPopular(ctx, req.(*proto.Status))
+		return srv.(AlbumServiceServer).GetPopular(ctx, req.(*empty.Empty))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _AlbumService_GetNew_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(proto.Status)
+	in := new(empty.Empty)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -204,7 +204,7 @@ func _AlbumService_GetNew_Handler(srv interface{}, ctx context.Context, dec func
 		FullMethod: "/AlbumService/GetNew",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AlbumServiceServer).GetNew(ctx, req.(*proto.Status))
+		return srv.(AlbumServiceServer).GetNew(ctx, req.(*empty.Empty))
 	}
 	return interceptor(ctx, in, info, handler)
 }

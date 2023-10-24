@@ -30,34 +30,34 @@ const ServerPort = ":8080"
 func main() {
 	logger := logger_init.LogRusInit()
 
-	userConnection, err := grpc.Dial("127.0.0.1:8081", grpc.EmptyDialOption{})
+	userConnection, err := grpc.Dial("user:8081", grpc.WithInsecure())
 	if err != nil {
-		logger.Fatalln("error connecting to user micro ", err)
+		logger.Fatalln("error connecting to user micros ", err)
 	}
 
-	sessionConnection, err := grpc.Dial("127.0.0.1:8082", grpc.EmptyDialOption{})
+	sessionConnection, err := grpc.Dial("session:8082", grpc.WithInsecure())
 	if err != nil {
-		logger.Fatalln("error connecting to user micro ", err)
+		logger.Fatalln("error connecting to session micros ", err)
 	}
 
-	trackConnection, err := grpc.Dial("127.0.0.1:8083", grpc.EmptyDialOption{})
+	trackConnection, err := grpc.Dial("track:8083", grpc.WithInsecure())
 	if err != nil {
-		logger.Fatalln("error connecting to user micro ", err)
+		logger.Fatalln("error connecting to track micros ", err)
 	}
 
-	albumConnection, err := grpc.Dial("127.0.0.1:8084", grpc.EmptyDialOption{})
+	albumConnection, err := grpc.Dial("album:8084", grpc.WithInsecure())
 	if err != nil {
-		logger.Fatalln("error connecting to user micro ", err)
+		logger.Fatalln("error connecting to album micros ", err)
 	}
 
-	playlistConnection, err := grpc.Dial("127.0.0.1:8085", grpc.EmptyDialOption{})
+	playlistConnection, err := grpc.Dial("playlist:8085", grpc.WithInsecure())
 	if err != nil {
-		logger.Fatalln("error connecting to user micro ", err)
+		logger.Fatalln("error connecting to playlist micros ", err)
 	}
 
-	artistConnection, err := grpc.Dial("127.0.0.1:8086", grpc.EmptyDialOption{})
+	artistConnection, err := grpc.Dial("artist:8086", grpc.WithInsecure())
 	if err != nil {
-		logger.Fatalln("error connecting to user micro ", err)
+		logger.Fatalln("error connecting to artist micros ", err)
 	}
 
 	userAgent := grpc_user.NewClient(user_client.NewUserServiceClient(userConnection), logger)

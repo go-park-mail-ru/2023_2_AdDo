@@ -6,6 +6,7 @@ import (
 	grpc_album "main/internal/microservices/album/service/client"
 	playlist_proto "main/internal/microservices/playlist/proto"
 	grpc_playlist_server "main/internal/microservices/playlist/service/server"
+	session_proto "main/internal/microservices/session/proto"
 	"main/internal/pkg/playlist"
 )
 
@@ -18,7 +19,7 @@ func NewClient(pm playlist_proto.PlaylistServiceClient, logger *logrus.Logger) C
 	return Client{playlistManager: pm, logger: logger}
 }
 
-func DeserializePlaylistResponse(in *playlist_proto.Response) playlist.Response {
+func DeserializePlaylistResponse(in *playlist_proto.PlaylistResponse) playlist.Response {
 	return playlist.Response{
 		Id:       in.GetId(),
 		Name:     in.GetName(),
@@ -61,7 +62,7 @@ func (c *Client) Get(playlistId uint64) (playlist.Response, error) {
 func (c *Client) GetUserPlaylists(userId string) ([]playlist.Base, error) {
 	c.logger.Infoln("Playlist client  entered")
 
-	result, err := c.playlistManager.GetUserPlaylists(context.Background(), &playlist_proto.UserId{Id: userId})
+	result, err := c.playlistManager.GetUserPlaylists(context.Background(), &session_proto.UserId{UserId: userId})
 	if err != nil {
 		return nil, err
 	}

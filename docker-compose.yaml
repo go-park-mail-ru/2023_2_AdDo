@@ -24,19 +24,136 @@ services:
       - ~/db-data:/var/lib/postgresql/data
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U musicon" ]
-      interval: 10s
+      interval: 30s
       retries: 3
-      timeout: 5s
+      timeout: 10s
 
-  musicon:
+  consul:
+    image: consul:1.15
+    ports:
+      - "8500:8500"
+
+  user:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: docker/microservices/user/Dockerfile
     depends_on:
       service-db-postgres:
         condition: service_healthy
       service-db-redis:
         condition: service_healthy
+      consul:
+        condition: service_started
+    ports:
+      - "8081:8081"
+    deploy:
+      replicas: 1
+    environment:
+      - DATABASE_URL=postgres://musicon:musicon@service-db-postgres:5432/musicon
+
+  session:
+    build:
+      context: .
+      dockerfile: docker/microservices/session/Dockerfile
+    depends_on:
+      service-db-postgres:
+        condition: service_healthy
+      service-db-redis:
+        condition: service_healthy
+      consul:
+        condition: service_started
+    ports:
+      - "8082:8082"
+    deploy:
+      replicas: 1
+    environment:
+      - DATABASE_URL=postgres://musicon:musicon@service-db-postgres:5432/musicon
+
+  track:
+    build:
+      context: .
+      dockerfile: docker/microservices/track/Dockerfile
+    depends_on:
+      service-db-postgres:
+        condition: service_healthy
+      consul:
+        condition: service_started
+    ports:
+      - "8083:8083"
+    deploy:
+      replicas: 1
+    environment:
+      - DATABASE_URL=postgres://musicon:musicon@service-db-postgres:5432/musicon
+
+  album:
+    build:
+      context: .
+      dockerfile: docker/microservices/album/Dockerfile
+    depends_on:
+      service-db-postgres:
+        condition: service_healthy
+      consul:
+        condition: service_started
+    ports:
+      - "8084:8084"
+    deploy:
+      replicas: 1
+    environment:
+      - DATABASE_URL=postgres://musicon:musicon@service-db-postgres:5432/musicon
+
+  playlist:
+    build:
+      context: .
+      dockerfile: docker/microservices/playlist/Dockerfile
+    depends_on:
+      service-db-postgres:
+        condition: service_healthy
+      consul:
+        condition: service_started
+    ports:
+      - "8085:8085"
+    deploy:
+      replicas: 1
+    environment:
+      - DATABASE_URL=postgres://musicon:musicon@service-db-postgres:5432/musicon
+
+  artist:
+    build:
+      context: .
+      dockerfile: docker/microservices/artist/Dockerfile
+    depends_on:
+      service-db-postgres:
+        condition: service_healthy
+      consul:
+        condition: service_started
+    ports:
+      - "8086:8086"
+    deploy:
+      replicas: 1
+    environment:
+      - DATABASE_URL=postgres://musicon:musicon@service-db-postgres:5432/musicon
+
+  musicon:
+    build:
+      context: .
+      dockerfile: docker/microservices/entrypoint/Dockerfile
+    depends_on:
+      service-db-postgres:
+        condition: service_healthy
+      service-db-redis:
+        condition: service_healthy
+      user:
+        condition: service_started
+      session:
+        condition: service_started
+      track:
+        condition: service_started
+      album:
+        condition: service_started
+      playlist:
+        condition: service_started
+      artist:
+        condition: service_started
     ports:
       - "8080:8080"
     environment:
