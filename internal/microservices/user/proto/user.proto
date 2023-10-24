@@ -2,12 +2,15 @@ syntax = "proto3";
 
 option go_package = "main/internal/microservices/user/proto";
 
+import "google/protobuf/empty.proto";
+import "session.proto";
+
 service UserService {
-  rpc Register (UserData) returns (Status) {}
+  rpc Register (UserData) returns (google.protobuf.Empty) {}
   rpc LogIn (UserCredentials) returns (SessionId) {}
   rpc Auth (SessionId) returns (Status) {}
   rpc GetUserInfo (SessionId) returns (UserData) {}
-  rpc LogOut (SessionId) returns (Status) {}
+  rpc LogOut (SessionId) returns (google.protobuf.Empty) {}
 }
 
 message UserData {
@@ -22,12 +25,4 @@ message UserData {
 message UserCredentials {
   string email = 2;
   string password = 3;
-}
-
-message SessionId {
-  string sessionId = 1;
-}
-
-message Status {
-  bool isOk = 1;
 }

@@ -4,6 +4,7 @@ package proto
 
 import (
 	context "context"
+	empty "github.com/golang/protobuf/ptypes/empty"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -18,8 +19,8 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type TrackServiceClient interface {
-	Listen(ctx context.Context, in *TrackId, opts ...grpc.CallOption) (*Status, error)
-	Like(ctx context.Context, in *TrackToUserId, opts ...grpc.CallOption) (*Status, error)
+	Listen(ctx context.Context, in *TrackId, opts ...grpc.CallOption) (*empty.Empty, error)
+	Like(ctx context.Context, in *TrackToUserId, opts ...grpc.CallOption) (*empty.Empty, error)
 }
 
 type trackServiceClient struct {
@@ -30,8 +31,8 @@ func NewTrackServiceClient(cc grpc.ClientConnInterface) TrackServiceClient {
 	return &trackServiceClient{cc}
 }
 
-func (c *trackServiceClient) Listen(ctx context.Context, in *TrackId, opts ...grpc.CallOption) (*Status, error) {
-	out := new(Status)
+func (c *trackServiceClient) Listen(ctx context.Context, in *TrackId, opts ...grpc.CallOption) (*empty.Empty, error) {
+	out := new(empty.Empty)
 	err := c.cc.Invoke(ctx, "/TrackService/Listen", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -39,8 +40,8 @@ func (c *trackServiceClient) Listen(ctx context.Context, in *TrackId, opts ...gr
 	return out, nil
 }
 
-func (c *trackServiceClient) Like(ctx context.Context, in *TrackToUserId, opts ...grpc.CallOption) (*Status, error) {
-	out := new(Status)
+func (c *trackServiceClient) Like(ctx context.Context, in *TrackToUserId, opts ...grpc.CallOption) (*empty.Empty, error) {
+	out := new(empty.Empty)
 	err := c.cc.Invoke(ctx, "/TrackService/Like", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -52,8 +53,8 @@ func (c *trackServiceClient) Like(ctx context.Context, in *TrackToUserId, opts .
 // All implementations must embed UnimplementedTrackServiceServer
 // for forward compatibility
 type TrackServiceServer interface {
-	Listen(context.Context, *TrackId) (*Status, error)
-	Like(context.Context, *TrackToUserId) (*Status, error)
+	Listen(context.Context, *TrackId) (*empty.Empty, error)
+	Like(context.Context, *TrackToUserId) (*empty.Empty, error)
 	mustEmbedUnimplementedTrackServiceServer()
 }
 
@@ -61,10 +62,10 @@ type TrackServiceServer interface {
 type UnimplementedTrackServiceServer struct {
 }
 
-func (UnimplementedTrackServiceServer) Listen(context.Context, *TrackId) (*Status, error) {
+func (UnimplementedTrackServiceServer) Listen(context.Context, *TrackId) (*empty.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Listen not implemented")
 }
-func (UnimplementedTrackServiceServer) Like(context.Context, *TrackToUserId) (*Status, error) {
+func (UnimplementedTrackServiceServer) Like(context.Context, *TrackToUserId) (*empty.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Like not implemented")
 }
 func (UnimplementedTrackServiceServer) mustEmbedUnimplementedTrackServiceServer() {}

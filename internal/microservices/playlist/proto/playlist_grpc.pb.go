@@ -4,10 +4,11 @@ package proto
 
 import (
 	context "context"
+	empty "github.com/golang/protobuf/ptypes/empty"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
-	proto "main/internal/microservices/track/proto"
+	proto "main/internal/microservices/session/proto"
 )
 
 // This is a compile-time assertion to ensure that this generated file
@@ -19,12 +20,12 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type PlaylistServiceClient interface {
-	Create(ctx context.Context, in *Base, opts ...grpc.CallOption) (*proto.Status, error)
-	Get(ctx context.Context, in *PlaylistId, opts ...grpc.CallOption) (*Response, error)
-	GetUserPlaylists(ctx context.Context, in *UserId, opts ...grpc.CallOption) (*PlaylistsBase, error)
-	AddTrack(ctx context.Context, in *PlaylistToTrackId, opts ...grpc.CallOption) (*proto.Status, error)
-	UpdatePreview(ctx context.Context, in *PlaylistIdToImageUrl, opts ...grpc.CallOption) (*proto.Status, error)
-	DeleteById(ctx context.Context, in *PlaylistId, opts ...grpc.CallOption) (*proto.Status, error)
+	Create(ctx context.Context, in *PlaylistBase, opts ...grpc.CallOption) (*empty.Empty, error)
+	Get(ctx context.Context, in *PlaylistId, opts ...grpc.CallOption) (*PlaylistResponse, error)
+	GetUserPlaylists(ctx context.Context, in *proto.UserId, opts ...grpc.CallOption) (*PlaylistsBase, error)
+	AddTrack(ctx context.Context, in *PlaylistToTrackId, opts ...grpc.CallOption) (*empty.Empty, error)
+	UpdatePreview(ctx context.Context, in *PlaylistIdToImageUrl, opts ...grpc.CallOption) (*empty.Empty, error)
+	DeleteById(ctx context.Context, in *PlaylistId, opts ...grpc.CallOption) (*empty.Empty, error)
 }
 
 type playlistServiceClient struct {
@@ -35,8 +36,8 @@ func NewPlaylistServiceClient(cc grpc.ClientConnInterface) PlaylistServiceClient
 	return &playlistServiceClient{cc}
 }
 
-func (c *playlistServiceClient) Create(ctx context.Context, in *Base, opts ...grpc.CallOption) (*proto.Status, error) {
-	out := new(proto.Status)
+func (c *playlistServiceClient) Create(ctx context.Context, in *PlaylistBase, opts ...grpc.CallOption) (*empty.Empty, error) {
+	out := new(empty.Empty)
 	err := c.cc.Invoke(ctx, "/PlaylistService/Create", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -44,8 +45,8 @@ func (c *playlistServiceClient) Create(ctx context.Context, in *Base, opts ...gr
 	return out, nil
 }
 
-func (c *playlistServiceClient) Get(ctx context.Context, in *PlaylistId, opts ...grpc.CallOption) (*Response, error) {
-	out := new(Response)
+func (c *playlistServiceClient) Get(ctx context.Context, in *PlaylistId, opts ...grpc.CallOption) (*PlaylistResponse, error) {
+	out := new(PlaylistResponse)
 	err := c.cc.Invoke(ctx, "/PlaylistService/Get", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -53,7 +54,7 @@ func (c *playlistServiceClient) Get(ctx context.Context, in *PlaylistId, opts ..
 	return out, nil
 }
 
-func (c *playlistServiceClient) GetUserPlaylists(ctx context.Context, in *UserId, opts ...grpc.CallOption) (*PlaylistsBase, error) {
+func (c *playlistServiceClient) GetUserPlaylists(ctx context.Context, in *proto.UserId, opts ...grpc.CallOption) (*PlaylistsBase, error) {
 	out := new(PlaylistsBase)
 	err := c.cc.Invoke(ctx, "/PlaylistService/GetUserPlaylists", in, out, opts...)
 	if err != nil {
@@ -62,8 +63,8 @@ func (c *playlistServiceClient) GetUserPlaylists(ctx context.Context, in *UserId
 	return out, nil
 }
 
-func (c *playlistServiceClient) AddTrack(ctx context.Context, in *PlaylistToTrackId, opts ...grpc.CallOption) (*proto.Status, error) {
-	out := new(proto.Status)
+func (c *playlistServiceClient) AddTrack(ctx context.Context, in *PlaylistToTrackId, opts ...grpc.CallOption) (*empty.Empty, error) {
+	out := new(empty.Empty)
 	err := c.cc.Invoke(ctx, "/PlaylistService/AddTrack", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -71,8 +72,8 @@ func (c *playlistServiceClient) AddTrack(ctx context.Context, in *PlaylistToTrac
 	return out, nil
 }
 
-func (c *playlistServiceClient) UpdatePreview(ctx context.Context, in *PlaylistIdToImageUrl, opts ...grpc.CallOption) (*proto.Status, error) {
-	out := new(proto.Status)
+func (c *playlistServiceClient) UpdatePreview(ctx context.Context, in *PlaylistIdToImageUrl, opts ...grpc.CallOption) (*empty.Empty, error) {
+	out := new(empty.Empty)
 	err := c.cc.Invoke(ctx, "/PlaylistService/UpdatePreview", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -80,8 +81,8 @@ func (c *playlistServiceClient) UpdatePreview(ctx context.Context, in *PlaylistI
 	return out, nil
 }
 
-func (c *playlistServiceClient) DeleteById(ctx context.Context, in *PlaylistId, opts ...grpc.CallOption) (*proto.Status, error) {
-	out := new(proto.Status)
+func (c *playlistServiceClient) DeleteById(ctx context.Context, in *PlaylistId, opts ...grpc.CallOption) (*empty.Empty, error) {
+	out := new(empty.Empty)
 	err := c.cc.Invoke(ctx, "/PlaylistService/DeleteById", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -93,12 +94,12 @@ func (c *playlistServiceClient) DeleteById(ctx context.Context, in *PlaylistId, 
 // All implementations must embed UnimplementedPlaylistServiceServer
 // for forward compatibility
 type PlaylistServiceServer interface {
-	Create(context.Context, *Base) (*proto.Status, error)
-	Get(context.Context, *PlaylistId) (*Response, error)
-	GetUserPlaylists(context.Context, *UserId) (*PlaylistsBase, error)
-	AddTrack(context.Context, *PlaylistToTrackId) (*proto.Status, error)
-	UpdatePreview(context.Context, *PlaylistIdToImageUrl) (*proto.Status, error)
-	DeleteById(context.Context, *PlaylistId) (*proto.Status, error)
+	Create(context.Context, *PlaylistBase) (*empty.Empty, error)
+	Get(context.Context, *PlaylistId) (*PlaylistResponse, error)
+	GetUserPlaylists(context.Context, *proto.UserId) (*PlaylistsBase, error)
+	AddTrack(context.Context, *PlaylistToTrackId) (*empty.Empty, error)
+	UpdatePreview(context.Context, *PlaylistIdToImageUrl) (*empty.Empty, error)
+	DeleteById(context.Context, *PlaylistId) (*empty.Empty, error)
 	mustEmbedUnimplementedPlaylistServiceServer()
 }
 
@@ -106,22 +107,22 @@ type PlaylistServiceServer interface {
 type UnimplementedPlaylistServiceServer struct {
 }
 
-func (UnimplementedPlaylistServiceServer) Create(context.Context, *Base) (*proto.Status, error) {
+func (UnimplementedPlaylistServiceServer) Create(context.Context, *PlaylistBase) (*empty.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Create not implemented")
 }
-func (UnimplementedPlaylistServiceServer) Get(context.Context, *PlaylistId) (*Response, error) {
+func (UnimplementedPlaylistServiceServer) Get(context.Context, *PlaylistId) (*PlaylistResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Get not implemented")
 }
-func (UnimplementedPlaylistServiceServer) GetUserPlaylists(context.Context, *UserId) (*PlaylistsBase, error) {
+func (UnimplementedPlaylistServiceServer) GetUserPlaylists(context.Context, *proto.UserId) (*PlaylistsBase, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetUserPlaylists not implemented")
 }
-func (UnimplementedPlaylistServiceServer) AddTrack(context.Context, *PlaylistToTrackId) (*proto.Status, error) {
+func (UnimplementedPlaylistServiceServer) AddTrack(context.Context, *PlaylistToTrackId) (*empty.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AddTrack not implemented")
 }
-func (UnimplementedPlaylistServiceServer) UpdatePreview(context.Context, *PlaylistIdToImageUrl) (*proto.Status, error) {
+func (UnimplementedPlaylistServiceServer) UpdatePreview(context.Context, *PlaylistIdToImageUrl) (*empty.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdatePreview not implemented")
 }
-func (UnimplementedPlaylistServiceServer) DeleteById(context.Context, *PlaylistId) (*proto.Status, error) {
+func (UnimplementedPlaylistServiceServer) DeleteById(context.Context, *PlaylistId) (*empty.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteById not implemented")
 }
 func (UnimplementedPlaylistServiceServer) mustEmbedUnimplementedPlaylistServiceServer() {}
@@ -138,7 +139,7 @@ func RegisterPlaylistServiceServer(s grpc.ServiceRegistrar, srv PlaylistServiceS
 }
 
 func _PlaylistService_Create_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Base)
+	in := new(PlaylistBase)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -150,7 +151,7 @@ func _PlaylistService_Create_Handler(srv interface{}, ctx context.Context, dec f
 		FullMethod: "/PlaylistService/Create",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PlaylistServiceServer).Create(ctx, req.(*Base))
+		return srv.(PlaylistServiceServer).Create(ctx, req.(*PlaylistBase))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -174,7 +175,7 @@ func _PlaylistService_Get_Handler(srv interface{}, ctx context.Context, dec func
 }
 
 func _PlaylistService_GetUserPlaylists_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UserId)
+	in := new(proto.UserId)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -186,7 +187,7 @@ func _PlaylistService_GetUserPlaylists_Handler(srv interface{}, ctx context.Cont
 		FullMethod: "/PlaylistService/GetUserPlaylists",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PlaylistServiceServer).GetUserPlaylists(ctx, req.(*UserId))
+		return srv.(PlaylistServiceServer).GetUserPlaylists(ctx, req.(*proto.UserId))
 	}
 	return interceptor(ctx, in, info, handler)
 }

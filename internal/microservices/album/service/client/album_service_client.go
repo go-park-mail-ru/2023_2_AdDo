@@ -2,9 +2,10 @@ package grpc_album
 
 import (
 	"context"
+	google_proto "github.com/golang/protobuf/ptypes/empty"
 	"github.com/sirupsen/logrus"
 	"main/internal/microservices/album/proto"
-	pb "main/internal/microservices/track/proto"
+	track_proto "main/internal/microservices/track/proto"
 	"main/internal/pkg/album"
 	"main/internal/pkg/track"
 )
@@ -14,7 +15,7 @@ type Client struct {
 	logger       *logrus.Logger
 }
 
-func DeserializeTrack(in *pb.Track) track.Response {
+func DeserializeTrack(in *track_proto.Track) track.Response {
 	return track.Response{
 		Id:         in.GetId(),
 		Name:       in.GetName(),
@@ -26,7 +27,7 @@ func DeserializeTrack(in *pb.Track) track.Response {
 	}
 }
 
-func DeserializeTracks(in *pb.TracksResponse) []track.Response {
+func DeserializeTracks(in *track_proto.TracksResponse) []track.Response {
 	result := make([]track.Response, 0)
 	for _, t := range in.GetTracks() {
 		result = append(result, DeserializeTrack(t))
@@ -34,7 +35,7 @@ func DeserializeTracks(in *pb.TracksResponse) []track.Response {
 	return result
 }
 
-func DeserializeAlbum(in *proto.Album) album.Response {
+func DeserializeAlbum(in *proto.AlbumResponse) album.Response {
 	return album.Response{
 		Id:         in.GetId(),
 		Name:       in.GetName(),
@@ -60,7 +61,7 @@ func NewClient(albumManager proto.AlbumServiceClient, logger *logrus.Logger) Cli
 func (c *Client) GetRandom() ([]album.Response, error) {
 	c.logger.Infoln("Client to Album Micros GetRandom entered")
 
-	result, err := c.albumManager.GetRandom(context.Background(), &pb.Status{IsOk: true})
+	result, err := c.albumManager.GetRandom(context.Background(), &google_proto.Empty{})
 	if err != nil {
 		return nil, err
 	}
@@ -71,7 +72,7 @@ func (c *Client) GetRandom() ([]album.Response, error) {
 func (c *Client) GetMostLiked() ([]album.Response, error) {
 	c.logger.Infoln("Client to Album Micros GetMostLiked entered")
 
-	result, err := c.albumManager.GetMostLiked(context.Background(), &pb.Status{IsOk: true})
+	result, err := c.albumManager.GetMostLiked(context.Background(), &google_proto.Empty{})
 	if err != nil {
 		return nil, err
 	}
@@ -82,7 +83,7 @@ func (c *Client) GetMostLiked() ([]album.Response, error) {
 func (c *Client) GetPopular() ([]album.Response, error) {
 	c.logger.Infoln("Client to Album Micros GetPopular entered")
 
-	result, err := c.albumManager.GetPopular(context.Background(), &pb.Status{IsOk: true})
+	result, err := c.albumManager.GetPopular(context.Background(), &google_proto.Empty{})
 	if err != nil {
 		return nil, err
 	}
@@ -93,7 +94,7 @@ func (c *Client) GetPopular() ([]album.Response, error) {
 func (c *Client) GetNew() ([]album.Response, error) {
 	c.logger.Infoln("Client to Album Micros GetNew entered")
 
-	result, err := c.albumManager.GetNew(context.Background(), &pb.Status{IsOk: true})
+	result, err := c.albumManager.GetNew(context.Background(), &google_proto.Empty{})
 	if err != nil {
 		return nil, err
 	}

@@ -2,14 +2,15 @@ syntax = "proto3";
 
 option go_package = "main/internal/microservices/album/proto";
 import "track.proto";
-//protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative -Imicroservices/album/proto -Imicroservices/track/proto  microservices/album/proto/album.proto
+import "google/protobuf/empty.proto";
+//   protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative -I../proto -I../../track/proto  album.proto
 service AlbumService {
-  rpc GetRandom (Status) returns (AlbumsResponse) {}
-  rpc GetMostLiked (Status) returns (AlbumsResponse) {}
-  rpc GetPopular (Status) returns (AlbumsResponse) {}
-  rpc GetNew (Status) returns (AlbumsResponse) {}
-  rpc GetAlbum (AlbumId) returns (Album) {}
-  rpc Like (AlbumToUserId) returns (Status) {}
+  rpc GetRandom (google.protobuf.Empty) returns (AlbumsResponse) {}
+  rpc GetMostLiked (google.protobuf.Empty) returns (AlbumsResponse) {}
+  rpc GetPopular (google.protobuf.Empty) returns (AlbumsResponse) {}
+  rpc GetNew (google.protobuf.Empty) returns (AlbumsResponse) {}
+  rpc GetAlbum (AlbumId) returns (AlbumResponse) {}
+  rpc Like (AlbumToUserId) returns (google.protobuf.Empty) {}
 }
 
 message AlbumToUserId {
@@ -21,17 +22,17 @@ message AlbumId {
   uint64 albumId = 1;
 }
 
-message Base {
+message AlbumBase {
   uint64 Id = 1;
   string Name = 2;
   string Preview = 3;
 }
 
 message AlbumsBase {
-  repeated Base albums = 1;
+  repeated AlbumBase albums = 1;
 }
 
-message Album {
+message AlbumResponse {
   uint64 Id = 1;
   string Name = 2;
   string Preview = 3;
@@ -41,5 +42,5 @@ message Album {
 }
 
 message AlbumsResponse {
-  repeated Album albums = 1;
+  repeated AlbumResponse albums = 1;
 }

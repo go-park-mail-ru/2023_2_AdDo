@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/sirupsen/logrus"
 	grpc_album_server "main/internal/microservices/album/service/server"
-	proto "main/internal/microservices/artist/proto"
+	artist_proto "main/internal/microservices/artist/proto"
 	"main/internal/pkg/album"
 	"main/internal/pkg/artist"
 	"main/internal/pkg/track"
@@ -15,7 +15,7 @@ type ArtistManager struct {
 	repoTrack  track.Repository
 	repoAlbum  album.Repository
 	logger     *logrus.Logger
-	proto.UnimplementedArtistServiceServer
+	artist_proto.UnimplementedArtistServiceServer
 }
 
 func NewArtistManager(repoArtist artist.Repository, repoTrack track.Repository, repoAlbum album.Repository, logger *logrus.Logger) ArtistManager {
@@ -27,8 +27,8 @@ func NewArtistManager(repoArtist artist.Repository, repoTrack track.Repository, 
 	}
 }
 
-func SerializeArtist(in artist.Response) *proto.Artist {
-	return &proto.Artist{
+func SerializeArtist(in artist.Response) *artist_proto.Artist {
+	return &artist_proto.Artist{
 		Id:     in.Id,
 		Name:   in.Name,
 		Avatar: in.Avatar,
@@ -37,7 +37,7 @@ func SerializeArtist(in artist.Response) *proto.Artist {
 	}
 }
 
-func (am *ArtistManager) GetArtistInfo(ctx context.Context, in *proto.ArtistId) (*proto.Artist, error) {
+func (am *ArtistManager) GetArtistInfo(ctx context.Context, in *artist_proto.ArtistId) (*artist_proto.Artist, error) {
 	am.logger.Infoln("Artist Micros GetArtistInfo entered")
 
 	var result artist.Response

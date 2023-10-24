@@ -2,8 +2,10 @@ package grpc_server_user
 
 import (
 	"context"
+	google_proto "github.com/golang/protobuf/ptypes/empty"
 	"github.com/sirupsen/logrus"
-	pb "main/internal/microservices/user/proto"
+	session_proto "main/internal/microservices/session/proto"
+	user_proto "main/internal/microservices/user/proto"
 	"main/internal/pkg/session"
 	user_domain "main/internal/pkg/user"
 )
@@ -12,7 +14,7 @@ type UserManager struct {
 	UserRepo user_domain.Repository
 	AuthRepo session.Repository
 	Logger   *logrus.Logger
-	pb.UnimplementedUserServiceServer
+	user_proto.UnimplementedUserServiceServer
 }
 
 func NewUserManager(userRepo user_domain.Repository, authRepo session.Repository, logger *logrus.Logger) *UserManager {
@@ -23,7 +25,7 @@ func NewUserManager(userRepo user_domain.Repository, authRepo session.Repository
 	}
 }
 
-func DeserializeUserData(in *pb.UserData) user_domain.User {
+func DeserializeUserData(in *user_proto.UserData) user_domain.User {
 	return user_domain.User{
 		Id:        in.GetId(),
 		Username:  in.GetUsername(),
@@ -34,8 +36,8 @@ func DeserializeUserData(in *pb.UserData) user_domain.User {
 	}
 }
 
-func SerializeUserData(in user_domain.User) *pb.UserData {
-	return &pb.UserData{
+func SerializeUserData(in user_domain.User) *user_proto.UserData {
+	return &user_proto.UserData{
 		Id:        in.Id,
 		Username:  in.Username,
 		Email:     in.Email,
@@ -45,7 +47,7 @@ func SerializeUserData(in user_domain.User) *pb.UserData {
 	}
 }
 
-func (us *UserManager) Register(ctx context.Context, in *pb.UserData) (*pb.Status, error) {
+func (us *UserManager) Register(ctx context.Context, in *user_proto.UserData) (*google_proto.Empty, error) {
 	us.Logger.Infoln("User Micros Register entered")
 
 	err := us.UserRepo.Create(DeserializeUserData(in))
@@ -54,10 +56,10 @@ func (us *UserManager) Register(ctx context.Context, in *pb.UserData) (*pb.Statu
 	}
 	us.Logger.Infoln("New User Created")
 
-	return &pb.Status{IsOk: true}, nil
+	return &google_proto.Empty{}, nil
 }
 
-func (us *UserManager) LogIn(ctx context.Context, in *pb.UserCredentials) (*pb.SessionId, error) {
+func (us *UserManager) LogIn(ctx context.Context, in *user_proto.UserCredentials) (*session_proto.SessionId, error) {
 	us.Logger.Infoln("User Micros Login entered")
 
 	id, err := us.UserRepo.CheckEmailAndPassword(in.GetEmail(), in.GetPassword())
@@ -72,22 +74,22 @@ func (us *UserManager) LogIn(ctx context.Context, in *pb.UserCredentials) (*pb.S
 	}
 	us.Logger.Infoln("New session id created for user ", in.Email)
 
-	return &pb.SessionId{SessionId: sessionId}, nil
+	return &session_proto.SessionId{SessionId: sessionId}, nil
 }
 
-func (us *UserManager) Auth(ctx context.Context, in *pb.SessionId) (*pb.Status, error) {
+func (us *UserManager) Auth(ctx context.Context, in *session_proto.SessionId) (*session_proto.Status, error) {
 	us.Logger.Infoln("User Micros Auth entered")
 
 	_, err := us.AuthRepo.Get(in.GetSessionId())
 	if err != nil {
-		return &pb.Status{IsOk: false}, session.ErrSessionDoesNotExist
+		return &session_proto.Status{IsOk: false}, session.ErrSessionDoesNotExist
 	}
 	us.Logger.Infoln("Got User Session From Database")
 
-	return &pb.Status{IsOk: true}, nil
+	return &session_proto.Status{IsOk: true}, nil
 }
 
-func (us *UserManager) GetUserInfo(ctx context.Context, in *pb.SessionId) (*pb.UserData, error) {
+func (us *UserManager) GetUserInfo(ctx context.Context, in *session_proto.SessionId) (*user_proto.UserData, error) {
 	us.Logger.Infoln("User Micros GetUserInfo entered")
 
 	id, err := us.AuthRepo.Get(in.GetSessionId())
@@ -105,7 +107,7 @@ func (us *UserManager) GetUserInfo(ctx context.Context, in *pb.SessionId) (*pb.U
 	return SerializeUserData(u), nil
 }
 
-func (us *UserManager) LogOut(ctx context.Context, in *pb.SessionId) (*pb.Status, error) {
+func (us *UserManager) LogOut(ctx context.Context, in *session_proto.SessionId) (*google_proto.Empty, error) {
 	us.Logger.Infoln("User Micros LogOut entered")
 
 	err := us.AuthRepo.Delete(in.GetSessionId())
@@ -114,5 +116,5 @@ func (us *UserManager) LogOut(ctx context.Context, in *pb.SessionId) (*pb.Status
 	}
 	us.Logger.Infoln("session deleted from database")
 
-	return &pb.Status{IsOk: true}, nil
+	return &google_proto.Empty{}, nil
 }

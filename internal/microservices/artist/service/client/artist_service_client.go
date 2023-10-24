@@ -22,7 +22,7 @@ func NewClient(am proto.ArtistServiceClient, logger *logrus.Logger) Client {
 	}
 }
 
-func DeserializeAlbumBase(in *album_proto.Base) album.Base {
+func DeserializeAlbumBase(in *album_proto.AlbumBase) album.Base {
 	return album.Base{
 		Id:      in.GetId(),
 		Name:    in.GetName(),

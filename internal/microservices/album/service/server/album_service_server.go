@@ -2,9 +2,10 @@ package grpc_album_server
 
 import (
 	"context"
+	google_proto "github.com/golang/protobuf/ptypes/empty"
 	"github.com/sirupsen/logrus"
-	pb "main/internal/microservices/album/proto"
-	pb2 "main/internal/microservices/track/proto"
+	album_proto "main/internal/microservices/album/proto"
+	track_proto "main/internal/microservices/track/proto"
 	"main/internal/pkg/album"
 	"main/internal/pkg/artist"
 	"main/internal/pkg/track"
@@ -15,7 +16,7 @@ type AlbumManager struct {
 	repoArtist artist.Repository
 	repoAlbum  album.Repository
 	logger     *logrus.Logger
-	pb.UnimplementedAlbumServiceServer
+	album_proto.UnimplementedAlbumServiceServer
 }
 
 func NewAlbumManager(repoTrack track.Repository, repoArtist artist.Repository, repoAlbum album.Repository, logger *logrus.Logger) AlbumManager {
@@ -27,8 +28,8 @@ func NewAlbumManager(repoTrack track.Repository, repoArtist artist.Repository, r
 	}
 }
 
-func SerializeTrack(in track.Response) *pb2.Track {
-	return &pb2.Track{
+func SerializeTrack(in track.Response) *track_proto.Track {
+	return &track_proto.Track{
 		Id:         in.Id,
 		Name:       in.Name,
 		Preview:    in.Preview,
@@ -39,16 +40,16 @@ func SerializeTrack(in track.Response) *pb2.Track {
 	}
 }
 
-func SerializeTracks(in []track.Response) *pb2.TracksResponse {
-	var result *pb2.TracksResponse
+func SerializeTracks(in []track.Response) *track_proto.TracksResponse {
+	var result *track_proto.TracksResponse
 	for _, t := range in {
 		result.Tracks = append(result.Tracks, SerializeTrack(t))
 	}
 	return result
 }
 
-func SerializeAlbum(in album.Response) *pb.Album {
-	return &pb.Album{
+func SerializeAlbum(in album.Response) *album_proto.AlbumResponse {
+	return &album_proto.AlbumResponse{
 		Id:         in.Id,
 		Name:       in.Name,
 		Preview:    in.Preview,
@@ -58,24 +59,24 @@ func SerializeAlbum(in album.Response) *pb.Album {
 	}
 }
 
-func SerializeAlbums(in []album.Response) *pb.AlbumsResponse {
-	var result *pb.AlbumsResponse
+func SerializeAlbums(in []album.Response) *album_proto.AlbumsResponse {
+	var result *album_proto.AlbumsResponse
 	for _, a := range in {
 		result.Albums = append(result.Albums, SerializeAlbum(a))
 	}
 	return result
 }
 
-func SerializeBase(in album.Base) *pb.Base {
-	return &pb.Base{
+func SerializeBase(in album.Base) *album_proto.AlbumBase {
+	return &album_proto.AlbumBase{
 		Id:      in.Id,
 		Name:    in.Name,
 		Preview: in.Preview,
 	}
 }
 
-func SerializeAlbumsBase(in []album.Base) *pb.AlbumsBase {
-	var result *pb.AlbumsBase
+func SerializeAlbumsBase(in []album.Base) *album_proto.AlbumsBase {
+	var result *album_proto.AlbumsBase
 
 	for _, base := range in {
 		result.Albums = append(result.Albums, SerializeBase(base))
@@ -83,7 +84,7 @@ func SerializeAlbumsBase(in []album.Base) *pb.AlbumsBase {
 	return result
 }
 
-func (am *AlbumManager) GetAlbum(ctx context.Context, in *pb.AlbumId) (*pb.Album, error) {
+func (am *AlbumManager) GetAlbum(ctx context.Context, in *album_proto.AlbumId) (*album_proto.AlbumResponse, error) {
 	am.logger.Infoln("Album Micros GetAlbum entered")
 
 	var result album.Response
@@ -118,7 +119,7 @@ func (am *AlbumManager) GetAlbum(ctx context.Context, in *pb.AlbumId) (*pb.Album
 	return SerializeAlbum(result), nil
 }
 
-func (am *AlbumManager) GetRandom(ctx context.Context, status *pb2.Status) (*pb.AlbumsResponse, error) {
+func (am *AlbumManager) GetRandom(ctx context.Context, status *google_proto.Empty) (*album_proto.AlbumsResponse, error) {
 	am.logger.Infoln("Album Micros GetRandom entered")
 
 	albums, err := am.repoAlbum.GetRandom(album.LimitForMainPage)
@@ -130,7 +131,7 @@ func (am *AlbumManager) GetRandom(ctx context.Context, status *pb2.Status) (*pb.
 	return am.formResponse(albums)
 }
 
-func (am *AlbumManager) GetMostLiked(ctx context.Context, status *pb2.Status) (*pb.AlbumsResponse, error) {
+func (am *AlbumManager) GetMostLiked(ctx context.Context, status *google_proto.Empty) (*album_proto.AlbumsResponse, error) {
 	am.logger.Infoln("Album Micros GetMostLiked entered")
 
 	albums, err := am.repoAlbum.GetByLikeCount(album.LimitForMainPage)
@@ -142,7 +143,7 @@ func (am *AlbumManager) GetMostLiked(ctx context.Context, status *pb2.Status) (*
 	return am.formResponse(albums)
 }
 
-func (am *AlbumManager) GetPopular(ctx context.Context, status *pb2.Status) (*pb.AlbumsResponse, error) {
+func (am *AlbumManager) GetPopular(ctx context.Context, status *google_proto.Empty) (*album_proto.AlbumsResponse, error) {
 	am.logger.Infoln("Album Micros GetPopular entered")
 
 	albums, err := am.repoAlbum.GetByListenCount(album.LimitForMainPage)
@@ -154,7 +155,7 @@ func (am *AlbumManager) GetPopular(ctx context.Context, status *pb2.Status) (*pb
 	return am.formResponse(albums)
 }
 
-func (am *AlbumManager) GetNew(ctx context.Context, status *pb2.Status) (*pb.AlbumsResponse, error) {
+func (am *AlbumManager) GetNew(ctx context.Context, status *google_proto.Empty) (*album_proto.AlbumsResponse, error) {
 	am.logger.Infoln("Album Micros GetNew entered")
 
 	albums, err := am.repoAlbum.GetByReleaseDate(album.LimitForMainPage)
@@ -166,7 +167,7 @@ func (am *AlbumManager) GetNew(ctx context.Context, status *pb2.Status) (*pb.Alb
 	return am.formResponse(albums)
 }
 
-func (am *AlbumManager) formResponse(albumBase []album.Base) (*pb.AlbumsResponse, error) {
+func (am *AlbumManager) formResponse(albumBase []album.Base) (*album_proto.AlbumsResponse, error) {
 	am.logger.Infoln("Album Micros fromResponse entered")
 
 	result := make([]album.Response, 0)
@@ -191,7 +192,7 @@ func (am *AlbumManager) formResponse(albumBase []album.Base) (*pb.AlbumsResponse
 	return SerializeAlbums(result), nil
 }
 
-func (am *AlbumManager) Like(ctx context.Context, in *pb.AlbumToUserId) (*pb2.Status, error) {
+func (am *AlbumManager) Like(ctx context.Context, in *album_proto.AlbumToUserId) (*google_proto.Empty, error) {
 	am.logger.Infoln("Album Micros Like entered")
 
 	err := am.repoAlbum.CreateLike(in.GetUserId(), in.GetAlbumId())
@@ -200,5 +201,5 @@ func (am *AlbumManager) Like(ctx context.Context, in *pb.AlbumToUserId) (*pb2.St
 	}
 	am.logger.Infoln("Like created")
 
-	return &pb2.Status{IsOk: true}, nil
+	return &google_proto.Empty{}, nil
 }
