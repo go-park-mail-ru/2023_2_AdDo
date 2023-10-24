@@ -41,11 +41,11 @@ func SerializeTrack(in track.Response) *track_proto.Track {
 }
 
 func SerializeTracks(in []track.Response) *track_proto.TracksResponse {
-	var result *track_proto.TracksResponse
+	tracks := make([]*track_proto.Track, 0)
 	for _, t := range in {
-		result.Tracks = append(result.Tracks, SerializeTrack(t))
+		tracks = append(tracks, SerializeTrack(t))
 	}
-	return result
+	return &track_proto.TracksResponse{Tracks: tracks}
 }
 
 func SerializeAlbum(in album.Response) *album_proto.AlbumResponse {
@@ -60,11 +60,11 @@ func SerializeAlbum(in album.Response) *album_proto.AlbumResponse {
 }
 
 func SerializeAlbums(in []album.Response) *album_proto.AlbumsResponse {
-	var result *album_proto.AlbumsResponse
+	albums := make([]*album_proto.AlbumResponse, 0)
 	for _, a := range in {
-		result.Albums = append(result.Albums, SerializeAlbum(a))
+		albums = append(albums, SerializeAlbum(a))
 	}
-	return result
+	return &album_proto.AlbumsResponse{Albums: albums}
 }
 
 func SerializeBase(in album.Base) *album_proto.AlbumBase {
@@ -76,12 +76,11 @@ func SerializeBase(in album.Base) *album_proto.AlbumBase {
 }
 
 func SerializeAlbumsBase(in []album.Base) *album_proto.AlbumsBase {
-	var result *album_proto.AlbumsBase
-
+	albums := make([]*album_proto.AlbumBase, 0)
 	for _, base := range in {
-		result.Albums = append(result.Albums, SerializeBase(base))
+		albums = append(albums, SerializeBase(base))
 	}
-	return result
+	return &album_proto.AlbumsBase{Albums: albums}
 }
 
 func (am *AlbumManager) GetAlbum(ctx context.Context, in *album_proto.AlbumId) (*album_proto.AlbumResponse, error) {
