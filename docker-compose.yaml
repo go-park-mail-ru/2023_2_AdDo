@@ -16,11 +16,11 @@ services:
   service-db-postgres:
     restart: always
     image: postgres:14
-    env_file: ./database/db.env
+    env_file: db/db.env
     network_mode: host
     volumes:
-      - ./database/migrations/migration_1.sql:/docker-entrypoint-initdb.d/migration_1.sql
-      - ./database/migrations/migration_2.sql:/docker-entrypoint-initdb.d/migration_2.sql
+      - ./db/migrations/db_schema.sql:/docker-entrypoint-initdb.d/db_schema.sql
+      - ./db/migrations/data_filling.sql:/docker-entrypoint-initdb.d/data_filling.sql
       - ~/db-data:/var/lib/postgresql/data
       - /etc/localtime:/etc/localtime:ro
     healthcheck:
