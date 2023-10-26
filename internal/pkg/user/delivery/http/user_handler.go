@@ -17,14 +17,14 @@ import (
 type UserHandler struct {
 	userUseCase    user_domain.UseCase
 	sessionUseCase session.UseCase
-	logger      *logrus.Logger
+	logger         *logrus.Logger
 }
 
 func NewHandler(userUseCase user_domain.UseCase, sessionUseCase session.UseCase, logger *logrus.Logger) UserHandler {
 	handler := UserHandler{
 		userUseCase:    userUseCase,
 		sessionUseCase: sessionUseCase,
-		logger:      logger,
+		logger:         logger,
 	}
 	logger.Infoln("New User Handler successfully created")
 	return handler
@@ -179,7 +179,7 @@ func (handler *UserHandler) LogOut(w http.ResponseWriter, r *http.Request) error
 	if err := handler.userUseCase.Logout(sessionId); err != nil {
 		return common_handler.StatusError{Code: http.StatusUnauthorized, Err: err}
 	}
-	handler.logger.Infoln("Session deleted from database")
+	handler.logger.Infoln("Session deleted from db")
 
 	http.SetCookie(w, &http.Cookie{
 		Expires: time.Now().Add(-1 * time.Second),
@@ -215,7 +215,7 @@ func (handler *UserHandler) Me(w http.ResponseWriter, r *http.Request) error {
 	if err != nil {
 		return common_handler.StatusError{Code: http.StatusUnauthorized, Err: err}
 	}
-	handler.logger.Infoln("Got user info from database successfully")
+	handler.logger.Infoln("Got user info from db successfully")
 
 	err = response.RenderJSON(w, user)
 	if err != nil {
@@ -249,7 +249,7 @@ func (handler *UserHandler) UploadAvatar(w http.ResponseWriter, r *http.Request)
 	if err != nil {
 		return common_handler.StatusError{Code: http.StatusUnauthorized, Err: err}
 	}
-	
+
 	src, hdr, err := r.FormFile("Avatar")
 	if err != nil {
 		return common_handler.StatusError{Code: http.StatusBadRequest, Err: err}

@@ -1,9 +1,9 @@
 package user_usecase
 
 import (
+	"github.com/sirupsen/logrus"
 	"io"
 	avatar_domain "main/internal/pkg/avatar"
-	"github.com/sirupsen/logrus"
 	"main/internal/pkg/session"
 	user_domain "main/internal/pkg/user"
 )
@@ -13,7 +13,7 @@ type WithStatefulSessions struct {
 	AuthRepo      session.Repository
 	AvatarRepo    avatar_domain.Repository
 	AvatarUseCase avatar_domain.UseCase
-	logger   *logrus.Logger
+	logger        *logrus.Logger
 }
 
 func NewWithStatefulSessions(
@@ -28,7 +28,7 @@ func NewWithStatefulSessions(
 		AuthRepo:      authRepo,
 		AvatarRepo:    avatarRepo,
 		AvatarUseCase: avatarUseCase,
-		logger:   logger,
+		logger:        logger,
 	}
 }
 
@@ -75,7 +75,7 @@ func (useCase *WithStatefulSessions) GetUserInfo(sessionId string) (user_domain.
 	if err != nil {
 		return u, err
 	}
-	useCase.logger.Infoln("Got user from database ", u.Email)
+	useCase.logger.Infoln("Got user from db ", u.Email)
 
 	return u, nil
 }
@@ -99,8 +99,8 @@ func (useCase *WithStatefulSessions) Logout(sessionId string) error {
 	if err != nil {
 		return session.ErrSessionDoesNotExist
 	}
-	useCase.logger.Infoln("session deleted from database")
-	
+	useCase.logger.Infoln("session deleted from db")
+
 	return nil
 }
 
