@@ -15,7 +15,12 @@ services:
       interval: 10s
       retries: 3
       timeout: 5s
-    
+    logging:
+      driver: "fluentd"
+      options: 
+        fluentd-async-connect: "true"
+        tag: "backend.minio"
+
   create_buckets:
     extends:
       file: ../minio-services.yml
@@ -33,6 +38,11 @@ services:
       interval: 10s
       timeout: 5s
       retries: 3
+    logging:
+      driver: "fluentd"
+      options: 
+        fluentd-async-connect: "true"
+        tag: "backend.redis"
 
   service-db-postgres:
     extends:
@@ -47,6 +57,11 @@ services:
       interval: 10s
       retries: 3
       timeout: 5s
+    logging:
+      driver: "fluentd"
+      options: 
+        fluentd-async-connect: "true"
+        tag: "backend.postgres"
 
   musicon:
     extends:
@@ -63,6 +78,11 @@ services:
         condition: service_healthy
       create_buckets:
         condition: service_completed_successfully
+    logging:
+      driver: "fluentd"
+      options: 
+        fluentd-async-connect: "true"
+        tag: "backend.server"
 
   wait-musicon:
     extends:
@@ -71,3 +91,8 @@ services:
     depends_on:
       musicon:
         condition: service_started
+        
+  service-fluentd:
+    extends:
+      file: ../fluentd-service.yml
+      service: fluentd
