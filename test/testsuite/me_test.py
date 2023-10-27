@@ -2,7 +2,7 @@ import unittest
 import requests
 import names
 
-url = 'http://localhost:8080/api/v1'
+url = 'http://localhost:8888/api/v1'
 
 
 class MeTest(unittest.TestCase):

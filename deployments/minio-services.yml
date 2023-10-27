@@ -1,31 +1,21 @@
-version: '3.7'
+version: '3.9'
 
 services:
   service-minio:
-    image: minio/minio:latest
+    image: minio/minio
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
     environment:
       MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
       MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
-    volumes:
-      - ~/minio:/data
-      - /etc/localtime:/etc/localtime:ro
-    network_mode: host
     command: server --console-address ":9001" /data
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
-      interval: 30s
-      timeout: 20s
-      retries: 3
-    
+
+
   create_buckets:
     image: minio/mc
-    depends_on:
-      service-minio:
-        condition: service_healthy
-    network_mode: host
     entrypoint: >
       /bin/sh -c "
-      /usr/bin/mc alias set musicon http://localhost:9000 ${MINIO_ACCESS_KEY} ${MINIO_SECRET_KEY};
+      /usr/bin/mc alias set musicon http://service-minio:9000 ${MINIO_ACCESS_KEY} ${MINIO_SECRET_KEY};
       /usr/bin/mc mb --ignore-existing musicon/user-avatar;
       /usr/bin/mc mb --ignore-existing musicon/playlist-image;
       /usr/bin/mc anonymous set download musicon/user-avatar;
