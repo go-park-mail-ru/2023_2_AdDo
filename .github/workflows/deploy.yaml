@@ -3,7 +3,7 @@ name: ci/cd
 on:
   push:
     branches: main
-  pull_request_target:
+  pull_request:
     types: [opened, reopened, closed]
 
 jobs:
@@ -30,26 +30,6 @@ jobs:
   #       version: latest
   #       skip-pkg-cache: true
   #       skip-build-cache: true
-        
-#   build-publish:
-#     needs: 
-#       - build
-#       - lint
-#     runs-on: ubuntu-latest
-#     steps:
-#       - name: Set up Docker Buildx
-#         uses: docker/setup-buildx-action@v3
-#       - name: Build and export
-#         uses: docker/build-push-action@v5
-#         with:
-#           context: .
-#           tags: musicon:latest
-#           outputs: type=docker,dest=/tmp/musicon-image.tar
-#       - name: Upload artifact
-#         uses: actions/upload-artifact@v3
-#         with:
-#           name: musicon-image
-#           path: /tmp/musicon-image.tar
       
   unit-test:
     needs: build
@@ -76,10 +56,32 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: '3.10' 
+      - name: Install dependencies
+        run: pip3 install requests names
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
       - name: Run integration test
         run: make integration-test
+
+  # build-publish:
+  #   needs: 
+  #     - unit-test
+  #     - integration-test
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Set up Docker Buildx
+  #       uses: docker/setup-buildx-action@v3
+  #     - name: Build and export
+  #       uses: docker/build-push-action@v5
+  #       with:
+  #         context: .
+  #         tags: musicon:latest
+  #         outputs: type=docker,dest=/tmp/musicon-image.tar
+  #     - name: Upload artifact
+  #       uses: actions/upload-artifact@v3
+  #       with:
+  #         name: musicon-image
+  #         path: /tmp/musicon-image.tar
 
   deploy:
     if: github.event.pull_request.merged == true
