@@ -1,13 +1,12 @@
-name: Deploy
+name: ci/cd
 
 on:
   push:
-    branches:
-      - clean_arch
-      - http_server_init
+    branches: main
+  pull_request_target:
+    types: [opened, reopened, closed]
 
 jobs:
-
   build:
     runs-on: ubuntu-latest
     steps:
@@ -20,24 +19,39 @@ jobs:
         run: go mod download && go mod tidy
       - name: Build musicon
         run: go build -o bin/musicon cmd/musicon/main.go
-      # - name: Upload musicon
-      #   uses: action/upload-artifacts@v3
-      #   with:
-      #     name: musicon
-      #     path: ./bin/musicon
-      # - name: Setup Python 
-      #   uses: actions/setup-python@v4 
-      #   with:
-      #     python-version: '3.10'
-      # - name: Create db_init
-      #   run: python3 ./postgres_db/fill_db_script.py
-      # - name: Upload db_init
-      #   uses: actions/upload-artifact@v3
-      #   with:
-      #     name: db_init
-      #     path: ./postgres_db/
-
-  test:
+  
+  # lint:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #   - uses: actions/checkout@v3
+  #   - name: golangci-lint
+  #     uses: golangci/golangci-lint-action@v3
+  #     with:
+  #       version: latest
+  #       skip-pkg-cache: true
+  #       skip-build-cache: true
+        
+#   build-publish:
+#     needs: 
+#       - build
+#       - lint
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: Set up Docker Buildx
+#         uses: docker/setup-buildx-action@v3
+#       - name: Build and export
+#         uses: docker/build-push-action@v5
+#         with:
+#           context: .
+#           tags: musicon:latest
+#           outputs: type=docker,dest=/tmp/musicon-image.tar
+#       - name: Upload artifact
+#         uses: actions/upload-artifact@v3
+#         with:
+#           name: musicon-image
+#           path: /tmp/musicon-image.tar
+      
+  unit-test:
     needs: build
     runs-on: ubuntu-latest
     steps:
@@ -50,13 +64,29 @@ jobs:
         run: |
           go mod download && go mod tidy 
           go install github.com/golang/mock/mockgen@v1.6.0
-      - name: Test musicon
-        run: |
-          cd test/script/ && chmod +x mockgen.sh  && ./mockgen.sh
-          go test ../../internal/...
-  
+      - name: Run unit test
+        run: make unit-test
+
+  integration-test:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup python3
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10' 
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Run integration test
+        run: make integration-test
+
   deploy:
-    needs: test
+    if: github.event.pull_request.merged == true
+    # if: github.ref == 'refs/heads/main'
+    needs:
+      - unit-test
+      - integration-test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -69,11 +99,6 @@ jobs:
           PASSWORD: ${{ secrets.PASSWORD }}
           source: "."
           target: ~/addo-backend
-      # - name: Download db_init
-      #   uses: actions/download-artifact@v3
-      #   with:
-      #     name: db_init
-      #     path: ~/addo-backend/postgres_db
       - name: Executing remote command
         uses: appleboy/ssh-action@master
         with:
@@ -81,4 +106,4 @@ jobs:
           USERNAME: ${{ secrets.USERNAME }}
           PORT: ${{ secrets.PORT }}
           PASSWORD: ${{ secrets.PASSWORD }}
-          script: cd addo-backend && chmod +x deploy.sh && ./deploy.sh
+          script: cd addo-backend && make deploy

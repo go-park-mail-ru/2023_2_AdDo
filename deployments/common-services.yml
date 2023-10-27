@@ -1,0 +1,41 @@
+version: '3.9'
+
+services:
+  service-db-redis:
+    restart: always
+    image: redis
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+
+  service-db-postgres:
+    restart: always
+    image: postgres:14
+    volumes:
+      - ../db/migrations/db_schema.sql:/db_schema.sql
+      - ../db/fill_data/data_filling.sql:/data_filling.sql
+      - ../db/startup.sh:/docker-entrypoint-initdb.d/startup.sh
+      - /etc/localtime:/etc/localtime:ro
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    
+  musicon:
+    build:
+      context: ..
+      dockerfile: build/package/Dockerfile
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+
+  wait-musicon:
+    image: alpine
+    command: >
+      /bin/sh -c "apk add --no-cache curl && 
+                  while true; do
+                    if curl -s -o /dev/null http://musicon:8080; then
+                      break;
+                    fi;
+                    sleep 1;
+                  done;"

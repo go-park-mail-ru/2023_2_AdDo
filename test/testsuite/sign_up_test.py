@@ -1,7 +1,7 @@
 import unittest
 import requests
 
-url = 'http://localhost:8080/api/v1'
+url = 'http://localhost:8888/api/v1'
 
 
 class SignUpTest(unittest.TestCase):

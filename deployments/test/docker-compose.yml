@@ -1,0 +1,56 @@
+version: '3.9'
+
+services:
+  service-minio:
+    extends:
+      file: ../minio-services.yml
+      service: service-minio
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 10s
+      retries: 3
+      timeout: 5s
+   
+  create_buckets:
+    extends:
+      file: ../minio-services.yml
+      service: create_buckets
+    depends_on:
+      service-minio:
+        condition: service_healthy
+
+  service-db-redis:
+    extends:
+      file: ../common-services.yml
+      service: service-db-redis
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  service-db-postgres:
+    extends:
+      file: ../common-services.yml
+      service: service-db-postgres
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U musicon" ]
+      interval: 10s
+      retries: 3
+      timeout: 5s
+
+  musicon:
+    extends:
+      file: ../common-services.yml
+      service: musicon
+    ports:
+      - "8888:8080"
+    depends_on:
+      service-db-postgres:
+        condition: service_healthy
+      service-db-redis:
+        condition: service_healthy
+      service-minio:
+        condition: service_healthy
+      create_buckets:
+        condition: service_completed_successfully

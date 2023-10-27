@@ -17,7 +17,7 @@ func InitMinio() (*minio.Client, error) {
 	accessKeyID := "Q3AM3UQ867SPQQA43P2F"
 	secretAccessKey := "tfteSlswRu7BJ86wekitnifILbZam1KYY3TG"
 
-	mn, err := minio.New("localhost:9000", &minio.Options{
+	mn, err := minio.New("service-minio:9000", &minio.Options{
 		Creds: credentials.NewStaticV4(
 			accessKeyID,
 			secretAccessKey,
