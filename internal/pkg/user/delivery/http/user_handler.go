@@ -3,9 +3,9 @@ package user_delivery
 import (
 	"encoding/json"
 	"github.com/sirupsen/logrus"
-	common_handler "main/internal/pkg/common/handler"
-	"main/internal/pkg/common/response"
-	"main/internal/pkg/common/utils"
+	"main/internal/common/handler"
+	"main/internal/common/response"
+	"main/internal/common/utils"
 	"main/internal/pkg/session"
 	user_domain "main/internal/pkg/user"
 	"net/http"

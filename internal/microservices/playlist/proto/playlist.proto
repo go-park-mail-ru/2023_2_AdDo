@@ -1,0 +1,55 @@
+syntax = "proto3";
+
+option go_package = "main/internal/microservices/playlist/proto";
+import "google/protobuf/empty.proto";
+import "track.proto";
+import "session.proto";
+// protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative -I../proto -I../../track/proto  playlist.proto
+
+service PlaylistService {
+  rpc Create (PlaylistBase) returns (google.protobuf.Empty) {}
+  rpc Get (PlaylistId) returns (PlaylistResponse) {}
+  rpc GetUserPlaylists (UserId) returns (PlaylistsBase) {}
+  rpc AddTrack (PlaylistToTrackId) returns (google.protobuf.Empty) {}
+  rpc UpdatePreview (PlaylistIdToImageUrl) returns (google.protobuf.Empty) {}
+  rpc DeleteById (PlaylistId) returns (google.protobuf.Empty) {}
+}
+
+message PlaylistId {
+  uint64 id = 1;
+}
+
+message PlaylistToTrackId {
+  uint64 playlistId = 1;
+  uint64 trackId = 2;
+}
+
+message PlaylistIdToImageUrl {
+  uint64 id = 1;
+  string image = 2;
+}
+
+message PlaylistBase {
+  uint64 Id = 1;
+  string Name = 2;
+  string CreatorId = 3;
+  string Preview = 4;
+}
+
+message PlaylistResponse {
+  uint64 Id = 1;
+  string Name = 2;
+  string Preview = 3;
+  uint64 ArtistId = 4;
+  string ArtistName = 5;
+  string CreatorId = 6;
+  TracksResponse Tracks = 7;
+}
+
+message PlaylistsResponse {
+  repeated PlaylistResponse playlists = 1;
+}
+
+message PlaylistsBase {
+  repeated PlaylistBase playlists = 1;
+}

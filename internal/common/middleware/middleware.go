@@ -3,7 +3,7 @@ package common_middleware
 import (
 	"github.com/sirupsen/logrus"
 	"io"
-	"main/internal/pkg/common/utils"
+	"main/internal/common/utils"
 	"net/http"
 	"time"
 )

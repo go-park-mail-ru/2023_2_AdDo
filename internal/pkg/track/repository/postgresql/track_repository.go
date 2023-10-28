@@ -3,7 +3,7 @@ package track_repository
 import (
 	"context"
 	"github.com/sirupsen/logrus"
-	postgres "main/internal/pkg/common/pgxiface"
+	"main/internal/common/pgxiface"
 	"main/internal/pkg/track"
 )
 
@@ -60,6 +60,12 @@ func (db *Postgres) GetByArtist(artistId uint64) ([]track.Response, error) {
 	db.logger.Infoln("TrackRepo GetByArtist entered")
 	query := "select track.id, name, preview, content from track join artist_track on track.id = artist_track.track_id where artist_track.artist_id = $1"
 	return db.getWithQuery(context.Background(), query, artistId)
+}
+
+func (db *Postgres) GetByPlaylist(playlistId uint64) ([]track.Response, error) {
+	db.logger.Infoln("TrackRepo GetByPlaylist entered")
+	query := "select track.id, name, preview, content from track join musicon.public.playlist_track on track.id = playlist_track.track_id where playlist_track.playlist_id = $1"
+	return db.getWithQuery(context.Background(), query, playlistId)
 }
 
 func (db *Postgres) CreateLike(userId string, trackId uint64) error {

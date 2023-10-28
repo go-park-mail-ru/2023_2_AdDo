@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+option go_package = "main/internal/microservices/user/proto";
+
+import "google/protobuf/empty.proto";
+import "session.proto";
+
+service UserService {
+  rpc Register (UserData) returns (google.protobuf.Empty) {}
+  rpc LogIn (UserCredentials) returns (SessionId) {}
+  rpc Auth (SessionId) returns (Status) {}
+  rpc GetUserInfo (SessionId) returns (UserData) {}
+  rpc LogOut (SessionId) returns (google.protobuf.Empty) {}
+}
+
+message UserData {
+  string Id = 1;
+  string email = 2;
+  string password = 3;
+  string username = 4;
+  string birthDate = 5;
+  string Avatar = 6;
+}
+
+message UserCredentials {
+  string email = 2;
+  string password = 3;
+}

@@ -7,7 +7,7 @@ import (
 	"image"
 	"image/png"
 	"github.com/sirupsen/logrus"
-	common_handler "main/internal/pkg/common/handler"
+	"main/internal/common/handler"
 	"main/internal/pkg/session"
 	user_domain "main/internal/pkg/user"
 	avatar_domain "main/internal/pkg/avatar"

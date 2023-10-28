@@ -9,10 +9,13 @@ type Id struct {
 }
 
 type Response struct {
-	Id      uint64 `json:"Id" example:"1"`
-	Name    string `json:"Name" example:"TrackName"`
-	Preview string `json:"Preview" example:"TrackPreview"`
-	Content string `json:"Content" example:"TrackContent"`
+	Id         uint64 `json:"Id" example:"1"`
+	Name       string `json:"Name" example:"TrackName"`
+	Preview    string `json:"Preview" example:"TrackPreview"`
+	Content    string `json:"Content" example:"TrackContent"`
+	ArtistName string `json:"ArtistName" example:"ArtiName"`
+	Duration   uint32 `json:"Duration" example:"0"`
+	IsLiked    bool   `json:"IsLiked" example:"false"`
 }
 
 type UseCase interface {
@@ -30,7 +33,7 @@ type Repository interface {
 	//GetAll() ([]Response, error)
 	//GetPopular(limit uint32) ([]Response, error)
 	//GetLatest(limit uint32) ([]Response, error)
-	//GetByPlaylist(playlistId uint64) ([]Response, error)
+	GetByPlaylist(playlistId uint64) ([]Response, error)
 	GetByAlbum(albumId uint64) ([]Response, error)
 	GetByArtist(artistId uint64) ([]Response, error)
 	CreateLike(userId string, trackId uint64) error

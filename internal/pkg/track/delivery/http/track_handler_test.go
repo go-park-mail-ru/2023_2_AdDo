@@ -7,7 +7,7 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
-	common_handler "main/internal/pkg/common/handler"
+	common_handler "main/internal/common/handler"
 	"main/internal/pkg/session"
 	"main/internal/pkg/track"
 	session_mock "main/test/mocks/session"
