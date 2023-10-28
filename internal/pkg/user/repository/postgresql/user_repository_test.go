@@ -94,3 +94,96 @@ func TestUserRepository_CheckEmailAndPassword(t *testing.T) {
 		t.Errorf("Unfulfilled expectations: %v", err)
 	}
 }
+
+func TestUserRepository_GetAvatarPath(t *testing.T) {
+	mock, err := pgxmock.NewPool()
+	defer mock.Close()
+
+	repo := Postgres{
+		Pool: mock,
+	}
+
+	const (
+		expectedAvatarPath = "/user_avatar/avatar.png"
+		userID = "1"
+	)
+
+	rows := pgxmock.NewRows([]string{"avatar_url"}).AddRow(expectedAvatarPath)
+
+	mock.ExpectQuery("select avatar_url from profile").
+		WithArgs(userID).
+		WillReturnRows(rows)
+
+	path, err := repo.GetAvatarPath(userID)
+	
+	if err != nil {
+		t.Errorf("Error get avatar path: %v", err)
+	}
+
+	if path != expectedAvatarPath {
+		t.Errorf("Expected avatar path is %s but got %s", expectedAvatarPath, path)
+	}
+
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Errorf("Unfulfilled expectations: %v", err)
+	}
+}
+
+
+func TestUserRepository_UpdateAvatarPath(t *testing.T) {
+	mock, err := pgxmock.NewPool()
+	defer mock.Close()
+
+	repo := Postgres{
+		Pool: mock,
+	}
+
+	const (
+		newAvatarPath = "/user_avatar/new_avatar.png"
+		userID = "1"
+	)
+
+	mock.ExpectExec("update profile set avatar_url").
+		WithArgs(newAvatarPath, userID).
+		WillReturnResult(pgxmock.NewResult("UPDATE", 1))
+
+	err = repo.UpdateAvatarPath(userID, newAvatarPath)
+	
+	if err != nil {
+		t.Errorf("Error update avatar path: %v", err)
+	}
+
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Errorf("Unfulfilled expectations: %v", err)
+	}
+
+}
+
+func TestUserRepository_RemoveAvatarPath(t *testing.T) {
+	mock, err := pgxmock.NewPool()
+	defer mock.Close()
+
+	repo := Postgres{
+		Pool: mock,
+	}
+
+	const (
+		newAvatarPath = "/user_avatar/new_avatar.png"
+		userID = "1"
+	)
+
+	mock.ExpectExec("update profile set avatar_url").
+		WithArgs(userID).
+		WillReturnResult(pgxmock.NewResult("UPDATE", 1))
+
+	err = repo.RemoveAvatarPath(userID)
+	
+	if err != nil {
+		t.Errorf("Error remove avatar path: %v", err)
+	}
+
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Errorf("Unfulfilled expectations: %v", err)
+	}
+
+}

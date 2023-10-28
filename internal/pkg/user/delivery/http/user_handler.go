@@ -15,14 +15,16 @@ import (
 )
 
 type UserHandler struct {
-	userUseCase user_domain.UseCase
-	logger      *logrus.Logger
+	userUseCase    user_domain.UseCase
+	sessionUseCase session.UseCase
+	logger         *logrus.Logger
 }
 
-func NewHandler(userUseCase user_domain.UseCase, logger *logrus.Logger) UserHandler {
+func NewHandler(userUseCase user_domain.UseCase, sessionUseCase session.UseCase, logger *logrus.Logger) UserHandler {
 	handler := UserHandler{
-		userUseCase: userUseCase,
-		logger:      logger,
+		userUseCase:    userUseCase,
+		sessionUseCase: sessionUseCase,
+		logger:         logger,
 	}
 	logger.Infoln("New User Handler successfully created")
 	return handler
@@ -177,7 +179,7 @@ func (handler *UserHandler) LogOut(w http.ResponseWriter, r *http.Request) error
 	if err := handler.userUseCase.Logout(sessionId); err != nil {
 		return common_handler.StatusError{Code: http.StatusUnauthorized, Err: err}
 	}
-	handler.logger.Infoln("Session deleted from database")
+	handler.logger.Infoln("Session deleted from db")
 
 	http.SetCookie(w, &http.Cookie{
 		Expires: time.Now().Add(-1 * time.Second),
@@ -213,13 +215,88 @@ func (handler *UserHandler) Me(w http.ResponseWriter, r *http.Request) error {
 	if err != nil {
 		return common_handler.StatusError{Code: http.StatusUnauthorized, Err: err}
 	}
-	handler.logger.Infoln("Got user info from database successfully")
+	handler.logger.Infoln("Got user info from db successfully")
 
 	err = response.RenderJSON(w, user)
 	if err != nil {
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}
 	handler.logger.Infoln("Response body rendered")
+
+	return nil
+}
+
+// UploadAvatar
+//
+// @Description	Upload user avatar
+// @Tags		user
+// @Param		Avatar	formData	file		true	"User avatar"
+// @Security	cookieAuth
+// @Security	csrfToken
+// @Security	cookieCsrfToken
+// @Success		200	{object}	user_domain.UploadAvatarResponse
+// @Failure		400	{string}	errMsg
+// @Failure		401	{string}	errMsg
+// @Failure		500	{string}	errMsg
+// @Router		/upload_avatar [post]
+func (handler *UserHandler) UploadAvatar(w http.ResponseWriter, r *http.Request) error {
+	sessionId, err := response.GetCookie(r)
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusUnauthorized, Err: err}
+	}
+
+	userId, err := handler.sessionUseCase.GetUserId(sessionId)
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusUnauthorized, Err: err}
+	}
+
+	src, hdr, err := r.FormFile("Avatar")
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusBadRequest, Err: err}
+	}
+	defer src.Close()
+
+	url, err := handler.userUseCase.UploadAvatar(userId, src, hdr.Size)
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusBadRequest, Err: err}
+	}
+
+	response, err := json.Marshal(user_domain.UploadAvatarResponse{Url: url})
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
+	}
+
+	w.Write(response)
+
+	return nil
+}
+
+// RemoveAvatar
+//
+// @Description	Remove user avatar
+// @Tags		user
+// @Security	cookieAuth
+// @Security	csrfToken
+// @Security	cookieCsrfToken
+// @Success		200
+// @Failure		401	{string}	errMsg
+// @Failure		409	{string}	errMsg
+// @Failure		500	{string}	errMsg
+// @Router		/remove_avatar [post]
+func (handler *UserHandler) RemoveAvatar(w http.ResponseWriter, r *http.Request) error {
+	sessionId, err := response.GetCookie(r)
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusUnauthorized, Err: err}
+	}
+
+	userId, err := handler.sessionUseCase.GetUserId(sessionId)
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusUnauthorized, Err: err}
+	}
+
+	if err = handler.userUseCase.RemoveAvatar(userId); err != nil {
+		return common_handler.StatusError{Code: http.StatusConflict, Err: err}
+	}
 
 	return nil
 }

@@ -1,0 +1,7 @@
+version: '3.9'
+
+services:
+  playlist:
+    build:
+      context: ../../..
+      dockerfile: build/package/playlist/Dockerfile

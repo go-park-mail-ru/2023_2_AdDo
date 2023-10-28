@@ -135,3 +135,26 @@ func Test_GetAlbum(t *testing.T) {
 	assert.Equal(t, nil, err)
 	assert.Equal(t, expectedAlbum, receivedAlbum)
 }
+
+func Test_Like(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockTrackRepo := track_mock.NewMockRepository(ctrl)
+	mockArtistRepo := artist_mock.NewMockRepository(ctrl)
+	mockAlbumRepo := album_mock.NewMockRepository(ctrl)
+
+	useCase := Default{
+		repoTrack:  mockTrackRepo,
+		repoArtist: mockArtistRepo,
+		repoAlbum:  mockAlbumRepo,
+		logger:     logrus.New(),
+	}
+
+	const userId = "user"
+	const albumId uint64 = 2
+	mockAlbumRepo.EXPECT().CreateLike(userId, albumId).Return(nil)
+
+	err := useCase.Like(userId, albumId)
+	assert.Nil(t, err)
+}

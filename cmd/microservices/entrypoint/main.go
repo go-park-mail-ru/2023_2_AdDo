@@ -71,7 +71,7 @@ func main() {
 
 	albumHandler := album_delivery.NewHandler(&trackAgent, &albumAgent, &sessionAgent, logger)
 	artistHandler := artist_delivery.NewHandler(&artistAgent, logger)
-	userHandler := user_delivery.NewHandler(&userAgent, logger)
+	userHandler := user_delivery.NewHandler(&userAgent, &sessionAgent, logger)
 	trackHandler := track_delivery.NewHandler(&trackAgent, &sessionAgent, logger)
 	logger.Infoln("Deliveries initialized")
 

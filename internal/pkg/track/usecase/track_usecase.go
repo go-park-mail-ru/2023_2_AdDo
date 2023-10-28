@@ -30,7 +30,7 @@ func (useCase *Default) Listen(trackId uint64) error {
 	if err != nil {
 		return err
 	}
-	useCase.logger.Infoln("listen for track ", trackId, " added")
+	useCase.logger.Infoln("listen for track", trackId, "added")
 
 	return nil
 }
@@ -42,7 +42,7 @@ func (useCase *Default) Like(userId string, trackId uint64) error {
 	if err != nil {
 		return err
 	}
-	useCase.logger.Infoln("Like created for track ", trackId, " by user ", userId)
+	useCase.logger.Infoln("Like created for track", trackId, "by user", userId)
 
 	return nil
 }

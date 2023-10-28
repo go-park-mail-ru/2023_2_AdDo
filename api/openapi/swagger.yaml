@@ -69,6 +69,12 @@ definitions:
         example: TrackPreview
         type: string
     type: object
+  user_domain.UploadAvatarResponse:
+    properties:
+      AvatarUrl:
+        example: /user-avatar/avatar.png
+        type: string
+    type: object
   user_domain.User:
     properties:
       Avatar:
@@ -81,8 +87,8 @@ definitions:
         example: example@gmail.com
         type: string
       Id:
-        example: 1
-        type: integer
+        example: qwer-werw-we4w
+        type: string
       Password:
         example: password
         type: string
@@ -424,6 +430,30 @@ paths:
             type: string
       tags:
       - album
+  /remove_avatar:
+    post:
+      description: Remove user avatar
+      responses:
+        "200":
+          description: OK
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "409":
+          description: Conflict
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - cookieAuth: []
+      - csrfToken: []
+      - cookieCsrfToken: []
+      tags:
+      - user
   /sign_up:
     post:
       consumes:
@@ -460,6 +490,38 @@ paths:
           schema:
             type: string
       security:
+      - csrfToken: []
+      - cookieCsrfToken: []
+      tags:
+      - user
+  /upload_avatar:
+    post:
+      description: Upload user avatar
+      parameters:
+      - description: User avatar
+        in: formData
+        name: Avatar
+        required: true
+        type: file
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/user_domain.UploadAvatarResponse'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - cookieAuth: []
       - csrfToken: []
       - cookieCsrfToken: []
       tags:
