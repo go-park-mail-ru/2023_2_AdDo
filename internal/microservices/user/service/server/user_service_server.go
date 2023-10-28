@@ -187,3 +187,15 @@ func (us *UserManager) RemoveAvatar(ctx context.Context, in *session_proto.UserI
 
 	return &google_proto.Empty{}, nil
 }
+
+func (us *UserManager) UpdateUserInfo(ctx context.Context, in *user_proto.UserData) (*google_proto.Empty, error) {
+	us.Logger.Infoln("User Micros UpdateUserInfo entered")
+
+	err := us.UserRepo.UpdateUserInfo(DeserializeUserData(in))
+	if err != nil {
+		return nil, err
+	}
+	us.Logger.Infoln("Info updated")
+
+	return &google_proto.Empty{}, nil
+}

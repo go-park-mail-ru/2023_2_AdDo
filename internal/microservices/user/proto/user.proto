@@ -13,6 +13,7 @@ service UserService {
   rpc LogOut (SessionId) returns (google.protobuf.Empty) {}
   rpc UploadAvatar(UserAvatar) returns (AvatarUrl) {}
   rpc RemoveAvatar(UserId) returns (google.protobuf.Empty) {}
+  rpc UpdateUserInfo(UserData) returns (google.protobuf.Empty) {}
 }
 
 message UserData {

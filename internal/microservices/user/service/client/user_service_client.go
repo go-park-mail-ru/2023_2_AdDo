@@ -120,3 +120,16 @@ func (c *Client) RemoveAvatar(userId string) error {
 
 	return nil
 }
+
+func (c *Client) UpdateUserInfo(userId string, u user_domain.User) error {
+	c.logger.Infoln("User grpc client UpdateUserInfo entered")
+
+	u.Id = userId
+	_, err := c.userClient.UpdateUserInfo(context.Background(), grpc_server_user.SerializeUserData(u))
+	if err != nil {
+		return err
+	}
+	c.logger.Infoln("Info updated successfully")
+
+	return nil
+}
