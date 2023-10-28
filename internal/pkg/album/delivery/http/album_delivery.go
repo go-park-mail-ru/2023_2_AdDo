@@ -166,6 +166,21 @@ func (handler *AlbumHandler) handleQuery(albums []album.Response, w http.Respons
 	return nil
 }
 
+// Like
+//
+//	@Description	like album
+//	@Tags			track
+//	@Security		csrfToken
+//	@Security		cookieCsrfToken
+//	@Accept			json
+//	@Param			trackId	body		integer	true	"track id"
+//	@Success		204
+//	@Failure		400		{string}	errMsg
+//	@Failure		401		{string}	errMsg
+//	@Failure		403		{string}	errMsg
+//	@Failure		500		{string}	errMsg
+//	@Router			/like [post]
+
 func (handler *AlbumHandler) Like(w http.ResponseWriter, r *http.Request) error {
 	handler.logger.WithFields(logrus.Fields{
 		"request_id": utils.GenReqId(r.RequestURI + r.Method),
@@ -195,5 +210,6 @@ func (handler *AlbumHandler) Like(w http.ResponseWriter, r *http.Request) error 
 	}
 	handler.logger.Infoln("like created successfully")
 
+	w.WriteHeader(http.StatusNoContent)
 	return nil
 }

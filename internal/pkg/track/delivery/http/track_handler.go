@@ -35,7 +35,7 @@ func NewHandler(track track.UseCase, session session.UseCase, logger *logrus.Log
 //	@Param			trackId	body	integer	true	"track id"
 //	@Security		csrfToken
 //	@Security		cookieCsrfToken
-//	@Success		200
+//	@Success		204
 //	@Failure		400	{string}	errMsg
 //	@Failure		403	{string}	errMsg
 //	@Failure		500	{string}	errMsg
@@ -57,6 +57,7 @@ func (handler *TrackHandler) Listen(w http.ResponseWriter, r *http.Request) erro
 	}
 	handler.logger.Infoln("play count for track ", trackId, "incremented")
 
+	w.WriteHeader(http.StatusNoContent)
 	return nil
 }
 
@@ -103,5 +104,6 @@ func (handler *TrackHandler) Like(w http.ResponseWriter, r *http.Request) error 
 	}
 	handler.logger.Infoln("like for track ", trackId, "created")
 
+	w.WriteHeader(http.StatusNoContent)
 	return nil
 }
