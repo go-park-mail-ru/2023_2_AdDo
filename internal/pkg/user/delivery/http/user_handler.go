@@ -314,3 +314,55 @@ func (handler *UserHandler) RemoveAvatar(w http.ResponseWriter, r *http.Request)
 	w.WriteHeader(http.StatusNoContent)
 	return nil
 }
+
+// UpdateUserInfo
+//
+//	@Description	updateUserInfo
+//	@Tags			user
+//	@Security		csrfToken
+//	@Security		cookieCsrfToken
+//	@Accept			json
+//	@Param			userData	body	user_domain.User	true	"User data"
+//	@Success		200
+//	@Failure		400	{string}	errMsg
+//	@Failure		403	{string}	errMsg
+//	@Failure		404	{string}	errMsg
+//	@Failure		500	{string}	errMsg
+//	@Header			204	{string}	Set-Cookie	"Set JSESSIONID in Cookie"
+//	@Router			/sign_up [post]
+
+func (handler *UserHandler) UpdateUserInfo(w http.ResponseWriter, r *http.Request) error {
+	handler.logger.WithFields(logrus.Fields{
+		"request_id": utils.GenReqId(r.RequestURI + r.Method),
+	}).Infoln("SignUp Handler entered")
+
+	sessionId, err := response.GetCookie(r)
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusUnauthorized, Err: err}
+	}
+
+	var u user_domain.User
+	if err := json.NewDecoder(r.Body).Decode(&u); err != nil {
+		return common_handler.StatusError{Code: http.StatusBadRequest, Err: err}
+	}
+	handler.logger.Infoln("User model decoded from request body")
+
+	err = u.Validate()
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusBadRequest, Err: err}
+	}
+	handler.logger.Infoln("User model is valid")
+
+	userId, err := handler.sessionUseCase.GetUserId(sessionId)
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusUnauthorized, Err: err}
+	}
+
+	err = handler.userUseCase.UpdateUserInfo(userId, u)
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+	return nil
+}

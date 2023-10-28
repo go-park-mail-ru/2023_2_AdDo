@@ -86,6 +86,11 @@ func (db *Postgres) UpdateAvatarPath(userId string, path string) error {
 	query := "update profile set avatar_url = $1 where id = $2"
 	_, err := db.Pool.Exec(context.Background(), query, path, userId)
 	if err != nil {
+		db.logger.WithFields(logrus.Fields{
+			"err":   err,
+			"path":  path,
+			"query": query,
+		}).Errorln("avatar updating failed")
 		return err
 	}
 
@@ -98,6 +103,11 @@ func (db *Postgres) GetAvatarPath(userId string) (string, error) {
 	query := "select avatar_url from profile where id = $1"
 	err := db.Pool.QueryRow(context.Background(), query, userId).Scan(&path)
 	if err != nil {
+		db.logger.WithFields(logrus.Fields{
+			"err":     err,
+			"user id": userId,
+			"query":   query,
+		}).Errorln("Getting user crds failed")
 		return "", err
 	}
 	if path != nil {
@@ -113,6 +123,24 @@ func (db *Postgres) RemoveAvatarPath(userId string) error {
 	if err != nil {
 		return err
 	}
+
+	return nil
+}
+
+func (db *Postgres) UpdateUserInfo(user user_domain.User) error {
+	db.logger.Infoln("UserRepo UpdateUserInfo entered")
+
+	query := "update profile set nickname = $1, email = $2, birth_date = $3 where id = $4"
+	_, err := db.Pool.Exec(context.Background(), query, user.Username, user.Email, user.BirthDate)
+	if err != nil {
+		db.logger.WithFields(logrus.Fields{
+			"err ":   err,
+			"user ":  user,
+			"query ": query,
+		}).Errorln("Getting user crds failed")
+		return err
+	}
+	db.logger.Infoln("Updated user info")
 
 	return nil
 }

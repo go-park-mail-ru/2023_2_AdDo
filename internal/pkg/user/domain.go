@@ -2,8 +2,8 @@ package user_domain
 
 import (
 	"errors"
-	"io"
 	xssvalidator "github.com/infiniteloopcloud/xss-validator"
+	"io"
 
 	"github.com/asaskevich/govalidator"
 )
@@ -91,6 +91,7 @@ type UseCase interface {
 	Auth(sessionId string) (bool, error)
 	GetUserInfo(sessionId string) (User, error)
 	Logout(sessionId string) error
+	UpdateUserInfo(userId string, user User) error
 	AvatarUseCase
 }
 
@@ -98,6 +99,7 @@ type Repository interface {
 	Create(user User) error
 	GetById(id string) (User, error)
 	CheckEmailAndPassword(email string, password string) (string, error)
+	UpdateUserInfo(user User) error
 	AvatarDbRepository
 }
 
