@@ -3,6 +3,7 @@ package grpc_user
 import (
 	"context"
 	"github.com/sirupsen/logrus"
+	"io"
 	session_proto "main/internal/microservices/session/proto"
 	user_proto "main/internal/microservices/user/proto"
 	grpc_server_user "main/internal/microservices/user/service/server"
@@ -12,6 +13,16 @@ import (
 type Client struct {
 	userClient user_proto.UserServiceClient
 	logger     *logrus.Logger
+}
+
+func (c *Client) UploadAvatar(userId string, src io.Reader, size int64) (string, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (c *Client) RemoveAvatar(userId string) error {
+	//TODO implement me
+	panic("implement me")
 }
 
 func NewClient(client user_proto.UserServiceClient, logger *logrus.Logger) Client {

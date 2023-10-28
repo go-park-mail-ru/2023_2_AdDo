@@ -12,13 +12,13 @@ func InitRedis() (*redis.Client, error) {
 		Password: "",
 		DB:       0,
 	})
-	fmt.Println("Redis database client created!")
+	fmt.Println("Redis db client created!")
 
 	_, err := rdb.Ping(context.Background()).Result()
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println("Redis database successfully connected!")
+	fmt.Println("Redis db successfully connected!")
 
 	return rdb, nil
 }

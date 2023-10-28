@@ -1,0 +1,16 @@
+version: "3.9"
+
+services:
+  fluentd:
+    build:
+      context: ..
+      dockerfile: build/package/Dockerfile.fluentd
+    restart: always
+    ports:
+      - "24224:24224"
+      - "24224:24224/udp"
+    volumes:
+      - ../configs/fluentd:/fluentd/etc
+      - /var/log/nginx:/var/log/nginx
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro

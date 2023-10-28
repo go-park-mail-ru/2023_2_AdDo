@@ -36,7 +36,7 @@ func (s *Default) CheckSession(sessionId string) (bool, error) {
 	if err != nil {
 		return false, session.ErrSessionDoesNotExist
 	}
-	s.logger.Infoln("Session id matched with an database one")
+	s.logger.Infoln("Session id matched with an db one")
 
 	return true, nil
 }

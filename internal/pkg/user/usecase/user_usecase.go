@@ -2,21 +2,33 @@ package user_usecase
 
 import (
 	"github.com/sirupsen/logrus"
+	"io"
+	avatar_domain "main/internal/pkg/avatar"
 	"main/internal/pkg/session"
-	"main/internal/pkg/user"
+	user_domain "main/internal/pkg/user"
 )
 
 type WithStatefulSessions struct {
-	UserRepo user_domain.Repository
-	AuthRepo session.Repository
-	logger   *logrus.Logger
+	UserRepo      user_domain.Repository
+	AuthRepo      session.Repository
+	AvatarRepo    avatar_domain.Repository
+	AvatarUseCase avatar_domain.UseCase
+	logger        *logrus.Logger
 }
 
-func NewWithStatefulSessions(userRepo user_domain.Repository, authRepo session.Repository, logger *logrus.Logger) WithStatefulSessions {
+func NewWithStatefulSessions(
+	userRepo user_domain.Repository,
+	authRepo session.Repository,
+	avatarRepo avatar_domain.Repository,
+	avatarUseCase avatar_domain.UseCase,
+	logger *logrus.Logger,
+) WithStatefulSessions {
 	return WithStatefulSessions{
-		UserRepo: userRepo,
-		AuthRepo: authRepo,
-		logger:   logger,
+		UserRepo:      userRepo,
+		AuthRepo:      authRepo,
+		AvatarRepo:    avatarRepo,
+		AvatarUseCase: avatarUseCase,
+		logger:        logger,
 	}
 }
 
@@ -63,7 +75,7 @@ func (useCase *WithStatefulSessions) GetUserInfo(sessionId string) (user_domain.
 	if err != nil {
 		return u, err
 	}
-	useCase.logger.Infoln("Got user from database ", u.Email)
+	useCase.logger.Infoln("Got user from db ", u.Email)
 
 	return u, nil
 }
@@ -87,7 +99,52 @@ func (useCase *WithStatefulSessions) Logout(sessionId string) error {
 	if err != nil {
 		return session.ErrSessionDoesNotExist
 	}
-	useCase.logger.Infoln("session deleted from database")
+	useCase.logger.Infoln("session deleted from db")
+
+	return nil
+}
+
+func (useCase *WithStatefulSessions) UploadAvatar(id string, src io.Reader, size int64) (string, error) {
+	oldPath, _ := useCase.UserRepo.GetAvatarPath(id)
+
+	avatar, err := useCase.AvatarUseCase.GetAvatar(id, src, size)
+	if err != nil {
+		return "", err
+	}
+
+	url, err := useCase.AvatarRepo.UploadAvatar(avatar)
+	if err != nil {
+		return "", err
+	}
+
+	err = useCase.UserRepo.UpdateAvatarPath(id, url)
+	if err != nil {
+		return "", err
+	}
+
+	if oldPath != "" {
+		useCase.AvatarRepo.Remove(oldPath)
+	}
+
+	return url, nil
+}
+
+func (useCase *WithStatefulSessions) RemoveAvatar(id string) error {
+	oldPath, err := useCase.UserRepo.GetAvatarPath(id)
+	if err != nil {
+		return err
+	}
+
+	if oldPath == "" {
+		return avatar_domain.ErrAvatarDoesNotExist
+	}
+
+	useCase.AvatarRepo.Remove(oldPath)
+
+	err = useCase.UserRepo.RemoveAvatarPath(id)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
