@@ -15,16 +15,6 @@ type Client struct {
 	logger     *logrus.Logger
 }
 
-func (c *Client) UploadAvatar(userId string, src io.Reader, size int64) (string, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (c *Client) RemoveAvatar(userId string) error {
-	//TODO implement me
-	panic("implement me")
-}
-
 func NewClient(client user_proto.UserServiceClient, logger *logrus.Logger) Client {
 	return Client{
 		userClient: client,
@@ -88,4 +78,14 @@ func (c *Client) Logout(sessionId string) error {
 	}
 
 	return nil
+}
+
+func (c *Client) UploadAvatar(userId string, src io.Reader, size int64) (string, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (c *Client) RemoveAvatar(userId string) error {
+	//TODO implement me
+	panic("implement me")
 }
