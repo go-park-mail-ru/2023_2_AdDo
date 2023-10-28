@@ -25,6 +25,8 @@ type UserServiceClient interface {
 	Auth(ctx context.Context, in *proto.SessionId, opts ...grpc.CallOption) (*proto.Status, error)
 	GetUserInfo(ctx context.Context, in *proto.SessionId, opts ...grpc.CallOption) (*UserData, error)
 	LogOut(ctx context.Context, in *proto.SessionId, opts ...grpc.CallOption) (*empty.Empty, error)
+	UploadAvatar(ctx context.Context, in *UserAvatar, opts ...grpc.CallOption) (*AvatarUrl, error)
+	RemoveAvatar(ctx context.Context, in *proto.UserId, opts ...grpc.CallOption) (*empty.Empty, error)
 }
 
 type userServiceClient struct {
@@ -80,6 +82,24 @@ func (c *userServiceClient) LogOut(ctx context.Context, in *proto.SessionId, opt
 	return out, nil
 }
 
+func (c *userServiceClient) UploadAvatar(ctx context.Context, in *UserAvatar, opts ...grpc.CallOption) (*AvatarUrl, error) {
+	out := new(AvatarUrl)
+	err := c.cc.Invoke(ctx, "/UserService/UploadAvatar", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userServiceClient) RemoveAvatar(ctx context.Context, in *proto.UserId, opts ...grpc.CallOption) (*empty.Empty, error) {
+	out := new(empty.Empty)
+	err := c.cc.Invoke(ctx, "/UserService/RemoveAvatar", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // UserServiceServer is the server API for UserService service.
 // All implementations must embed UnimplementedUserServiceServer
 // for forward compatibility
@@ -89,6 +109,8 @@ type UserServiceServer interface {
 	Auth(context.Context, *proto.SessionId) (*proto.Status, error)
 	GetUserInfo(context.Context, *proto.SessionId) (*UserData, error)
 	LogOut(context.Context, *proto.SessionId) (*empty.Empty, error)
+	UploadAvatar(context.Context, *UserAvatar) (*AvatarUrl, error)
+	RemoveAvatar(context.Context, *proto.UserId) (*empty.Empty, error)
 	mustEmbedUnimplementedUserServiceServer()
 }
 
@@ -110,6 +132,12 @@ func (UnimplementedUserServiceServer) GetUserInfo(context.Context, *proto.Sessio
 }
 func (UnimplementedUserServiceServer) LogOut(context.Context, *proto.SessionId) (*empty.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method LogOut not implemented")
+}
+func (UnimplementedUserServiceServer) UploadAvatar(context.Context, *UserAvatar) (*AvatarUrl, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UploadAvatar not implemented")
+}
+func (UnimplementedUserServiceServer) RemoveAvatar(context.Context, *proto.UserId) (*empty.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RemoveAvatar not implemented")
 }
 func (UnimplementedUserServiceServer) mustEmbedUnimplementedUserServiceServer() {}
 
@@ -214,6 +242,42 @@ func _UserService_LogOut_Handler(srv interface{}, ctx context.Context, dec func(
 	return interceptor(ctx, in, info, handler)
 }
 
+func _UserService_UploadAvatar_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UserAvatar)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).UploadAvatar(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/UserService/UploadAvatar",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).UploadAvatar(ctx, req.(*UserAvatar))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UserService_RemoveAvatar_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(proto.UserId)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).RemoveAvatar(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/UserService/RemoveAvatar",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).RemoveAvatar(ctx, req.(*proto.UserId))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // UserService_ServiceDesc is the grpc.ServiceDesc for UserService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -240,6 +304,14 @@ var UserService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "LogOut",
 			Handler:    _UserService_LogOut_Handler,
+		},
+		{
+			MethodName: "UploadAvatar",
+			Handler:    _UserService_UploadAvatar_Handler,
+		},
+		{
+			MethodName: "RemoveAvatar",
+			Handler:    _UserService_RemoveAvatar_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
