@@ -4,10 +4,13 @@ import (
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	microservices_init "main/cmd/microservices"
+	init_minio "main/init/minio"
 	init_db "main/init/postgres_db"
 	init_redis "main/init/redis_db"
 	user_proto "main/internal/microservices/user/proto"
 	grpc_server_user "main/internal/microservices/user/service/server"
+	avatar_repository "main/internal/pkg/avatar/repository/minio"
+	avatar_usecase "main/internal/pkg/avatar/usecase"
 	session_repository_redis "main/internal/pkg/session/repository/redis"
 	user_repository "main/internal/pkg/user/repository/postgresql"
 	"net"
@@ -35,10 +38,17 @@ func main() {
 		logger.Fatalf("error while conneting redis databse %s", err.Error())
 	}
 
+	minio, err := init_minio.InitMinio()
+	if err != nil {
+		logger.Fatalf("error minio connecting %v", err)
+	}
+
 	userRepository := user_repository.NewPostgres(pool, logger)
 	authRepository := session_repository_redis.NewRedis(redis, logger)
+	avatarRepository := avatar_repository.NewMinio(minio)
 
-	userManager := grpc_server_user.NewUserManager(userRepository, authRepository, logger)
+	avatarUseCase := avatar_usecase.NewDefault()
+	userManager := grpc_server_user.NewUserManager(userRepository, authRepository, avatarRepository, avatarUseCase, logger)
 
 	server := grpc.NewServer()
 	user_proto.RegisterUserServiceServer(server, userManager)
