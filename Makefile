@@ -2,12 +2,12 @@
 		integration-test
 		mocks-clean
 		database-clean
-		fill_database
-		docker_service_build
-		docker_service_start
+		fill-database
+		docker-service-build
+		docker-service-start
 		clean
 		deploy
-		hard_deploy
+		hard-deploy
 
 # Запуск юнит-тестов в файл
 unit-test:
@@ -27,19 +27,19 @@ integration-test:
 	$(CURDIR)/scripts/integration-test.sh
 
 # генерируем скрипт для заполнения базы данных основными данными
-fill_database:
+fill-database:
 	@cd db && python3 fill_db_script.py;
 
 #генерируем скрипт для заполнения базы данных моковыми данными
-fill_database_mock_data:
-	@cd database && python3 fill_db_script_mock_data.py;
+fill-database-mock-data:
+	@cd database && python3 fill-db-script-mock-data.py;
 
 # билд контейнера с бэкендом
-docker_services_build: 
+docker-services-build:
 	$(CURDIR)/scripts/docker-services-build.sh
 
 # запуск сервисов в докере
-docker_services_start:
+docker-services-start:
 	$(CURDIR)/scripts/docker-services-start.sh
 
 # Остановка контейнеров, удаление контейнеров, образов и сетей
@@ -49,10 +49,10 @@ clean:
 # Деплой без очистки данных - мы не теряем созданных пользователей и их лайки
 deploy:
 	@make clean
-	@make fill_database
-	@make docker_services_start
+	@make fill-database
+	@make docker-services-start
 
 # Деплой полностью сервиса без пользователей только с музыкой
-hard_deploy:
-	@make database-clean
+hard-deploy:
+	@-make database-clean
 	@make deploy

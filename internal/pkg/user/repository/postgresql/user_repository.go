@@ -4,8 +4,8 @@ import (
 	"context"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/sirupsen/logrus"
-	postgres "main/internal/pkg/common/pgxiface"
-	"main/internal/pkg/common/utils"
+	"main/internal/common/pgxiface"
+	"main/internal/common/utils"
 	user_domain "main/internal/pkg/user"
 )
 
