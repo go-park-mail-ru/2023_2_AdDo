@@ -113,6 +113,10 @@ func (am *AlbumManager) GetAlbum(ctx context.Context, in *album_proto.AlbumId) (
 	}
 	am.logger.Infoln("Got tracks by album id ", tracks)
 
+	for index, _ := range tracks {
+		tracks[index].ArtistName = art.Name
+	}
+
 	result.Tracks = tracks
 
 	return SerializeAlbum(result), nil

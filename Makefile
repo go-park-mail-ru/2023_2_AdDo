@@ -56,3 +56,8 @@ deploy:
 hard-deploy:
 	@-make database-clean
 	@make deploy
+
+registry-start:
+	@docker run -d -p 5000:5000 --restart=always --name musicon-registry registry:2
+	@DOCKER_OPTS="$DOCKER_OPTS --insecure-registry musicon-registry:5000"
+	@service docker restart

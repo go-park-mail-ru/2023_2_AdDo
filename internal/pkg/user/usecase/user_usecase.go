@@ -16,6 +16,11 @@ type WithStatefulSessions struct {
 	logger        *logrus.Logger
 }
 
+func (useCase *WithStatefulSessions) UpdateUserInfo(userId string, user user_domain.User) error {
+	//TODO implement me
+	panic("implement me")
+}
+
 func NewWithStatefulSessions(
 	userRepo user_domain.Repository,
 	authRepo session.Repository,
