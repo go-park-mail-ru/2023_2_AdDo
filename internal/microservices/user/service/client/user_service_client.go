@@ -15,20 +15,28 @@ type Client struct {
 	logger     *logrus.Logger
 }
 
-func (c *Client) UploadAvatar(userId string, src io.Reader, size int64) (string, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (c *Client) RemoveAvatar(userId string) error {
-	//TODO implement me
-	panic("implement me")
-}
-
 func NewClient(client user_proto.UserServiceClient, logger *logrus.Logger) Client {
 	return Client{
 		userClient: client,
 		logger:     logger,
+	}
+}
+
+func SerializeAvatar(src io.Reader, size int64) *user_proto.Avatar {
+	data, err := io.ReadAll(src)
+	if err != nil {
+		return nil
+	}
+	return &user_proto.Avatar{
+		Data:   data,
+		Length: 0,
+	}
+}
+
+func SerializeUserAvatar(userId string, src io.Reader, size int64) *user_proto.UserAvatar {
+	return &user_proto.UserAvatar{
+		Avatar: SerializeAvatar(src, size),
+		Id:     &session_proto.UserId{UserId: userId},
 	}
 }
 
@@ -86,6 +94,42 @@ func (c *Client) Logout(sessionId string) error {
 	if err != nil {
 		return err
 	}
+
+	return nil
+}
+
+func (c *Client) UploadAvatar(userId string, src io.Reader, size int64) (string, error) {
+	c.logger.Infoln("User grpc client UploadAvatar entered")
+
+	result, err := c.userClient.UploadAvatar(context.Background(), SerializeUserAvatar(userId, src, size))
+	if err != nil {
+		return "", err
+	}
+
+	return result.GetUrl(), nil
+}
+
+func (c *Client) RemoveAvatar(userId string) error {
+	c.logger.Infoln("User grpc client UploadAvatar entered")
+
+	_, err := c.userClient.RemoveAvatar(context.Background(), &session_proto.UserId{UserId: userId})
+	if err != nil {
+		return err
+	}
+	c.logger.Infoln("Avatar Removed")
+
+	return nil
+}
+
+func (c *Client) UpdateUserInfo(userId string, u user_domain.User) error {
+	c.logger.Infoln("User grpc client UpdateUserInfo entered")
+
+	u.Id = userId
+	_, err := c.userClient.UpdateUserInfo(context.Background(), grpc_server_user.SerializeUserData(u))
+	if err != nil {
+		return err
+	}
+	c.logger.Infoln("Info updated successfully")
 
 	return nil
 }

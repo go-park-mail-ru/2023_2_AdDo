@@ -4,13 +4,16 @@ option go_package = "main/internal/microservices/user/proto";
 
 import "google/protobuf/empty.proto";
 import "session.proto";
-
+//    protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative -I../proto -I../../session/proto  user.proto
 service UserService {
   rpc Register (UserData) returns (google.protobuf.Empty) {}
   rpc LogIn (UserCredentials) returns (SessionId) {}
   rpc Auth (SessionId) returns (Status) {}
   rpc GetUserInfo (SessionId) returns (UserData) {}
   rpc LogOut (SessionId) returns (google.protobuf.Empty) {}
+  rpc UploadAvatar(UserAvatar) returns (AvatarUrl) {}
+  rpc RemoveAvatar(UserId) returns (google.protobuf.Empty) {}
+  rpc UpdateUserInfo(UserData) returns (google.protobuf.Empty) {}
 }
 
 message UserData {
@@ -20,6 +23,20 @@ message UserData {
   string username = 4;
   string birthDate = 5;
   string Avatar = 6;
+}
+
+message Avatar {
+  bytes data = 1;
+  uint64 length = 2;
+}
+
+message AvatarUrl {
+  string url = 1;
+}
+
+message UserAvatar {
+  Avatar avatar = 1;
+  UserId id = 2;
 }
 
 message UserCredentials {

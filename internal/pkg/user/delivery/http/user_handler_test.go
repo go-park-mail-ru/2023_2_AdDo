@@ -4,13 +4,13 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"github.com/sirupsen/logrus"
 	"image"
 	"image/png"
-	"github.com/sirupsen/logrus"
 	"main/internal/common/handler"
+	avatar_domain "main/internal/pkg/avatar"
 	"main/internal/pkg/session"
 	user_domain "main/internal/pkg/user"
-	avatar_domain "main/internal/pkg/avatar"
 	session_mock "main/test/mocks/session"
 	user_mock "main/test/mocks/user"
 	"mime/multipart"
@@ -88,7 +88,7 @@ func TestSignUp(t *testing.T) {
 		err = handler.SignUp(w, req)
 
 		assert.Nil(t, err)
-		assert.Equal(t, http.StatusOK, w.Code)
+		assert.Equal(t, http.StatusNoContent, w.Code)
 
 		assert.NoError(t, err)
 	})
@@ -148,7 +148,7 @@ func TestLogin(t *testing.T) {
 		err = handler.Login(w, req)
 
 		assert.Nil(t, err)
-		assert.Equal(t, http.StatusOK, w.Code)
+		assert.Equal(t, http.StatusNoContent, w.Code)
 
 		cookie := w.Result().Cookies()[firstCookie]
 		sessionIdReceived := cookie.Value
@@ -216,7 +216,7 @@ func TestAuth(t *testing.T) {
 		err := handler.Auth(w, req)
 
 		assert.Nil(t, err)
-		assert.Equal(t, http.StatusOK, w.Code)
+		assert.Equal(t, http.StatusNoContent, w.Code)
 	})
 }
 
@@ -248,7 +248,7 @@ func TestLogOut(t *testing.T) {
 
 		err := handler.LogOut(w, req)
 		assert.NoError(t, err)
-		assert.Equal(t, http.StatusOK, w.Code)
+		assert.Equal(t, http.StatusNoContent, w.Code)
 
 		cookies := w.Result().Cookies()
 
@@ -395,7 +395,7 @@ func TestRemoveAvatar(t *testing.T) {
 
 		err := handler.RemoveAvatar(w, req)
 		assert.NoError(t, err)
-		assert.Equal(t, http.StatusOK, w.Code)
+		assert.Equal(t, http.StatusNoContent, w.Code)
 	})
 
 	t.Run("Conflict", func(t *testing.T) {

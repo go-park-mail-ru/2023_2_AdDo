@@ -64,7 +64,7 @@ func TestListen(t *testing.T) {
 		err = handler.Listen(w, req)
 
 		assert.Nil(t, err)
-		assert.Equal(t, http.StatusOK, w.Code)
+		assert.Equal(t, http.StatusNoContent, w.Code)
 	})
 }
 
@@ -116,6 +116,6 @@ func TestLike(t *testing.T) {
 		err = handler.Like(w, req)
 
 		assert.Nil(t, err)
-		assert.Equal(t, http.StatusOK, w.Code)
+		assert.Equal(t, http.StatusNoContent, w.Code)
 	})
 }
