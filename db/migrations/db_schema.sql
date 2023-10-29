@@ -49,6 +49,7 @@ create table if not exists track(
     -- аналогично с альбомом и исполнителем
     preview varchar(1024),
     content varchar(1024),
+    duration int not null,
     -- ссылка на объект в s3 хранилище довольно длинная, порядка пяти сотен символов
     play_count int not null default 0
 );
