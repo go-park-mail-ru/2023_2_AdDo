@@ -1,6 +1,24 @@
 {
   "artists": [
     {
+      "artist_name": "1oveboi",
+      "albums": [
+        {
+          "album_name": "1ove club",
+          "album_release_date": "2023-06-23",
+          "tracks": [
+            "intro",
+            "love is....",
+            "alaska",
+            "no excuses",
+            "такси",
+            "outro",
+            "babyyyy"
+          ]
+        }
+      ]
+    },
+    {
       "artist_name": "Doja Cat",
       "albums": [
         {
@@ -11,7 +29,7 @@
             "Agora Hills",
             "Attention",
             "Balut",
-            "Can't Wait.mp3",
+            "Can't Wait",
             "Demons",
             "Fuck The Girls",
             "Go Off",
