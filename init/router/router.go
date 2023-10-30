@@ -8,9 +8,12 @@ import (
 	httpSwagger "github.com/swaggo/http-swagger/v2"
 	_ "main/api/openapi"
 	"main/internal/common/handler"
-	"main/internal/common/middleware"
+	"main/internal/common/middleware/common"
+	modify_playlist "main/internal/common/middleware/playlist_middleware/modify"
+	read_playlist "main/internal/common/middleware/playlist_middleware/read"
 	album_delivery "main/internal/pkg/album/delivery/http"
 	artist_delivery "main/internal/pkg/artist/delivery/http"
+	"main/internal/pkg/playlist"
 	playlist_delivery "main/internal/pkg/playlist/delivery/http"
 	"main/internal/pkg/session"
 	track_delivery "main/internal/pkg/track/delivery/http"
@@ -41,19 +44,20 @@ import (
 
 // @host		musicon.space
 // @BasePath	/api/v1
-func New(userHandler user_delivery.UserHandler, trackHandler track_delivery.TrackHandler, artistHandler artist_delivery.ArtistHandler, albumHandler album_delivery.AlbumHandler, playlistHandler playlist_delivery.Handler, logger *logrus.Logger) http.Handler {
+func New(playlistUseCase playlist.UseCase, sessionUseCase session.UseCase, userHandler user_delivery.UserHandler, trackHandler track_delivery.TrackHandler, artistHandler artist_delivery.ArtistHandler, albumHandler album_delivery.AlbumHandler, playlistHandler playlist_delivery.Handler, logger *logrus.Logger) http.Handler {
 	router := mux.NewRouter()
 
+	playlistRouterModify := router.PathPrefix("").Subrouter()
+	playlistRouterRead := router.PathPrefix("").Subrouter()
+
 	router.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
+
 	router.Handle("/api/v1/sign_up", common_handler.Handler{H: userHandler.SignUp}).Methods("POST")
 	router.Handle("/api/v1/login", common_handler.Handler{H: userHandler.Login}).Methods("POST")
 	router.Handle("/api/v1/update_info", common_handler.Handler{H: userHandler.UpdateUserInfo}).Methods("PUT")
 	router.Handle("/api/v1/logout", common_handler.Handler{H: userHandler.LogOut}).Methods("POST")
 
 	router.Handle("/api/v1/playlist", common_handler.Handler{H: playlistHandler.Create}).Methods("POST")
-	router.Handle("/api/v1/playlist/{id}", common_handler.Handler{H: playlistHandler.Delete}).Methods("DELETE")
-	router.Handle("/api/v1/add_track", common_handler.Handler{H: playlistHandler.AddTrack}).Methods("POST")
-	router.Handle("/api/v1/remove_track", common_handler.Handler{H: playlistHandler.RemoveTrack}).Methods("DELETE")
 
 	router.Handle("/api/v1/auth", common_handler.Handler{H: userHandler.Auth}).Methods("GET")
 	router.Handle("/api/v1/me", common_handler.Handler{H: userHandler.Me}).Methods("GET")
@@ -65,16 +69,29 @@ func New(userHandler user_delivery.UserHandler, trackHandler track_delivery.Trac
 
 	router.Handle("/api/v1/artist/{id}", common_handler.Handler{H: artistHandler.ArtistInfo}).Methods("GET")
 	router.Handle("/api/v1/album/{id}", common_handler.Handler{H: albumHandler.AlbumTracks}).Methods("GET")
-	router.Handle("/api/v1/playlist{id}", common_handler.Handler{H: playlistHandler.Get}).Methods("POST")
 
 	router.Handle("/api/v1/feed", common_handler.Handler{H: albumHandler.Feed}).Methods("GET")
 	router.Handle("/api/v1/new", common_handler.Handler{H: albumHandler.New}).Methods("GET")
 	router.Handle("/api/v1/most_liked", common_handler.Handler{H: albumHandler.MostLiked}).Methods("GET")
 	router.Handle("/api/v1/popular", common_handler.Handler{H: albumHandler.Popular}).Methods("GET")
 
-	router.Handle("/api/v1/playlist/{id}", common_handler.Handler{H: playlistHandler.UpdatePreview}).Methods("POST")
 	router.Handle("/api/v1/upload_avatar", common_handler.Handler{H: userHandler.UploadAvatar}).Methods("POST")
 	router.Handle("/api/v1/remove_avatar", common_handler.Handler{H: userHandler.RemoveAvatar}).Methods("POST")
+
+	playlistRouterModify.Handle("/api/v1/playlist/{id}", common_handler.Handler{H: playlistHandler.Delete}).Methods("DELETE")
+	playlistRouterModify.Handle("/api/v1/playlist/{id}/add_track", common_handler.Handler{H: playlistHandler.AddTrack}).Methods("POST")
+	playlistRouterModify.Handle("/api/v1/playlist/{id}/remove_track", common_handler.Handler{H: playlistHandler.RemoveTrack}).Methods("DELETE")
+	playlistRouterModify.Handle("/api/v1/playlist/{id}/make_private", common_handler.Handler{H: playlistHandler.MakePrivate}).Methods("PUT")
+	playlistRouterModify.Handle("/api/v1/playlist/{id}/make_public", common_handler.Handler{H: playlistHandler.MakePublic}).Methods("PUT")
+	playlistRouterModify.Handle("/api/v1/playlist/{id}/update_preview", common_handler.Handler{H: playlistHandler.UpdatePreview}).Methods("POST")
+
+	playlistRouterRead.Handle("/api/v1/playlist/{id}", common_handler.Handler{H: playlistHandler.Get}).Methods("POST")
+
+	modifyPlaylistMiddleware := modify_playlist.NewMiddleware(playlistUseCase, sessionUseCase, logger)
+	readPlaylistMiddleware := read_playlist.NewMiddleware(playlistUseCase, logger)
+
+	playlistRouterModify.Use(modifyPlaylistMiddleware.ModifyPlaylistAccess)
+	playlistRouterRead.Use(readPlaylistMiddleware.ReadPlaylistAccess)
 
 	corsMiddleware := handlers.CORS(
 		handlers.AllowedOrigins([]string{"http://82.146.45.164:8081"}),
@@ -95,16 +112,11 @@ func New(userHandler user_delivery.UserHandler, trackHandler track_delivery.Trac
 	)
 	router.Use(corsMiddleware, csrfMiddleware)
 
-	routerWithMiddleware := common_middleware.Logging(router, logger)
-	routerWithMiddleware = common_middleware.PanicRecovery(routerWithMiddleware, logger)
+	routerWithMiddleware := common.Logging(router, logger)
+	routerWithMiddleware = common.PanicRecovery(routerWithMiddleware, logger)
 
 	return routerWithMiddleware
 }
 
-/// Todo Добавить мидлварь на проверку прав пользователя при работе с плейлистами, эти методы - методы юзкейса плейлистов
-/// Todo не забыть про артист нейм в респонсе треков от плейлиста
-
 /// Todo is_liked поле для треков: сходить в микрос юзеров и получить все его лайки
-/// Todo Собрать все это дело и запустить, сделать новый контейнер для картинок
-/// Todo удалить waiter-musicon из common-services
 /// Todo Протестировать весь функционал юнит и интеграционными тестами

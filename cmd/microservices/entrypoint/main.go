@@ -86,7 +86,7 @@ func main() {
 
 	logger.Infoln("Deliveries initialized")
 
-	router := router_init.New(userHandler, trackHandler, artistHandler, albumHandler, playlistHandler, logger)
+	router := router_init.New(&playlistAgent, &sessionAgent, userHandler, trackHandler, artistHandler, albumHandler, playlistHandler, logger)
 
 	logger.Fatalln(http.ListenAndServe(ServerPort, router))
 }

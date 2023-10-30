@@ -22,6 +22,7 @@ type Response struct {
 	Name     string `json:"Name" example:"PlaylistName"`
 	AuthorId string `json:"AuthorId" example:"sdfa-asdf-adsf"`
 	Preview  string `json:"Preview" example:"PlaylistPreview"`
+	IsYours  bool   `json:"IsYours" example:"true"`
 	Tracks   []track.Response
 }
 
@@ -32,7 +33,7 @@ type ToTrackId struct {
 
 type UseCase interface {
 	Create(playlist Base) error
-	Get(playlistId uint64) (Response, error)
+	Get(userId string, playlistId uint64) (Response, error)
 	GetUserPlaylists(userId string) ([]Base, error)
 	AddTrack(playlistId, trackId uint64) error
 	Like(userId string, playlistId uint64) error
@@ -40,6 +41,10 @@ type UseCase interface {
 	UpdatePreview(playlistId uint64, src io.Reader, size int64) error
 	RemovePreview(playlistId uint64) error
 	DeleteById(playlistId uint64) error
+	HasModifyAccess(userId string, playlistId uint64) (bool, error)
+	HasReadAccess(playlistId uint64) (bool, error)
+	MakePrivate(playlistId uint64) error
+	MakePublic(playlistId uint64) error
 }
 
 type Repository interface {
@@ -52,4 +57,8 @@ type Repository interface {
 	RemovePreviewPath(ctx context.Context, playlistId uint64) (string, error)
 	Delete(ctx context.Context, playlistId uint64) error
 	CreateLike(ctx context.Context, userId string, playlistId uint64) error
+	IsCreator(ctx context.Context, userId string, playlistId uint64) (bool, error)
+	IsPrivate(ctx context.Context, playlistId uint64) (bool, error)
+	MakePublic(ctx context.Context, playlistId uint64) error
+	MakePrivate(ctx context.Context, playlistId uint64) error
 }

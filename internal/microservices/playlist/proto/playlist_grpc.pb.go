@@ -22,7 +22,7 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type PlaylistServiceClient interface {
 	Create(ctx context.Context, in *PlaylistBase, opts ...grpc.CallOption) (*empty.Empty, error)
-	Get(ctx context.Context, in *PlaylistId, opts ...grpc.CallOption) (*PlaylistResponse, error)
+	Get(ctx context.Context, in *PlaylistToUserId, opts ...grpc.CallOption) (*PlaylistResponse, error)
 	GetUserPlaylists(ctx context.Context, in *proto.UserId, opts ...grpc.CallOption) (*PlaylistsBase, error)
 	AddTrack(ctx context.Context, in *PlaylistToTrackId, opts ...grpc.CallOption) (*empty.Empty, error)
 	RemoveTrack(ctx context.Context, in *PlaylistToTrackId, opts ...grpc.CallOption) (*empty.Empty, error)
@@ -30,6 +30,10 @@ type PlaylistServiceClient interface {
 	RemovePreview(ctx context.Context, in *PlaylistId, opts ...grpc.CallOption) (*proto1.ImageUrl, error)
 	DeleteById(ctx context.Context, in *PlaylistId, opts ...grpc.CallOption) (*empty.Empty, error)
 	Like(ctx context.Context, in *PlaylistToUserId, opts ...grpc.CallOption) (*empty.Empty, error)
+	HasModifyAccess(ctx context.Context, in *PlaylistToUserId, opts ...grpc.CallOption) (*HasAccess, error)
+	HasReadAccess(ctx context.Context, in *PlaylistId, opts ...grpc.CallOption) (*HasAccess, error)
+	MakePrivate(ctx context.Context, in *PlaylistId, opts ...grpc.CallOption) (*empty.Empty, error)
+	MakePublic(ctx context.Context, in *PlaylistId, opts ...grpc.CallOption) (*empty.Empty, error)
 }
 
 type playlistServiceClient struct {
@@ -49,7 +53,7 @@ func (c *playlistServiceClient) Create(ctx context.Context, in *PlaylistBase, op
 	return out, nil
 }
 
-func (c *playlistServiceClient) Get(ctx context.Context, in *PlaylistId, opts ...grpc.CallOption) (*PlaylistResponse, error) {
+func (c *playlistServiceClient) Get(ctx context.Context, in *PlaylistToUserId, opts ...grpc.CallOption) (*PlaylistResponse, error) {
 	out := new(PlaylistResponse)
 	err := c.cc.Invoke(ctx, "/PlaylistService/Get", in, out, opts...)
 	if err != nil {
@@ -121,12 +125,48 @@ func (c *playlistServiceClient) Like(ctx context.Context, in *PlaylistToUserId, 
 	return out, nil
 }
 
+func (c *playlistServiceClient) HasModifyAccess(ctx context.Context, in *PlaylistToUserId, opts ...grpc.CallOption) (*HasAccess, error) {
+	out := new(HasAccess)
+	err := c.cc.Invoke(ctx, "/PlaylistService/HasModifyAccess", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *playlistServiceClient) HasReadAccess(ctx context.Context, in *PlaylistId, opts ...grpc.CallOption) (*HasAccess, error) {
+	out := new(HasAccess)
+	err := c.cc.Invoke(ctx, "/PlaylistService/HasReadAccess", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *playlistServiceClient) MakePrivate(ctx context.Context, in *PlaylistId, opts ...grpc.CallOption) (*empty.Empty, error) {
+	out := new(empty.Empty)
+	err := c.cc.Invoke(ctx, "/PlaylistService/MakePrivate", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *playlistServiceClient) MakePublic(ctx context.Context, in *PlaylistId, opts ...grpc.CallOption) (*empty.Empty, error) {
+	out := new(empty.Empty)
+	err := c.cc.Invoke(ctx, "/PlaylistService/MakePublic", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // PlaylistServiceServer is the server API for PlaylistService service.
 // All implementations must embed UnimplementedPlaylistServiceServer
 // for forward compatibility
 type PlaylistServiceServer interface {
 	Create(context.Context, *PlaylistBase) (*empty.Empty, error)
-	Get(context.Context, *PlaylistId) (*PlaylistResponse, error)
+	Get(context.Context, *PlaylistToUserId) (*PlaylistResponse, error)
 	GetUserPlaylists(context.Context, *proto.UserId) (*PlaylistsBase, error)
 	AddTrack(context.Context, *PlaylistToTrackId) (*empty.Empty, error)
 	RemoveTrack(context.Context, *PlaylistToTrackId) (*empty.Empty, error)
@@ -134,6 +174,10 @@ type PlaylistServiceServer interface {
 	RemovePreview(context.Context, *PlaylistId) (*proto1.ImageUrl, error)
 	DeleteById(context.Context, *PlaylistId) (*empty.Empty, error)
 	Like(context.Context, *PlaylistToUserId) (*empty.Empty, error)
+	HasModifyAccess(context.Context, *PlaylistToUserId) (*HasAccess, error)
+	HasReadAccess(context.Context, *PlaylistId) (*HasAccess, error)
+	MakePrivate(context.Context, *PlaylistId) (*empty.Empty, error)
+	MakePublic(context.Context, *PlaylistId) (*empty.Empty, error)
 	mustEmbedUnimplementedPlaylistServiceServer()
 }
 
@@ -144,7 +188,7 @@ type UnimplementedPlaylistServiceServer struct {
 func (UnimplementedPlaylistServiceServer) Create(context.Context, *PlaylistBase) (*empty.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Create not implemented")
 }
-func (UnimplementedPlaylistServiceServer) Get(context.Context, *PlaylistId) (*PlaylistResponse, error) {
+func (UnimplementedPlaylistServiceServer) Get(context.Context, *PlaylistToUserId) (*PlaylistResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Get not implemented")
 }
 func (UnimplementedPlaylistServiceServer) GetUserPlaylists(context.Context, *proto.UserId) (*PlaylistsBase, error) {
@@ -167,6 +211,18 @@ func (UnimplementedPlaylistServiceServer) DeleteById(context.Context, *PlaylistI
 }
 func (UnimplementedPlaylistServiceServer) Like(context.Context, *PlaylistToUserId) (*empty.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Like not implemented")
+}
+func (UnimplementedPlaylistServiceServer) HasModifyAccess(context.Context, *PlaylistToUserId) (*HasAccess, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method HasModifyAccess not implemented")
+}
+func (UnimplementedPlaylistServiceServer) HasReadAccess(context.Context, *PlaylistId) (*HasAccess, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method HasReadAccess not implemented")
+}
+func (UnimplementedPlaylistServiceServer) MakePrivate(context.Context, *PlaylistId) (*empty.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method MakePrivate not implemented")
+}
+func (UnimplementedPlaylistServiceServer) MakePublic(context.Context, *PlaylistId) (*empty.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method MakePublic not implemented")
 }
 func (UnimplementedPlaylistServiceServer) mustEmbedUnimplementedPlaylistServiceServer() {}
 
@@ -200,7 +256,7 @@ func _PlaylistService_Create_Handler(srv interface{}, ctx context.Context, dec f
 }
 
 func _PlaylistService_Get_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(PlaylistId)
+	in := new(PlaylistToUserId)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -212,7 +268,7 @@ func _PlaylistService_Get_Handler(srv interface{}, ctx context.Context, dec func
 		FullMethod: "/PlaylistService/Get",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PlaylistServiceServer).Get(ctx, req.(*PlaylistId))
+		return srv.(PlaylistServiceServer).Get(ctx, req.(*PlaylistToUserId))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -343,6 +399,78 @@ func _PlaylistService_Like_Handler(srv interface{}, ctx context.Context, dec fun
 	return interceptor(ctx, in, info, handler)
 }
 
+func _PlaylistService_HasModifyAccess_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PlaylistToUserId)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlaylistServiceServer).HasModifyAccess(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/PlaylistService/HasModifyAccess",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlaylistServiceServer).HasModifyAccess(ctx, req.(*PlaylistToUserId))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PlaylistService_HasReadAccess_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PlaylistId)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlaylistServiceServer).HasReadAccess(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/PlaylistService/HasReadAccess",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlaylistServiceServer).HasReadAccess(ctx, req.(*PlaylistId))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PlaylistService_MakePrivate_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PlaylistId)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlaylistServiceServer).MakePrivate(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/PlaylistService/MakePrivate",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlaylistServiceServer).MakePrivate(ctx, req.(*PlaylistId))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PlaylistService_MakePublic_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PlaylistId)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlaylistServiceServer).MakePublic(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/PlaylistService/MakePublic",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlaylistServiceServer).MakePublic(ctx, req.(*PlaylistId))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // PlaylistService_ServiceDesc is the grpc.ServiceDesc for PlaylistService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -385,6 +513,22 @@ var PlaylistService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Like",
 			Handler:    _PlaylistService_Like_Handler,
+		},
+		{
+			MethodName: "HasModifyAccess",
+			Handler:    _PlaylistService_HasModifyAccess_Handler,
+		},
+		{
+			MethodName: "HasReadAccess",
+			Handler:    _PlaylistService_HasReadAccess_Handler,
+		},
+		{
+			MethodName: "MakePrivate",
+			Handler:    _PlaylistService_MakePrivate_Handler,
+		},
+		{
+			MethodName: "MakePublic",
+			Handler:    _PlaylistService_MakePublic_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

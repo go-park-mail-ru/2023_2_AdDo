@@ -192,3 +192,75 @@ func (p *Postgres) CreateLike(ctx context.Context, userId string, playlistId uin
 
 	return nil
 }
+
+func (p *Postgres) IsCreator(ctx context.Context, userId string, playlistId uint64) (bool, error) {
+	p.logger.Infoln("Album Repo IsCreator entered")
+
+	var creatorId string
+	query := "select creator_id from playlist where id = $1"
+	err := p.Pool.QueryRow(context.Background(), query, userId, playlistId).Scan(&creatorId)
+	if err != nil {
+		p.logger.WithFields(logrus.Fields{
+			"err":         err,
+			"playlist Id": playlistId,
+			"query":       query,
+		}).Errorln("getting creator error")
+		return false, err
+	}
+	p.logger.Infoln("Got creatorId")
+
+	return creatorId == userId, nil
+}
+
+func (p *Postgres) IsPrivate(ctx context.Context, playlistId uint64) (bool, error) {
+	p.logger.Infoln("Album Repo IsPrivate entered")
+
+	var isPrivate bool
+	query := "select is_private from playlist where id = $1"
+	err := p.Pool.QueryRow(context.Background(), query, playlistId).Scan(&isPrivate)
+	if err != nil {
+		p.logger.WithFields(logrus.Fields{
+			"err":         err,
+			"playlist Id": playlistId,
+			"query":       query,
+		}).Errorln("getting is_private error")
+		return false, err
+	}
+	p.logger.Infoln("Got isPrivate")
+
+	return isPrivate, nil
+}
+
+func (p *Postgres) MakePublic(ctx context.Context, playlistId uint64) error {
+	p.logger.Infoln("Album Repo MakePublic entered")
+
+	query := "update playlist set is_private = false where id = $1"
+	_, err := p.Pool.Exec(context.Background(), query, playlistId)
+	if err != nil {
+		p.logger.WithFields(logrus.Fields{
+			"err":         err,
+			"playlist Id": playlistId,
+			"query":       query,
+		}).Errorln("updating is_private error")
+		return err
+	}
+
+	return nil
+}
+
+func (p *Postgres) MakePrivate(ctx context.Context, playlistId uint64) error {
+	p.logger.Infoln("Album Repo MakePrivate entered")
+
+	query := "update playlist set is_private = true where id = $1"
+	_, err := p.Pool.Exec(context.Background(), query, playlistId)
+	if err != nil {
+		p.logger.WithFields(logrus.Fields{
+			"err":         err,
+			"playlist Id": playlistId,
+			"query":       query,
+		}).Errorln("updating is_private error")
+		return err
+	}
+
+	return nil
+}
