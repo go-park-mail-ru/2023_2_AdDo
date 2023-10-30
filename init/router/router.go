@@ -11,6 +11,7 @@ import (
 	"main/internal/common/middleware"
 	album_delivery "main/internal/pkg/album/delivery/http"
 	artist_delivery "main/internal/pkg/artist/delivery/http"
+	playlist_delivery "main/internal/pkg/playlist/delivery/http"
 	"main/internal/pkg/session"
 	track_delivery "main/internal/pkg/track/delivery/http"
 	user_delivery "main/internal/pkg/user/delivery/http"
@@ -40,7 +41,7 @@ import (
 
 // @host		musicon.space
 // @BasePath	/api/v1
-func New(userHandler user_delivery.UserHandler, trackHandler track_delivery.TrackHandler, artistHandler artist_delivery.ArtistHandler, albumHandler album_delivery.AlbumHandler, logger *logrus.Logger) http.Handler {
+func New(userHandler user_delivery.UserHandler, trackHandler track_delivery.TrackHandler, artistHandler artist_delivery.ArtistHandler, albumHandler album_delivery.AlbumHandler, playlistHandler playlist_delivery.Handler, logger *logrus.Logger) http.Handler {
 	router := mux.NewRouter()
 
 	router.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
@@ -49,21 +50,29 @@ func New(userHandler user_delivery.UserHandler, trackHandler track_delivery.Trac
 	router.Handle("/api/v1/update_info", common_handler.Handler{H: userHandler.UpdateUserInfo}).Methods("PUT")
 	router.Handle("/api/v1/logout", common_handler.Handler{H: userHandler.LogOut}).Methods("POST")
 
+	router.Handle("/api/v1/playlist", common_handler.Handler{H: playlistHandler.Create}).Methods("POST")
+	router.Handle("/api/v1/playlist/{id}", common_handler.Handler{H: playlistHandler.Delete}).Methods("DELETE")
+	router.Handle("/api/v1/add_track", common_handler.Handler{H: playlistHandler.AddTrack}).Methods("POST")
+	router.Handle("/api/v1/remove_track", common_handler.Handler{H: playlistHandler.RemoveTrack}).Methods("DELETE")
+
 	router.Handle("/api/v1/auth", common_handler.Handler{H: userHandler.Auth}).Methods("GET")
 	router.Handle("/api/v1/me", common_handler.Handler{H: userHandler.Me}).Methods("GET")
 
 	router.Handle("/api/v1/listen", common_handler.Handler{H: trackHandler.Listen}).Methods("POST")
 	router.Handle("/api/v1/like_track", common_handler.Handler{H: trackHandler.Like}).Methods("POST")
 	router.Handle("/api/v1/like_album", common_handler.Handler{H: albumHandler.Like}).Methods("POST")
+	router.Handle("/api/v1/like_playlist", common_handler.Handler{H: playlistHandler.Like}).Methods("POST")
 
 	router.Handle("/api/v1/artist/{id}", common_handler.Handler{H: artistHandler.ArtistInfo}).Methods("GET")
 	router.Handle("/api/v1/album/{id}", common_handler.Handler{H: albumHandler.AlbumTracks}).Methods("GET")
+	router.Handle("/api/v1/playlist{id}", common_handler.Handler{H: playlistHandler.Get}).Methods("POST")
 
 	router.Handle("/api/v1/feed", common_handler.Handler{H: albumHandler.Feed}).Methods("GET")
 	router.Handle("/api/v1/new", common_handler.Handler{H: albumHandler.New}).Methods("GET")
 	router.Handle("/api/v1/most_liked", common_handler.Handler{H: albumHandler.MostLiked}).Methods("GET")
 	router.Handle("/api/v1/popular", common_handler.Handler{H: albumHandler.Popular}).Methods("GET")
 
+	router.Handle("/api/v1/playlist/{id}", common_handler.Handler{H: playlistHandler.UpdatePreview}).Methods("POST")
 	router.Handle("/api/v1/upload_avatar", common_handler.Handler{H: userHandler.UploadAvatar}).Methods("POST")
 	router.Handle("/api/v1/remove_avatar", common_handler.Handler{H: userHandler.RemoveAvatar}).Methods("POST")
 
@@ -92,10 +101,11 @@ func New(userHandler user_delivery.UserHandler, trackHandler track_delivery.Trac
 	return routerWithMiddleware
 }
 
-/// TODO
-/// Todo Переписать логику взаимодействия юзера с картинками, добавить картинки для плейлистов, и метод удаления трека
-/// Todo Добавить в документацию новые ручки, добавить их в роутер
+/// Todo Написать новые ручки для плейлиста, добавить их в роутер
 /// Todo Добавить мидлварь на проверку прав пользователя при работе с плейлистами, эти методы - методы юзкейса плейлистов
-/// Todo Протестировать весь функционал юнит и интеграционными тестами
 /// Todo не забыть про артист нейм в респонсе треков от плейлиста
+
 /// Todo is_liked поле для треков: сходить в микрос юзеров и получить все его лайки
+/// Todo Собрать все это дело и запустить, сделать новый контейнер для картинок
+
+/// Todo Протестировать весь функционал юнит и интеграционными тестами

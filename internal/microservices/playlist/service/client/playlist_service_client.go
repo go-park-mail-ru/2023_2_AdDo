@@ -141,3 +141,14 @@ func (c *Client) DeleteById(playlistId uint64) error {
 
 	return nil
 }
+
+func (c *Client) Like(userId string, playlistId uint64) error {
+	c.logger.Infoln("Client to Playlist Micros Like entered")
+
+	_, err := c.playlistManager.Like(context.Background(), &playlist_proto.PlaylistToUserId{UserId: userId, PlaylistId: playlistId})
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

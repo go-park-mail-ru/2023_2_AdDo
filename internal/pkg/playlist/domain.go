@@ -6,6 +6,10 @@ import (
 	"main/internal/pkg/track"
 )
 
+type Id struct {
+	Id uint64 `json:"Id" example:"1"`
+}
+
 type Base struct {
 	Id       uint64 `json:"Id" example:"1"`
 	Name     string `json:"Name" example:"PlaylistName"`
@@ -31,6 +35,7 @@ type UseCase interface {
 	Get(playlistId uint64) (Response, error)
 	GetUserPlaylists(userId string) ([]Base, error)
 	AddTrack(playlistId, trackId uint64) error
+	Like(userId string, playlistId uint64) error
 	RemoveTrack(playlistId, trackId uint64) error
 	UpdatePreview(playlistId uint64, src io.Reader, size int64) error
 	RemovePreview(playlistId uint64) error
@@ -46,4 +51,5 @@ type Repository interface {
 	UpdateImage(ctx context.Context, playlistId uint64, image string) error
 	RemovePreviewPath(ctx context.Context, playlistId uint64) (string, error)
 	Delete(ctx context.Context, playlistId uint64) error
+	CreateLike(ctx context.Context, userId string, playlistId uint64) error
 }

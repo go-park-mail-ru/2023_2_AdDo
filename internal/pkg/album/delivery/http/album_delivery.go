@@ -186,7 +186,7 @@ func (handler *AlbumHandler) Like(w http.ResponseWriter, r *http.Request) error 
 		"request_id": utils.GenReqId(r.RequestURI + r.Method),
 	}).Infoln("Like Handler entered")
 
-	var albumId track.Id
+	var albumId album.Id
 	if err := json.NewDecoder(r.Body).Decode(&albumId); err != nil {
 		return common_handler.StatusError{Code: http.StatusBadRequest, Err: err}
 	}
