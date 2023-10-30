@@ -105,6 +105,23 @@ func (p *Postgres) AddTrack(ctx context.Context, playlistId, trackId uint64) err
 	return nil
 }
 
+func (p *Postgres) RemoveTrack(ctx context.Context, playlistId, trackId uint64) error {
+	p.logger.Infoln("Playlist Repo RemoveTrack entered")
+
+	query := "delete from playlist_track where playlist_id = $1 and track_id = $2"
+	_, err := p.Pool.Exec(ctx, query, playlistId, trackId)
+	if err != nil {
+		p.logger.WithFields(logrus.Fields{
+			"error":       err,
+			"playlist id": playlistId,
+			"track id":    trackId,
+			"query":       query,
+		}).Errorln("error while removing track into playlist")
+	}
+
+	return nil
+}
+
 func (p *Postgres) UpdateImage(ctx context.Context, playlistId uint64, image string) error {
 	p.logger.Infoln("Playlist Repo UpdateImage entered")
 
@@ -123,6 +140,24 @@ func (p *Postgres) UpdateImage(ctx context.Context, playlistId uint64, image str
 	return nil
 }
 
+func (p *Postgres) RemovePreviewPath(ctx context.Context, playlistId uint64) (string, error) {
+	p.logger.Infoln("Playlist Repo UpdateImage entered")
+
+	query := "update playlist set preview = null where id = $1 returning preview"
+	result, err := p.Pool.Exec(ctx, query, playlistId)
+	if err != nil {
+		p.logger.WithFields(logrus.Fields{
+			"error":       err,
+			"playlist id": playlistId,
+			"image":       result.String(),
+			"query":       query,
+		}).Errorln("error while updating image into playlist")
+		return "", err
+	}
+
+	return result.String(), nil
+}
+
 func (p *Postgres) Delete(ctx context.Context, playlistId uint64) error {
 	p.logger.Infoln("Playlist Repo Delete entered")
 
@@ -139,11 +174,3 @@ func (p *Postgres) Delete(ctx context.Context, playlistId uint64) error {
 
 	return nil
 }
-
-//type Repository interface {
-//	Create(playlist Base) error
-//	Get(playlistId uint64) (Base, error)
-//	AddTrack(playlistId, trackId uint64) error
-//	UpdateImage(playlistId, image string) error
-//	Delete(playlistId uint64) error
-//}

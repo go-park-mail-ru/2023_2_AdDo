@@ -57,7 +57,7 @@ func (db *Postgres) GetById(id string) (user_domain.User, error) {
 
 	user.BirthDate = dt.Time.Format("2006-01-02")
 	user.Avatar = avatar.String
-	db.logger.Infoln("birthday and avatar formatted")
+	db.logger.Infoln("birthday and image formatted")
 
 	return user, err
 }
@@ -90,7 +90,7 @@ func (db *Postgres) UpdateAvatarPath(userId string, path string) error {
 			"err":   err,
 			"path":  path,
 			"query": query,
-		}).Errorln("avatar updating failed")
+		}).Errorln("image updating failed")
 		return err
 	}
 
@@ -117,14 +117,15 @@ func (db *Postgres) GetAvatarPath(userId string) (string, error) {
 	return "", nil
 }
 
-func (db *Postgres) RemoveAvatarPath(userId string) error {
-	query := "update profile set avatar_url = null where id = $1"
-	_, err := db.Pool.Exec(context.Background(), query, userId)
+func (db *Postgres) RemoveAvatarPath(userId string) (string, error) {
+	query := "update profile set avatar_url = null where id = $1 returning avatar_url"
+	result, err := db.Pool.Exec(context.Background(), query, userId)
 	if err != nil {
-		return err
+		return "", err
 	}
+	db.logger.Infoln("Avatar removed", result.String())
 
-	return nil
+	return result.String(), nil
 }
 
 func (db *Postgres) UpdateUserInfo(user user_domain.User) error {

@@ -8,6 +8,7 @@ import (
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
+	proto1 "main/internal/microservices/image/proto"
 	proto "main/internal/microservices/session/proto"
 )
 
@@ -24,7 +25,9 @@ type PlaylistServiceClient interface {
 	Get(ctx context.Context, in *PlaylistId, opts ...grpc.CallOption) (*PlaylistResponse, error)
 	GetUserPlaylists(ctx context.Context, in *proto.UserId, opts ...grpc.CallOption) (*PlaylistsBase, error)
 	AddTrack(ctx context.Context, in *PlaylistToTrackId, opts ...grpc.CallOption) (*empty.Empty, error)
+	RemoveTrack(ctx context.Context, in *PlaylistToTrackId, opts ...grpc.CallOption) (*empty.Empty, error)
 	UpdatePreview(ctx context.Context, in *PlaylistIdToImageUrl, opts ...grpc.CallOption) (*empty.Empty, error)
+	RemovePreview(ctx context.Context, in *PlaylistId, opts ...grpc.CallOption) (*proto1.ImageUrl, error)
 	DeleteById(ctx context.Context, in *PlaylistId, opts ...grpc.CallOption) (*empty.Empty, error)
 }
 
@@ -72,9 +75,27 @@ func (c *playlistServiceClient) AddTrack(ctx context.Context, in *PlaylistToTrac
 	return out, nil
 }
 
+func (c *playlistServiceClient) RemoveTrack(ctx context.Context, in *PlaylistToTrackId, opts ...grpc.CallOption) (*empty.Empty, error) {
+	out := new(empty.Empty)
+	err := c.cc.Invoke(ctx, "/PlaylistService/RemoveTrack", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *playlistServiceClient) UpdatePreview(ctx context.Context, in *PlaylistIdToImageUrl, opts ...grpc.CallOption) (*empty.Empty, error) {
 	out := new(empty.Empty)
 	err := c.cc.Invoke(ctx, "/PlaylistService/UpdatePreview", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *playlistServiceClient) RemovePreview(ctx context.Context, in *PlaylistId, opts ...grpc.CallOption) (*proto1.ImageUrl, error) {
+	out := new(proto1.ImageUrl)
+	err := c.cc.Invoke(ctx, "/PlaylistService/RemovePreview", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -98,7 +119,9 @@ type PlaylistServiceServer interface {
 	Get(context.Context, *PlaylistId) (*PlaylistResponse, error)
 	GetUserPlaylists(context.Context, *proto.UserId) (*PlaylistsBase, error)
 	AddTrack(context.Context, *PlaylistToTrackId) (*empty.Empty, error)
+	RemoveTrack(context.Context, *PlaylistToTrackId) (*empty.Empty, error)
 	UpdatePreview(context.Context, *PlaylistIdToImageUrl) (*empty.Empty, error)
+	RemovePreview(context.Context, *PlaylistId) (*proto1.ImageUrl, error)
 	DeleteById(context.Context, *PlaylistId) (*empty.Empty, error)
 	mustEmbedUnimplementedPlaylistServiceServer()
 }
@@ -119,8 +142,14 @@ func (UnimplementedPlaylistServiceServer) GetUserPlaylists(context.Context, *pro
 func (UnimplementedPlaylistServiceServer) AddTrack(context.Context, *PlaylistToTrackId) (*empty.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AddTrack not implemented")
 }
+func (UnimplementedPlaylistServiceServer) RemoveTrack(context.Context, *PlaylistToTrackId) (*empty.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RemoveTrack not implemented")
+}
 func (UnimplementedPlaylistServiceServer) UpdatePreview(context.Context, *PlaylistIdToImageUrl) (*empty.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdatePreview not implemented")
+}
+func (UnimplementedPlaylistServiceServer) RemovePreview(context.Context, *PlaylistId) (*proto1.ImageUrl, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RemovePreview not implemented")
 }
 func (UnimplementedPlaylistServiceServer) DeleteById(context.Context, *PlaylistId) (*empty.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteById not implemented")
@@ -210,6 +239,24 @@ func _PlaylistService_AddTrack_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
+func _PlaylistService_RemoveTrack_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PlaylistToTrackId)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlaylistServiceServer).RemoveTrack(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/PlaylistService/RemoveTrack",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlaylistServiceServer).RemoveTrack(ctx, req.(*PlaylistToTrackId))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _PlaylistService_UpdatePreview_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(PlaylistIdToImageUrl)
 	if err := dec(in); err != nil {
@@ -224,6 +271,24 @@ func _PlaylistService_UpdatePreview_Handler(srv interface{}, ctx context.Context
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(PlaylistServiceServer).UpdatePreview(ctx, req.(*PlaylistIdToImageUrl))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PlaylistService_RemovePreview_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PlaylistId)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlaylistServiceServer).RemovePreview(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/PlaylistService/RemovePreview",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlaylistServiceServer).RemovePreview(ctx, req.(*PlaylistId))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -270,8 +335,16 @@ var PlaylistService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _PlaylistService_AddTrack_Handler,
 		},
 		{
+			MethodName: "RemoveTrack",
+			Handler:    _PlaylistService_RemoveTrack_Handler,
+		},
+		{
 			MethodName: "UpdatePreview",
 			Handler:    _PlaylistService_UpdatePreview_Handler,
+		},
+		{
+			MethodName: "RemovePreview",
+			Handler:    _PlaylistService_RemovePreview_Handler,
 		},
 		{
 			MethodName: "DeleteById",

@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/sirupsen/logrus"
 	"io"
+	grpc_image "main/internal/microservices/image/service/client"
 	session_proto "main/internal/microservices/session/proto"
 	user_proto "main/internal/microservices/user/proto"
 	grpc_server_user "main/internal/microservices/user/service/server"
@@ -11,32 +12,16 @@ import (
 )
 
 type Client struct {
-	userClient user_proto.UserServiceClient
-	logger     *logrus.Logger
+	userClient  user_proto.UserServiceClient
+	imageClient grpc_image.Client
+	logger      *logrus.Logger
 }
 
-func NewClient(client user_proto.UserServiceClient, logger *logrus.Logger) Client {
+func NewClient(client user_proto.UserServiceClient, imageClient grpc_image.Client, logger *logrus.Logger) Client {
 	return Client{
-		userClient: client,
-		logger:     logger,
-	}
-}
-
-func SerializeAvatar(src io.Reader, size int64) *user_proto.Avatar {
-	data, err := io.ReadAll(src)
-	if err != nil {
-		return nil
-	}
-	return &user_proto.Avatar{
-		Data:   data,
-		Length: 0,
-	}
-}
-
-func SerializeUserAvatar(userId string, src io.Reader, size int64) *user_proto.UserAvatar {
-	return &user_proto.UserAvatar{
-		Avatar: SerializeAvatar(src, size),
-		Id:     &session_proto.UserId{UserId: userId},
+		userClient:  client,
+		logger:      logger,
+		imageClient: imageClient,
 	}
 }
 
@@ -101,18 +86,39 @@ func (c *Client) Logout(sessionId string) error {
 func (c *Client) UploadAvatar(userId string, src io.Reader, size int64) (string, error) {
 	c.logger.Infoln("User grpc client UploadAvatar entered")
 
-	result, err := c.userClient.UploadAvatar(context.Background(), SerializeUserAvatar(userId, src, size))
+	avatarUrl, err := c.imageClient.UploadAvatar(src, size)
 	if err != nil {
 		return "", err
 	}
+	c.logger.Infoln("Image uploaded")
 
-	return result.GetUrl(), nil
+	_, err = c.userClient.UploadAvatar(context.Background(), &user_proto.ImageToUser{
+		Url: &user_proto.ImageUrl{Url: avatarUrl},
+		Id:  &session_proto.UserId{UserId: userId},
+	})
+	if err != nil {
+		return "", err
+	}
+	c.logger.Infoln("Avatar path add to db")
+
+	return avatarUrl, nil
 }
 
 func (c *Client) RemoveAvatar(userId string) error {
-	c.logger.Infoln("User grpc client UploadAvatar entered")
+	c.logger.Infoln("User grpc client RemoveAvatar entered")
 
-	_, err := c.userClient.RemoveAvatar(context.Background(), &session_proto.UserId{UserId: userId})
+	avatarUrl, err := c.userClient.RemoveAvatar(context.Background(), &session_proto.UserId{UserId: userId})
+	if err != nil {
+		return err
+	}
+	c.logger.Infoln("avatar removed", avatarUrl.GetUrl())
+
+	err = c.imageClient.RemoveImage(avatarUrl.GetUrl())
+	if err != nil {
+		return err
+	}
+	c.logger.Infoln("image removed")
+
 	if err != nil {
 		return err
 	}

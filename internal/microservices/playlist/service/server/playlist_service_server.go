@@ -5,6 +5,7 @@ import (
 	google_proto "github.com/golang/protobuf/ptypes/empty"
 	"github.com/sirupsen/logrus"
 	grpc_album_server "main/internal/microservices/album/service/server"
+	image_proto "main/internal/microservices/image/proto"
 	playlist_proto "main/internal/microservices/playlist/proto"
 	session_proto "main/internal/microservices/session/proto"
 	"main/internal/pkg/playlist"
@@ -119,16 +120,40 @@ func (pm *PlaylistManager) AddTrack(ctx context.Context, in *playlist_proto.Play
 	return &google_proto.Empty{}, nil
 }
 
+func (pm *PlaylistManager) RemoveTrack(ctx context.Context, in *playlist_proto.PlaylistToTrackId) (*google_proto.Empty, error) {
+	pm.logger.Infoln("Playlist Service RemoveTrack Method entered")
+
+	err := pm.repoPlaylist.RemoveTrack(ctx, in.GetPlaylistId(), in.GetTrackId())
+	if err != nil {
+		return nil, err
+	}
+	pm.logger.Infoln("TrackRemoved")
+
+	return &google_proto.Empty{}, nil
+}
+
 func (pm *PlaylistManager) UpdatePreview(ctx context.Context, in *playlist_proto.PlaylistIdToImageUrl) (*google_proto.Empty, error) {
 	pm.logger.Infoln("Playlist Service UpdatePreview Method entered")
 
-	err := pm.repoPlaylist.UpdateImage(ctx, in.GetId(), in.GetImage())
+	err := pm.repoPlaylist.UpdateImage(ctx, in.GetId(), in.GetUrl().GetUrl())
 	if err != nil {
 		return nil, err
 	}
 	pm.logger.Infoln("Photo Updated")
 
 	return &google_proto.Empty{}, nil
+}
+
+func (pm *PlaylistManager) RemovePreview(ctx context.Context, in *playlist_proto.PlaylistId) (*image_proto.ImageUrl, error) {
+	pm.logger.Infoln("Playlist Service RemovePreview Method entered")
+
+	avatarPath, err := pm.repoPlaylist.RemovePreviewPath(ctx, in.GetId())
+	if err != nil {
+		return nil, err
+	}
+	pm.logger.Infoln("Preview removed")
+
+	return &image_proto.ImageUrl{Url: avatarPath}, nil
 }
 
 func (pm *PlaylistManager) DeleteById(ctx context.Context, in *playlist_proto.PlaylistId) (*google_proto.Empty, error) {

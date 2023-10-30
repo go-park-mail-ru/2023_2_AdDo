@@ -1,10 +1,10 @@
-package avatar_repository
+package image_repository
 
 import (
 	"context"
 	"fmt"
 	minio_init "main/init/minio"
-	avatar_domain "main/internal/pkg/avatar"
+	avatar_domain "main/internal/pkg/image"
 	"path/filepath"
 
 	"github.com/minio/minio-go/v7"
@@ -18,15 +18,15 @@ func NewMinio(client *minio.Client) Minio {
 	return Minio{client: client}
 }
 
-func (mn Minio) UploadAvatar(avatar avatar_domain.Avatar) (string, error) {
+func (mn Minio) UploadAvatar(avatar avatar_domain.Base) (string, error) {
 	return mn.create(avatar, minio_init.UserAvatarBucketName)
 }
 
-func (mn Minio) UploadPlaylistImage(avatar avatar_domain.Avatar) (string, error) {
+func (mn Minio) UploadPlaylistImage(avatar avatar_domain.Base) (string, error) {
 	return mn.create(avatar, minio_init.PlaylistImageBucketName)
 }
 
-func (mn Minio) create(avatar avatar_domain.Avatar, bucketName string) (string, error) {
+func (mn Minio) create(avatar avatar_domain.Base, bucketName string) (string, error) {
 	_, err := mn.client.PutObject(
 		context.Background(),
 		minio_init.UserAvatarBucketName,

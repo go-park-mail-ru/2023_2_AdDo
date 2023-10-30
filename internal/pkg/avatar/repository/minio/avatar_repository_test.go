@@ -1,2 +1,0 @@
-package avatar_repository
-

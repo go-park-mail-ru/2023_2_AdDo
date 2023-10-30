@@ -72,7 +72,7 @@ definitions:
   user_domain.UploadAvatarResponse:
     properties:
       AvatarUrl:
-        example: /user-avatar/avatar.png
+        example: /user-image/image.png
         type: string
     type: object
   user_domain.User:
@@ -432,7 +432,7 @@ paths:
       - album
   /remove_avatar:
     post:
-      description: Remove user avatar
+      description: Remove user image
       responses:
         "200":
           description: OK
@@ -496,9 +496,9 @@ paths:
       - user
   /upload_avatar:
     post:
-      description: Upload user avatar
+      description: Upload user image
       parameters:
-      - description: User avatar
+      - description: User image
         in: formData
         name: Avatar
         required: true

@@ -2,6 +2,7 @@ package playlist
 
 import (
 	"context"
+	"io"
 	"main/internal/pkg/track"
 )
 
@@ -20,12 +21,19 @@ type Response struct {
 	Tracks   []track.Response
 }
 
+type ToTrackId struct {
+	PlaylistId uint64 `json:"PlaylistId" example:"1"`
+	TrackId    uint64 `json:"TrackId" example:"1"`
+}
+
 type UseCase interface {
 	Create(playlist Base) error
 	Get(playlistId uint64) (Response, error)
 	GetUserPlaylists(userId string) ([]Base, error)
 	AddTrack(playlistId, trackId uint64) error
-	UpdatePreview(playlistId uint64, preview string) error
+	RemoveTrack(playlistId, trackId uint64) error
+	UpdatePreview(playlistId uint64, src io.Reader, size int64) error
+	RemovePreview(playlistId uint64) error
 	DeleteById(playlistId uint64) error
 }
 
@@ -34,6 +42,8 @@ type Repository interface {
 	Get(ctx context.Context, playlistId uint64) (Base, error)
 	GetByCreatorId(ctx context.Context, userId string) ([]Base, error)
 	AddTrack(ctx context.Context, playlistId, trackId uint64) error
+	RemoveTrack(ctx context.Context, playlistId, trackId uint64) error
 	UpdateImage(ctx context.Context, playlistId uint64, image string) error
+	RemovePreviewPath(ctx context.Context, playlistId uint64) (string, error)
 	Delete(ctx context.Context, playlistId uint64) error
 }
