@@ -10,7 +10,8 @@ import (
 	empty "github.com/golang/protobuf/ptypes/empty"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
-	proto "main/internal/microservices/session/proto"
+	proto "main/internal/microservices/image/proto"
+	proto1 "main/internal/microservices/session/proto"
 	reflect "reflect"
 	sync "sync"
 )
@@ -27,8 +28,8 @@ type ImageToUser struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Url *ImageUrl     `protobuf:"bytes,1,opt,name=url,proto3" json:"url,omitempty"`
-	Id  *proto.UserId `protobuf:"bytes,2,opt,name=id,proto3" json:"id,omitempty"`
+	Url *proto.ImageUrl `protobuf:"bytes,1,opt,name=url,proto3" json:"url,omitempty"`
+	Id  *proto1.UserId  `protobuf:"bytes,2,opt,name=id,proto3" json:"id,omitempty"`
 }
 
 func (x *ImageToUser) Reset() {
@@ -63,14 +64,14 @@ func (*ImageToUser) Descriptor() ([]byte, []int) {
 	return file_user_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *ImageToUser) GetUrl() *ImageUrl {
+func (x *ImageToUser) GetUrl() *proto.ImageUrl {
 	if x != nil {
 		return x.Url
 	}
 	return nil
 }
 
-func (x *ImageToUser) GetId() *proto.UserId {
+func (x *ImageToUser) GetId() *proto1.UserId {
 	if x != nil {
 		return x.Id
 	}
@@ -288,14 +289,14 @@ func file_user_proto_rawDescGZIP() []byte {
 
 var file_user_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
 var file_user_proto_goTypes = []interface{}{
-	(*ImageToUser)(nil),     // 0: ImageToUser
-	(*UserData)(nil),        // 1: UserData
-	(*UserCredentials)(nil), // 2: UserCredentials
-	(*ImageUrl)(nil),        // 3: ImageUrl
-	(*proto.UserId)(nil),    // 4: UserId
-	(*proto.SessionId)(nil), // 5: SessionId
-	(*empty.Empty)(nil),     // 6: google.protobuf.Empty
-	(*proto.Status)(nil),    // 7: Status
+	(*ImageToUser)(nil),      // 0: ImageToUser
+	(*UserData)(nil),         // 1: UserData
+	(*UserCredentials)(nil),  // 2: UserCredentials
+	(*proto.ImageUrl)(nil),   // 3: ImageUrl
+	(*proto1.UserId)(nil),    // 4: UserId
+	(*proto1.SessionId)(nil), // 5: SessionId
+	(*empty.Empty)(nil),      // 6: google.protobuf.Empty
+	(*proto1.Status)(nil),    // 7: Status
 }
 var file_user_proto_depIdxs = []int32{
 	3,  // 0: ImageToUser.url:type_name -> ImageUrl
@@ -328,7 +329,6 @@ func file_user_proto_init() {
 	if File_user_proto != nil {
 		return
 	}
-	file_image_proto_init()
 	if !protoimpl.UnsafeEnabled {
 		file_user_proto_msgTypes[0].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*ImageToUser); i {

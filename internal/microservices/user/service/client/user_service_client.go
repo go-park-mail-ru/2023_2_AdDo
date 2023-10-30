@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/sirupsen/logrus"
 	"io"
+	image_proto "main/internal/microservices/image/proto"
 	grpc_image "main/internal/microservices/image/service/client"
 	session_proto "main/internal/microservices/session/proto"
 	user_proto "main/internal/microservices/user/proto"
@@ -93,7 +94,7 @@ func (c *Client) UploadAvatar(userId string, src io.Reader, size int64) (string,
 	c.logger.Infoln("Image uploaded")
 
 	_, err = c.userClient.UploadAvatar(context.Background(), &user_proto.ImageToUser{
-		Url: &user_proto.ImageUrl{Url: avatarUrl},
+		Url: &image_proto.ImageUrl{Url: avatarUrl},
 		Id:  &session_proto.UserId{UserId: userId},
 	})
 	if err != nil {
