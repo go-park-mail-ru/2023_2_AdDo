@@ -3,7 +3,7 @@ package user_usecase
 import (
 	"github.com/sirupsen/logrus"
 	"io"
-	avatar_domain "main/internal/pkg/avatar"
+	avatar_domain "main/internal/pkg/image"
 	"main/internal/pkg/session"
 	user_domain "main/internal/pkg/user"
 )
@@ -110,28 +110,29 @@ func (useCase *WithStatefulSessions) Logout(sessionId string) error {
 }
 
 func (useCase *WithStatefulSessions) UploadAvatar(id string, src io.Reader, size int64) (string, error) {
-	oldPath, _ := useCase.UserRepo.GetAvatarPath(id)
+	//oldPath, _ := useCase.UserRepo.GetAvatarPath(id)
 
-	avatar, err := useCase.AvatarUseCase.GetAvatar(id, src, size)
-	if err != nil {
-		return "", err
-	}
+	//avatar, err := useCase.AvatarUseCase.GetAvatar(id, src, size)
+	//if err != nil {
+	//	return "", err
+	//}
+	//
+	//url, err := useCase.AvatarRepo.UploadAvatar(avatar)
+	//if err != nil {
+	//	return "", err
+	//}
 
-	url, err := useCase.AvatarRepo.UploadAvatar(avatar)
-	if err != nil {
-		return "", err
-	}
-
-	err = useCase.UserRepo.UpdateAvatarPath(id, url)
-	if err != nil {
-		return "", err
-	}
-
-	if oldPath != "" {
-		useCase.AvatarRepo.Remove(oldPath)
-	}
-
-	return url, nil
+	//err = useCase.UserRepo.UpdateAvatarPath(id, url)
+	//if err != nil {
+	//	return "", err
+	//}
+	//
+	//if oldPath != "" {
+	//	useCase.AvatarRepo.Remove(oldPath)
+	//}
+	//
+	//return url, nil
+	return "", nil
 }
 
 func (useCase *WithStatefulSessions) RemoveAvatar(id string) error {

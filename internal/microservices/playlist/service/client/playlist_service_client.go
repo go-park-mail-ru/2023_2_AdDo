@@ -3,7 +3,10 @@ package grpc_playlist
 import (
 	"context"
 	"github.com/sirupsen/logrus"
+	"io"
 	grpc_album "main/internal/microservices/album/service/client"
+	image_proto "main/internal/microservices/image/proto"
+	grpc_image "main/internal/microservices/image/service/client"
 	playlist_proto "main/internal/microservices/playlist/proto"
 	grpc_playlist_server "main/internal/microservices/playlist/service/server"
 	session_proto "main/internal/microservices/session/proto"
@@ -12,11 +15,12 @@ import (
 
 type Client struct {
 	playlistManager playlist_proto.PlaylistServiceClient
+	imageClient     grpc_image.Client
 	logger          *logrus.Logger
 }
 
-func NewClient(pm playlist_proto.PlaylistServiceClient, logger *logrus.Logger) Client {
-	return Client{playlistManager: pm, logger: logger}
+func NewClient(pm playlist_proto.PlaylistServiceClient, client grpc_image.Client, logger *logrus.Logger) Client {
+	return Client{playlistManager: pm, logger: logger, imageClient: client}
 }
 
 func DeserializePlaylistResponse(in *playlist_proto.PlaylistResponse) playlist.Response {
@@ -81,13 +85,48 @@ func (c *Client) AddTrack(playlistId, trackId uint64) error {
 	return nil
 }
 
-func (c *Client) UpdatePreview(playlistId uint64, image string) error {
-	c.logger.Infoln("Playlist client  entered")
+func (c *Client) RemoveTrack(playlistId, trackId uint64) error {
+	c.logger.Infoln("Playlist client RemoveTrack  entered")
 
-	_, err := c.playlistManager.UpdatePreview(context.Background(), &playlist_proto.PlaylistIdToImageUrl{Id: playlistId, Image: image})
+	_, err := c.playlistManager.RemoveTrack(context.Background(), &playlist_proto.PlaylistToTrackId{PlaylistId: playlistId, TrackId: trackId})
 	if err != nil {
 		return err
 	}
+
+	return nil
+}
+
+func (c *Client) UpdatePreview(playlistId uint64, src io.Reader, size int64) error {
+	c.logger.Infoln("Playlist client  entered")
+
+	url, err := c.imageClient.UploadPlaylistImage(src, size)
+	if err != nil {
+		return err
+	}
+	c.logger.Infoln("Image Uploaded")
+
+	_, err = c.playlistManager.UpdatePreview(context.Background(), &playlist_proto.PlaylistIdToImageUrl{Id: playlistId, Url: &image_proto.ImageUrl{Url: url}})
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (c *Client) RemovePreview(playlistId uint64) error {
+	c.logger.Infoln("Playlist client  entered")
+
+	url, err := c.playlistManager.RemovePreview(context.Background(), &playlist_proto.PlaylistId{Id: playlistId})
+	if err != nil {
+		return err
+	}
+	c.logger.Infoln("Path deleted from db")
+
+	err = c.imageClient.RemoveImage(url.GetUrl())
+	if err != nil {
+		return err
+	}
+	c.logger.Infoln("Image deleted from sss")
 
 	return nil
 }

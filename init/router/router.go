@@ -46,6 +46,7 @@ func New(userHandler user_delivery.UserHandler, trackHandler track_delivery.Trac
 	router.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
 	router.Handle("/api/v1/sign_up", common_handler.Handler{H: userHandler.SignUp}).Methods("POST")
 	router.Handle("/api/v1/login", common_handler.Handler{H: userHandler.Login}).Methods("POST")
+	router.Handle("/api/v1/update_info", common_handler.Handler{H: userHandler.UpdateUserInfo}).Methods("PUT")
 	router.Handle("/api/v1/logout", common_handler.Handler{H: userHandler.LogOut}).Methods("POST")
 
 	router.Handle("/api/v1/auth", common_handler.Handler{H: userHandler.Auth}).Methods("GET")
@@ -90,3 +91,11 @@ func New(userHandler user_delivery.UserHandler, trackHandler track_delivery.Trac
 
 	return routerWithMiddleware
 }
+
+/// TODO
+/// Todo Переписать логику взаимодействия юзера с картинками, добавить картинки для плейлистов, и метод удаления трека
+/// Todo Добавить в документацию новые ручки, добавить их в роутер
+/// Todo Добавить мидлварь на проверку прав пользователя при работе с плейлистами, эти методы - методы юзкейса плейлистов
+/// Todo Протестировать весь функционал юнит и интеграционными тестами
+/// Todo не забыть про артист нейм в респонсе треков от плейлиста
+/// Todo is_liked поле для треков: сходить в микрос юзеров и получить все его лайки

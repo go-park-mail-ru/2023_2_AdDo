@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	UserAvatarBucketName    = "user-avatar"
+	UserAvatarBucketName    = "user-image"
 	PlaylistImageBucketName = "playlist-image"
 )
 
