@@ -4,6 +4,7 @@ import (
 	"context"
 	google_proto "github.com/golang/protobuf/ptypes/empty"
 	"github.com/sirupsen/logrus"
+	image_proto "main/internal/microservices/image/proto"
 	session_proto "main/internal/microservices/session/proto"
 	user_proto "main/internal/microservices/user/proto"
 	"main/internal/pkg/session"
@@ -131,7 +132,7 @@ func (us *UserManager) UploadAvatar(ctx context.Context, in *user_proto.ImageToU
 	return &google_proto.Empty{}, nil
 }
 
-func (us *UserManager) RemoveAvatar(ctx context.Context, in *session_proto.UserId) (*user_proto.ImageUrl, error) {
+func (us *UserManager) RemoveAvatar(ctx context.Context, in *session_proto.UserId) (*image_proto.ImageUrl, error) {
 	us.Logger.Infoln("User Micros RemoveAvatar entered")
 
 	imageUrl, err := us.UserRepo.RemoveAvatarPath(in.GetUserId())
@@ -140,7 +141,7 @@ func (us *UserManager) RemoveAvatar(ctx context.Context, in *session_proto.UserI
 	}
 	us.Logger.Infoln("Avatar removed")
 
-	return &user_proto.ImageUrl{Url: imageUrl}, nil
+	return &image_proto.ImageUrl{Url: imageUrl}, nil
 }
 
 func (us *UserManager) UpdateUserInfo(ctx context.Context, in *user_proto.UserData) (*google_proto.Empty, error) {

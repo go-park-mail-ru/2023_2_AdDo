@@ -8,6 +8,7 @@ import (
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
+	proto1 "main/internal/microservices/image/proto"
 	proto "main/internal/microservices/session/proto"
 )
 
@@ -26,7 +27,7 @@ type UserServiceClient interface {
 	GetUserInfo(ctx context.Context, in *proto.SessionId, opts ...grpc.CallOption) (*UserData, error)
 	LogOut(ctx context.Context, in *proto.SessionId, opts ...grpc.CallOption) (*empty.Empty, error)
 	UploadAvatar(ctx context.Context, in *ImageToUser, opts ...grpc.CallOption) (*empty.Empty, error)
-	RemoveAvatar(ctx context.Context, in *proto.UserId, opts ...grpc.CallOption) (*ImageUrl, error)
+	RemoveAvatar(ctx context.Context, in *proto.UserId, opts ...grpc.CallOption) (*proto1.ImageUrl, error)
 	UpdateUserInfo(ctx context.Context, in *UserData, opts ...grpc.CallOption) (*empty.Empty, error)
 }
 
@@ -92,8 +93,8 @@ func (c *userServiceClient) UploadAvatar(ctx context.Context, in *ImageToUser, o
 	return out, nil
 }
 
-func (c *userServiceClient) RemoveAvatar(ctx context.Context, in *proto.UserId, opts ...grpc.CallOption) (*ImageUrl, error) {
-	out := new(ImageUrl)
+func (c *userServiceClient) RemoveAvatar(ctx context.Context, in *proto.UserId, opts ...grpc.CallOption) (*proto1.ImageUrl, error) {
+	out := new(proto1.ImageUrl)
 	err := c.cc.Invoke(ctx, "/UserService/RemoveAvatar", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -120,7 +121,7 @@ type UserServiceServer interface {
 	GetUserInfo(context.Context, *proto.SessionId) (*UserData, error)
 	LogOut(context.Context, *proto.SessionId) (*empty.Empty, error)
 	UploadAvatar(context.Context, *ImageToUser) (*empty.Empty, error)
-	RemoveAvatar(context.Context, *proto.UserId) (*ImageUrl, error)
+	RemoveAvatar(context.Context, *proto.UserId) (*proto1.ImageUrl, error)
 	UpdateUserInfo(context.Context, *UserData) (*empty.Empty, error)
 	mustEmbedUnimplementedUserServiceServer()
 }
@@ -147,7 +148,7 @@ func (UnimplementedUserServiceServer) LogOut(context.Context, *proto.SessionId) 
 func (UnimplementedUserServiceServer) UploadAvatar(context.Context, *ImageToUser) (*empty.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UploadAvatar not implemented")
 }
-func (UnimplementedUserServiceServer) RemoveAvatar(context.Context, *proto.UserId) (*ImageUrl, error) {
+func (UnimplementedUserServiceServer) RemoveAvatar(context.Context, *proto.UserId) (*proto1.ImageUrl, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RemoveAvatar not implemented")
 }
 func (UnimplementedUserServiceServer) UpdateUserInfo(context.Context, *UserData) (*empty.Empty, error) {
