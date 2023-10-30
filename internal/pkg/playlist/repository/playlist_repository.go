@@ -174,3 +174,21 @@ func (p *Postgres) Delete(ctx context.Context, playlistId uint64) error {
 
 	return nil
 }
+
+func (p *Postgres) CreateLike(ctx context.Context, userId string, playlistId uint64) error {
+	p.logger.Infoln("Album Repo CreateLike entered")
+
+	query := "insert into musicon.public.profile_playlist (profile_id, playlist_id) values ($1, $2)"
+	_, err := p.Pool.Exec(context.Background(), query, userId, playlistId)
+	if err != nil {
+		p.logger.WithFields(logrus.Fields{
+			"err":         err,
+			"playlist Id": playlistId,
+			"query":       query,
+		}).Errorln("creating like error")
+		return err
+	}
+	p.logger.Infoln("Like Created")
+
+	return nil
+}

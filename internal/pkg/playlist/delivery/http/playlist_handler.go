@@ -27,8 +27,8 @@ func NewHandler(pu playlist.UseCase, su session.UseCase, logger *logrus.Logger) 
 	}
 }
 
-func (h *Handler) Create(w http.ResponseWriter, r *http.Request) error {
-	h.logger.WithFields(logrus.Fields{
+func (handler *Handler) Create(w http.ResponseWriter, r *http.Request) error {
+	handler.logger.WithFields(logrus.Fields{
 		"request_id": utils.GenReqId(r.RequestURI + r.Method),
 	}).Infoln("PlaylistCreate Handler entered")
 
@@ -36,22 +36,22 @@ func (h *Handler) Create(w http.ResponseWriter, r *http.Request) error {
 	if err != nil {
 		return common_handler.StatusError{Code: http.StatusUnauthorized, Err: err}
 	}
-	h.logger.Infoln("Got Cookie")
+	handler.logger.Infoln("Got Cookie")
 
-	userId, err := h.sessionUseCase.GetUserId(sessionId)
+	userId, err := handler.sessionUseCase.GetUserId(sessionId)
 	if err != nil {
 		return common_handler.StatusError{Code: http.StatusUnauthorized, Err: err}
 	}
-	h.logger.Infoln("Got user id")
+	handler.logger.Infoln("Got user id")
 
 	var base playlist.Base
 	if err := json.NewDecoder(r.Body).Decode(&base); err != nil {
 		return common_handler.StatusError{Code: http.StatusBadRequest, Err: err}
 	}
 	base.AuthorId = userId
-	h.logger.Infoln("Got base playlist formed")
+	handler.logger.Infoln("Got base playlist formed")
 
-	err = h.playlistUseCase.Create(base)
+	err = handler.playlistUseCase.Create(base)
 	if err != nil {
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}
@@ -60,8 +60,8 @@ func (h *Handler) Create(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
-func (h *Handler) Get(w http.ResponseWriter, r *http.Request) error {
-	h.logger.WithFields(logrus.Fields{
+func (handler *Handler) Get(w http.ResponseWriter, r *http.Request) error {
+	handler.logger.WithFields(logrus.Fields{
 		"request_id": utils.GenReqId(r.RequestURI + r.Method),
 	}).Infoln("PlaylistGet Handler entered")
 
@@ -69,9 +69,9 @@ func (h *Handler) Get(w http.ResponseWriter, r *http.Request) error {
 	if err != nil {
 		return common_handler.StatusError{Code: http.StatusBadRequest, Err: err}
 	}
-	h.logger.Infoln("Parsed playlistId from Vars")
+	handler.logger.Infoln("Parsed playlistId from Vars")
 
-	result, err := h.playlistUseCase.Get(uint64(playlistId))
+	result, err := handler.playlistUseCase.Get(uint64(playlistId))
 	if err != nil {
 		return common_handler.StatusError{Code: http.StatusNotFound, Err: err}
 	}
@@ -83,8 +83,8 @@ func (h *Handler) Get(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
-func (h *Handler) AddTrack(w http.ResponseWriter, r *http.Request) error {
-	h.logger.WithFields(logrus.Fields{
+func (handler *Handler) AddTrack(w http.ResponseWriter, r *http.Request) error {
+	handler.logger.WithFields(logrus.Fields{
 		"request_id": utils.GenReqId(r.RequestURI + r.Method),
 	}).Infoln("PlaylistAddTrack Handler entered")
 
@@ -92,9 +92,9 @@ func (h *Handler) AddTrack(w http.ResponseWriter, r *http.Request) error {
 	if err := json.NewDecoder(r.Body).Decode(&ids); err != nil {
 		return common_handler.StatusError{Code: http.StatusBadRequest, Err: err}
 	}
-	h.logger.Infoln("Got playlist and track ids")
+	handler.logger.Infoln("Got playlist and track ids")
 
-	err := h.playlistUseCase.AddTrack(ids.PlaylistId, ids.TrackId)
+	err := handler.playlistUseCase.AddTrack(ids.PlaylistId, ids.TrackId)
 	if err != nil {
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}
@@ -103,8 +103,8 @@ func (h *Handler) AddTrack(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
-func (h *Handler) RemoveTrack(w http.ResponseWriter, r *http.Request) error {
-	h.logger.WithFields(logrus.Fields{
+func (handler *Handler) RemoveTrack(w http.ResponseWriter, r *http.Request) error {
+	handler.logger.WithFields(logrus.Fields{
 		"request_id": utils.GenReqId(r.RequestURI + r.Method),
 	}).Infoln("PlaylistRemoveTrack Handler entered")
 
@@ -112,9 +112,9 @@ func (h *Handler) RemoveTrack(w http.ResponseWriter, r *http.Request) error {
 	if err := json.NewDecoder(r.Body).Decode(&ids); err != nil {
 		return common_handler.StatusError{Code: http.StatusBadRequest, Err: err}
 	}
-	h.logger.Infoln("Got playlist and track ids")
+	handler.logger.Infoln("Got playlist and track ids")
 
-	err := h.playlistUseCase.RemoveTrack(ids.PlaylistId, ids.TrackId)
+	err := handler.playlistUseCase.RemoveTrack(ids.PlaylistId, ids.TrackId)
 	if err != nil {
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}
@@ -123,8 +123,68 @@ func (h *Handler) RemoveTrack(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
-func (h *Handler) Delete(w http.ResponseWriter, r *http.Request) error {
-	h.logger.WithFields(logrus.Fields{
+func (handler *Handler) UpdatePreview(w http.ResponseWriter, r *http.Request) error {
+	handler.logger.WithFields(logrus.Fields{
+		"request_id": utils.GenReqId(r.RequestURI + r.Method),
+	}).Infoln("PlaylistAddTrack Handler entered")
+
+	playlistId, err := strconv.Atoi(mux.Vars(r)["id"])
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusBadRequest, Err: err}
+	}
+	handler.logger.Infoln("Parsed playlistId from Vars")
+
+	src, hdr, err := r.FormFile("Preview")
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusBadRequest, Err: err}
+	}
+	defer src.Close()
+	handler.logger.Infoln("formed file")
+
+	err = handler.playlistUseCase.UpdatePreview(uint64(playlistId), src, hdr.Size)
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+	return nil
+}
+
+func (handler *Handler) Like(w http.ResponseWriter, r *http.Request) error {
+	handler.logger.WithFields(logrus.Fields{
+		"request_id": utils.GenReqId(r.RequestURI + r.Method),
+	}).Infoln("LikePlaylist Handler entered")
+
+	var id playlist.Id
+	if err := json.NewDecoder(r.Body).Decode(&id); err != nil {
+		return common_handler.StatusError{Code: http.StatusBadRequest, Err: err}
+	}
+	handler.logger.Infoln("got track id from body")
+
+	sessionId, err := response.GetCookie(r)
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusUnauthorized, Err: err}
+	}
+	handler.logger.Infoln("got user cookie")
+
+	userId, err := handler.sessionUseCase.GetUserId(sessionId)
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusUnauthorized, Err: err}
+	}
+	handler.logger.Infoln("got user id by cookie")
+
+	err = handler.playlistUseCase.Like(userId, id.Id)
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
+	}
+	handler.logger.Infoln("like created successfully")
+
+	w.WriteHeader(http.StatusNoContent)
+	return nil
+}
+
+func (handler *Handler) Delete(w http.ResponseWriter, r *http.Request) error {
+	handler.logger.WithFields(logrus.Fields{
 		"request_id": utils.GenReqId(r.RequestURI + r.Method),
 	}).Infoln("PlaylistDelete Handler entered")
 
@@ -132,9 +192,9 @@ func (h *Handler) Delete(w http.ResponseWriter, r *http.Request) error {
 	if err != nil {
 		return common_handler.StatusError{Code: http.StatusBadRequest, Err: err}
 	}
-	h.logger.Infoln("Parsed playlistId from Vars")
+	handler.logger.Infoln("Parsed playlistId from Vars")
 
-	err = h.playlistUseCase.DeleteById(uint64(playlistId))
+	err = handler.playlistUseCase.DeleteById(uint64(playlistId))
 	if err != nil {
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}

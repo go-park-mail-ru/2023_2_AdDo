@@ -4,6 +4,7 @@ import (
 	"context"
 	google_proto "github.com/golang/protobuf/ptypes/empty"
 	"github.com/sirupsen/logrus"
+	album_proto "main/internal/microservices/album/proto"
 	grpc_album_server "main/internal/microservices/album/service/server"
 	image_proto "main/internal/microservices/image/proto"
 	playlist_proto "main/internal/microservices/playlist/proto"
@@ -164,6 +165,18 @@ func (pm *PlaylistManager) DeleteById(ctx context.Context, in *playlist_proto.Pl
 		return nil, err
 	}
 	pm.logger.Infoln("Playlist Deleted")
+
+	return &google_proto.Empty{}, nil
+}
+
+func (pm *PlaylistManager) Like(ctx context.Context, in *album_proto.AlbumToUserId) (*google_proto.Empty, error) {
+	pm.logger.Infoln("Album Micros Like entered")
+
+	err := pm.repoPlaylist.CreateLike(context.Background(), in.GetUserId(), in.GetAlbumId())
+	if err != nil {
+		return nil, err
+	}
+	pm.logger.Infoln("Like created")
 
 	return &google_proto.Empty{}, nil
 }

@@ -29,6 +29,7 @@ type PlaylistServiceClient interface {
 	UpdatePreview(ctx context.Context, in *PlaylistIdToImageUrl, opts ...grpc.CallOption) (*empty.Empty, error)
 	RemovePreview(ctx context.Context, in *PlaylistId, opts ...grpc.CallOption) (*proto1.ImageUrl, error)
 	DeleteById(ctx context.Context, in *PlaylistId, opts ...grpc.CallOption) (*empty.Empty, error)
+	Like(ctx context.Context, in *PlaylistToUserId, opts ...grpc.CallOption) (*empty.Empty, error)
 }
 
 type playlistServiceClient struct {
@@ -111,6 +112,15 @@ func (c *playlistServiceClient) DeleteById(ctx context.Context, in *PlaylistId, 
 	return out, nil
 }
 
+func (c *playlistServiceClient) Like(ctx context.Context, in *PlaylistToUserId, opts ...grpc.CallOption) (*empty.Empty, error) {
+	out := new(empty.Empty)
+	err := c.cc.Invoke(ctx, "/PlaylistService/Like", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // PlaylistServiceServer is the server API for PlaylistService service.
 // All implementations must embed UnimplementedPlaylistServiceServer
 // for forward compatibility
@@ -123,6 +133,7 @@ type PlaylistServiceServer interface {
 	UpdatePreview(context.Context, *PlaylistIdToImageUrl) (*empty.Empty, error)
 	RemovePreview(context.Context, *PlaylistId) (*proto1.ImageUrl, error)
 	DeleteById(context.Context, *PlaylistId) (*empty.Empty, error)
+	Like(context.Context, *PlaylistToUserId) (*empty.Empty, error)
 	mustEmbedUnimplementedPlaylistServiceServer()
 }
 
@@ -153,6 +164,9 @@ func (UnimplementedPlaylistServiceServer) RemovePreview(context.Context, *Playli
 }
 func (UnimplementedPlaylistServiceServer) DeleteById(context.Context, *PlaylistId) (*empty.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteById not implemented")
+}
+func (UnimplementedPlaylistServiceServer) Like(context.Context, *PlaylistToUserId) (*empty.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Like not implemented")
 }
 func (UnimplementedPlaylistServiceServer) mustEmbedUnimplementedPlaylistServiceServer() {}
 
@@ -311,6 +325,24 @@ func _PlaylistService_DeleteById_Handler(srv interface{}, ctx context.Context, d
 	return interceptor(ctx, in, info, handler)
 }
 
+func _PlaylistService_Like_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PlaylistToUserId)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlaylistServiceServer).Like(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/PlaylistService/Like",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlaylistServiceServer).Like(ctx, req.(*PlaylistToUserId))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // PlaylistService_ServiceDesc is the grpc.ServiceDesc for PlaylistService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -349,6 +381,10 @@ var PlaylistService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteById",
 			Handler:    _PlaylistService_DeleteById_Handler,
+		},
+		{
+			MethodName: "Like",
+			Handler:    _PlaylistService_Like_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
