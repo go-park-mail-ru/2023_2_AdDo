@@ -65,13 +65,25 @@ func (handler *Handler) Get(w http.ResponseWriter, r *http.Request) error {
 		"request_id": utils.GenReqId(r.RequestURI + r.Method),
 	}).Infoln("PlaylistGet Handler entered")
 
+	sessionId, err := response.GetCookie(r)
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusUnauthorized, Err: err}
+	}
+	handler.logger.Infoln("Got Cookie")
+
+	userId, err := handler.sessionUseCase.GetUserId(sessionId)
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusUnauthorized, Err: err}
+	}
+	handler.logger.Infoln("Got user id")
+
 	playlistId, err := strconv.Atoi(mux.Vars(r)["id"])
 	if err != nil {
 		return common_handler.StatusError{Code: http.StatusBadRequest, Err: err}
 	}
 	handler.logger.Infoln("Parsed playlistId from Vars")
 
-	result, err := handler.playlistUseCase.Get(uint64(playlistId))
+	result, err := handler.playlistUseCase.Get(userId, uint64(playlistId))
 	if err != nil {
 		return common_handler.StatusError{Code: http.StatusNotFound, Err: err}
 	}
@@ -195,6 +207,46 @@ func (handler *Handler) Delete(w http.ResponseWriter, r *http.Request) error {
 	handler.logger.Infoln("Parsed playlistId from Vars")
 
 	err = handler.playlistUseCase.DeleteById(uint64(playlistId))
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+	return nil
+}
+
+func (handler *Handler) MakePublic(w http.ResponseWriter, r *http.Request) error {
+	handler.logger.WithFields(logrus.Fields{
+		"request_id": utils.GenReqId(r.RequestURI + r.Method),
+	}).Infoln("MakePublic Handler entered")
+
+	playlistId, err := strconv.Atoi(mux.Vars(r)["id"])
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusBadRequest, Err: err}
+	}
+	handler.logger.Infoln("Parsed playlistId from Vars")
+
+	err = handler.playlistUseCase.MakePublic(uint64(playlistId))
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+	return nil
+}
+
+func (handler *Handler) MakePrivate(w http.ResponseWriter, r *http.Request) error {
+	handler.logger.WithFields(logrus.Fields{
+		"request_id": utils.GenReqId(r.RequestURI + r.Method),
+	}).Infoln("MakePrivate Handler entered")
+
+	playlistId, err := strconv.Atoi(mux.Vars(r)["id"])
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusBadRequest, Err: err}
+	}
+	handler.logger.Infoln("Parsed playlistId from Vars")
+
+	err = handler.playlistUseCase.MakePrivate(uint64(playlistId))
 	if err != nil {
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}

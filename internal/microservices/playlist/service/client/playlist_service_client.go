@@ -27,6 +27,7 @@ func DeserializePlaylistResponse(in *playlist_proto.PlaylistResponse) playlist.R
 	return playlist.Response{
 		Id:       in.GetId(),
 		Name:     in.GetName(),
+		IsYours:  in.GetIsYours(),
 		AuthorId: in.GetCreatorId(),
 		Preview:  in.GetPreview(),
 		Tracks:   grpc_album.DeserializeTracks(in.GetTracks()),
@@ -52,10 +53,10 @@ func (c *Client) Create(base playlist.Base) error {
 	return nil
 }
 
-func (c *Client) Get(playlistId uint64) (playlist.Response, error) {
-	c.logger.Infoln("Playlist client  entered")
+func (c *Client) Get(userId string, playlistId uint64) (playlist.Response, error) {
+	c.logger.Infoln("Playlist client Get entered")
 
-	result, err := c.playlistManager.Get(context.Background(), &playlist_proto.PlaylistId{Id: playlistId})
+	result, err := c.playlistManager.Get(context.Background(), &playlist_proto.PlaylistToUserId{UserId: userId, PlaylistId: playlistId})
 	if err != nil {
 		return playlist.Response{}, err
 	}
@@ -64,7 +65,7 @@ func (c *Client) Get(playlistId uint64) (playlist.Response, error) {
 }
 
 func (c *Client) GetUserPlaylists(userId string) ([]playlist.Base, error) {
-	c.logger.Infoln("Playlist client  entered")
+	c.logger.Infoln("Playlist client GetUserPlaylists entered")
 
 	result, err := c.playlistManager.GetUserPlaylists(context.Background(), &session_proto.UserId{UserId: userId})
 	if err != nil {
@@ -146,6 +147,50 @@ func (c *Client) Like(userId string, playlistId uint64) error {
 	c.logger.Infoln("Client to Playlist Micros Like entered")
 
 	_, err := c.playlistManager.Like(context.Background(), &playlist_proto.PlaylistToUserId{UserId: userId, PlaylistId: playlistId})
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (c *Client) HasModifyAccess(userId string, playlistId uint64) (bool, error) {
+	c.logger.Infoln("Client to Playlist Micros HasModifyAccess entered")
+
+	result, err := c.playlistManager.HasModifyAccess(context.Background(), &playlist_proto.PlaylistToUserId{UserId: userId, PlaylistId: playlistId})
+	if err != nil {
+		return false, err
+	}
+
+	return result.GetIsAccess(), nil
+}
+
+func (c *Client) HasReadAccess(playlistId uint64) (bool, error) {
+	c.logger.Infoln("Client to Playlist Micros HasReadAccess entered")
+
+	result, err := c.playlistManager.HasReadAccess(context.Background(), &playlist_proto.PlaylistId{Id: playlistId})
+	if err != nil {
+		return false, err
+	}
+
+	return result.GetIsAccess(), nil
+}
+
+func (c *Client) MakePrivate(playlistId uint64) error {
+	c.logger.Infoln("Client to Playlist Micros MakePrivate entered")
+
+	_, err := c.playlistManager.MakePrivate(context.Background(), &playlist_proto.PlaylistId{Id: playlistId})
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (c *Client) MakePublic(playlistId uint64) error {
+	c.logger.Infoln("Client to Playlist Micros MakePublic entered")
+
+	_, err := c.playlistManager.MakePublic(context.Background(), &playlist_proto.PlaylistId{Id: playlistId})
 	if err != nil {
 		return err
 	}

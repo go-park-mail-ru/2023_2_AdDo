@@ -66,10 +66,6 @@ func (am *ArtistManager) GetArtistInfo(ctx context.Context, in *artist_proto.Art
 	}
 	am.logger.Infoln("Got artist tracks")
 
-	for index, _ := range tracks {
-		tracks[index].ArtistName = artistBase.Name
-	}
-
 	result.Tracks = tracks
 
 	return SerializeArtist(result), nil

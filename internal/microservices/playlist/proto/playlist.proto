@@ -9,7 +9,7 @@ import "image.proto";
 
 service PlaylistService {
   rpc Create (PlaylistBase) returns (google.protobuf.Empty) {}
-  rpc Get (PlaylistId) returns (PlaylistResponse) {}
+  rpc Get (PlaylistToUserId) returns (PlaylistResponse) {}
   rpc GetUserPlaylists (UserId) returns (PlaylistsBase) {}
   rpc AddTrack (PlaylistToTrackId) returns (google.protobuf.Empty) {}
   rpc RemoveTrack (PlaylistToTrackId) returns (google.protobuf.Empty) {}
@@ -17,6 +17,14 @@ service PlaylistService {
   rpc RemovePreview (PlaylistId) returns (ImageUrl) {}
   rpc DeleteById (PlaylistId) returns (google.protobuf.Empty) {}
   rpc Like (PlaylistToUserId) returns (google.protobuf.Empty) {}
+  rpc HasModifyAccess (PlaylistToUserId) returns (HasAccess) {}
+  rpc HasReadAccess (PlaylistId) returns (HasAccess) {}
+  rpc MakePrivate (PlaylistId) returns (google.protobuf.Empty) {}
+  rpc MakePublic (PlaylistId) returns (google.protobuf.Empty) {}
+}
+
+message HasAccess {
+  bool IsAccess = 1;
 }
 
 message PlaylistToUserId {
@@ -50,9 +58,9 @@ message PlaylistResponse {
   string Name = 2;
   string Preview = 3;
   uint64 ArtistId = 4;
-  string ArtistName = 5;
   string CreatorId = 6;
-  TracksResponse Tracks = 7;
+  bool IsYours = 7;
+  TracksResponse Tracks = 8;
 }
 
 message PlaylistsResponse {

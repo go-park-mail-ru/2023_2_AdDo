@@ -34,7 +34,7 @@ func (db *Postgres) getWithQuery(ctx context.Context, query string, args ...any)
 	result := make([]track.Response, 0)
 	for rows.Next() {
 		var t track.Response
-		err := rows.Scan(&t.Id, &t.Name, &t.Preview, &t.Content)
+		err := rows.Scan(&t.Id, &t.Name, &t.Preview, &t.Content, &t.ArtistName)
 		if err != nil {
 			db.logger.WithFields(logrus.Fields{
 				"query":    query,
@@ -52,19 +52,30 @@ func (db *Postgres) getWithQuery(ctx context.Context, query string, args ...any)
 
 func (db *Postgres) GetByAlbum(albumId uint64) ([]track.Response, error) {
 	db.logger.Infoln("TrackRepo GetByAlbum entered")
-	query := "select track.id, name, preview, content from track join album_track on track.id = album_track.track_id where album_track.album_id = $1"
+	query := `select track.id, track.name, preview, content, artist.name from track 
+    			join album_track on track.id = album_track.track_id  
+				join artist_track on track.id = artist_track.track_id 
+    			join artist on artist.id = artist_track.artist_id 
+			   	where album_track.album_id = $1`
 	return db.getWithQuery(context.Background(), query, albumId)
 }
 
 func (db *Postgres) GetByArtist(artistId uint64) ([]track.Response, error) {
 	db.logger.Infoln("TrackRepo GetByArtist entered")
-	query := "select track.id, name, preview, content from track join artist_track on track.id = artist_track.track_id where artist_track.artist_id = $1"
+	query := `select track.id, track.name, preview, content, artist.name from track
+				join artist_track on track.id = artist_track.track_id
+    			join artist on artist.id = artist_track.artist_id 
+				where artist_track.artist_id = $1`
 	return db.getWithQuery(context.Background(), query, artistId)
 }
 
 func (db *Postgres) GetByPlaylist(playlistId uint64) ([]track.Response, error) {
 	db.logger.Infoln("TrackRepo GetByPlaylist entered")
-	query := "select track.id, name, preview, content from track join musicon.public.playlist_track on track.id = playlist_track.track_id where playlist_track.playlist_id = $1"
+	query := `select track.id, track.name, preview, content, artist.name from track 
+    			join playlist_track on track.id = playlist_track.track_id 
+      			join artist_track on track.id = artist_track.track_id 
+    			join artist on artist.id = artist_track.artist_id 
+			    where playlist_track.playlist_id = $1`
 	return db.getWithQuery(context.Background(), query, playlistId)
 }
 
