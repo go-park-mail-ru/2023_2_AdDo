@@ -1,4 +1,5 @@
 import json
+import sys
 
 from pydub import AudioSegment
 import requests
@@ -46,13 +47,25 @@ def create_single_command(track_name, track_preview, track_content, artist_name)
     return command
 
 
-def get_track_duration(track_url):
-    response = requests.get(track_url)
-    audio_data = io.BytesIO(response.content)
+server = "https://api.s3.musicon.space"
 
+
+def check_url(url):
+    response = requests.get(server + url)
+    if response.status_code != 200:
+        print("Wrong url")
+        sys.exit(1)
+
+
+def get_track_duration(track_url):
+    response = requests.get(server + track_url)
+    if response.status_code != 200:
+        print("Wrong url")
+        sys.exit(1)
+
+    audio_data = io.BytesIO(response.content)
     audio_segment = AudioSegment.from_file(audio_data)
-    duration = len(audio_segment)
-    return duration // 1000
+    return len(audio_segment) // 1000
 
 
 with open("data_for_db_filling.json") as file:
@@ -62,9 +75,12 @@ with open("data_for_db_filling.json") as file:
 with open("fill_data/data_filling.sql", "w") as file:
     for artist in conf["artists"]:
         artist_name = artist["artist_name"]
+        print("Artist:", artist_name)
 
         # во всех url пробел заменяется на нижнее подчеркивание
         artist_avatar_url = "/images/avatars/artists/" + artist_name.replace(" ", "_") + ".jpg"
+        print("Avatar:", server + artist_avatar_url, "\n")
+        check_url(artist_avatar_url)
 
         # в запросах надо удваивать одинарные кавычки
         file.write(create_artist_command(artist_name.replace("'", "''"),
@@ -73,8 +89,12 @@ with open("fill_data/data_filling.sql", "w") as file:
 
         for album in artist["albums"]:
             album_name = album["album_name"]
+            print("Album:", album_name)
+
             album_release = album["album_release_date"]
             album_image = ("/images/tracks/" + artist_name + "/" + album_name + ".jpg").replace(" ", "_")
+            print("Album image:", server + album_image, "\n")
+            check_url(album_image)
 
             file.write(create_album_command(artist_name.replace("'", "''"),
                                             album_name.replace("'", "''"),
@@ -83,14 +103,13 @@ with open("fill_data/data_filling.sql", "w") as file:
                                             ) + '\n')
 
             for track_name in album["tracks"]:
-                server = "http://82.146.45.164:9000"
                 track_url = ("/audio/" + artist_name + "/" + album_name + "/" + track_name + ".mp3").replace(" ", "_")
 
-                print("track:", track_name)
-                print("track url:", server + track_url)
+                print("Track:", track_name)
+                print("Track url:", server + track_url)
 
-                track_duration = get_track_duration(server + track_url)
-                print("duration:", track_duration, '\n')
+                track_duration = get_track_duration(track_url)
+                print("Duration:", track_duration, '\n')
 
                 file.write(create_track_command(track_name.replace("'", "''"),
                                                 album_image.replace("'", "''"),
