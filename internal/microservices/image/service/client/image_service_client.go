@@ -43,7 +43,7 @@ func (c *Client) UploadPlaylistImage(src io.Reader, size int64) (string, error) 
 	if err != nil {
 		return "", err
 	}
-	c.logger.Infoln("playlist image uploaded", result.GetUrl())
+	c.logger.Infoln("playlist images uploaded", result.GetUrl())
 
 	return result.GetUrl(), nil
 }
@@ -55,7 +55,7 @@ func (c *Client) RemoveImage(url string) error {
 	if err != nil {
 		return err
 	}
-	c.logger.Infoln("image removed")
+	c.logger.Infoln("images removed")
 
 	return nil
 }

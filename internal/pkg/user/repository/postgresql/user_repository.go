@@ -57,7 +57,7 @@ func (db *Postgres) GetById(id string) (user_domain.User, error) {
 
 	user.BirthDate = dt.Time.Format("2006-01-02")
 	user.Avatar = avatar.String
-	db.logger.Infoln("birthday and image formatted")
+	db.logger.Infoln("birthday and images formatted")
 
 	return user, err
 }
@@ -90,7 +90,7 @@ func (db *Postgres) UpdateAvatarPath(userId string, path string) error {
 			"err":   err,
 			"path":  path,
 			"query": query,
-		}).Errorln("image updating failed")
+		}).Errorln("images updating failed")
 		return err
 	}
 

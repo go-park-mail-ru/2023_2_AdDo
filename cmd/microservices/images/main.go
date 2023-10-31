@@ -18,7 +18,7 @@ func main() {
 	logger := logrus.New()
 	lis, err := net.Listen("tcp", ":"+strconv.Itoa(Port))
 	if err != nil {
-		logger.Errorln("err while starting image micros: ", err)
+		logger.Errorln("err while starting images micros: ", err)
 	}
 
 	minio, err := init_minio.InitMinio()
@@ -33,7 +33,7 @@ func main() {
 	server := grpc.NewServer()
 	image_proto.RegisterImageServiceServer(server, &imageManager)
 
-	serviceId := microservices_init.RegisterInConsul(Port, "image-api", "image", logger)
+	serviceId := microservices_init.RegisterInConsul(Port, "images-api", "images", logger)
 	defer func() {
 		microservices_init.UnRegisterInConsul(serviceId, logger)
 	}()
