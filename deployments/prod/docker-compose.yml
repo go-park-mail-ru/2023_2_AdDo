@@ -155,10 +155,10 @@ services:
     env_file:
       - .env
 
-  image:
+  images:
     extends:
-      file: ../microservices/image/image-microservice.yml
-      service: image
+      file: ../microservices/images/image-microservice.yml
+      service: images
     deploy:
       replicas: 1
     depends_on:
@@ -182,7 +182,7 @@ services:
         condition: service_started
       artist:
         condition: service_started
-      image:
+      images:
         condition: service_started
 
   musicon:

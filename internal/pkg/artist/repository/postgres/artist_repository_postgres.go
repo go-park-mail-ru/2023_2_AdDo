@@ -24,7 +24,7 @@ func (repo *Postgres) Get(artistId uint64) (artist.Base, error) {
 
 	var result artist.Base
 
-	query := "select artist.id, name, image from artist where artist.id = $1"
+	query := "select artist.id, name, images from artist where artist.id = $1"
 	err := repo.Pool.QueryRow(context.Background(), query, artistId).Scan(&result.Id, &result.Name, &result.Avatar)
 	if err != nil {
 		repo.logger.WithFields(logrus.Fields{
@@ -44,7 +44,7 @@ func (repo *Postgres) GetByTrackId(trackId uint64) ([]artist.Base, error) {
 
 	result := make([]artist.Base, 0)
 
-	query := "select artist.id, name, image from artist join artist_track on artist.id = artist_track.artist_id where artist_track.track_id = $1"
+	query := "select artist.id, name, images from artist join artist_track on artist.id = artist_track.artist_id where artist_track.track_id = $1"
 	rows, err := repo.Pool.Query(context.Background(), query, trackId)
 	if err != nil {
 		repo.logger.WithFields(logrus.Fields{
@@ -77,7 +77,7 @@ func (repo *Postgres) GetByAlbumId(albumId uint64) (artist.Base, error) {
 
 	var result artist.Base
 
-	query := "select artist.id, artist.name, image from artist join album on artist.id = album.artist_id where album.id = $1"
+	query := "select artist.id, artist.name, images from artist join album on artist.id = album.artist_id where album.id = $1"
 	err := repo.Pool.QueryRow(context.Background(), query, albumId).Scan(&result.Id, &result.Name, &result.Avatar)
 	if err != nil {
 		repo.logger.WithFields(logrus.Fields{

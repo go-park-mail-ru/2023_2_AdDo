@@ -104,7 +104,7 @@ func TestUserRepository_GetAvatarPath(t *testing.T) {
 	}
 
 	const (
-		expectedAvatarPath = "/user_avatar/image.png"
+		expectedAvatarPath = "/user_avatar/images.png"
 		userID             = "1"
 	)
 
@@ -117,11 +117,11 @@ func TestUserRepository_GetAvatarPath(t *testing.T) {
 	path, err := repo.GetAvatarPath(userID)
 
 	if err != nil {
-		t.Errorf("Error get image path: %v", err)
+		t.Errorf("Error get images path: %v", err)
 	}
 
 	if path != expectedAvatarPath {
-		t.Errorf("Expected image path is %s but got %s", expectedAvatarPath, path)
+		t.Errorf("Expected images path is %s but got %s", expectedAvatarPath, path)
 	}
 
 	if err := mock.ExpectationsWereMet(); err != nil {
@@ -149,7 +149,7 @@ func TestUserRepository_UpdateAvatarPath(t *testing.T) {
 	err = repo.UpdateAvatarPath(userID, newAvatarPath)
 
 	if err != nil {
-		t.Errorf("Error update image path: %v", err)
+		t.Errorf("Error update images path: %v", err)
 	}
 
 	if err := mock.ExpectationsWereMet(); err != nil {
@@ -178,7 +178,7 @@ func TestUserRepository_RemoveAvatarPath(t *testing.T) {
 	err = repo.RemoveAvatarPath(userID)
 
 	if err != nil {
-		t.Errorf("Error remove image path: %v", err)
+		t.Errorf("Error remove images path: %v", err)
 	}
 
 	if err := mock.ExpectationsWereMet(); err != nil {

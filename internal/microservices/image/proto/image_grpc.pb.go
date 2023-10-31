@@ -170,5 +170,5 @@ var ImageService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "image.proto",
+	Metadata: "images.proto",
 }

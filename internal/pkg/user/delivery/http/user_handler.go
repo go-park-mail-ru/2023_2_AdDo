@@ -234,9 +234,9 @@ func (handler *UserHandler) Me(w http.ResponseWriter, r *http.Request) error {
 
 // UploadAvatar
 //
-// @Description	Upload user image
+// @Description	Upload user images
 // @Tags		user
-// @Param		Avatar	formData	file		true	"User image"
+// @Param		Avatar	formData	file		true	"User images"
 // @Security	cookieAuth
 // @Security	csrfToken
 // @Security	cookieCsrfToken
@@ -273,7 +273,7 @@ func (handler *UserHandler) UploadAvatar(w http.ResponseWriter, r *http.Request)
 	if err != nil {
 		return common_handler.StatusError{Code: http.StatusBadRequest, Err: err}
 	}
-	handler.logger.Infoln("image uploaded")
+	handler.logger.Infoln("images uploaded")
 
 	err = response.RenderJSON(w, user_domain.UploadAvatarResponse{Url: url})
 	if err != nil {
@@ -286,7 +286,7 @@ func (handler *UserHandler) UploadAvatar(w http.ResponseWriter, r *http.Request)
 
 // RemoveAvatar
 //
-// @Description	Remove user image
+// @Description	Remove user images
 // @Tags		user
 // @Security	cookieAuth
 // @Security	csrfToken

@@ -4,4 +4,4 @@ services:
   playlist:
     build:
       context: ../../..
-      dockerfile: ../../../build/package/image/Dockerfile
+      dockerfile: ../../../build/package/images/Dockerfile

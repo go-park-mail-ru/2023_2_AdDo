@@ -28,7 +28,7 @@ func CreateImageFromSource(src io.Reader, size int64) (Base, error) {
 	}
 
 	contentType := http.DetectContentType(data[:512])
-	if !strings.HasPrefix(contentType, "image/") {
+	if !strings.HasPrefix(contentType, "images/") {
 		return Base{}, ErrWrongAvatarType
 	}
 
@@ -61,8 +61,8 @@ type Repository interface {
 const MaxAvatarSize = 16 * 1024 * 1024
 
 var (
-	ErrAvatarDoesNotExist = errors.New("image does not exist")
+	ErrAvatarDoesNotExist = errors.New("images does not exist")
 	ErrAvatarIsTooLarge   = errors.New("file is too large")
 	ErrCannotRead         = errors.New("cannot read file")
-	ErrWrongAvatarType    = errors.New("wrong image type")
+	ErrWrongAvatarType    = errors.New("wrong images type")
 )

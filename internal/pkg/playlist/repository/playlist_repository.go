@@ -129,11 +129,11 @@ func (p *Postgres) UpdateImage(ctx context.Context, playlistId uint64, image str
 	_, err := p.Pool.Exec(ctx, query, image, playlistId)
 	if err != nil {
 		p.logger.WithFields(logrus.Fields{
-			"error":          err,
-			"image url path": image,
-			"playlist id":    playlistId,
-			"query":          query,
-		}).Errorln("error while updating image into playlist")
+			"error":           err,
+			"images url path": image,
+			"playlist id":     playlistId,
+			"query":           query,
+		}).Errorln("error while updating images into playlist")
 		return err
 	}
 
@@ -149,9 +149,9 @@ func (p *Postgres) RemovePreviewPath(ctx context.Context, playlistId uint64) (st
 		p.logger.WithFields(logrus.Fields{
 			"error":       err,
 			"playlist id": playlistId,
-			"image":       result.String(),
+			"images":      result.String(),
 			"query":       query,
-		}).Errorln("error while updating image into playlist")
+		}).Errorln("error while updating images into playlist")
 		return "", err
 	}
 

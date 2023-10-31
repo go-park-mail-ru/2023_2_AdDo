@@ -280,7 +280,7 @@ func TestUploadAvatar(t *testing.T) {
 	body := new(bytes.Buffer)
 	writer := multipart.NewWriter(body)
 
-	part, err := writer.CreateFormFile("Base", "image.png")
+	part, err := writer.CreateFormFile("Base", "images.png")
 	if err != nil {
 		t.Error(err)
 	}

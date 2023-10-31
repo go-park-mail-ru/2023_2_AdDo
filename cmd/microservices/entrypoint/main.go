@@ -65,7 +65,7 @@ func main() {
 
 	imageConnection, err := grpc.Dial("artist:8087", grpc.WithInsecure())
 	if err != nil {
-		logger.Fatalln("error connecting to image micros ", err)
+		logger.Fatalln("error connecting to images micros ", err)
 	}
 
 	imageAgent := grpc_image.NewClient(proto4.NewImageServiceClient(imageConnection), logger)

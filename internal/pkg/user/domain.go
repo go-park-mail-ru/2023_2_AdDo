@@ -18,7 +18,7 @@ type User struct {
 	Email     string `valid:"length(1|30), email, required, printableascii" json:"Email" example:"example@gmail.com"`
 	Password  string `valid:"length(6|30), required, printableascii" json:"Password" example:"password"`
 	BirthDate string `valid:"required" json:"BirthDate" example:"2000-01-01"`
-	Avatar    string `valid:"url_optional" json:"Avatar" example:"http://test/image/1.jpg,http://test/image/2.jpg"`
+	Avatar    string `valid:"url_optional" json:"Avatar" example:"http://test/images/1.jpg,http://test/images/2.jpg"`
 }
 
 func (u *User) Validate() error {
@@ -70,7 +70,7 @@ func (uC *UserCredentials) Validate() error {
 }
 
 type UploadAvatarResponse struct {
-	Url string `json:"AvatarUrl" example:"/user-image/image.png"`
+	Url string `json:"AvatarUrl" example:"/user-images/images.png"`
 }
 
 type UseCase interface {

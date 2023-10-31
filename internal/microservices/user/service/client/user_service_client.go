@@ -118,7 +118,7 @@ func (c *Client) RemoveAvatar(userId string) error {
 	if err != nil {
 		return err
 	}
-	c.logger.Infoln("image removed")
+	c.logger.Infoln("images removed")
 
 	if err != nil {
 		return err

@@ -181,18 +181,18 @@ func TestUploadAvatar_Success(t *testing.T) {
 
 	const (
 		mockUserId = "1"
-		mockPath   = "/user-image/image.png"
+		mockPath   = "/user-images/images.png"
 	)
 	mockPayload := new(bytes.Buffer)
 	mockPayloadSize := int64(mockPayload.Len())
 
 	avatar := avatar_domain.Base{
-		Name:        "image-name",
+		Name:        "images-name",
 		Payload:     mockPayload,
 		PayloadSize: mockPayloadSize,
-		ContentType: "image/png",
+		ContentType: "images/png",
 	}
-	t.Run("Create image", func(t *testing.T) {
+	t.Run("Create images", func(t *testing.T) {
 		mockOldPath := ""
 		mockUserRepo.EXPECT().GetAvatarPath(mockUserId).Return(mockOldPath, nil)
 		mockAvatarUseCase.EXPECT().GetAvatar(mockUserId, mockPayload, mockPayloadSize).Return(avatar, nil)
@@ -204,8 +204,8 @@ func TestUploadAvatar_Success(t *testing.T) {
 		assert.Equal(t, nil, err)
 	})
 
-	t.Run("Update image", func(t *testing.T) {
-		mockOldPath := "/user-image/image.png"
+	t.Run("Update images", func(t *testing.T) {
+		mockOldPath := "/user-images/images.png"
 		mockUserRepo.EXPECT().GetAvatarPath(mockUserId).Return(mockOldPath, nil)
 		mockAvatarUseCase.EXPECT().GetAvatar(mockUserId, mockPayload, mockPayloadSize).Return(avatar, nil)
 		mockAvatarRepo.EXPECT().UploadAvatar(avatar).Return(mockPath, nil)
@@ -233,7 +233,7 @@ func TestRemoveAvatar_Success(t *testing.T) {
 
 	const (
 		mockUserID  = "1"
-		mockOldPath = "/user_avatar/image.png"
+		mockOldPath = "/user_avatar/images.png"
 	)
 
 	mockUserRepo.EXPECT().GetAvatarPath(mockUserID).Return(mockOldPath, nil)
