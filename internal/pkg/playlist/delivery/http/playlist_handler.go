@@ -167,11 +167,11 @@ func (handler *Handler) Like(w http.ResponseWriter, r *http.Request) error {
 		"request_id": utils.GenReqId(r.RequestURI + r.Method),
 	}).Infoln("LikePlaylist Handler entered")
 
-	var id playlist.Id
-	if err := json.NewDecoder(r.Body).Decode(&id); err != nil {
+	playlistId, err := strconv.Atoi(mux.Vars(r)["id"])
+	if err != nil {
 		return common_handler.StatusError{Code: http.StatusBadRequest, Err: err}
 	}
-	handler.logger.Infoln("got track id from body")
+	handler.logger.Infoln("Parsed playlistId from Vars")
 
 	sessionId, err := response.GetCookie(r)
 	if err != nil {
@@ -185,11 +185,82 @@ func (handler *Handler) Like(w http.ResponseWriter, r *http.Request) error {
 	}
 	handler.logger.Infoln("got user id by cookie")
 
-	err = handler.playlistUseCase.Like(userId, id.Id)
+	err = handler.playlistUseCase.Like(userId, uint64(playlistId))
 	if err != nil {
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}
-	handler.logger.Infoln("like created successfully")
+	handler.logger.Infoln("playlist like created successfully")
+
+	w.WriteHeader(http.StatusNoContent)
+	return nil
+}
+
+func (handler *Handler) IsLike(w http.ResponseWriter, r *http.Request) error {
+	handler.logger.WithFields(logrus.Fields{
+		"request_id": utils.GenReqId(r.RequestURI + r.Method),
+	}).Infoln("LikePlaylist Handler entered")
+
+	playlistId, err := strconv.Atoi(mux.Vars(r)["id"])
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusBadRequest, Err: err}
+	}
+	handler.logger.Infoln("Parsed playlistId from Vars")
+
+	sessionId, err := response.GetCookie(r)
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusUnauthorized, Err: err}
+	}
+	handler.logger.Infoln("got user cookie")
+
+	userId, err := handler.sessionUseCase.GetUserId(sessionId)
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusUnauthorized, Err: err}
+	}
+	handler.logger.Infoln("got user id by cookie")
+
+	isLiked, err := handler.playlistUseCase.IsLike(userId, uint64(playlistId))
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusNotFound, Err: err}
+	}
+	handler.logger.Infoln("User like checked")
+
+	err = response.RenderJSON(w, response.IsLiked{IsLiked: isLiked})
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
+	}
+	handler.logger.Infoln("response  formed")
+
+	return nil
+}
+
+func (handler *Handler) Unlike(w http.ResponseWriter, r *http.Request) error {
+	handler.logger.WithFields(logrus.Fields{
+		"request_id": utils.GenReqId(r.RequestURI + r.Method),
+	}).Infoln("LikePlaylist Handler entered")
+
+	playlistId, err := strconv.Atoi(mux.Vars(r)["id"])
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusBadRequest, Err: err}
+	}
+	handler.logger.Infoln("Parsed playlistId from Vars")
+
+	sessionId, err := response.GetCookie(r)
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusUnauthorized, Err: err}
+	}
+	handler.logger.Infoln("got user cookie")
+
+	userId, err := handler.sessionUseCase.GetUserId(sessionId)
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusUnauthorized, Err: err}
+	}
+	handler.logger.Infoln("got user id by cookie")
+
+	err = handler.playlistUseCase.Unlike(userId, uint64(playlistId))
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
+	}
+	handler.logger.Infoln("playlist like deleted successfully")
 
 	w.WriteHeader(http.StatusNoContent)
 	return nil

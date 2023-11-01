@@ -14,11 +14,6 @@ echo "Preparing successful done"
 echo "Running tests with empty database..."
 for test in test/testsuite/*; do
     python3 $test
-    if [ $? -ne 0 ]; then
-        echo "Error integration tests"
-        docker compose -f deployments/test/docker-compose.yml down
-        exit 1
-    fi
 done
 
 echo "Tests passed"

@@ -135,22 +135,22 @@ func (useCase *WithStatefulSessions) UploadAvatar(id string, src io.Reader, size
 	return "", nil
 }
 
-func (useCase *WithStatefulSessions) RemoveAvatar(id string) error {
-	oldPath, err := useCase.UserRepo.GetAvatarPath(id)
-	if err != nil {
-		return err
-	}
-
-	if oldPath == "" {
-		return avatar_domain.ErrAvatarDoesNotExist
-	}
-
-	useCase.AvatarRepo.Remove(oldPath)
-
-	err = useCase.UserRepo.RemoveAvatarPath(id)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
+//func (useCase *WithStatefulSessions) RemoveAvatar(id string) error {
+//	oldPath, err := useCase.UserRepo.GetAvatarPath(id)
+//	if err != nil {
+//		return err
+//	}
+//
+//	if oldPath == "" {
+//		return avatar_domain.ErrAvatarDoesNotExist
+//	}
+//
+//	useCase.AvatarRepo.Remove(oldPath)
+//
+//	err = useCase.UserRepo.RemoveAvatarPath(id)
+//	if err != nil {
+//		return err
+//	}
+//
+//	return nil
+//}

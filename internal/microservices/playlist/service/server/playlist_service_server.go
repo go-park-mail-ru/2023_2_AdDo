@@ -187,6 +187,30 @@ func (pm *PlaylistManager) Like(ctx context.Context, in *playlist_proto.Playlist
 	return &google_proto.Empty{}, nil
 }
 
+func (pm *PlaylistManager) IsLike(ctx context.Context, in *playlist_proto.PlaylistToUserId) (*playlist_proto.IsLikedPlaylist, error) {
+	pm.logger.Infoln("Playlist Micros Like entered")
+
+	isLiked, err := pm.repoPlaylist.CheckLike(context.Background(), in.GetUserId(), in.GetPlaylistId())
+	if err != nil {
+		return nil, err
+	}
+	pm.logger.Infoln("Like checked")
+
+	return &playlist_proto.IsLikedPlaylist{IsLiked: isLiked}, nil
+}
+
+func (pm *PlaylistManager) Unlike(ctx context.Context, in *playlist_proto.PlaylistToUserId) (*google_proto.Empty, error) {
+	pm.logger.Infoln("Playlist Micros Like entered")
+
+	err := pm.repoPlaylist.DeleteLike(context.Background(), in.GetUserId(), in.GetPlaylistId())
+	if err != nil {
+		return nil, err
+	}
+	pm.logger.Infoln("Like deleted")
+
+	return &google_proto.Empty{}, nil
+}
+
 func (pm *PlaylistManager) HasModifyAccess(ctx context.Context, in *playlist_proto.PlaylistToUserId) (*playlist_proto.HasAccess, error) {
 	pm.logger.Infoln("Album Micros HasModAccess entered")
 

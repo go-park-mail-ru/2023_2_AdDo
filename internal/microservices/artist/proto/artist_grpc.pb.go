@@ -4,6 +4,7 @@ package artist
 
 import (
 	context "context"
+	empty "github.com/golang/protobuf/ptypes/empty"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -19,6 +20,9 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ArtistServiceClient interface {
 	GetArtistInfo(ctx context.Context, in *ArtistId, opts ...grpc.CallOption) (*Artist, error)
+	Like(ctx context.Context, in *ArtistToUserId, opts ...grpc.CallOption) (*empty.Empty, error)
+	IsLike(ctx context.Context, in *ArtistToUserId, opts ...grpc.CallOption) (*IsLikedArtist, error)
+	Unlike(ctx context.Context, in *ArtistToUserId, opts ...grpc.CallOption) (*empty.Empty, error)
 }
 
 type artistServiceClient struct {
@@ -38,11 +42,41 @@ func (c *artistServiceClient) GetArtistInfo(ctx context.Context, in *ArtistId, o
 	return out, nil
 }
 
+func (c *artistServiceClient) Like(ctx context.Context, in *ArtistToUserId, opts ...grpc.CallOption) (*empty.Empty, error) {
+	out := new(empty.Empty)
+	err := c.cc.Invoke(ctx, "/ArtistService/Like", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *artistServiceClient) IsLike(ctx context.Context, in *ArtistToUserId, opts ...grpc.CallOption) (*IsLikedArtist, error) {
+	out := new(IsLikedArtist)
+	err := c.cc.Invoke(ctx, "/ArtistService/IsLike", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *artistServiceClient) Unlike(ctx context.Context, in *ArtistToUserId, opts ...grpc.CallOption) (*empty.Empty, error) {
+	out := new(empty.Empty)
+	err := c.cc.Invoke(ctx, "/ArtistService/Unlike", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ArtistServiceServer is the server API for ArtistService service.
 // All implementations must embed UnimplementedArtistServiceServer
 // for forward compatibility
 type ArtistServiceServer interface {
 	GetArtistInfo(context.Context, *ArtistId) (*Artist, error)
+	Like(context.Context, *ArtistToUserId) (*empty.Empty, error)
+	IsLike(context.Context, *ArtistToUserId) (*IsLikedArtist, error)
+	Unlike(context.Context, *ArtistToUserId) (*empty.Empty, error)
 	mustEmbedUnimplementedArtistServiceServer()
 }
 
@@ -52,6 +86,15 @@ type UnimplementedArtistServiceServer struct {
 
 func (UnimplementedArtistServiceServer) GetArtistInfo(context.Context, *ArtistId) (*Artist, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetArtistInfo not implemented")
+}
+func (UnimplementedArtistServiceServer) Like(context.Context, *ArtistToUserId) (*empty.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Like not implemented")
+}
+func (UnimplementedArtistServiceServer) IsLike(context.Context, *ArtistToUserId) (*IsLikedArtist, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method IsLike not implemented")
+}
+func (UnimplementedArtistServiceServer) Unlike(context.Context, *ArtistToUserId) (*empty.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Unlike not implemented")
 }
 func (UnimplementedArtistServiceServer) mustEmbedUnimplementedArtistServiceServer() {}
 
@@ -84,6 +127,60 @@ func _ArtistService_GetArtistInfo_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ArtistService_Like_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ArtistToUserId)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ArtistServiceServer).Like(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/ArtistService/Like",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ArtistServiceServer).Like(ctx, req.(*ArtistToUserId))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ArtistService_IsLike_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ArtistToUserId)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ArtistServiceServer).IsLike(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/ArtistService/IsLike",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ArtistServiceServer).IsLike(ctx, req.(*ArtistToUserId))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ArtistService_Unlike_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ArtistToUserId)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ArtistServiceServer).Unlike(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/ArtistService/Unlike",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ArtistServiceServer).Unlike(ctx, req.(*ArtistToUserId))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // ArtistService_ServiceDesc is the grpc.ServiceDesc for ArtistService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -94,6 +191,18 @@ var ArtistService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetArtistInfo",
 			Handler:    _ArtistService_GetArtistInfo_Handler,
+		},
+		{
+			MethodName: "Like",
+			Handler:    _ArtistService_Like_Handler,
+		},
+		{
+			MethodName: "IsLike",
+			Handler:    _ArtistService_IsLike_Handler,
+		},
+		{
+			MethodName: "Unlike",
+			Handler:    _ArtistService_Unlike_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -129,3 +129,39 @@ func (p Postgres) CreateLike(userId string, albumId uint64) error {
 
 	return nil
 }
+
+func (p Postgres) CheckLike(userId string, albumId uint64) (bool, error) {
+	p.logger.Infoln("Album Repo CreateLike entered")
+
+	query := "select * from profile_album where profile_id = $1 and album_id = $2"
+	err := p.Pool.QueryRow(context.Background(), query, userId, albumId).Scan()
+	if err != nil {
+		p.logger.WithFields(logrus.Fields{
+			"err":      err,
+			"album id": albumId,
+			"query":    query,
+		}).Errorln("creating like error")
+		return false, err
+	}
+	p.logger.Infoln("Like Created")
+
+	return true, nil
+}
+
+func (p Postgres) DeleteLike(userId string, albumId uint64) error {
+	p.logger.Infoln("Album Repo DeleteLike entered")
+
+	query := "delete from profile_album where profile_id = $1 and album_id = $2"
+	_, err := p.Pool.Exec(context.Background(), query, userId, albumId)
+	if err != nil {
+		p.logger.WithFields(logrus.Fields{
+			"err":      err,
+			"album id": albumId,
+			"query":    query,
+		}).Errorln("delete like error")
+		return err
+	}
+	p.logger.Infoln("Like deleted")
+
+	return nil
+}

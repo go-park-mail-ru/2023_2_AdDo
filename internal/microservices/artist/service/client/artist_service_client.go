@@ -59,3 +59,36 @@ func (c *Client) GetArtistInfo(artistId uint64) (artist.Response, error) {
 
 	return DeserializeArtist(result), nil
 }
+
+func (c *Client) Like(userId string, artistId uint64) error {
+	c.logger.Infoln("Client for artist micros")
+
+	_, err := c.artistManager.Like(context.Background(), &proto.ArtistToUserId{UserId: userId, ArtistId: artistId})
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (c *Client) IsLike(userId string, artistId uint64) (bool, error) {
+	c.logger.Infoln("Client for artist micros")
+
+	isLiked, err := c.artistManager.IsLike(context.Background(), &proto.ArtistToUserId{UserId: userId, ArtistId: artistId})
+	if err != nil {
+		return false, err
+	}
+
+	return isLiked.GetIsLiked(), nil
+}
+
+func (c *Client) Unlike(userId string, artistId uint64) error {
+	c.logger.Infoln("Client for artist micros")
+
+	_, err := c.artistManager.Unlike(context.Background(), &proto.ArtistToUserId{UserId: userId, ArtistId: artistId})
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

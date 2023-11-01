@@ -176,9 +176,45 @@ func (p *Postgres) Delete(ctx context.Context, playlistId uint64) error {
 }
 
 func (p *Postgres) CreateLike(ctx context.Context, userId string, playlistId uint64) error {
-	p.logger.Infoln("Album Repo CreateLike entered")
+	p.logger.Infoln("Playlist Repo CreateLike entered")
 
-	query := "insert into musicon.public.profile_playlist (profile_id, playlist_id) values ($1, $2)"
+	query := "insert into profile_playlist (profile_id, playlist_id) values ($1, $2)"
+	_, err := p.Pool.Exec(context.Background(), query, userId, playlistId)
+	if err != nil {
+		p.logger.WithFields(logrus.Fields{
+			"err":         err,
+			"playlist Id": playlistId,
+			"query":       query,
+		}).Errorln("creating like error")
+		return err
+	}
+	p.logger.Infoln("Like Created")
+
+	return nil
+}
+
+func (p *Postgres) CheckLike(ctx context.Context, userId string, playlistId uint64) (bool, error) {
+	p.logger.Infoln("Playlist Repo CheckLike entered")
+
+	query := "select * from profile_playlist where profile_id = $1 and playlist_id = $2"
+	err := p.Pool.QueryRow(context.Background(), query, userId, playlistId).Scan()
+	if err != nil {
+		p.logger.WithFields(logrus.Fields{
+			"err":         err,
+			"playlist Id": playlistId,
+			"query":       query,
+		}).Errorln("checking like error")
+		return false, err
+	}
+	p.logger.Infoln("Like checked")
+
+	return true, nil
+}
+
+func (p *Postgres) DeleteLike(ctx context.Context, userId string, playlistId uint64) error {
+	p.logger.Infoln("playlist Repo CreateLike entered")
+
+	query := "delete from profile_playlist where profile_id = $1 and playlist_id = $2"
 	_, err := p.Pool.Exec(context.Background(), query, userId, playlistId)
 	if err != nil {
 		p.logger.WithFields(logrus.Fields{

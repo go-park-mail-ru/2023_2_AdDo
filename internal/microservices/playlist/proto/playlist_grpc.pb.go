@@ -30,6 +30,8 @@ type PlaylistServiceClient interface {
 	RemovePreview(ctx context.Context, in *PlaylistId, opts ...grpc.CallOption) (*proto1.ImageUrl, error)
 	DeleteById(ctx context.Context, in *PlaylistId, opts ...grpc.CallOption) (*empty.Empty, error)
 	Like(ctx context.Context, in *PlaylistToUserId, opts ...grpc.CallOption) (*empty.Empty, error)
+	IsLike(ctx context.Context, in *PlaylistToUserId, opts ...grpc.CallOption) (*IsLikedPlaylist, error)
+	Unlike(ctx context.Context, in *PlaylistToUserId, opts ...grpc.CallOption) (*empty.Empty, error)
 	HasModifyAccess(ctx context.Context, in *PlaylistToUserId, opts ...grpc.CallOption) (*HasAccess, error)
 	HasReadAccess(ctx context.Context, in *PlaylistId, opts ...grpc.CallOption) (*HasAccess, error)
 	MakePrivate(ctx context.Context, in *PlaylistId, opts ...grpc.CallOption) (*empty.Empty, error)
@@ -125,6 +127,24 @@ func (c *playlistServiceClient) Like(ctx context.Context, in *PlaylistToUserId, 
 	return out, nil
 }
 
+func (c *playlistServiceClient) IsLike(ctx context.Context, in *PlaylistToUserId, opts ...grpc.CallOption) (*IsLikedPlaylist, error) {
+	out := new(IsLikedPlaylist)
+	err := c.cc.Invoke(ctx, "/PlaylistService/IsLike", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *playlistServiceClient) Unlike(ctx context.Context, in *PlaylistToUserId, opts ...grpc.CallOption) (*empty.Empty, error) {
+	out := new(empty.Empty)
+	err := c.cc.Invoke(ctx, "/PlaylistService/Unlike", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *playlistServiceClient) HasModifyAccess(ctx context.Context, in *PlaylistToUserId, opts ...grpc.CallOption) (*HasAccess, error) {
 	out := new(HasAccess)
 	err := c.cc.Invoke(ctx, "/PlaylistService/HasModifyAccess", in, out, opts...)
@@ -174,6 +194,8 @@ type PlaylistServiceServer interface {
 	RemovePreview(context.Context, *PlaylistId) (*proto1.ImageUrl, error)
 	DeleteById(context.Context, *PlaylistId) (*empty.Empty, error)
 	Like(context.Context, *PlaylistToUserId) (*empty.Empty, error)
+	IsLike(context.Context, *PlaylistToUserId) (*IsLikedPlaylist, error)
+	Unlike(context.Context, *PlaylistToUserId) (*empty.Empty, error)
 	HasModifyAccess(context.Context, *PlaylistToUserId) (*HasAccess, error)
 	HasReadAccess(context.Context, *PlaylistId) (*HasAccess, error)
 	MakePrivate(context.Context, *PlaylistId) (*empty.Empty, error)
@@ -211,6 +233,12 @@ func (UnimplementedPlaylistServiceServer) DeleteById(context.Context, *PlaylistI
 }
 func (UnimplementedPlaylistServiceServer) Like(context.Context, *PlaylistToUserId) (*empty.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Like not implemented")
+}
+func (UnimplementedPlaylistServiceServer) IsLike(context.Context, *PlaylistToUserId) (*IsLikedPlaylist, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method IsLike not implemented")
+}
+func (UnimplementedPlaylistServiceServer) Unlike(context.Context, *PlaylistToUserId) (*empty.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Unlike not implemented")
 }
 func (UnimplementedPlaylistServiceServer) HasModifyAccess(context.Context, *PlaylistToUserId) (*HasAccess, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method HasModifyAccess not implemented")
@@ -399,6 +427,42 @@ func _PlaylistService_Like_Handler(srv interface{}, ctx context.Context, dec fun
 	return interceptor(ctx, in, info, handler)
 }
 
+func _PlaylistService_IsLike_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PlaylistToUserId)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlaylistServiceServer).IsLike(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/PlaylistService/IsLike",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlaylistServiceServer).IsLike(ctx, req.(*PlaylistToUserId))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PlaylistService_Unlike_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PlaylistToUserId)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlaylistServiceServer).Unlike(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/PlaylistService/Unlike",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlaylistServiceServer).Unlike(ctx, req.(*PlaylistToUserId))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _PlaylistService_HasModifyAccess_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(PlaylistToUserId)
 	if err := dec(in); err != nil {
@@ -513,6 +577,14 @@ var PlaylistService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Like",
 			Handler:    _PlaylistService_Like_Handler,
+		},
+		{
+			MethodName: "IsLike",
+			Handler:    _PlaylistService_IsLike_Handler,
+		},
+		{
+			MethodName: "Unlike",
+			Handler:    _PlaylistService_Unlike_Handler,
 		},
 		{
 			MethodName: "HasModifyAccess",

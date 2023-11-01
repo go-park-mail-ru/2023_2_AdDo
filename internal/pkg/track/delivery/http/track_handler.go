@@ -2,6 +2,7 @@ package track_delivery
 
 import (
 	"encoding/json"
+	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
 	"main/internal/common/handler"
 	"main/internal/common/response"
@@ -10,6 +11,7 @@ import (
 	"main/internal/pkg/session"
 	"main/internal/pkg/track"
 	"net/http"
+	"strconv"
 )
 
 type TrackHandler struct {
@@ -80,11 +82,11 @@ func (handler *TrackHandler) Like(w http.ResponseWriter, r *http.Request) error 
 		"request_id": utils.GenReqId(r.RequestURI + r.Method),
 	}).Infoln("Like TrackHandler entered")
 
-	var trackId track.Id
-	if err := json.NewDecoder(r.Body).Decode(&trackId); err != nil {
+	trackId, err := strconv.Atoi(mux.Vars(r)["id"])
+	if err != nil {
 		return common_handler.StatusError{Code: http.StatusBadRequest, Err: err}
 	}
-	handler.logger.Infoln("track id decoded")
+	handler.logger.Infoln("Parsed trackId from Vars")
 
 	sessionId, err := response.GetCookie(r)
 	if err != nil {
@@ -98,11 +100,82 @@ func (handler *TrackHandler) Like(w http.ResponseWriter, r *http.Request) error 
 	}
 	handler.logger.Infoln("got user id by session id")
 
-	err = handler.trackUseCase.Like(userId, trackId.Id)
+	err = handler.trackUseCase.Like(userId, uint64(trackId))
 	if err != nil {
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}
 	handler.logger.Infoln("like for track ", trackId, "created")
+
+	w.WriteHeader(http.StatusNoContent)
+	return nil
+}
+
+func (handler *TrackHandler) IsLike(w http.ResponseWriter, r *http.Request) error {
+	handler.logger.WithFields(logrus.Fields{
+		"request_id": utils.GenReqId(r.RequestURI + r.Method),
+	}).Infoln("Like TrackHandler entered")
+
+	trackId, err := strconv.Atoi(mux.Vars(r)["id"])
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusBadRequest, Err: err}
+	}
+	handler.logger.Infoln("Parsed trackId from Vars")
+
+	sessionId, err := response.GetCookie(r)
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusUnauthorized, Err: err}
+	}
+	handler.logger.Infoln("got cookie")
+
+	userId, err := handler.sessionUseCase.GetUserId(sessionId)
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusUnauthorized, Err: err}
+	}
+	handler.logger.Infoln("got user id by session id")
+
+	isLiked, err := handler.trackUseCase.IsLike(userId, uint64(trackId))
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
+	}
+	handler.logger.Infoln("like for track ", trackId, "checked")
+
+	err = response.RenderJSON(w, response.IsLiked{IsLiked: isLiked})
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
+	}
+	handler.logger.Infoln("response  formed")
+
+	return nil
+}
+
+func (handler *TrackHandler) Unlike(w http.ResponseWriter, r *http.Request) error {
+	handler.logger.WithFields(logrus.Fields{
+		"request_id": utils.GenReqId(r.RequestURI + r.Method),
+	}).Infoln("Like TrackHandler entered")
+
+	trackId, err := strconv.Atoi(mux.Vars(r)["id"])
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusBadRequest, Err: err}
+	}
+	handler.logger.Infoln("Parsed trackId from Vars")
+
+	sessionId, err := response.GetCookie(r)
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusUnauthorized, Err: err}
+	}
+	handler.logger.Infoln("got cookie")
+
+	userId, err := handler.sessionUseCase.GetUserId(sessionId)
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusUnauthorized, Err: err}
+	}
+	handler.logger.Infoln("got user id by session id")
+
+	err = handler.trackUseCase.Unlike(userId, uint64(trackId))
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
+	}
+	handler.logger.Infoln("like for track ", trackId, "deleted")
 
 	w.WriteHeader(http.StatusNoContent)
 	return nil

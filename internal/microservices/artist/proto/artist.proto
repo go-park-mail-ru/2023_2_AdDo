@@ -3,9 +3,23 @@ syntax = "proto3";
 option go_package = "/artist";
 import "album.proto";
 import "track.proto";
+import "google/protobuf/empty.proto";
+
 // protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative -I../proto -I../../track/proto -I../../album/proto artist.proto
 service ArtistService {
   rpc GetArtistInfo(ArtistId) returns(Artist) {}
+  rpc Like (ArtistToUserId) returns (google.protobuf.Empty) {}
+  rpc IsLike (ArtistToUserId) returns (IsLikedArtist) {}
+  rpc Unlike (ArtistToUserId) returns (google.protobuf.Empty) {}
+}
+
+message IsLikedArtist {
+  bool IsLiked = 1;
+}
+
+message ArtistToUserId {
+  string userId = 1;
+  uint64 artistId = 2;
 }
 
 message ArtistId {
