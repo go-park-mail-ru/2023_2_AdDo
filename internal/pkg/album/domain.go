@@ -28,6 +28,8 @@ type UseCase interface {
 	GetNew() ([]Response, error)
 	GetAlbum(albumId uint64) (Response, error)
 	Like(userId string, albumId uint64) error
+	IsLike(userId string, albumId uint64) (bool, error)
+	Unlike(userId string, albumId uint64) error
 }
 
 type Repository interface {
@@ -39,6 +41,8 @@ type Repository interface {
 	GetByListenCount(limit uint32) ([]Base, error)
 	GetRandom(limit uint32) ([]Base, error)
 	CreateLike(userId string, albumId uint64) error
+	CheckLike(userId string, albumId uint64) (bool, error)
+	DeleteLike(userId string, albumId uint64) error
 }
 
 const LimitForMainPage = 10

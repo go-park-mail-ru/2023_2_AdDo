@@ -39,6 +39,30 @@ func (tm *TrackManager) Listen(ctx context.Context, in *track_proto.TrackId) (*g
 	return &google_proto.Empty{}, nil
 }
 
+func (tm *TrackManager) IsLike(ctx context.Context, in *track_proto.TrackToUserId) (*track_proto.IsLikedTrack, error) {
+	tm.logger.Infoln("Track Micros Like entered")
+
+	isLiked, err := tm.repoTrack.CheckLike(in.GetUserId(), in.GetTrackId())
+	if err != nil {
+		return nil, err
+	}
+	tm.logger.Infoln("Like checked for track ", in.GetTrackId(), " by user ", in.GetUserId())
+
+	return &track_proto.IsLikedTrack{IsLiked: isLiked}, nil
+}
+
+func (tm *TrackManager) Unlike(ctx context.Context, in *track_proto.TrackToUserId) (*google_proto.Empty, error) {
+	tm.logger.Infoln("Track Micros Like entered")
+
+	err := tm.repoTrack.DeleteLike(in.GetUserId(), in.GetTrackId())
+	if err != nil {
+		return nil, err
+	}
+	tm.logger.Infoln("Like deleted for track ", in.GetTrackId(), " by user ", in.GetUserId())
+
+	return &google_proto.Empty{}, nil
+}
+
 func (tm *TrackManager) Like(ctx context.Context, in *track_proto.TrackToUserId) (*google_proto.Empty, error) {
 	tm.logger.Infoln("Track Micros Like entered")
 

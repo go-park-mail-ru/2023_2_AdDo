@@ -9,8 +9,8 @@ import (
 )
 
 const (
-	UserAvatarBucketName    = "user-images"
-	PlaylistImageBucketName = "playlist-images"
+	UserAvatarBucketName    = "user-avatar"
+	PlaylistImageBucketName = "playlist-image"
 )
 
 func InitMinio() (*minio.Client, error) {

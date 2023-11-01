@@ -17,10 +17,16 @@ service PlaylistService {
   rpc RemovePreview (PlaylistId) returns (ImageUrl) {}
   rpc DeleteById (PlaylistId) returns (google.protobuf.Empty) {}
   rpc Like (PlaylistToUserId) returns (google.protobuf.Empty) {}
+  rpc IsLike (PlaylistToUserId) returns (IsLikedPlaylist) {}
+  rpc Unlike (PlaylistToUserId) returns (google.protobuf.Empty) {}
   rpc HasModifyAccess (PlaylistToUserId) returns (HasAccess) {}
   rpc HasReadAccess (PlaylistId) returns (HasAccess) {}
   rpc MakePrivate (PlaylistId) returns (google.protobuf.Empty) {}
   rpc MakePublic (PlaylistId) returns (google.protobuf.Empty) {}
+}
+
+message IsLikedPlaylist {
+  bool IsLiked = 1;
 }
 
 message HasAccess {

@@ -154,6 +154,28 @@ func (c *Client) Like(userId string, playlistId uint64) error {
 	return nil
 }
 
+func (c *Client) IsLike(userId string, playlistId uint64) (bool, error) {
+	c.logger.Infoln("Client to Playlist Micros CheckLike entered")
+
+	isLiked, err := c.playlistManager.IsLike(context.Background(), &playlist_proto.PlaylistToUserId{UserId: userId, PlaylistId: playlistId})
+	if err != nil {
+		return false, err
+	}
+
+	return isLiked.GetIsLiked(), nil
+}
+
+func (c *Client) Unlike(userId string, playlistId uint64) error {
+	c.logger.Infoln("Client to Playlist Micros Unlike entered")
+
+	_, err := c.playlistManager.Unlike(context.Background(), &playlist_proto.PlaylistToUserId{UserId: userId, PlaylistId: playlistId})
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (c *Client) HasModifyAccess(userId string, playlistId uint64) (bool, error) {
 	c.logger.Infoln("Client to Playlist Micros HasModifyAccess entered")
 

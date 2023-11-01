@@ -79,7 +79,7 @@ func main() {
 	logger.Infoln("Clients to micros initialized")
 
 	albumHandler := album_delivery.NewHandler(&trackAgent, &albumAgent, &sessionAgent, logger)
-	artistHandler := artist_delivery.NewHandler(&artistAgent, logger)
+	artistHandler := artist_delivery.NewHandler(&sessionAgent, &artistAgent, logger)
 	userHandler := user_delivery.NewHandler(&userAgent, &sessionAgent, logger)
 	trackHandler := track_delivery.NewHandler(&trackAgent, &sessionAgent, logger)
 	playlistHandler := playlist_delivery.NewHandler(&playlistAgent, &sessionAgent, logger)

@@ -22,13 +22,13 @@ class AuthTest(unittest.TestCase):
             'BirthDate': '12-01-2003',
         }
         response = requests.post(url + "/sign_up", headers=headers, json=register_data, cookies=cookies)
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 204)
         self.assertNotEqual(response.cookies['JSESSIONID'], "")
 
         cookies['JSESSIONID'] = response.cookies['JSESSIONID']
 
         response = requests.get(url + '/auth', headers=headers, cookies=cookies)
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 204)
 
 auth_test = AuthTest()
 auth_test.test_auth_success()

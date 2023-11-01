@@ -63,9 +63,18 @@ func New(playlistUseCase playlist.UseCase, sessionUseCase session.UseCase, userH
 	router.Handle("/api/v1/me", common_handler.Handler{H: userHandler.Me}).Methods("GET")
 
 	router.Handle("/api/v1/listen", common_handler.Handler{H: trackHandler.Listen}).Methods("POST")
-	router.Handle("/api/v1/like_track", common_handler.Handler{H: trackHandler.Like}).Methods("POST")
-	router.Handle("/api/v1/like_album", common_handler.Handler{H: albumHandler.Like}).Methods("POST")
-	router.Handle("/api/v1/like_playlist", common_handler.Handler{H: playlistHandler.Like}).Methods("POST")
+
+	router.Handle("/api/v1/track/{id}/like", common_handler.Handler{H: trackHandler.Like}).Methods("POST")
+	router.Handle("/api/v1/album/{id}/like", common_handler.Handler{H: albumHandler.Like}).Methods("POST")
+	router.Handle("/api/v1/artist/{id}/like", common_handler.Handler{H: artistHandler.Like}).Methods("POST")
+
+	router.Handle("/api/v1/track/{id}/is_like", common_handler.Handler{H: trackHandler.IsLike}).Methods("GET")
+	router.Handle("/api/v1/album/{id}/is_like", common_handler.Handler{H: albumHandler.IsLike}).Methods("GET")
+	router.Handle("/api/v1/artist/{id}/is_like", common_handler.Handler{H: artistHandler.IsLike}).Methods("GET")
+
+	router.Handle("/api/v1/track/{id}/unlike", common_handler.Handler{H: trackHandler.Unlike}).Methods("DELETE")
+	router.Handle("/api/v1/album/{id}/unlike", common_handler.Handler{H: albumHandler.Unlike}).Methods("DELETE")
+	router.Handle("/api/v1/artist/{id}/unlike", common_handler.Handler{H: artistHandler.Unlike}).Methods("DELETE")
 
 	router.Handle("/api/v1/artist/{id}", common_handler.Handler{H: artistHandler.ArtistInfo}).Methods("GET")
 	router.Handle("/api/v1/album/{id}", common_handler.Handler{H: albumHandler.AlbumTracks}).Methods("GET")
@@ -85,7 +94,10 @@ func New(playlistUseCase playlist.UseCase, sessionUseCase session.UseCase, userH
 	playlistRouterModify.Handle("/api/v1/playlist/{id}/make_public", common_handler.Handler{H: playlistHandler.MakePublic}).Methods("PUT")
 	playlistRouterModify.Handle("/api/v1/playlist/{id}/update_preview", common_handler.Handler{H: playlistHandler.UpdatePreview}).Methods("POST")
 
-	playlistRouterRead.Handle("/api/v1/playlist/{id}", common_handler.Handler{H: playlistHandler.Get}).Methods("POST")
+	playlistRouterRead.Handle("/api/v1/playlist/{id}/like", common_handler.Handler{H: playlistHandler.Like}).Methods("POST")
+	playlistRouterRead.Handle("/api/v1/playlist/{id}/is_like", common_handler.Handler{H: playlistHandler.IsLike}).Methods("GET")
+	playlistRouterRead.Handle("/api/v1/playlist/{id}/unlike", common_handler.Handler{H: playlistHandler.Unlike}).Methods("DELETE")
+	playlistRouterRead.Handle("/api/v1/playlist/{id}", common_handler.Handler{H: playlistHandler.Get}).Methods("GET")
 
 	modifyPlaylistMiddleware := modify_playlist.NewMiddleware(playlistUseCase, sessionUseCase, logger)
 	readPlaylistMiddleware := read_playlist.NewMiddleware(playlistUseCase, logger)
@@ -118,5 +130,4 @@ func New(playlistUseCase playlist.UseCase, sessionUseCase session.UseCase, userH
 	return routerWithMiddleware
 }
 
-/// Todo is_liked поле для треков: сходить в микрос юзеров и получить все его лайки
 /// Todo Протестировать весь функционал юнит и интеграционными тестами

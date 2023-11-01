@@ -97,6 +97,42 @@ func (db *Postgres) CreateLike(userId string, trackId uint64) error {
 	return nil
 }
 
+func (db *Postgres) CheckLike(userId string, trackId uint64) (bool, error) {
+	db.logger.Infoln("TrackRepo CheckLike entered")
+
+	query := "select * from profile_track where profile_id = $1 and track_id = $2"
+	err := db.Pool.QueryRow(context.Background(), query, userId, trackId).Scan()
+	if err != nil {
+		db.logger.WithFields(logrus.Fields{
+			"query":    query,
+			"track id": trackId,
+			"err":      err,
+		}).Errorln("create like failed")
+		return false, err
+	}
+	db.logger.Infoln("like created")
+
+	return true, nil
+}
+
+func (db *Postgres) DeleteLike(userId string, trackId uint64) error {
+	db.logger.Infoln("TrackRepo DeleteLike entered")
+
+	query := "delete from profile_track where profile_id = $1 and track_id = $2"
+	_, err := db.Pool.Exec(context.Background(), query, userId, trackId)
+	if err != nil {
+		db.logger.WithFields(logrus.Fields{
+			"query":    query,
+			"track id": trackId,
+			"err":      err,
+		}).Errorln("deleting like failed")
+		return err
+	}
+	db.logger.Infoln("like deleted")
+
+	return nil
+}
+
 func (db *Postgres) AddListen(trackId uint64) error {
 	db.logger.Infoln("TrackRepo AddListen entered")
 
