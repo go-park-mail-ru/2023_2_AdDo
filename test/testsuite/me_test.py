@@ -1,44 +1,32 @@
 import unittest
 import requests
-import names
-
-url = 'http://localhost:8888/api/v1'
+import utils
 
 
 class MeTest(unittest.TestCase):
+    def test_me_forbidden(self):
+        response = requests.get(utils.url + '/me')
+        self.assertEqual(response.status_code, 403)
+
+    def test_me_unauthorized(self):
+        headers, cookies = utils.get_csrf_headers_and_cookies()
+
+        response = requests.get(utils.url + '/me', cookies=cookies, headers=headers)
+        self.assertEqual(response.status_code, 401)
+
     def test_me_success(self):
-        pre_response = requests.get(url + '/auth')
-
-        headers = {
-            'X-Csrf-Token': pre_response.headers['X-Csrf-Token']
-        }
-        cookies = {
-            'X-Csrf-Token': pre_response.cookies['X-Csrf-Token']
-        }
-
-        username = names.get_full_name().replace(' ', '').lower()
-        email = username + '@mail.ru'
-        register_data = {
-            'Email': email,
-            'Password': 'userPassword',
-            'Username': username,
-            'BirthDate': '2003-01-12',
-        }
-        response = requests.post(url + "/sign_up", headers=headers, json=register_data, cookies=cookies)
-        self.assertEqual(response.status_code, 200)
-        self.assertNotEqual(response.cookies['JSESSIONID'], "")
+        headers, cookies = utils.get_csrf_headers_and_cookies()
+        data = utils.gen_random_valid_register_data()
+        response = requests.post(utils.url + "/sign_up", headers=headers, json=data, cookies=cookies)
+        self.assertEqual(response.status_code, 204)
 
         cookies['JSESSIONID'] = response.cookies['JSESSIONID']
 
-        response = requests.get(url + '/me', headers=headers, cookies=cookies)
+        response = requests.get(utils.url + '/me', headers=headers, cookies=cookies)
 
         self.assertEqual(response.status_code, 200)
         self.assertNotEqual(response.json()['Id'], 0)
-        self.assertEqual(response.json()['Username'], register_data['Username'])
-        self.assertEqual(response.json()['Email'], register_data['Email'])
-        self.assertEqual(response.json()['BirthDate'], register_data['BirthDate'])
+        self.assertEqual(response.json()['Username'], data['Username'])
+        self.assertEqual(response.json()['Email'], data['Email'])
+        self.assertEqual(response.json()['BirthDate'], data['BirthDate'])
         self.assertEqual(response.json()['Avatar'], '')
-
-
-me_test = MeTest()
-me_test.test_me_success()

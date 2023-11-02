@@ -55,12 +55,11 @@ func New(playlistUseCase playlist.UseCase, sessionUseCase session.UseCase, userH
 	router.Handle("/api/v1/sign_up", common_handler.Handler{H: userHandler.SignUp}).Methods("POST")
 	router.Handle("/api/v1/login", common_handler.Handler{H: userHandler.Login}).Methods("POST")
 	router.Handle("/api/v1/update_info", common_handler.Handler{H: userHandler.UpdateUserInfo}).Methods("PUT")
-	router.Handle("/api/v1/logout", common_handler.Handler{H: userHandler.LogOut}).Methods("POST")
-
-	router.Handle("/api/v1/playlist", common_handler.Handler{H: playlistHandler.Create}).Methods("POST")
-
+	router.Handle("/api/v1/upload_avatar", common_handler.Handler{H: userHandler.UploadAvatar}).Methods("POST")
+	router.Handle("/api/v1/remove_avatar", common_handler.Handler{H: userHandler.RemoveAvatar}).Methods("POST")
 	router.Handle("/api/v1/auth", common_handler.Handler{H: userHandler.Auth}).Methods("GET")
 	router.Handle("/api/v1/me", common_handler.Handler{H: userHandler.Me}).Methods("GET")
+	router.Handle("/api/v1/logout", common_handler.Handler{H: userHandler.LogOut}).Methods("POST")
 
 	router.Handle("/api/v1/listen", common_handler.Handler{H: trackHandler.Listen}).Methods("POST")
 
@@ -84,8 +83,7 @@ func New(playlistUseCase playlist.UseCase, sessionUseCase session.UseCase, userH
 	router.Handle("/api/v1/most_liked", common_handler.Handler{H: albumHandler.MostLiked}).Methods("GET")
 	router.Handle("/api/v1/popular", common_handler.Handler{H: albumHandler.Popular}).Methods("GET")
 
-	router.Handle("/api/v1/upload_avatar", common_handler.Handler{H: userHandler.UploadAvatar}).Methods("POST")
-	router.Handle("/api/v1/remove_avatar", common_handler.Handler{H: userHandler.RemoveAvatar}).Methods("POST")
+	router.Handle("/api/v1/playlist", common_handler.Handler{H: playlistHandler.Create}).Methods("POST")
 
 	playlistRouterModify.Handle("/api/v1/playlist/{id}", common_handler.Handler{H: playlistHandler.Delete}).Methods("DELETE")
 	playlistRouterModify.Handle("/api/v1/playlist/{id}/add_track", common_handler.Handler{H: playlistHandler.AddTrack}).Methods("POST")
