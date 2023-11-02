@@ -1,34 +1,15 @@
 import unittest
 import requests
-
-url = 'http://localhost:8888/api/v1'
+import utils
 
 
 class AuthTest(unittest.TestCase):
+    def test_auth_unauthorized(self):
+        response = requests.get(utils.url + '/auth')
+        self.assertEqual(response.status_code, 401)
+
     def test_auth_success(self):
-        pre_response = requests.get(url + '/auth')
+        headers, cookies = utils.init_authorized_user_headers_and_cookies()
 
-        headers = {
-            'X-Csrf-Token': pre_response.headers['X-Csrf-Token']
-        }
-        cookies = {
-            'X-Csrf-Token': pre_response.cookies['X-Csrf-Token']
-        }
-
-        register_data = {
-            'Email': 'petr@mail.ru',
-            'Password': 'userPassword',
-            'Username': 'username',
-            'BirthDate': '12-01-2003',
-        }
-        response = requests.post(url + "/sign_up", headers=headers, json=register_data, cookies=cookies)
+        response = requests.get(utils.url + '/auth', headers=headers, cookies=cookies)
         self.assertEqual(response.status_code, 204)
-        self.assertNotEqual(response.cookies['JSESSIONID'], "")
-
-        cookies['JSESSIONID'] = response.cookies['JSESSIONID']
-
-        response = requests.get(url + '/auth', headers=headers, cookies=cookies)
-        self.assertEqual(response.status_code, 204)
-
-auth_test = AuthTest()
-auth_test.test_auth_success()
