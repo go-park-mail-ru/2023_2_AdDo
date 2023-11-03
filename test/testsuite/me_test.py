@@ -6,7 +6,7 @@ import utils
 class MeTest(unittest.TestCase):
     def test_me_forbidden(self):
         response = requests.get(utils.url + '/me')
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 401)
 
     def test_me_unauthorized(self):
         headers, cookies = utils.get_csrf_headers_and_cookies()

@@ -5,16 +5,12 @@ import hashlib
 url = 'http://localhost:8080/api/v1'
 
 
-def get_md5(s):
-    return hashlib.md5(s)
-
-
 def gen_random_valid_register_data():
     username = names.get_full_name().replace(' ', '').lower()
     email = username + '@mail.ru'
     register_data = {
         'Email': email,
-        'Password': get_md5(username),
+        'Password': 'password',
         'Username': username,
         'BirthDate': '2003-01-12',
     }

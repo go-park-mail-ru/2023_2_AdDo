@@ -17,25 +17,17 @@ type Base struct {
 	ContentType string
 }
 
-func CreateImageFromSource(src io.Reader, size int64) (Base, error) {
+func CreateImageFromSource(data []byte, size int64) (Base, error) {
 	if size > MaxAvatarSize {
 		return Base{}, ErrAvatarIsTooLarge
 	}
 
-	data, err := io.ReadAll(src)
-	if err != nil {
-		return Base{}, ErrCannotRead
-	}
-
 	contentType := http.DetectContentType(data[:512])
-	if !strings.HasPrefix(contentType, "images/") {
+	if !strings.HasPrefix(contentType, "image/") {
 		return Base{}, ErrWrongAvatarType
 	}
 
-	src = bytes.NewReader(data)
-	if err != nil {
-		return Base{}, err
-	}
+	src := bytes.NewReader(data)
 
 	name := utils.GetImageName(path.Base(contentType))
 	return Base{
@@ -64,5 +56,5 @@ var (
 	ErrAvatarDoesNotExist = errors.New("images does not exist")
 	ErrAvatarIsTooLarge   = errors.New("file is too large")
 	ErrCannotRead         = errors.New("cannot read file")
-	ErrWrongAvatarType    = errors.New("wrong images type")
+	ErrWrongAvatarType    = errors.New("wrong image type")
 )

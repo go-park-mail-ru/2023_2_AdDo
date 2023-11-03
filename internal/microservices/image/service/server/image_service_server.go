@@ -4,7 +4,6 @@ import (
 	"context"
 	google_proto "github.com/golang/protobuf/ptypes/empty"
 	"github.com/sirupsen/logrus"
-	"main/internal/common/utils"
 	image_proto "main/internal/microservices/image/proto"
 	"main/internal/pkg/image"
 )
@@ -25,14 +24,16 @@ func NewImageManager(rp image.Repository, logger *logrus.Logger) ImageManager {
 func (im *ImageManager) UploadAvatar(ctx context.Context, in *image_proto.Image) (*image_proto.ImageUrl, error) {
 	im.logger.Infoln("Image micros UploadAvatar entered")
 
-	base, err := image.CreateImageFromSource(utils.GetReaderFromBytes(in.GetData()), int64(in.GetSize()))
+	base, err := image.CreateImageFromSource(in.GetData(), int64(in.GetSize()))
 	if err != nil {
+		im.logger.Errorln(err)
 		return nil, err
 	}
 	im.logger.Infoln("Image got from message")
 
 	url, err := im.repoImage.UploadAvatar(base)
 	if err != nil {
+		im.logger.Errorln(err)
 		return nil, err
 	}
 	im.logger.Infoln("Image uploaded")
@@ -43,7 +44,7 @@ func (im *ImageManager) UploadAvatar(ctx context.Context, in *image_proto.Image)
 func (im *ImageManager) UploadPlaylistImage(ctx context.Context, in *image_proto.Image) (*image_proto.ImageUrl, error) {
 	im.logger.Infoln("Image micros UploadPlaylistImage entered")
 
-	base, err := image.CreateImageFromSource(utils.GetReaderFromBytes(in.GetData()), int64(in.GetSize()))
+	base, err := image.CreateImageFromSource(in.GetData(), int64(in.GetSize()))
 	if err != nil {
 		return nil, err
 	}

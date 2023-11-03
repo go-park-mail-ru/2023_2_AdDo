@@ -17,8 +17,8 @@ class UpdateInfo(unittest.TestCase):
     def test_update_info_success(self):
         headers, cookies = utils.init_authorized_user_headers_and_cookies()
 
-        new_data = utils.gen_random_valid_update_data()
-        response = requests.put(utils.url + '/update_info', headers=headers, cookies=cookies, data=new_data)
+        new_data = utils.gen_random_valid_register_data()
+        response = requests.put(utils.url + '/update_info', headers=headers, cookies=cookies, json=new_data)
         self.assertEqual(response.status_code, 204)
 
         response = requests.get(utils.url + '/me', headers=headers, cookies=cookies)
