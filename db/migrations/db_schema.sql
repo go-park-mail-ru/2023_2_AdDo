@@ -28,7 +28,8 @@ create table if not exists playlist (
     foreign key (creator_id) references profile (id) on delete cascade,
     preview    varchar(1024),
     -- ссылка на объект в s3 хранилище довольно длинная, порядка пяти сотен символов
-    creating_date timestamptz not null default now()
+    creating_date timestamptz not null default now(),
+    is_private bool not null default false
 );
 
 create table if not exists album (
@@ -59,7 +60,8 @@ create table if not exists album_track (
     album_id int not null,
     track_id int not null,
     foreign key (album_id) references album (id) on delete cascade ,
-    foreign key (track_id) references track (id) on delete cascade
+    foreign key (track_id) references track (id) on delete cascade,
+    constraint unique_album_track UNIQUE (album_id, track_id)
 );
 
 create table if not exists artist_track (
@@ -67,7 +69,8 @@ create table if not exists artist_track (
     artist_id int not null,
     track_id int not null,
     foreign key (artist_id) references artist (id) on delete cascade ,
-    foreign key (track_id) references track (id) on delete cascade
+    foreign key (track_id) references track (id) on delete cascade,
+    constraint unique_artist_track UNIQUE (artist_id, track_id)
 );
 
 create table if not exists playlist_track (
@@ -75,7 +78,8 @@ create table if not exists playlist_track (
     playlist_id int not null,
     foreign key (playlist_id) references playlist (id) on delete cascade ,
     track_id    int not null,
-    foreign key (track_id) references track (id) on delete cascade
+    foreign key (track_id) references track (id) on delete cascade,
+    constraint unique_playlist_track UNIQUE (playlist_id, track_id)
 );
 
 create table if not exists profile_track (
@@ -83,7 +87,8 @@ create table if not exists profile_track (
     profile_id uuid not null,
     foreign key (profile_id) references profile (id) on delete cascade ,
     track_id int not null,
-    foreign key (track_id) references track (id) on delete cascade
+    foreign key (track_id) references track (id) on delete cascade,
+    constraint unique_profile_track UNIQUE (profile_id, track_id)
 );
 
 create table if not exists profile_artist (
@@ -91,7 +96,8 @@ create table if not exists profile_artist (
     profile_id uuid not null,
     foreign key (profile_id) references profile (id) on delete cascade ,
     artist_id int not null,
-    foreign key (artist_id) references artist (id) on delete cascade
+    foreign key (artist_id) references artist (id) on delete cascade,
+    constraint unique_profile_artist UNIQUE (profile_id, artist_id)
 );
 
 create table if not exists profile_album (
@@ -99,7 +105,8 @@ create table if not exists profile_album (
     profile_id uuid not null,
     foreign key (profile_id) references profile (id) on delete cascade ,
     album_id int not null,
-    foreign key (album_id) references album (id) on delete cascade
+    foreign key (album_id) references album (id) on delete cascade,
+    constraint unique_profile_album UNIQUE (profile_id, album_id)
 );
 
 create table if not exists profile_playlist (
@@ -107,5 +114,6 @@ create table if not exists profile_playlist (
     profile_id uuid not null,
     foreign key (profile_id) references profile (id) on delete cascade ,
     playlist_id int not null,
-    foreign key (playlist_id) references playlist (id) on delete cascade
+    foreign key (playlist_id) references playlist (id) on delete cascade,
+    constraint unique_profile_playlist UNIQUE (profile_id, playlist_id)
 );

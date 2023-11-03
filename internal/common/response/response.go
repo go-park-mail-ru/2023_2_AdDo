@@ -7,6 +7,10 @@ import (
 	"time"
 )
 
+type IsLiked struct {
+	IsLiked bool `json:"IsLiked"`
+}
+
 func GetCookie(r *http.Request) (string, error) {
 	cookie, err := r.Cookie(session.CookieName)
 	if err != nil {

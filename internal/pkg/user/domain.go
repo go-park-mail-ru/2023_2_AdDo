@@ -2,10 +2,9 @@ package user_domain
 
 import (
 	"errors"
+	"github.com/asaskevich/govalidator"
 	xssvalidator "github.com/infiniteloopcloud/xss-validator"
 	"io"
-
-	"github.com/asaskevich/govalidator"
 )
 
 type UserCredentials struct {
@@ -19,7 +18,12 @@ type User struct {
 	Email     string `valid:"length(1|30), email, required, printableascii" json:"Email" example:"example@gmail.com"`
 	Password  string `valid:"length(6|30), required, printableascii" json:"Password" example:"password"`
 	BirthDate string `valid:"required" json:"BirthDate" example:"2000-01-01"`
-	Avatar    string `valid:"url_optional" json:"Avatar" example:"http://test/image/1.jpg,http://test/image/2.jpg"`
+	Avatar    string `valid:"url_optional" json:"Avatar" example:"http://test/images/1.jpg,http://test/images/2.jpg"`
+}
+
+func (u *User) ValidateForUpdate() error {
+	u.Password = "password"
+	return u.Validate()
 }
 
 func (u *User) Validate() error {
@@ -71,18 +75,7 @@ func (uC *UserCredentials) Validate() error {
 }
 
 type UploadAvatarResponse struct {
-	Url string `json:"AvatarUrl" example:"/user-avatar/avatar.png"`
-}
-
-type AvatarUseCase interface {
-	UploadAvatar(userId string, src io.Reader, size int64) (string, error)
-	RemoveAvatar(userId string) error
-}
-
-type AvatarDbRepository interface {
-	UpdateAvatarPath(userId string, path string) error
-	GetAvatarPath(userId string) (string, error)
-	RemoveAvatarPath(userId string) error
+	Url string `json:"AvatarUrl" example:"/user-images/images.png"`
 }
 
 type UseCase interface {
@@ -92,7 +85,8 @@ type UseCase interface {
 	GetUserInfo(sessionId string) (User, error)
 	Logout(sessionId string) error
 	UpdateUserInfo(userId string, user User) error
-	AvatarUseCase
+	UploadAvatar(userId string, src io.Reader, size int64) (string, error)
+	RemoveAvatar(userId string) error
 }
 
 type Repository interface {
@@ -100,7 +94,9 @@ type Repository interface {
 	GetById(id string) (User, error)
 	CheckEmailAndPassword(email string, password string) (string, error)
 	UpdateUserInfo(user User) error
-	AvatarDbRepository
+	UpdateAvatarPath(userId string, path string) error
+	GetAvatarPath(userId string) (string, error)
+	RemoveAvatarPath(userId string) (string, error)
 }
 
 var (

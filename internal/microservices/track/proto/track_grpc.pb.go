@@ -21,6 +21,8 @@ const _ = grpc.SupportPackageIsVersion7
 type TrackServiceClient interface {
 	Listen(ctx context.Context, in *TrackId, opts ...grpc.CallOption) (*empty.Empty, error)
 	Like(ctx context.Context, in *TrackToUserId, opts ...grpc.CallOption) (*empty.Empty, error)
+	IsLike(ctx context.Context, in *TrackToUserId, opts ...grpc.CallOption) (*IsLikedTrack, error)
+	Unlike(ctx context.Context, in *TrackToUserId, opts ...grpc.CallOption) (*empty.Empty, error)
 }
 
 type trackServiceClient struct {
@@ -49,12 +51,32 @@ func (c *trackServiceClient) Like(ctx context.Context, in *TrackToUserId, opts .
 	return out, nil
 }
 
+func (c *trackServiceClient) IsLike(ctx context.Context, in *TrackToUserId, opts ...grpc.CallOption) (*IsLikedTrack, error) {
+	out := new(IsLikedTrack)
+	err := c.cc.Invoke(ctx, "/TrackService/IsLike", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *trackServiceClient) Unlike(ctx context.Context, in *TrackToUserId, opts ...grpc.CallOption) (*empty.Empty, error) {
+	out := new(empty.Empty)
+	err := c.cc.Invoke(ctx, "/TrackService/Unlike", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // TrackServiceServer is the server API for TrackService service.
 // All implementations must embed UnimplementedTrackServiceServer
 // for forward compatibility
 type TrackServiceServer interface {
 	Listen(context.Context, *TrackId) (*empty.Empty, error)
 	Like(context.Context, *TrackToUserId) (*empty.Empty, error)
+	IsLike(context.Context, *TrackToUserId) (*IsLikedTrack, error)
+	Unlike(context.Context, *TrackToUserId) (*empty.Empty, error)
 	mustEmbedUnimplementedTrackServiceServer()
 }
 
@@ -67,6 +89,12 @@ func (UnimplementedTrackServiceServer) Listen(context.Context, *TrackId) (*empty
 }
 func (UnimplementedTrackServiceServer) Like(context.Context, *TrackToUserId) (*empty.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Like not implemented")
+}
+func (UnimplementedTrackServiceServer) IsLike(context.Context, *TrackToUserId) (*IsLikedTrack, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method IsLike not implemented")
+}
+func (UnimplementedTrackServiceServer) Unlike(context.Context, *TrackToUserId) (*empty.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Unlike not implemented")
 }
 func (UnimplementedTrackServiceServer) mustEmbedUnimplementedTrackServiceServer() {}
 
@@ -117,6 +145,42 @@ func _TrackService_Like_Handler(srv interface{}, ctx context.Context, dec func(i
 	return interceptor(ctx, in, info, handler)
 }
 
+func _TrackService_IsLike_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TrackToUserId)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TrackServiceServer).IsLike(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/TrackService/IsLike",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TrackServiceServer).IsLike(ctx, req.(*TrackToUserId))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TrackService_Unlike_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TrackToUserId)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TrackServiceServer).Unlike(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/TrackService/Unlike",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TrackServiceServer).Unlike(ctx, req.(*TrackToUserId))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // TrackService_ServiceDesc is the grpc.ServiceDesc for TrackService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -131,6 +195,14 @@ var TrackService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Like",
 			Handler:    _TrackService_Like_Handler,
+		},
+		{
+			MethodName: "IsLike",
+			Handler:    _TrackService_IsLike_Handler,
+		},
+		{
+			MethodName: "Unlike",
+			Handler:    _TrackService_Unlike_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

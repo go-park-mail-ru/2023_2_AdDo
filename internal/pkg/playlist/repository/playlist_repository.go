@@ -105,6 +105,23 @@ func (p *Postgres) AddTrack(ctx context.Context, playlistId, trackId uint64) err
 	return nil
 }
 
+func (p *Postgres) RemoveTrack(ctx context.Context, playlistId, trackId uint64) error {
+	p.logger.Infoln("Playlist Repo RemoveTrack entered")
+
+	query := "delete from playlist_track where playlist_id = $1 and track_id = $2"
+	_, err := p.Pool.Exec(ctx, query, playlistId, trackId)
+	if err != nil {
+		p.logger.WithFields(logrus.Fields{
+			"error":       err,
+			"playlist id": playlistId,
+			"track id":    trackId,
+			"query":       query,
+		}).Errorln("error while removing track into playlist")
+	}
+
+	return nil
+}
+
 func (p *Postgres) UpdateImage(ctx context.Context, playlistId uint64, image string) error {
 	p.logger.Infoln("Playlist Repo UpdateImage entered")
 
@@ -112,15 +129,34 @@ func (p *Postgres) UpdateImage(ctx context.Context, playlistId uint64, image str
 	_, err := p.Pool.Exec(ctx, query, image, playlistId)
 	if err != nil {
 		p.logger.WithFields(logrus.Fields{
-			"error":          err,
-			"image url path": image,
-			"playlist id":    playlistId,
-			"query":          query,
-		}).Errorln("error while updating image into playlist")
+			"error":           err,
+			"images url path": image,
+			"playlist id":     playlistId,
+			"query":           query,
+		}).Errorln("error while updating images into playlist")
 		return err
 	}
 
 	return nil
+}
+
+func (p *Postgres) RemovePreviewPath(ctx context.Context, playlistId uint64) (string, error) {
+	p.logger.Infoln("Playlist Repo UpdateImage entered")
+
+	var result string
+	query := "update playlist set preview = null where id = $1 returning preview"
+	err := p.Pool.QueryRow(ctx, query, playlistId).Scan(&result)
+	if err != nil {
+		p.logger.WithFields(logrus.Fields{
+			"error":       err,
+			"playlist id": playlistId,
+			"preview":     result,
+			"query":       query,
+		}).Errorln("error while updating images into playlist")
+		return "", err
+	}
+
+	return result, nil
 }
 
 func (p *Postgres) Delete(ctx context.Context, playlistId uint64) error {
@@ -140,10 +176,129 @@ func (p *Postgres) Delete(ctx context.Context, playlistId uint64) error {
 	return nil
 }
 
-//type Repository interface {
-//	Create(playlist Base) error
-//	Get(playlistId uint64) (Base, error)
-//	AddTrack(playlistId, trackId uint64) error
-//	UpdateImage(playlistId, image string) error
-//	Delete(playlistId uint64) error
-//}
+func (p *Postgres) CreateLike(ctx context.Context, userId string, playlistId uint64) error {
+	p.logger.Infoln("Playlist Repo CreateLike entered")
+
+	query := "insert into profile_playlist (profile_id, playlist_id) values ($1, $2)"
+	_, err := p.Pool.Exec(context.Background(), query, userId, playlistId)
+	if err != nil {
+		p.logger.WithFields(logrus.Fields{
+			"err":         err,
+			"playlist Id": playlistId,
+			"query":       query,
+		}).Errorln("creating like error")
+		return err
+	}
+	p.logger.Infoln("Like Created")
+
+	return nil
+}
+
+func (p *Postgres) CheckLike(ctx context.Context, userId string, playlistId uint64) (bool, error) {
+	p.logger.Infoln("Playlist Repo CheckLike entered")
+
+	var counter int
+	query := "select count(*) from profile_playlist where profile_id = $1 and playlist_id = $2"
+	err := p.Pool.QueryRow(context.Background(), query, userId, playlistId).Scan(&counter)
+	if err != nil {
+		p.logger.Errorln(err)
+		return false, err
+	}
+	p.logger.Infoln("like checked")
+
+	if counter == 0 {
+		return false, nil
+	}
+
+	return true, nil
+}
+
+func (p *Postgres) DeleteLike(ctx context.Context, userId string, playlistId uint64) error {
+	p.logger.Infoln("playlist Repo CreateLike entered")
+
+	query := "delete from profile_playlist where profile_id = $1 and playlist_id = $2"
+	_, err := p.Pool.Exec(context.Background(), query, userId, playlistId)
+	if err != nil {
+		p.logger.WithFields(logrus.Fields{
+			"err":         err,
+			"playlist Id": playlistId,
+			"query":       query,
+		}).Errorln("creating like error")
+		return err
+	}
+	p.logger.Infoln("Like Created")
+
+	return nil
+}
+
+func (p *Postgres) IsCreator(ctx context.Context, userId string, playlistId uint64) (bool, error) {
+	p.logger.Infoln("Album Repo IsCreator entered")
+
+	var creatorId string
+	query := "select creator_id from playlist where id = $1"
+	err := p.Pool.QueryRow(context.Background(), query, userId, playlistId).Scan(&creatorId)
+	if err != nil {
+		p.logger.WithFields(logrus.Fields{
+			"err":         err,
+			"playlist Id": playlistId,
+			"query":       query,
+		}).Errorln("getting creator error")
+		return false, err
+	}
+	p.logger.Infoln("Got creatorId")
+
+	return creatorId == userId, nil
+}
+
+func (p *Postgres) IsPrivate(ctx context.Context, playlistId uint64) (bool, error) {
+	p.logger.Infoln("Album Repo IsPrivate entered")
+
+	var isPrivate bool
+	query := "select is_private from playlist where id = $1"
+	err := p.Pool.QueryRow(context.Background(), query, playlistId).Scan(&isPrivate)
+	if err != nil {
+		p.logger.WithFields(logrus.Fields{
+			"err":         err,
+			"playlist Id": playlistId,
+			"query":       query,
+		}).Errorln("getting is_private error")
+		return false, err
+	}
+	p.logger.Infoln("Got isPrivate")
+
+	return isPrivate, nil
+}
+
+func (p *Postgres) MakePublic(ctx context.Context, playlistId uint64) error {
+	p.logger.Infoln("Album Repo MakePublic entered")
+
+	query := "update playlist set is_private = false where id = $1"
+	_, err := p.Pool.Exec(context.Background(), query, playlistId)
+	if err != nil {
+		p.logger.WithFields(logrus.Fields{
+			"err":         err,
+			"playlist Id": playlistId,
+			"query":       query,
+		}).Errorln("updating is_private error")
+		return err
+	}
+
+	return nil
+}
+
+func (p *Postgres) MakePrivate(ctx context.Context, playlistId uint64) error {
+	p.logger.Infoln("Album Repo MakePrivate entered")
+
+	query := "update playlist set is_private = true where id = $1"
+	_, err := p.Pool.Exec(context.Background(), query, playlistId)
+	if err != nil {
+		p.logger.WithFields(logrus.Fields{
+			"err":         err,
+			"playlist Id": playlistId,
+			"query":       query,
+		}).Errorln("updating is_private error")
+		return err
+	}
+
+	return nil
+}

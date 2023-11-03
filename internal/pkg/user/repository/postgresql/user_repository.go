@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/sirupsen/logrus"
-	"main/internal/common/pgxiface"
+	postgres "main/internal/common/pgxiface"
 	"main/internal/common/utils"
 	user_domain "main/internal/pkg/user"
 )
@@ -57,7 +57,7 @@ func (db *Postgres) GetById(id string) (user_domain.User, error) {
 
 	user.BirthDate = dt.Time.Format("2006-01-02")
 	user.Avatar = avatar.String
-	db.logger.Infoln("birthday and avatar formatted")
+	db.logger.Infoln("birthday and images formatted")
 
 	return user, err
 }
@@ -90,7 +90,7 @@ func (db *Postgres) UpdateAvatarPath(userId string, path string) error {
 			"err":   err,
 			"path":  path,
 			"query": query,
-		}).Errorln("avatar updating failed")
+		}).Errorln("images updating failed")
 		return err
 	}
 
@@ -117,21 +117,30 @@ func (db *Postgres) GetAvatarPath(userId string) (string, error) {
 	return "", nil
 }
 
-func (db *Postgres) RemoveAvatarPath(userId string) error {
-	query := "update profile set avatar_url = null where id = $1"
-	_, err := db.Pool.Exec(context.Background(), query, userId)
+func (db *Postgres) RemoveAvatarPath(userId string) (string, error) {
+	url, err := db.GetAvatarPath(userId)
 	if err != nil {
-		return err
+		db.logger.WithFields(logrus.Fields{
+			"err":     err,
+			"user id": userId,
+		}).Errorln("no active avatar")
 	}
 
-	return nil
+	query := "update profile set avatar_url = null where id = $1"
+	_, err = db.Pool.Exec(context.Background(), query, userId)
+	if err != nil {
+		return "", err
+	}
+	db.logger.Infoln("Avatar removed", url)
+
+	return url, nil
 }
 
 func (db *Postgres) UpdateUserInfo(user user_domain.User) error {
 	db.logger.Infoln("UserRepo UpdateUserInfo entered")
 
 	query := "update profile set nickname = $1, email = $2, birth_date = $3 where id = $4"
-	_, err := db.Pool.Exec(context.Background(), query, user.Username, user.Email, user.BirthDate)
+	_, err := db.Pool.Exec(context.Background(), query, user.Username, user.Email, user.BirthDate, user.Id)
 	if err != nil {
 		db.logger.WithFields(logrus.Fields{
 			"err ":   err,

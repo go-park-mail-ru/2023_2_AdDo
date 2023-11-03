@@ -539,7 +539,7 @@ const docTemplate = `{
                         "cookieCsrfToken": []
                     }
                 ],
-                "description": "Remove user avatar",
+                "description": "Remove user images",
                 "tags": [
                     "user"
                 ],
@@ -646,14 +646,14 @@ const docTemplate = `{
                         "cookieCsrfToken": []
                     }
                 ],
-                "description": "Upload user avatar",
+                "description": "Upload user images",
                 "tags": [
                     "user"
                 ],
                 "parameters": [
                     {
                         "type": "file",
-                        "description": "User avatar",
+                        "description": "User images",
                         "name": "Avatar",
                         "in": "formData",
                         "required": true
@@ -792,7 +792,7 @@ const docTemplate = `{
             "properties": {
                 "AvatarUrl": {
                     "type": "string",
-                    "example": "/user-avatar/avatar.png"
+                    "example": "/user-images/images.png"
                 }
             }
         },
@@ -801,7 +801,7 @@ const docTemplate = `{
             "properties": {
                 "Avatar": {
                     "type": "string",
-                    "example": "http://test/image/1.jpg,http://test/image/2.jpg"
+                    "example": "http://test/images/1.jpg,http://test/images/2.jpg"
                 },
                 "BirthDate": {
                     "type": "string",

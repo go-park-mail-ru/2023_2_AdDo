@@ -113,10 +113,6 @@ func (am *AlbumManager) GetAlbum(ctx context.Context, in *album_proto.AlbumId) (
 	}
 	am.logger.Infoln("Got tracks by album id ", tracks)
 
-	for index, _ := range tracks {
-		tracks[index].ArtistName = art.Name
-	}
-
 	result.Tracks = tracks
 
 	return SerializeAlbum(result), nil
@@ -199,6 +195,30 @@ func (am *AlbumManager) Like(ctx context.Context, in *album_proto.AlbumToUserId)
 	am.logger.Infoln("Album Micros Like entered")
 
 	err := am.repoAlbum.CreateLike(in.GetUserId(), in.GetAlbumId())
+	if err != nil {
+		return nil, err
+	}
+	am.logger.Infoln("Like created")
+
+	return &google_proto.Empty{}, nil
+}
+
+func (am *AlbumManager) IsLike(ctx context.Context, in *album_proto.AlbumToUserId) (*album_proto.IsLikedAlbum, error) {
+	am.logger.Infoln("Album Micros Like entered")
+
+	result, err := am.repoAlbum.CheckLike(in.GetUserId(), in.GetAlbumId())
+	if err != nil {
+		return nil, err
+	}
+	am.logger.Infoln("Like created")
+
+	return &album_proto.IsLikedAlbum{IsLiked: result}, nil
+}
+
+func (am *AlbumManager) Unlike(ctx context.Context, in *album_proto.AlbumToUserId) (*google_proto.Empty, error) {
+	am.logger.Infoln("Album Micros Like entered")
+
+	err := am.repoAlbum.DeleteLike(in.GetUserId(), in.GetAlbumId())
 	if err != nil {
 		return nil, err
 	}

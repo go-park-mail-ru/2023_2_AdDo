@@ -25,6 +25,8 @@ type AlbumServiceClient interface {
 	GetNew(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*AlbumsResponse, error)
 	GetAlbum(ctx context.Context, in *AlbumId, opts ...grpc.CallOption) (*AlbumResponse, error)
 	Like(ctx context.Context, in *AlbumToUserId, opts ...grpc.CallOption) (*empty.Empty, error)
+	IsLike(ctx context.Context, in *AlbumToUserId, opts ...grpc.CallOption) (*IsLikedAlbum, error)
+	Unlike(ctx context.Context, in *AlbumToUserId, opts ...grpc.CallOption) (*empty.Empty, error)
 }
 
 type albumServiceClient struct {
@@ -89,6 +91,24 @@ func (c *albumServiceClient) Like(ctx context.Context, in *AlbumToUserId, opts .
 	return out, nil
 }
 
+func (c *albumServiceClient) IsLike(ctx context.Context, in *AlbumToUserId, opts ...grpc.CallOption) (*IsLikedAlbum, error) {
+	out := new(IsLikedAlbum)
+	err := c.cc.Invoke(ctx, "/AlbumService/IsLike", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *albumServiceClient) Unlike(ctx context.Context, in *AlbumToUserId, opts ...grpc.CallOption) (*empty.Empty, error) {
+	out := new(empty.Empty)
+	err := c.cc.Invoke(ctx, "/AlbumService/Unlike", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // AlbumServiceServer is the server API for AlbumService service.
 // All implementations must embed UnimplementedAlbumServiceServer
 // for forward compatibility
@@ -99,6 +119,8 @@ type AlbumServiceServer interface {
 	GetNew(context.Context, *empty.Empty) (*AlbumsResponse, error)
 	GetAlbum(context.Context, *AlbumId) (*AlbumResponse, error)
 	Like(context.Context, *AlbumToUserId) (*empty.Empty, error)
+	IsLike(context.Context, *AlbumToUserId) (*IsLikedAlbum, error)
+	Unlike(context.Context, *AlbumToUserId) (*empty.Empty, error)
 	mustEmbedUnimplementedAlbumServiceServer()
 }
 
@@ -123,6 +145,12 @@ func (UnimplementedAlbumServiceServer) GetAlbum(context.Context, *AlbumId) (*Alb
 }
 func (UnimplementedAlbumServiceServer) Like(context.Context, *AlbumToUserId) (*empty.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Like not implemented")
+}
+func (UnimplementedAlbumServiceServer) IsLike(context.Context, *AlbumToUserId) (*IsLikedAlbum, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method IsLike not implemented")
+}
+func (UnimplementedAlbumServiceServer) Unlike(context.Context, *AlbumToUserId) (*empty.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Unlike not implemented")
 }
 func (UnimplementedAlbumServiceServer) mustEmbedUnimplementedAlbumServiceServer() {}
 
@@ -245,6 +273,42 @@ func _AlbumService_Like_Handler(srv interface{}, ctx context.Context, dec func(i
 	return interceptor(ctx, in, info, handler)
 }
 
+func _AlbumService_IsLike_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AlbumToUserId)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AlbumServiceServer).IsLike(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/AlbumService/IsLike",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AlbumServiceServer).IsLike(ctx, req.(*AlbumToUserId))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AlbumService_Unlike_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AlbumToUserId)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AlbumServiceServer).Unlike(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/AlbumService/Unlike",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AlbumServiceServer).Unlike(ctx, req.(*AlbumToUserId))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // AlbumService_ServiceDesc is the grpc.ServiceDesc for AlbumService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -275,6 +339,14 @@ var AlbumService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Like",
 			Handler:    _AlbumService_Like_Handler,
+		},
+		{
+			MethodName: "IsLike",
+			Handler:    _AlbumService_IsLike_Handler,
+		},
+		{
+			MethodName: "Unlike",
+			Handler:    _AlbumService_Unlike_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

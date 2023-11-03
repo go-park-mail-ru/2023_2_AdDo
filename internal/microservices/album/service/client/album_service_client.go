@@ -123,3 +123,25 @@ func (c *Client) Like(userId string, albumId uint64) error {
 
 	return nil
 }
+
+func (c *Client) IsLike(userId string, albumId uint64) (bool, error) {
+	c.logger.Infoln("Client to Album Micros Like entered")
+
+	isLiked, err := c.albumManager.IsLike(context.Background(), &proto.AlbumToUserId{UserId: userId, AlbumId: albumId})
+	if err != nil {
+		return false, err
+	}
+
+	return isLiked.GetIsLiked(), nil
+}
+
+func (c *Client) Unlike(userId string, albumId uint64) error {
+	c.logger.Infoln("Client to Album Micros Like entered")
+
+	_, err := c.albumManager.Unlike(context.Background(), &proto.AlbumToUserId{UserId: userId, AlbumId: albumId})
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

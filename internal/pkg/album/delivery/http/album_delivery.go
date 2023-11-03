@@ -1,7 +1,6 @@
 package album_delivery
 
 import (
-	"encoding/json"
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
 	"main/internal/common/handler"
@@ -186,11 +185,11 @@ func (handler *AlbumHandler) Like(w http.ResponseWriter, r *http.Request) error 
 		"request_id": utils.GenReqId(r.RequestURI + r.Method),
 	}).Infoln("Like Handler entered")
 
-	var albumId track.Id
-	if err := json.NewDecoder(r.Body).Decode(&albumId); err != nil {
+	albumId, err := strconv.Atoi(mux.Vars(r)["id"])
+	if err != nil {
 		return common_handler.StatusError{Code: http.StatusBadRequest, Err: err}
 	}
-	handler.logger.Infoln("got track id from body")
+	handler.logger.Infoln("Parsed albumId from Vars")
 
 	sessionId, err := response.GetCookie(r)
 	if err != nil {
@@ -204,11 +203,82 @@ func (handler *AlbumHandler) Like(w http.ResponseWriter, r *http.Request) error 
 	}
 	handler.logger.Infoln("got user id by cookie")
 
-	err = handler.albumUseCase.Like(userId, albumId.Id)
+	err = handler.albumUseCase.Like(userId, uint64(albumId))
 	if err != nil {
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}
 	handler.logger.Infoln("like created successfully")
+
+	w.WriteHeader(http.StatusNoContent)
+	return nil
+}
+
+func (handler *AlbumHandler) IsLike(w http.ResponseWriter, r *http.Request) error {
+	handler.logger.WithFields(logrus.Fields{
+		"request_id": utils.GenReqId(r.RequestURI + r.Method),
+	}).Infoln("Like Handler entered")
+
+	albumId, err := strconv.Atoi(mux.Vars(r)["id"])
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusBadRequest, Err: err}
+	}
+	handler.logger.Infoln("Parsed albumId from Vars")
+
+	sessionId, err := response.GetCookie(r)
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusUnauthorized, Err: err}
+	}
+	handler.logger.Infoln("got user cookie")
+
+	userId, err := handler.sessionUseCase.GetUserId(sessionId)
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusUnauthorized, Err: err}
+	}
+	handler.logger.Infoln("got user id by cookie")
+
+	isLiked, err := handler.albumUseCase.IsLike(userId, uint64(albumId))
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusNotFound, Err: err}
+	}
+	handler.logger.Infoln("artist like checked")
+
+	err = response.RenderJSON(w, response.IsLiked{IsLiked: isLiked})
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
+	}
+	handler.logger.Infoln("response  formed")
+
+	return nil
+}
+
+func (handler *AlbumHandler) Unlike(w http.ResponseWriter, r *http.Request) error {
+	handler.logger.WithFields(logrus.Fields{
+		"request_id": utils.GenReqId(r.RequestURI + r.Method),
+	}).Infoln("Like Handler entered")
+
+	albumId, err := strconv.Atoi(mux.Vars(r)["id"])
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusBadRequest, Err: err}
+	}
+	handler.logger.Infoln("Parsed albumId from Vars")
+
+	sessionId, err := response.GetCookie(r)
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusUnauthorized, Err: err}
+	}
+	handler.logger.Infoln("got user cookie")
+
+	userId, err := handler.sessionUseCase.GetUserId(sessionId)
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusUnauthorized, Err: err}
+	}
+	handler.logger.Infoln("got user id by cookie")
+
+	err = handler.albumUseCase.Unlike(userId, uint64(albumId))
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
+	}
+	handler.logger.Infoln("like deleted successfully")
 
 	w.WriteHeader(http.StatusNoContent)
 	return nil

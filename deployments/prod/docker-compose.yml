@@ -10,11 +10,11 @@ services:
       - "9001:9001" # redundant
     volumes:
       - ~/minio-data:/data
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
-      interval: 10s
-      retries: 3
-      timeout: 5s
+#    healthcheck:
+      #      test: ["CMD-SHELL", "curl --fail http://localhost:9000/minio/health/live || exit 1"]
+      #      interval: 30s
+      #      timeout: 10s
+      #      retries: 3
     logging:
       driver: "fluentd"
       options: 
@@ -27,7 +27,7 @@ services:
       service: create_buckets
     depends_on:
       service-minio:
-        condition: service_healthy
+        condition: service_started
 
   service-db-redis:
     extends:
@@ -76,7 +76,7 @@ services:
       service-db-redis:
         condition: service_healthy
       service-minio:
-        condition: service_healthy
+        condition: service_started
       create_buckets:
         condition: service_completed_successfully
       consul:
@@ -155,6 +155,18 @@ services:
     env_file:
       - .env
 
+  images:
+    extends:
+      file: ../microservices/images/image-microservice.yml
+      service: images
+    deploy:
+      replicas: 1
+    depends_on:
+      common-service-waiter:
+        condition: service_completed_successfully
+    env_file:
+      - .env
+
   microservice-waiter:
     image: alpine
     depends_on:
@@ -169,6 +181,8 @@ services:
       playlist:
         condition: service_started
       artist:
+        condition: service_started
+      images:
         condition: service_started
 
   musicon:
@@ -190,9 +204,6 @@ services:
 
   wait-musicon:
     image: alpine
-    #extends:
-     # file: ../common-services.yml
-     # service: wait-musicon
     depends_on:
       musicon:
         condition: service_started

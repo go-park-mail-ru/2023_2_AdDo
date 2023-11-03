@@ -76,12 +76,12 @@ jobs:
   #       with:
   #         context: .
   #         tags: musicon:latest
-  #         outputs: type=docker,dest=/tmp/musicon-image.tar
+  #         outputs: type=docker,dest=/tmp/musicon-images.tar
   #     - name: Upload artifact
   #       uses: actions/upload-artifact@v3
   #       with:
-  #         name: musicon-image
-  #         path: /tmp/musicon-image.tar
+  #         name: musicon-images
+  #         path: /tmp/musicon-images.tar
 
   deploy:
     if: github.event.pull_request.merged == true
