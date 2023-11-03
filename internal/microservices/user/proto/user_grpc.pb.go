@@ -8,6 +8,7 @@ import (
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
+	proto1 "main/internal/microservices/image/proto"
 	proto "main/internal/microservices/session/proto"
 )
 
@@ -25,8 +26,8 @@ type UserServiceClient interface {
 	Auth(ctx context.Context, in *proto.SessionId, opts ...grpc.CallOption) (*proto.Status, error)
 	GetUserInfo(ctx context.Context, in *proto.SessionId, opts ...grpc.CallOption) (*UserData, error)
 	LogOut(ctx context.Context, in *proto.SessionId, opts ...grpc.CallOption) (*empty.Empty, error)
-	UploadAvatar(ctx context.Context, in *UserAvatar, opts ...grpc.CallOption) (*AvatarUrl, error)
-	RemoveAvatar(ctx context.Context, in *proto.UserId, opts ...grpc.CallOption) (*empty.Empty, error)
+	UploadAvatar(ctx context.Context, in *ImageToUser, opts ...grpc.CallOption) (*empty.Empty, error)
+	RemoveAvatar(ctx context.Context, in *proto.UserId, opts ...grpc.CallOption) (*proto1.ImageUrl, error)
 	UpdateUserInfo(ctx context.Context, in *UserData, opts ...grpc.CallOption) (*empty.Empty, error)
 }
 
@@ -83,8 +84,8 @@ func (c *userServiceClient) LogOut(ctx context.Context, in *proto.SessionId, opt
 	return out, nil
 }
 
-func (c *userServiceClient) UploadAvatar(ctx context.Context, in *UserAvatar, opts ...grpc.CallOption) (*AvatarUrl, error) {
-	out := new(AvatarUrl)
+func (c *userServiceClient) UploadAvatar(ctx context.Context, in *ImageToUser, opts ...grpc.CallOption) (*empty.Empty, error) {
+	out := new(empty.Empty)
 	err := c.cc.Invoke(ctx, "/UserService/UploadAvatar", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -92,8 +93,8 @@ func (c *userServiceClient) UploadAvatar(ctx context.Context, in *UserAvatar, op
 	return out, nil
 }
 
-func (c *userServiceClient) RemoveAvatar(ctx context.Context, in *proto.UserId, opts ...grpc.CallOption) (*empty.Empty, error) {
-	out := new(empty.Empty)
+func (c *userServiceClient) RemoveAvatar(ctx context.Context, in *proto.UserId, opts ...grpc.CallOption) (*proto1.ImageUrl, error) {
+	out := new(proto1.ImageUrl)
 	err := c.cc.Invoke(ctx, "/UserService/RemoveAvatar", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -119,8 +120,8 @@ type UserServiceServer interface {
 	Auth(context.Context, *proto.SessionId) (*proto.Status, error)
 	GetUserInfo(context.Context, *proto.SessionId) (*UserData, error)
 	LogOut(context.Context, *proto.SessionId) (*empty.Empty, error)
-	UploadAvatar(context.Context, *UserAvatar) (*AvatarUrl, error)
-	RemoveAvatar(context.Context, *proto.UserId) (*empty.Empty, error)
+	UploadAvatar(context.Context, *ImageToUser) (*empty.Empty, error)
+	RemoveAvatar(context.Context, *proto.UserId) (*proto1.ImageUrl, error)
 	UpdateUserInfo(context.Context, *UserData) (*empty.Empty, error)
 	mustEmbedUnimplementedUserServiceServer()
 }
@@ -144,10 +145,10 @@ func (UnimplementedUserServiceServer) GetUserInfo(context.Context, *proto.Sessio
 func (UnimplementedUserServiceServer) LogOut(context.Context, *proto.SessionId) (*empty.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method LogOut not implemented")
 }
-func (UnimplementedUserServiceServer) UploadAvatar(context.Context, *UserAvatar) (*AvatarUrl, error) {
+func (UnimplementedUserServiceServer) UploadAvatar(context.Context, *ImageToUser) (*empty.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UploadAvatar not implemented")
 }
-func (UnimplementedUserServiceServer) RemoveAvatar(context.Context, *proto.UserId) (*empty.Empty, error) {
+func (UnimplementedUserServiceServer) RemoveAvatar(context.Context, *proto.UserId) (*proto1.ImageUrl, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RemoveAvatar not implemented")
 }
 func (UnimplementedUserServiceServer) UpdateUserInfo(context.Context, *UserData) (*empty.Empty, error) {
@@ -257,7 +258,7 @@ func _UserService_LogOut_Handler(srv interface{}, ctx context.Context, dec func(
 }
 
 func _UserService_UploadAvatar_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UserAvatar)
+	in := new(ImageToUser)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -269,7 +270,7 @@ func _UserService_UploadAvatar_Handler(srv interface{}, ctx context.Context, dec
 		FullMethod: "/UserService/UploadAvatar",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UserServiceServer).UploadAvatar(ctx, req.(*UserAvatar))
+		return srv.(UserServiceServer).UploadAvatar(ctx, req.(*ImageToUser))
 	}
 	return interceptor(ctx, in, info, handler)
 }

@@ -104,8 +104,8 @@ func TestUserRepository_GetAvatarPath(t *testing.T) {
 	}
 
 	const (
-		expectedAvatarPath = "/user_avatar/avatar.png"
-		userID = "1"
+		expectedAvatarPath = "/user_avatar/images.png"
+		userID             = "1"
 	)
 
 	rows := pgxmock.NewRows([]string{"avatar_url"}).AddRow(expectedAvatarPath)
@@ -115,20 +115,19 @@ func TestUserRepository_GetAvatarPath(t *testing.T) {
 		WillReturnRows(rows)
 
 	path, err := repo.GetAvatarPath(userID)
-	
+
 	if err != nil {
-		t.Errorf("Error get avatar path: %v", err)
+		t.Errorf("Error get images path: %v", err)
 	}
 
 	if path != expectedAvatarPath {
-		t.Errorf("Expected avatar path is %s but got %s", expectedAvatarPath, path)
+		t.Errorf("Expected images path is %s but got %s", expectedAvatarPath, path)
 	}
 
 	if err := mock.ExpectationsWereMet(); err != nil {
 		t.Errorf("Unfulfilled expectations: %v", err)
 	}
 }
-
 
 func TestUserRepository_UpdateAvatarPath(t *testing.T) {
 	mock, err := pgxmock.NewPool()
@@ -140,7 +139,7 @@ func TestUserRepository_UpdateAvatarPath(t *testing.T) {
 
 	const (
 		newAvatarPath = "/user_avatar/new_avatar.png"
-		userID = "1"
+		userID        = "1"
 	)
 
 	mock.ExpectExec("update profile set avatar_url").
@@ -148,9 +147,9 @@ func TestUserRepository_UpdateAvatarPath(t *testing.T) {
 		WillReturnResult(pgxmock.NewResult("UPDATE", 1))
 
 	err = repo.UpdateAvatarPath(userID, newAvatarPath)
-	
+
 	if err != nil {
-		t.Errorf("Error update avatar path: %v", err)
+		t.Errorf("Error update images path: %v", err)
 	}
 
 	if err := mock.ExpectationsWereMet(); err != nil {
@@ -169,7 +168,7 @@ func TestUserRepository_RemoveAvatarPath(t *testing.T) {
 
 	const (
 		newAvatarPath = "/user_avatar/new_avatar.png"
-		userID = "1"
+		userID        = "1"
 	)
 
 	mock.ExpectExec("update profile set avatar_url").
@@ -177,9 +176,9 @@ func TestUserRepository_RemoveAvatarPath(t *testing.T) {
 		WillReturnResult(pgxmock.NewResult("UPDATE", 1))
 
 	err = repo.RemoveAvatarPath(userID)
-	
+
 	if err != nil {
-		t.Errorf("Error remove avatar path: %v", err)
+		t.Errorf("Error remove images path: %v", err)
 	}
 
 	if err := mock.ExpectationsWereMet(); err != nil {

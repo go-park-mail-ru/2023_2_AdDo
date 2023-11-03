@@ -7,6 +7,12 @@ import "google/protobuf/empty.proto";
 service TrackService {
   rpc Listen (TrackId) returns (google.protobuf.Empty) {}
   rpc Like (TrackToUserId) returns (google.protobuf.Empty) {}
+  rpc IsLike (TrackToUserId) returns (IsLikedTrack) {}
+  rpc Unlike (TrackToUserId) returns (google.protobuf.Empty) {}
+}
+
+message IsLikedTrack {
+  bool isLiked = 1;
 }
 
 message TrackId {

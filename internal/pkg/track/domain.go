@@ -27,6 +27,8 @@ type UseCase interface {
 	//GetByArtist(artistId uint64) ([]Response, error)
 	Listen(trackId uint64) error
 	Like(userId string, trackId uint64) error
+	IsLike(userId string, trackId uint64) (bool, error)
+	Unlike(userId string, trackId uint64) error
 }
 
 type Repository interface {
@@ -37,6 +39,8 @@ type Repository interface {
 	GetByAlbum(albumId uint64) ([]Response, error)
 	GetByArtist(artistId uint64) ([]Response, error)
 	CreateLike(userId string, trackId uint64) error
+	CheckLike(userId string, trackId uint64) (bool, error)
+	DeleteLike(userId string, trackId uint64) error
 	AddListen(trackId uint64) error
 }
 

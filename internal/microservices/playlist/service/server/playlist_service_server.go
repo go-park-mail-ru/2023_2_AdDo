@@ -5,6 +5,7 @@ import (
 	google_proto "github.com/golang/protobuf/ptypes/empty"
 	"github.com/sirupsen/logrus"
 	grpc_album_server "main/internal/microservices/album/service/server"
+	image_proto "main/internal/microservices/image/proto"
 	playlist_proto "main/internal/microservices/playlist/proto"
 	session_proto "main/internal/microservices/session/proto"
 	"main/internal/pkg/playlist"
@@ -41,6 +42,7 @@ func SerializePlaylistResponse(in playlist.Response) *playlist_proto.PlaylistRes
 		Name:      in.Name,
 		Preview:   in.Preview,
 		CreatorId: in.AuthorId,
+		IsYours:   in.IsYours,
 		Tracks:    grpc_album_server.SerializeTracks(in.Tracks),
 	}
 }
@@ -74,15 +76,20 @@ func (pm *PlaylistManager) Create(ctx context.Context, in *playlist_proto.Playli
 	return &google_proto.Empty{}, nil
 }
 
-func (pm *PlaylistManager) Get(ctx context.Context, in *playlist_proto.PlaylistId) (*playlist_proto.PlaylistResponse, error) {
+func (pm *PlaylistManager) Get(ctx context.Context, in *playlist_proto.PlaylistToUserId) (*playlist_proto.PlaylistResponse, error) {
 	pm.logger.Infoln("Playlist Service Get Method entered")
 
-	result, err := pm.repoPlaylist.Get(ctx, in.GetId())
+	result, err := pm.repoPlaylist.Get(ctx, in.GetPlaylistId())
 	if err != nil {
 		return nil, err
 	}
 
-	tracks, err := pm.repoTracks.GetByPlaylist(in.GetId())
+	tracks, err := pm.repoTracks.GetByPlaylist(in.GetPlaylistId())
+	if err != nil {
+		return nil, err
+	}
+
+	isCreator, err := pm.repoPlaylist.IsCreator(context.Background(), in.GetUserId(), in.GetPlaylistId())
 	if err != nil {
 		return nil, err
 	}
@@ -91,8 +98,9 @@ func (pm *PlaylistManager) Get(ctx context.Context, in *playlist_proto.PlaylistI
 		Id:       result.Id,
 		Name:     result.Name,
 		AuthorId: result.AuthorId,
-		Preview:  "",
+		Preview:  result.Preview,
 		Tracks:   tracks,
+		IsYours:  isCreator,
 	}), nil
 }
 
@@ -119,16 +127,40 @@ func (pm *PlaylistManager) AddTrack(ctx context.Context, in *playlist_proto.Play
 	return &google_proto.Empty{}, nil
 }
 
+func (pm *PlaylistManager) RemoveTrack(ctx context.Context, in *playlist_proto.PlaylistToTrackId) (*google_proto.Empty, error) {
+	pm.logger.Infoln("Playlist Service RemoveTrack Method entered")
+
+	err := pm.repoPlaylist.RemoveTrack(ctx, in.GetPlaylistId(), in.GetTrackId())
+	if err != nil {
+		return nil, err
+	}
+	pm.logger.Infoln("TrackRemoved")
+
+	return &google_proto.Empty{}, nil
+}
+
 func (pm *PlaylistManager) UpdatePreview(ctx context.Context, in *playlist_proto.PlaylistIdToImageUrl) (*google_proto.Empty, error) {
 	pm.logger.Infoln("Playlist Service UpdatePreview Method entered")
 
-	err := pm.repoPlaylist.UpdateImage(ctx, in.GetId(), in.GetImage())
+	err := pm.repoPlaylist.UpdateImage(ctx, in.GetId(), in.GetUrl().GetUrl())
 	if err != nil {
 		return nil, err
 	}
 	pm.logger.Infoln("Photo Updated")
 
 	return &google_proto.Empty{}, nil
+}
+
+func (pm *PlaylistManager) RemovePreview(ctx context.Context, in *playlist_proto.PlaylistId) (*image_proto.ImageUrl, error) {
+	pm.logger.Infoln("Playlist Service RemovePreview Method entered")
+
+	avatarPath, err := pm.repoPlaylist.RemovePreviewPath(ctx, in.GetId())
+	if err != nil {
+		return nil, err
+	}
+	pm.logger.Infoln("Preview removed")
+
+	return &image_proto.ImageUrl{Url: avatarPath}, nil
 }
 
 func (pm *PlaylistManager) DeleteById(ctx context.Context, in *playlist_proto.PlaylistId) (*google_proto.Empty, error) {
@@ -139,6 +171,86 @@ func (pm *PlaylistManager) DeleteById(ctx context.Context, in *playlist_proto.Pl
 		return nil, err
 	}
 	pm.logger.Infoln("Playlist Deleted")
+
+	return &google_proto.Empty{}, nil
+}
+
+func (pm *PlaylistManager) Like(ctx context.Context, in *playlist_proto.PlaylistToUserId) (*google_proto.Empty, error) {
+	pm.logger.Infoln("Album Micros Like entered")
+
+	err := pm.repoPlaylist.CreateLike(context.Background(), in.GetUserId(), in.GetPlaylistId())
+	if err != nil {
+		return nil, err
+	}
+	pm.logger.Infoln("Like created")
+
+	return &google_proto.Empty{}, nil
+}
+
+func (pm *PlaylistManager) IsLike(ctx context.Context, in *playlist_proto.PlaylistToUserId) (*playlist_proto.IsLikedPlaylist, error) {
+	pm.logger.Infoln("Playlist Micros Like entered")
+
+	isLiked, err := pm.repoPlaylist.CheckLike(context.Background(), in.GetUserId(), in.GetPlaylistId())
+	if err != nil {
+		return nil, err
+	}
+	pm.logger.Infoln("Like checked")
+
+	return &playlist_proto.IsLikedPlaylist{IsLiked: isLiked}, nil
+}
+
+func (pm *PlaylistManager) Unlike(ctx context.Context, in *playlist_proto.PlaylistToUserId) (*google_proto.Empty, error) {
+	pm.logger.Infoln("Playlist Micros Like entered")
+
+	err := pm.repoPlaylist.DeleteLike(context.Background(), in.GetUserId(), in.GetPlaylistId())
+	if err != nil {
+		return nil, err
+	}
+	pm.logger.Infoln("Like deleted")
+
+	return &google_proto.Empty{}, nil
+}
+
+func (pm *PlaylistManager) HasModifyAccess(ctx context.Context, in *playlist_proto.PlaylistToUserId) (*playlist_proto.HasAccess, error) {
+	pm.logger.Infoln("Album Micros HasModAccess entered")
+
+	isCreator, err := pm.repoPlaylist.IsCreator(ctx, in.GetUserId(), in.GetPlaylistId())
+	if err != nil {
+		return &playlist_proto.HasAccess{IsAccess: false}, nil
+	}
+
+	return &playlist_proto.HasAccess{IsAccess: isCreator}, nil
+}
+
+func (pm *PlaylistManager) HasReadAccess(ctx context.Context, in *playlist_proto.PlaylistId) (*playlist_proto.HasAccess, error) {
+	pm.logger.Infoln("Album Micros HasReadAccess entered")
+
+	isPrivate, err := pm.repoPlaylist.IsPrivate(ctx, in.GetId())
+	if err != nil {
+		return &playlist_proto.HasAccess{IsAccess: false}, nil
+	}
+
+	return &playlist_proto.HasAccess{IsAccess: isPrivate}, nil
+}
+
+func (pm *PlaylistManager) MakePrivate(ctx context.Context, in *playlist_proto.PlaylistId) (*google_proto.Empty, error) {
+	pm.logger.Infoln("Album Micros MakePrivate entered")
+
+	err := pm.repoPlaylist.MakePrivate(ctx, in.GetId())
+	if err != nil {
+		return nil, nil
+	}
+
+	return &google_proto.Empty{}, nil
+}
+
+func (pm *PlaylistManager) MakePublic(ctx context.Context, in *playlist_proto.PlaylistId) (*google_proto.Empty, error) {
+	pm.logger.Infoln("Album Micros MakePublic entered")
+
+	err := pm.repoPlaylist.MakePublic(ctx, in.GetId())
+	if err != nil {
+		return nil, nil
+	}
 
 	return &google_proto.Empty{}, nil
 }

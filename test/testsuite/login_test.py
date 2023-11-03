@@ -1,71 +1,41 @@
 import unittest
 import requests
-
-url = 'http://localhost:8888/api/v1'
+import utils
 
 
 class LoginTest(unittest.TestCase):
-    def test_login_endpoint_success(self):
-        # get csrf token
-        pre_response = requests.get(url + '/auth')
+    def test_login_success(self):
+        headers, cookies = utils.get_csrf_headers_and_cookies()
+        data = utils.gen_random_valid_register_data()
 
-        # use it in post header and cookies (double submit)
-        headers = {
-            'X-Csrf-Token': pre_response.headers['X-Csrf-Token']
-        }
-        cookies = {
-            'X-Csrf-Token': pre_response.cookies['X-Csrf-Token']
-        }
-
-        # our register data
-        register_data = {
-            'Email': 'new@mail.ru',
-            'Password': 'userPassword',
-            'Username': 'username',
-            'BirthDate': '12-01-2003',
-        }
-        response = requests.post(url + "/sign_up", headers=headers, json=register_data, cookies=cookies)
-        print(response.text)
-        # get ok code and sessionId
-        self.assertEqual(response.status_code, 200)
+        response = requests.post(utils.url + "/sign_up", headers=headers, json=data, cookies=cookies)
+        self.assertEqual(response.status_code, 204)
         self.assertNotEqual(response.cookies['JSESSIONID'], "")
 
-        login_data = {
-            'Email': 'new@mail.ru',
-            'Password': 'userPassword',
+        user_cred = {
+            'Email': data['Email'],
+            'Password': data['Password']
         }
-        response = requests.post(url + '/login', headers=headers, json=login_data, cookies=cookies)
-        self.assertEqual(response.status_code, 200)
+
+        response = requests.post(utils.url + '/login', headers=headers, json=user_cred, cookies=cookies)
+        self.assertEqual(response.status_code, 204)
         self.assertNotEqual(response.cookies['JSESSIONID'], "")
 
-    def test_login_endpoint_without_csrf(self):
-        # we have no csrf and do request
-        # it's not important what data we have
-        data = {}
-        response = requests.post(url + "/login", data=data)
+    def test_login_forbidden(self):
+        response = requests.post(utils.url + "/login")
         self.assertEqual(response.status_code, 403)
 
-    def test_login_without_account(self):
-        # get csrf token
-        pre_response = requests.get(url + '/auth')
-
-        # use it in post header and cookies (double submit)
-        headers = {
-            'X-Csrf-Token': pre_response.headers['X-Csrf-Token']
-        }
-        cookies = {
-            'X-Csrf-Token': pre_response.cookies['X-Csrf-Token']
+        headers, cookies = utils.get_csrf_headers_and_cookies()
+        data = utils.gen_random_valid_register_data()
+        user_cred = {
+            'Email': data['Email'],
+            'Password': data['Password']
         }
 
-        login_data = {
-            'Email': 'we.have.no@mail.ru',
-            'Password': 'anyPassword',
-        }
-        response = requests.post(url + '/login', headers=headers, json=login_data, cookies=cookies)
+        response = requests.post(utils.url + '/login', headers=headers, json=user_cred, cookies=cookies)
         self.assertEqual(response.status_code, 403)
 
-
-login_test = LoginTest()
-login_test.test_login_endpoint_success()
-login_test.test_login_endpoint_without_csrf()
-login_test.test_login_without_account()
+    def test_login_bad_request(self):
+        headers, cookies = utils.get_csrf_headers_and_cookies()
+        response = requests.post(utils.url + '/login', headers=headers, cookies=cookies)
+        self.assertEqual(response.status_code, 400)

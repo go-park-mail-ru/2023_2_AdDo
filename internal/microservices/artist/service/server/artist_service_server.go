@@ -2,6 +2,7 @@ package grpc_artist_server
 
 import (
 	"context"
+	google_proto "github.com/golang/protobuf/ptypes/empty"
 	"github.com/sirupsen/logrus"
 	grpc_album_server "main/internal/microservices/album/service/server"
 	artist_proto "main/internal/microservices/artist/proto"
@@ -66,11 +67,43 @@ func (am *ArtistManager) GetArtistInfo(ctx context.Context, in *artist_proto.Art
 	}
 	am.logger.Infoln("Got artist tracks")
 
-	for index, _ := range tracks {
-		tracks[index].ArtistName = artistBase.Name
-	}
-
 	result.Tracks = tracks
 
 	return SerializeArtist(result), nil
+}
+
+func (am *ArtistManager) Like(ctx context.Context, in *artist_proto.ArtistToUserId) (*google_proto.Empty, error) {
+	am.logger.Infoln("Artist Micros Like entered")
+
+	err := am.repoArtist.CreateLike(in.GetUserId(), in.GetArtistId())
+	if err != nil {
+		return nil, err
+	}
+	am.logger.Infoln("Like created")
+
+	return &google_proto.Empty{}, nil
+}
+
+func (am *ArtistManager) IsLike(ctx context.Context, in *artist_proto.ArtistToUserId) (*artist_proto.IsLikedArtist, error) {
+	am.logger.Infoln("Artist Micros IsLike entered")
+
+	isLiked, err := am.repoArtist.CheckLike(in.GetUserId(), in.GetArtistId())
+	if err != nil {
+		return nil, err
+	}
+	am.logger.Infoln("Like checked")
+
+	return &artist_proto.IsLikedArtist{IsLiked: isLiked}, nil
+}
+
+func (am *ArtistManager) Unlike(ctx context.Context, in *artist_proto.ArtistToUserId) (*google_proto.Empty, error) {
+	am.logger.Infoln("Artist Micros Like entered")
+
+	err := am.repoArtist.DeleteLike(in.GetUserId(), in.GetArtistId())
+	if err != nil {
+		return nil, err
+	}
+	am.logger.Infoln("Like created")
+
+	return &google_proto.Empty{}, nil
 }

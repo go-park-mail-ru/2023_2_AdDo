@@ -9,6 +9,8 @@ import (
 	grpc_album "main/internal/microservices/album/service/client"
 	artist "main/internal/microservices/artist/proto"
 	grpc_artist "main/internal/microservices/artist/service/client"
+	proto4 "main/internal/microservices/image/proto"
+	grpc_image "main/internal/microservices/image/service/client"
 	proto3 "main/internal/microservices/playlist/proto"
 	grpc_playlist "main/internal/microservices/playlist/service/client"
 	session2 "main/internal/microservices/session/proto"
@@ -19,6 +21,7 @@ import (
 	grpc_user "main/internal/microservices/user/service/client"
 	album_delivery "main/internal/pkg/album/delivery/http"
 	artist_delivery "main/internal/pkg/artist/delivery/http"
+	playlist_delivery "main/internal/pkg/playlist/delivery/http"
 	track_delivery "main/internal/pkg/track/delivery/http"
 	user_delivery "main/internal/pkg/user/delivery/http"
 	"net/http"
@@ -60,22 +63,30 @@ func main() {
 		logger.Fatalln("error connecting to artist micros ", err)
 	}
 
-	userAgent := grpc_user.NewClient(user_client.NewUserServiceClient(userConnection), logger)
+	imageConnection, err := grpc.Dial("images:8087", grpc.WithInsecure())
+	if err != nil {
+		logger.Fatalln("error connecting to images micros ", err)
+	}
+
+	imageAgent := grpc_image.NewClient(proto4.NewImageServiceClient(imageConnection), logger)
+	userAgent := grpc_user.NewClient(user_client.NewUserServiceClient(userConnection), imageAgent, logger)
 	sessionAgent := grpc_session.NewClient(session2.NewSessionServiceClient(sessionConnection), logger)
 	trackAgent := grpc_track.NewClient(proto.NewTrackServiceClient(trackConnection), logger)
 	albumAgent := grpc_album.NewClient(proto2.NewAlbumServiceClient(albumConnection), logger)
-	_ = grpc_playlist.NewClient(proto3.NewPlaylistServiceClient(playlistConnection), logger)
+	playlistAgent := grpc_playlist.NewClient(proto3.NewPlaylistServiceClient(playlistConnection), imageAgent, logger)
 	artistAgent := grpc_artist.NewClient(artist.NewArtistServiceClient(artistConnection), logger)
 
 	logger.Infoln("Clients to micros initialized")
 
 	albumHandler := album_delivery.NewHandler(&trackAgent, &albumAgent, &sessionAgent, logger)
-	artistHandler := artist_delivery.NewHandler(&artistAgent, logger)
+	artistHandler := artist_delivery.NewHandler(&sessionAgent, &artistAgent, logger)
 	userHandler := user_delivery.NewHandler(&userAgent, &sessionAgent, logger)
 	trackHandler := track_delivery.NewHandler(&trackAgent, &sessionAgent, logger)
+	playlistHandler := playlist_delivery.NewHandler(&playlistAgent, &sessionAgent, logger)
+
 	logger.Infoln("Deliveries initialized")
 
-	router := router_init.New(userHandler, trackHandler, artistHandler, albumHandler, logger)
+	router := router_init.New(&playlistAgent, &sessionAgent, userHandler, trackHandler, artistHandler, albumHandler, playlistHandler, logger)
 
 	logger.Fatalln(http.ListenAndServe(ServerPort, router))
 }
