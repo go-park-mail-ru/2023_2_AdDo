@@ -1,5 +1,8 @@
 import auth_test
-import listen_test
+import track_test
+import album_test
+import artist_test
+import playlist_test
 import login_test
 import user_avatar_test
 import logout_test
@@ -49,9 +52,20 @@ logout_test = logout_test.LogoutTest()
 logout_test.test_logout_success()
 
 
-listen_test = listen_test.ListenTest()
-listen_test.test_listen_forbidden()
-listen_test.test_listen_success()
+track_test = track_test.TrackTest()
+track_test.test_track_listen_forbidden()
+track_test.test_track_listen_success()
+track_test.test_track_like_success()
+
+
+album_test = album_test.AlbumTest()
+album_test.test_album_get_success()
+album_test.test_album_like_success()
+
+
+artist_test = artist_test.ArtistTest()
+artist_test.test_artist_get_success()
+artist_test.test_artist_like_success()
 
 
 music_test = music_test.MusicTest()

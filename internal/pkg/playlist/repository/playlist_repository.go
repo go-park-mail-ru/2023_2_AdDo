@@ -197,17 +197,18 @@ func (p *Postgres) CreateLike(ctx context.Context, userId string, playlistId uin
 func (p *Postgres) CheckLike(ctx context.Context, userId string, playlistId uint64) (bool, error) {
 	p.logger.Infoln("Playlist Repo CheckLike entered")
 
-	query := "select * from profile_playlist where profile_id = $1 and playlist_id = $2"
-	err := p.Pool.QueryRow(context.Background(), query, userId, playlistId).Scan()
+	var counter int
+	query := "select count(*) from profile_playlist where profile_id = $1 and playlist_id = $2"
+	err := p.Pool.QueryRow(context.Background(), query, userId, playlistId).Scan(&counter)
 	if err != nil {
-		p.logger.WithFields(logrus.Fields{
-			"err":         err,
-			"playlist Id": playlistId,
-			"query":       query,
-		}).Errorln("checking like error")
+		p.logger.Errorln(err)
 		return false, err
 	}
-	p.logger.Infoln("Like checked")
+	p.logger.Infoln("like checked")
+
+	if counter == 0 {
+		return false, nil
+	}
 
 	return true, nil
 }

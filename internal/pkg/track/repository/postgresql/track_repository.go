@@ -100,17 +100,18 @@ func (db *Postgres) CreateLike(userId string, trackId uint64) error {
 func (db *Postgres) CheckLike(userId string, trackId uint64) (bool, error) {
 	db.logger.Infoln("TrackRepo CheckLike entered")
 
-	query := "select * from profile_track where profile_id = $1 and track_id = $2"
-	err := db.Pool.QueryRow(context.Background(), query, userId, trackId).Scan()
+	var counter int
+	query := "select count(*) from profile_track where profile_id = $1 and track_id = $2"
+	err := db.Pool.QueryRow(context.Background(), query, userId, trackId).Scan(&counter)
 	if err != nil {
-		db.logger.WithFields(logrus.Fields{
-			"query":    query,
-			"track id": trackId,
-			"err":      err,
-		}).Errorln("create like failed")
+		db.logger.Errorln(err)
 		return false, err
 	}
-	db.logger.Infoln("like created")
+	db.logger.Infoln("like checked")
+
+	if counter == 0 {
+		return false, nil
+	}
 
 	return true, nil
 }
