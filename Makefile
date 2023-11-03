@@ -49,7 +49,7 @@ clean:
 # Деплой без очистки данных - мы не теряем созданных пользователей и их лайки
 deploy:
 	@make clean
-	@make fill-database
+	@make docker-services-build
 	@make docker-services-start
 
 # Деплой полностью сервиса без пользователей только с музыкой
