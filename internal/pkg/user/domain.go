@@ -21,6 +21,11 @@ type User struct {
 	Avatar    string `valid:"url_optional" json:"Avatar" example:"http://test/images/1.jpg,http://test/images/2.jpg"`
 }
 
+func (u *User) ValidateForUpdate() error {
+	u.Password = "password"
+	return u.Validate()
+}
+
 func (u *User) Validate() error {
 	_, err := govalidator.ValidateStruct(u)
 	if err != nil {

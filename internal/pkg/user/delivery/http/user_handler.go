@@ -347,7 +347,7 @@ func (handler *UserHandler) UpdateUserInfo(w http.ResponseWriter, r *http.Reques
 	}
 	handler.logger.Infoln("User model decoded from request body")
 
-	err = u.Validate()
+	err = u.ValidateForUpdate()
 	if err != nil {
 		return common_handler.StatusError{Code: http.StatusBadRequest, Err: err}
 	}
