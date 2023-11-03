@@ -143,19 +143,20 @@ func (p *Postgres) UpdateImage(ctx context.Context, playlistId uint64, image str
 func (p *Postgres) RemovePreviewPath(ctx context.Context, playlistId uint64) (string, error) {
 	p.logger.Infoln("Playlist Repo UpdateImage entered")
 
+	var result string
 	query := "update playlist set preview = null where id = $1 returning preview"
-	result, err := p.Pool.Exec(ctx, query, playlistId)
+	err := p.Pool.QueryRow(ctx, query, playlistId).Scan(&result)
 	if err != nil {
 		p.logger.WithFields(logrus.Fields{
 			"error":       err,
 			"playlist id": playlistId,
-			"images":      result.String(),
+			"preview":     result,
 			"query":       query,
 		}).Errorln("error while updating images into playlist")
 		return "", err
 	}
 
-	return result.String(), nil
+	return result, nil
 }
 
 func (p *Postgres) Delete(ctx context.Context, playlistId uint64) error {

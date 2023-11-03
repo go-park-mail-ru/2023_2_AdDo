@@ -63,7 +63,7 @@ func main() {
 		logger.Fatalln("error connecting to artist micros ", err)
 	}
 
-	imageConnection, err := grpc.Dial("artist:8087", grpc.WithInsecure())
+	imageConnection, err := grpc.Dial("images:8087", grpc.WithInsecure())
 	if err != nil {
 		logger.Fatalln("error connecting to images micros ", err)
 	}

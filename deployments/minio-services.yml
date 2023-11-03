@@ -15,7 +15,7 @@ services:
     image: minio/mc
     entrypoint: >
       /bin/sh -c "
-      /usr/bin/mc alias set musicon http://localhost:9000 ${MINIO_ACCESS_KEY} ${MINIO_SECRET_KEY};
+      /usr/bin/mc alias set musicon http://service-minio:9000 ${MINIO_ACCESS_KEY} ${MINIO_SECRET_KEY};
       /usr/bin/mc mb --ignore-existing musicon/user-avatar;
       /usr/bin/mc mb --ignore-existing musicon/playlist-image;
       /usr/bin/mc anonymous set download musicon/user-avatar;

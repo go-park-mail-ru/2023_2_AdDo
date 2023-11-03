@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/sirupsen/logrus"
-	"main/internal/common/pgxiface"
+	postgres "main/internal/common/pgxiface"
 	"main/internal/common/utils"
 	user_domain "main/internal/pkg/user"
 )
@@ -118,21 +118,29 @@ func (db *Postgres) GetAvatarPath(userId string) (string, error) {
 }
 
 func (db *Postgres) RemoveAvatarPath(userId string) (string, error) {
-	query := "update profile set avatar_url = null where id = $1 returning avatar_url"
-	result, err := db.Pool.Exec(context.Background(), query, userId)
+	url, err := db.GetAvatarPath(userId)
+	if err != nil {
+		db.logger.WithFields(logrus.Fields{
+			"err":     err,
+			"user id": userId,
+		}).Errorln("no active avatar")
+	}
+
+	query := "update profile set avatar_url = null where id = $1"
+	_, err = db.Pool.Exec(context.Background(), query, userId)
 	if err != nil {
 		return "", err
 	}
-	db.logger.Infoln("Avatar removed", result.String())
+	db.logger.Infoln("Avatar removed", url)
 
-	return result.String(), nil
+	return url, nil
 }
 
 func (db *Postgres) UpdateUserInfo(user user_domain.User) error {
 	db.logger.Infoln("UserRepo UpdateUserInfo entered")
 
 	query := "update profile set nickname = $1, email = $2, birth_date = $3 where id = $4"
-	_, err := db.Pool.Exec(context.Background(), query, user.Username, user.Email, user.BirthDate)
+	_, err := db.Pool.Exec(context.Background(), query, user.Username, user.Email, user.BirthDate, user.Id)
 	if err != nil {
 		db.logger.WithFields(logrus.Fields{
 			"err ":   err,
