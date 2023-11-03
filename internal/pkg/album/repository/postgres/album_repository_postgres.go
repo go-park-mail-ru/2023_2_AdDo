@@ -131,19 +131,20 @@ func (p Postgres) CreateLike(userId string, albumId uint64) error {
 }
 
 func (p Postgres) CheckLike(userId string, albumId uint64) (bool, error) {
-	p.logger.Infoln("Album Repo CreateLike entered")
+	p.logger.Infoln("Album Repo CheckLike entered")
 
-	query := "select * from profile_album where profile_id = $1 and album_id = $2"
-	err := p.Pool.QueryRow(context.Background(), query, userId, albumId).Scan()
+	var counter int
+	query := "select count(*) from profile_album where profile_id = $1 and album_id = $2"
+	err := p.Pool.QueryRow(context.Background(), query, userId, albumId).Scan(&counter)
 	if err != nil {
-		p.logger.WithFields(logrus.Fields{
-			"err":      err,
-			"album id": albumId,
-			"query":    query,
-		}).Errorln("creating like error")
+		p.logger.Errorln(err)
 		return false, err
 	}
-	p.logger.Infoln("Like Created")
+	p.logger.Infoln("like checked")
+
+	if counter == 0 {
+		return false, nil
+	}
 
 	return true, nil
 }
