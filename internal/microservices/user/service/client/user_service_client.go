@@ -87,6 +87,9 @@ func (c *Client) Logout(sessionId string) error {
 func (c *Client) UploadAvatar(userId string, src io.Reader, size int64) (string, error) {
 	c.logger.Infoln("User grpc client UploadAvatar entered")
 
+	_ = c.RemoveAvatar(userId)
+	c.logger.Infoln("last avatar and image removed")
+
 	avatarUrl, err := c.imageClient.UploadAvatar(src, size)
 	if err != nil {
 		return "", err
