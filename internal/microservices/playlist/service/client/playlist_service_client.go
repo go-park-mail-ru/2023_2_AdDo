@@ -100,6 +100,9 @@ func (c *Client) RemoveTrack(playlistId, trackId uint64) error {
 func (c *Client) UpdatePreview(playlistId uint64, src io.Reader, size int64) error {
 	c.logger.Infoln("Playlist client  entered")
 
+	_ = c.RemovePreview(playlistId)
+	c.logger.Infoln("Last preview and image removed")
+
 	url, err := c.imageClient.UploadPlaylistImage(src, size)
 	if err != nil {
 		return err
