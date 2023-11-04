@@ -56,6 +56,7 @@ track_test = track_test.TrackTest()
 track_test.test_track_listen_forbidden()
 track_test.test_track_listen_success()
 track_test.test_track_like_success()
+track_test.test_track_collection_success()
 
 
 album_test = album_test.AlbumTest()

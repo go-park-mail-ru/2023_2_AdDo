@@ -4,10 +4,10 @@ import (
 	"context"
 	google_proto "github.com/golang/protobuf/ptypes/empty"
 	"github.com/sirupsen/logrus"
-	grpc_album_server "main/internal/microservices/album/service/server"
 	image_proto "main/internal/microservices/image/proto"
 	playlist_proto "main/internal/microservices/playlist/proto"
 	session_proto "main/internal/microservices/session/proto"
+	grpc_track_server "main/internal/microservices/track/service/server"
 	"main/internal/pkg/playlist"
 	"main/internal/pkg/track"
 )
@@ -43,7 +43,7 @@ func SerializePlaylistResponse(in playlist.Response) *playlist_proto.PlaylistRes
 		Preview:   in.Preview,
 		CreatorId: in.AuthorId,
 		IsYours:   in.IsYours,
-		Tracks:    grpc_album_server.SerializeTracks(in.Tracks),
+		Tracks:    grpc_track_server.SerializeTracks(in.Tracks),
 	}
 }
 
