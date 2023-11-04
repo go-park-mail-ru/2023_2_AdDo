@@ -280,7 +280,7 @@ func TestUploadAvatar(t *testing.T) {
 	body := new(bytes.Buffer)
 	writer := multipart.NewWriter(body)
 
-	part, err := writer.CreateFormFile("Base", "images.png")
+	part, err := writer.CreateFormFile("Avatar", "images.png")
 	if err != nil {
 		t.Error(err)
 	}
@@ -314,7 +314,7 @@ func TestUploadAvatar(t *testing.T) {
 		req.Header.Add("Content-Type", writer.FormDataContentType())
 		req.AddCookie(&cookie)
 
-		src, hdr, err := req.FormFile("Base")
+		src, hdr, err := req.FormFile("Avatar")
 		if err != nil {
 			t.Error(err)
 		}

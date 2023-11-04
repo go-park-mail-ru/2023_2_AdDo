@@ -1,7 +1,6 @@
 package album_delivery
 
 import (
-	"bytes"
 	"encoding/json"
 	"errors"
 	"github.com/golang/mock/gomock"
@@ -207,16 +206,20 @@ func TestLike(t *testing.T) {
 		logger:         logrus.New(),
 	}
 
-	albumId := track.Id{Id: 1}
-	requestBody, err := json.Marshal(albumId)
-	assert.NoError(t, err)
+	t.Run("GetPathParamError", func(t *testing.T) {
+		req := httptest.NewRequest(http.MethodPost, "/album/like", nil)
+		w := httptest.NewRecorder()
+		err := handler.Like(w, req)
+		assert.Equal(t, http.StatusBadRequest, err.(common_handler.StatusError).Code)
+	})
 
 	t.Run("GetCookieError", func(t *testing.T) {
-		req := httptest.NewRequest(http.MethodPost, "/like_album", bytes.NewBuffer(requestBody))
+		req := httptest.NewRequest(http.MethodPost, "/album/like", nil)
+		const albumId = "1"
+		req = mux.SetURLVars(req, map[string]string{"id": albumId})
 		w := httptest.NewRecorder()
 
-		err = handler.Like(w, req)
-		assert.NotNil(t, err)
+		err := handler.Like(w, req)
 		assert.Equal(t, http.StatusUnauthorized, err.(common_handler.StatusError).Code)
 	})
 
@@ -231,15 +234,18 @@ func TestLike(t *testing.T) {
 			HttpOnly: true,
 		}
 
-		req := httptest.NewRequest(http.MethodPost, "/like_album", bytes.NewBuffer(requestBody))
+		req := httptest.NewRequest(http.MethodPost, "/album/like", nil)
+		const albumId = "1"
+		const albumIdInt uint64 = 1
+
+		req = mux.SetURLVars(req, map[string]string{"id": albumId})
 		req.AddCookie(&cookie)
 		w := httptest.NewRecorder()
 
 		mockSessionUseCase.EXPECT().GetUserId(sessionId).Return(userId, nil)
-		mockAlbumUseCase.EXPECT().Like(userId, albumId.Id).Return(nil)
+		mockAlbumUseCase.EXPECT().Like(userId, albumIdInt).Return(nil)
 
-		err = handler.Like(w, req)
-
+		err := handler.Like(w, req)
 		assert.Nil(t, err)
 		assert.Equal(t, http.StatusNoContent, w.Code)
 	})
