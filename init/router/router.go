@@ -62,26 +62,24 @@ func New(playlistUseCase playlist.UseCase, sessionUseCase session.UseCase, userH
 	router.Handle("/api/v1/logout", common_handler.Handler{H: userHandler.LogOut}).Methods("POST")
 
 	router.Handle("/api/v1/listen", common_handler.Handler{H: trackHandler.Listen}).Methods("POST")
-
 	router.Handle("/api/v1/track/{id}/like", common_handler.Handler{H: trackHandler.Like}).Methods("POST")
-	router.Handle("/api/v1/album/{id}/like", common_handler.Handler{H: albumHandler.Like}).Methods("POST")
-	router.Handle("/api/v1/artist/{id}/like", common_handler.Handler{H: artistHandler.Like}).Methods("POST")
-
 	router.Handle("/api/v1/track/{id}/is_like", common_handler.Handler{H: trackHandler.IsLike}).Methods("GET")
-	router.Handle("/api/v1/album/{id}/is_like", common_handler.Handler{H: albumHandler.IsLike}).Methods("GET")
-	router.Handle("/api/v1/artist/{id}/is_like", common_handler.Handler{H: artistHandler.IsLike}).Methods("GET")
-
 	router.Handle("/api/v1/track/{id}/unlike", common_handler.Handler{H: trackHandler.Unlike}).Methods("DELETE")
-	router.Handle("/api/v1/album/{id}/unlike", common_handler.Handler{H: albumHandler.Unlike}).Methods("DELETE")
-	router.Handle("/api/v1/artist/{id}/unlike", common_handler.Handler{H: artistHandler.Unlike}).Methods("DELETE")
-
-	router.Handle("/api/v1/artist/{id}", common_handler.Handler{H: artistHandler.ArtistInfo}).Methods("GET")
-	router.Handle("/api/v1/album/{id}", common_handler.Handler{H: albumHandler.AlbumTracks}).Methods("GET")
+	router.Handle("/api/v1/collection/tracks", common_handler.Handler{H: trackHandler.GetUserTracks}).Methods("GET")
 
 	router.Handle("/api/v1/feed", common_handler.Handler{H: albumHandler.Feed}).Methods("GET")
 	router.Handle("/api/v1/new", common_handler.Handler{H: albumHandler.New}).Methods("GET")
 	router.Handle("/api/v1/most_liked", common_handler.Handler{H: albumHandler.MostLiked}).Methods("GET")
 	router.Handle("/api/v1/popular", common_handler.Handler{H: albumHandler.Popular}).Methods("GET")
+	router.Handle("/api/v1/album/{id}/like", common_handler.Handler{H: albumHandler.Like}).Methods("POST")
+	router.Handle("/api/v1/album/{id}/is_like", common_handler.Handler{H: albumHandler.IsLike}).Methods("GET")
+	router.Handle("/api/v1/album/{id}/unlike", common_handler.Handler{H: albumHandler.Unlike}).Methods("DELETE")
+	router.Handle("/api/v1/album/{id}", common_handler.Handler{H: albumHandler.AlbumTracks}).Methods("GET")
+
+	router.Handle("/api/v1/artist/{id}/like", common_handler.Handler{H: artistHandler.Like}).Methods("POST")
+	router.Handle("/api/v1/artist/{id}/is_like", common_handler.Handler{H: artistHandler.IsLike}).Methods("GET")
+	router.Handle("/api/v1/artist/{id}/unlike", common_handler.Handler{H: artistHandler.Unlike}).Methods("DELETE")
+	router.Handle("/api/v1/artist/{id}", common_handler.Handler{H: artistHandler.ArtistInfo}).Methods("GET")
 
 	router.Handle("/api/v1/playlist", common_handler.Handler{H: playlistHandler.Create}).Methods("POST")
 

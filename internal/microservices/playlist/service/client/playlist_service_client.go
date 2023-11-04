@@ -4,12 +4,12 @@ import (
 	"context"
 	"github.com/sirupsen/logrus"
 	"io"
-	grpc_album "main/internal/microservices/album/service/client"
 	image_proto "main/internal/microservices/image/proto"
 	grpc_image "main/internal/microservices/image/service/client"
 	playlist_proto "main/internal/microservices/playlist/proto"
 	grpc_playlist_server "main/internal/microservices/playlist/service/server"
 	session_proto "main/internal/microservices/session/proto"
+	grpc_track "main/internal/microservices/track/service/client"
 	"main/internal/pkg/playlist"
 )
 
@@ -30,7 +30,7 @@ func DeserializePlaylistResponse(in *playlist_proto.PlaylistResponse) playlist.R
 		IsYours:  in.GetIsYours(),
 		AuthorId: in.GetCreatorId(),
 		Preview:  in.GetPreview(),
-		Tracks:   grpc_album.DeserializeTracks(in.GetTracks()),
+		Tracks:   grpc_track.DeserializeTracks(in.GetTracks()),
 	}
 }
 

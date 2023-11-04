@@ -79,6 +79,16 @@ func (db *Postgres) GetByPlaylist(playlistId uint64) ([]track.Response, error) {
 	return db.getWithQuery(context.Background(), query, playlistId)
 }
 
+func (db *Postgres) GetByUser(userId string) ([]track.Response, error) {
+	db.logger.Infoln("TrackRepo GetByUser entered")
+	query := `select track.id, track.name, preview, content, duration, artist.name from track 
+    			join profile_track on track.id = profile_track.track_id 
+      			join artist_track on track.id = artist_track.track_id 
+    			join artist on artist.id = artist_track.artist_id 
+			    where profile_id = $1`
+	return db.getWithQuery(context.Background(), query, userId)
+}
+
 func (db *Postgres) CreateLike(userId string, trackId uint64) error {
 	db.logger.Infoln("TrackRepo CreateLike entered")
 
@@ -151,18 +161,3 @@ func (db *Postgres) AddListen(trackId uint64) error {
 
 	return nil
 }
-
-//func (db *Postgres) GetAll() ([]track.Response, error) {
-//	query := "select id, name, preview, content from track"
-//	return db.getTracks(query, 0)
-//}
-//
-//func (db *Postgres) GetPopular(limit uint32) ([]track.Response, error) {
-//	query := "select id, name, preview, content from track order by play_count desc limit $1"
-//	return db.getTracks(query, limit)
-//}
-//
-//func (db *Postgres) GetLatest(limit uint32) ([]track.Response, error) {
-//	query := "select id, name, preview, content from track order by release_date desc limit $1"
-//	return db.getTracks(query, limit)
-//}
