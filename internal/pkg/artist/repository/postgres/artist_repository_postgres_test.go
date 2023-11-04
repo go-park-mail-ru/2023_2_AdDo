@@ -33,7 +33,7 @@ func TestArtistRepository_gettingById(t *testing.T) {
 			AddRow(expectedArtists[0].Id, expectedArtists[0].Name, expectedArtists[0].Avatar)
 
 		artistId := uint64(1)
-		query := "select artist.id, name, images from artist where artist.id = ?"
+		query := "select artist.id, name, avatar from artist where artist.id = ?"
 
 		mock.ExpectQuery(query).WithArgs(artistId).WillReturnRows(profileTable)
 
@@ -49,7 +49,7 @@ func TestArtistRepository_gettingById(t *testing.T) {
 			AddRow(expectedArtists[0].Id, expectedArtists[0].Name, expectedArtists[0].Avatar)
 
 		trackId := uint64(1)
-		query := "select artist.id, name, images from artist join artist_track on artist.id = artist_track.artist_id where artist_track.track_id = ?"
+		query := "select artist.id, name, avatar from artist join artist_track on artist.id = artist_track.artist_id where artist_track.track_id = ?"
 
 		mock.ExpectQuery(query).WithArgs(trackId).WillReturnRows(profileTable)
 
@@ -65,7 +65,7 @@ func TestArtistRepository_gettingById(t *testing.T) {
 			AddRow(expectedArtists[0].Id, expectedArtists[0].Name, expectedArtists[0].Avatar)
 
 		albumId := uint64(1)
-		query := "select artist.id, artist.name, images from artist join album on artist.id = album.artist_id where album.id = ?"
+		query := "select artist.id, artist.name, avatar from artist join album on artist.id = album.artist_id where album.id = ?"
 
 		mock.ExpectQuery(query).WithArgs(albumId).WillReturnRows(profileTable)
 

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/golang/mock/gomock"
+	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	common_handler "main/internal/common/handler"
@@ -81,17 +82,20 @@ func TestLike(t *testing.T) {
 		logger:         logrus.New(),
 	}
 
-	trackId := track.Id{Id: 1}
-	requestBody, err := json.Marshal(trackId)
-	assert.NoError(t, err)
+	t.Run("GetPathParamError", func(t *testing.T) {
+		req := httptest.NewRequest(http.MethodPost, "/track/like", nil)
+		w := httptest.NewRecorder()
+		err := handler.Like(w, req)
+		assert.Equal(t, http.StatusBadRequest, err.(common_handler.StatusError).Code)
+	})
 
 	t.Run("GetCookieError", func(t *testing.T) {
-		req := httptest.NewRequest(http.MethodPost, "/like", bytes.NewBuffer(requestBody))
+		req := httptest.NewRequest(http.MethodPost, "/track/like", nil)
+		const trackId = "1"
+		req = mux.SetURLVars(req, map[string]string{"id": trackId})
 		w := httptest.NewRecorder()
 
-		err = handler.Like(w, req)
-
-		assert.NotNil(t, err)
+		err := handler.Like(w, req)
 		assert.Equal(t, http.StatusUnauthorized, err.(common_handler.StatusError).Code)
 	})
 
@@ -106,15 +110,17 @@ func TestLike(t *testing.T) {
 			HttpOnly: true,
 		}
 
-		req := httptest.NewRequest(http.MethodPost, "/like", bytes.NewBuffer(requestBody))
+		req := httptest.NewRequest(http.MethodPost, "/track/like", nil)
+		const trackId = "1"
+		const trackIdInt uint64 = 1
+		req = mux.SetURLVars(req, map[string]string{"id": trackId})
 		req.AddCookie(&cookie)
 		w := httptest.NewRecorder()
 
 		mockSessionUseCase.EXPECT().GetUserId(sessionId).Return(userId, nil)
-		mockTrackUseCase.EXPECT().Like(userId, trackId.Id).Return(nil)
+		mockTrackUseCase.EXPECT().Like(userId, trackIdInt).Return(nil)
 
-		err = handler.Like(w, req)
-
+		err := handler.Like(w, req)
 		assert.Nil(t, err)
 		assert.Equal(t, http.StatusNoContent, w.Code)
 	})
