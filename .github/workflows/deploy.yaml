@@ -6,89 +6,130 @@ on:
   pull_request:
     types: [opened, reopened, closed]
 
-jobs:
+jobs:    
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Setup Go 
-        uses: actions/setup-go@v4 
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build base image
+        run: docker build -t musicon-base -f build/package/base/Dockerfile .
+
+      - name: Build other image
+        run: |
+          mkdir /tmp/images 
+          docker build -t user -f build/package/user/Dockerfile --output type=tar,dest=/tmp/images/user.tar . \
+          && docker build -t album -f build/package/album/Dockerfile --output type=tar,dest=/tmp/images/album.tar . \
+          && docker build -t artist -f build/package/artist/Dockerfile --output type=tar,dest=/tmp/images/artist.tar . \
+          && docker build -t entrypoint -f build/package/entrypoint/Dockerfile --output type=tar,dest=/tmp/images/entrypoint.tar . \
+          && docker build -t images -f build/package/images/Dockerfile --output type=tar,dest=/tmp/images/images.tar . \
+          && docker build -t playlist -f build/package/playlist/Dockerfile --output type=tar,dest=/tmp/images/playlist.tar . \
+          && docker build -t session -f build/package/session/Dockerfile --output type=tar,dest=/tmp/images/session.tar . \
+          && docker build -t track -f build/package/track/Dockerfile --output type=tar,dest=/tmp/images/track.tar .
+      
+      - uses: actions/upload-artifact@v3
         with:
-          go-version: '1.21.x'
-      - name: Install dependencies
-        run: go mod download && go mod tidy
-      - name: Build musicon
-        run: go build -o bin/musicon cmd/musicon/main.go
-  
-  # lint:
+          name: images
+          path: /tmp
+          retention-days: 3
+
+  # unit-test:
+  #   needs: 
+  #     - build
+  #     # - lint
   #   runs-on: ubuntu-latest
   #   steps:
-  #   - uses: actions/checkout@v3
-  #   - name: golangci-lint
-  #     uses: golangci/golangci-lint-action@v3
-  #     with:
-  #       version: latest
-  #       skip-pkg-cache: true
-  #       skip-build-cache: true
-      
-  unit-test:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Setup Go 
-        uses: actions/setup-go@v4 
-        with:
-          go-version: '1.21.x'
-      - name: Install dependencies
-        run: |
-          go mod download && go mod tidy 
-          go install github.com/golang/mock/mockgen@v1.6.0
-      - name: Run unit test
-        run: make unit-test
+  #     - uses: actions/checkout@v3
+  #     - name: Setup Go 
+  #       uses: actions/setup-go@v4 
+  #       with:
+  #         go-version: '1.21.x'
+  #     - name: Install dependencies
+  #       run: |
+  #         go mod download && go mod tidy 
+  #         go install github.com/golang/mock/mockgen@v1.6.0
+  #     - name: Run unit test
+  #       run: make unit-test
 
   integration-test:
-    needs: build
+    needs: 
+      - build
+      # - lint
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+
+      - name: Download artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: images
+          path: /tmp
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Load docker images
+        run: |
+          for arch in /tmp/images/*.tar; do
+            echo $arch 
+            cat $arch | docker import - $(basename $arch .tar):latest
+          done
+
       - name: Setup python3
         uses: actions/setup-python@v4
         with:
           python-version: '3.10' 
-      - name: Install dependencies
+
+      - name: Install python dependencies
         run: pip3 install requests names
+
+      - name: Run integration test
+        run: |
+          docker compose -f deployments/test/docker-compose.yml up -d
+          python3 test/testsuite/run_test.py && echo "Integration tests passed!"
+          docker compose -f deployments/test/docker-compose.yml down
+
+  publish:
+    needs: 
+      # - unit-test
+      - integration-test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-      - name: Run integration test
-        run: make integration-test
 
-  # build-publish:
-  #   needs: 
-  #     - unit-test
-  #     - integration-test
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Set up Docker Buildx
-  #       uses: docker/setup-buildx-action@v3
-  #     - name: Build and export
-  #       uses: docker/build-push-action@v5
-  #       with:
-  #         context: .
-  #         tags: musicon:latest
-  #         outputs: type=docker,dest=/tmp/musicon-images.tar
-  #     - name: Upload artifact
-  #       uses: actions/upload-artifact@v3
-  #       with:
-  #         name: musicon-images
-  #         path: /tmp/musicon-images.tar
+      - name: Login to Private Docker Registry
+        uses: docker/login-action@v1
+        with:
+          registry: registry.musicon.space
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}  
+
+      - name: Download artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: images
+          path: /tmp
+      
+      - name: Publish docker images
+        run: |
+          for arch in /tmp/images/*.tar; do
+            echo $arch 
+            image_name=$(basename $arch .tar)
+            cat $arch | docker import - registry.musicon.space/$image_name:latest
+            docker push registry.musicon.space/$image_name:latest
+          done
 
   deploy:
     if: github.event.pull_request.merged == true
     # if: github.ref == 'refs/heads/main'
     needs:
-      - unit-test
-      - integration-test
+      - publish
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -108,4 +149,94 @@ jobs:
           USERNAME: ${{ secrets.USERNAME }}
           PORT: ${{ secrets.PORT }}
           PASSWORD: ${{ secrets.PASSWORD }}
-          script: cd addo-backend && make deploy
+          script: |
+            docker login registry.musicon.space -u ${{ secrets.REGISTRY_USERNAME }} -p ${{ secrets.REGISTRY_PASSWORD }}
+            cd addo-backend && make deploy
+
+
+      # - name: Build base image
+      #   uses: docker/build-push-action@v2
+      #   with:
+      #     context: .
+      #     file: ./build/package/base/Dockerfile
+      #     load: true
+      #     tags: musicon-base:latest
+      
+      # - name: Inspect
+      #   run: |
+      #     docker image inspect musicon-base:latest
+
+      # - name: Build album image
+      #   uses: docker/build-push-action@v2
+      #   with:
+      #     context: .
+      #     file: ./build/package/album/Dockerfile
+      #     tags: album:latest
+      #     outputs: type=docker,dest=/tmp/album.tar
+
+#       - name: Build artist image
+#         uses: docker/build-push-action@v2
+#         with:
+#           context: .
+#           file: ./build/package/artist/Dockerfile
+#           tags: artist:latest
+#           outputs: type=docker,dest=/tmp/artist.tar
+# 
+#       - name: Build entrypoint image
+#         uses: docker/build-push-action@v2
+#         with:
+#           context: .
+#           file: ./build/package/entrypoint/Dockerfile
+#           tags: entrypoint:latest
+#           outputs: type=docker,dest=/tmp/entrypoint.tar
+# 
+#       - name: Build images image
+#         uses: docker/build-push-action@v2
+#         with:
+#           context: .
+#           file: ./build/package/images/Dockerfile
+#           tags: images:latest
+#           outputs: type=docker,dest=/tmp/images.tar
+# 
+#       - name: Build playlist image
+#         uses: docker/build-push-action@v2
+#         with:
+#           context: .
+#           file: ./build/package/playlist/Dockerfile
+#           tags: playlist:latest
+#           outputs: type=docker,dest=/tmp/playlist.tar
+# 
+#       - name: Build session image
+#         uses: docker/build-push-action@v2
+#         with:
+#           context: .
+#           file: ./build/package/session/Dockerfile
+#           tags: session:latest
+#           outputs: type=docker,dest=/tmp/session.tar
+# 
+#       - name: Build track image
+#         uses: docker/build-push-action@v2
+#         with:
+#           context: .
+#           file: ./build/package/track/Dockerfile
+#           tags: track:latest
+#           outputs: type=docker,dest=/tmp/track.tar
+# 
+#       - name: Build user image
+#         uses: docker/build-push-action@v2
+#         with:
+#           context: .
+#           file: ./build/package/user/Dockerfile
+#           tags: user:latest
+#           outputs: type=docker,dest=/tmp/user.tar
+
+  # lint:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #   - uses: actions/checkout@v3
+  #   - name: golangci-lint
+  #     uses: golangci/golangci-lint-action@v3
+  #     with:
+  #       version: latest
+  #       skip-pkg-cache: true
+  #       skip-build-cache: true

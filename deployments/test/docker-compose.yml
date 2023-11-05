@@ -71,6 +71,7 @@ services:
         condition: service_completed_successfully
     environment:
       DATABASE_URL: "${DATABASE_URL}"
+    command: "/user"
 
   session:
     image: session
@@ -84,7 +85,7 @@ services:
         condition: service_completed_successfully
     environment:
       DATABASE_URL: "${DATABASE_URL}"
-
+    command: "/session"
 
   track:
     image: track
@@ -98,6 +99,7 @@ services:
         condition: service_completed_successfully
     environment:
       DATABASE_URL: "${DATABASE_URL}"
+    command: "/track"
 
 
   album:
@@ -112,6 +114,7 @@ services:
         condition: service_completed_successfully
     environment:
       DATABASE_URL: "${DATABASE_URL}"
+    command: "/album"
 
 
   playlist:
@@ -124,6 +127,7 @@ services:
         condition: service_completed_successfully
     environment:
       DATABASE_URL: "${DATABASE_URL}"
+    command: "/playlist"
 
 
   artist:
@@ -136,6 +140,7 @@ services:
         condition: service_completed_successfully
     environment:
       DATABASE_URL: "${DATABASE_URL}"
+    command: "/artist"
 
   images:
     image: images
@@ -144,6 +149,7 @@ services:
         condition: service_completed_successfully
     environment:
       DATABASE_URL: "${DATABASE_URL}"
+    command: "/images"
     # extends:
     #   file: ../microservices/images/image-microservice.yml
     #   service: artist
@@ -181,3 +187,4 @@ services:
         condition: service_completed_successfully
     environment:
       DATABASE_URL: "${DATABASE_URL}"
+    command: "/entrypoint"

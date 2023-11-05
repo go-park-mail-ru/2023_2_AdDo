@@ -7,7 +7,7 @@ services:
       service: service-minio
     ports:
       - "9000:9000"
-      - "9001:9001" # redundant
+      - "9001:9001"
     volumes:
       - ~/minio-data:/data
 #    healthcheck:
@@ -84,88 +84,80 @@ services:
     command: "ls"
 
   user:
-    extends:
-      file: ../microservices/user/user-microservice.yml
-      service: user
+    image: registry.musicon.space/user
     deploy:
       replicas: 1
     depends_on:
       common-service-waiter:
         condition: service_completed_successfully
-    env_file:
-      - .env
-
+    environment:
+      DATABASE_URL: "${DATABASE_URL}"
+    command: "/user"
+  
   session:
-    extends:
-      file: ../microservices/session/session-microservice.yml
-      service: session
+    image: registry.musicon.space/session
     deploy:
       replicas: 1
     depends_on:
       common-service-waiter:
         condition: service_completed_successfully
-    env_file:
-      - .env
+    command: "/session"
 
   track:
-    extends:
-      file: ../microservices/track/track-microservice.yml
-      service: track
+    image: registry.musicon.space/track
+
     deploy:
       replicas: 1
     depends_on:
       common-service-waiter:
         condition: service_completed_successfully
-    env_file:
-      - .env
+    environment:
+      DATABASE_URL: "${DATABASE_URL}"
+    command: "/track"
 
   album:
-    extends:
-      file: ../microservices/album/album-microservice.yml
-      service: album
+    image: registry.musicon.space/album
     deploy:
       replicas: 1
     depends_on:
       common-service-waiter:
         condition: service_completed_successfully
-    env_file:
-      - .env
+    environment:
+      DATABASE_URL: "${DATABASE_URL}"
+    command: "/album"
 
   playlist:
-    extends:
-      file: ../microservices/playlist/playlist-microservice.yml
-      service: playlist
+    image: registry.musicon.space/playlist
     deploy:
       replicas: 1
     depends_on:
       common-service-waiter:
         condition: service_completed_successfully
-    env_file:
-      - .env
+    environment:
+      DATABASE_URL: "${DATABASE_URL}"
+    command: "/playlist"
 
   artist:
-    extends:
-      file: ../microservices/artist/artist-microservice.yml
-      service: artist
+    image: registry.musicon.space/artist
     deploy:
       replicas: 1
     depends_on:
       common-service-waiter:
         condition: service_completed_successfully
-    env_file:
-      - .env
+    environment:
+      DATABASE_URL: "${DATABASE_URL}"
+    command: "/artist"
 
   images:
-    extends:
-      file: ../microservices/images/image-microservice.yml
-      service: images
+    image: registry.musicon.space/images
     deploy:
       replicas: 1
     depends_on:
       common-service-waiter:
         condition: service_completed_successfully
-    env_file:
-      - .env
+    environment:
+      DATABASE_URL: "${DATABASE_URL}"
+    command: "/images"
 
   microservice-waiter:
     image: alpine
@@ -186,9 +178,7 @@ services:
         condition: service_started
 
   musicon:
-    extends:
-      file: ../entrypoint/gateway.yml
-      service: musicon
+    image: registry.musicon.space/entrypoint
     ports:
       - "8080:8080"
     depends_on:
@@ -196,6 +186,9 @@ services:
         condition: service_completed_successfully
       microservice-waiter:
         condition: service_completed_successfully
+    environment:
+      DATABASE_URL: "${DATABASE_URL}"
+    command: "/entrypoint"
     logging:
       driver: "fluentd"
       options: 
