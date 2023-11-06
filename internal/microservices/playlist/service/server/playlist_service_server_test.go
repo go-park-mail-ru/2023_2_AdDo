@@ -32,25 +32,22 @@ func Test_Create(t *testing.T) {
 
 	ctx := context.Background()
 
-	in := &playlist_proto.PlaylistBase{
-		Id:        100,
-		Name:      "Playlist",
-		CreatorId: "creatorId",
-		Preview:   "preview",
+	in := &playlist_proto.PlaylistBase{CreatorId: "creatorId"}
+
+	expected := playlist.Response{
+		AuthorId: in.CreatorId,
+		Name:     in.GetName(),
 	}
 
 	deserialized := playlist.Base{
-		Id:       in.Id,
-		Name:     in.Name,
 		AuthorId: in.CreatorId,
-		Preview:  in.Preview,
 	}
 
-	mockPlaylistRepo.EXPECT().Create(ctx, deserialized).Return(nil)
+	mockPlaylistRepo.EXPECT().Create(ctx, deserialized).Return(expected, nil)
 
 	result, err := playlistManager.Create(ctx, in)
 	assert.Nil(t, err)
-	assert.Equal(t, &google_proto.Empty{}, result)
+	assert.Equal(t, expected, result)
 }
 
 func Test_Get(t *testing.T) {
