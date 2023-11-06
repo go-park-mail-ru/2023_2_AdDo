@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	image_proto "main/internal/microservices/image/proto"
 	playlist_proto "main/internal/microservices/playlist/proto"
+	session_proto "main/internal/microservices/session/proto"
 	track_proto "main/internal/microservices/track/proto"
 	"main/internal/pkg/playlist"
 	"main/internal/pkg/track"
@@ -15,6 +16,42 @@ import (
 	track_mock "main/test/mocks/track"
 	"testing"
 )
+
+func Test_Create(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockPlaylistRepo := playlist_mock.NewMockRepository(ctrl)
+	mockTracksRepo := track_mock.NewMockRepository(ctrl)
+
+	playlistManager := &PlaylistManager{
+		repoPlaylist: mockPlaylistRepo,
+		repoTracks:   mockTracksRepo,
+		logger:       logrus.New(),
+	}
+
+	ctx := context.Background()
+
+	in := &playlist_proto.PlaylistBase{
+		Id:        100,
+		Name:      "Playlist",
+		CreatorId: "creatorId",
+		Preview:   "preview",
+	}
+
+	deserialized := playlist.Base{
+		Id:       in.Id,
+		Name:     in.Name,
+		AuthorId: in.CreatorId,
+		Preview:  in.Preview,
+	}
+
+	mockPlaylistRepo.EXPECT().Create(ctx, deserialized).Return(nil)
+
+	result, err := playlistManager.Create(ctx, in)
+	assert.Nil(t, err)
+	assert.Equal(t, &google_proto.Empty{}, result)
+}
 
 func Test_Get(t *testing.T) {
 	ctrl := gomock.NewController(t)
@@ -93,6 +130,49 @@ func Test_Get(t *testing.T) {
 		assert.Nil(t, err)
 		assert.Equal(t, serializedResponse, result)
 	})
+}
+
+func Test_GetUserPlaylists(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockPlaylistRepo := playlist_mock.NewMockRepository(ctrl)
+	mockTracksRepo := track_mock.NewMockRepository(ctrl)
+
+	playlistManager := &PlaylistManager{
+		repoPlaylist: mockPlaylistRepo,
+		repoTracks:   mockTracksRepo,
+		logger:       logrus.New(),
+	}
+
+	ctx := context.Background()
+	in := &session_proto.UserId{UserId: "user_id"}
+
+	playlists := []playlist.Base{
+		{
+			Id:       100,
+			Name:     "Playlist",
+			AuthorId: "creatorId",
+			Preview:  "preview",
+		},
+	}
+
+	serializedPlaylists := &playlist_proto.PlaylistsBase{
+		Playlists: []*playlist_proto.PlaylistBase{
+			{
+				Id:        playlists[0].Id,
+				Name:      playlists[0].Name,
+				CreatorId: playlists[0].AuthorId,
+				Preview:   playlists[0].Preview,
+			},
+		},
+	}
+
+	mockPlaylistRepo.EXPECT().GetByCreatorId(ctx, in.GetUserId()).Return(playlists, nil)
+
+	result, err := playlistManager.GetUserPlaylists(ctx, in)
+	assert.Nil(t, err)
+	assert.Equal(t, serializedPlaylists, result)
 }
 
 func Test_ChangePlaylist(t *testing.T) {

@@ -8,6 +8,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	common_handler "main/internal/common/handler"
+	"main/internal/common/response"
 	"main/internal/pkg/album"
 	"main/internal/pkg/session"
 	"main/internal/pkg/track"
@@ -206,16 +207,32 @@ func TestLike(t *testing.T) {
 		logger:         logrus.New(),
 	}
 
-	t.Run("GetPathParamError", func(t *testing.T) {
+	const (
+		albumId           = "1"
+		albumIdInt uint64 = 1
+		sessionId         = "sessionID"
+		userId            = "qwer-qwer-qwer"
+		isLiked           = true
+	)
+
+	cookie := http.Cookie{
+		Name:     session.CookieName,
+		Value:    sessionId,
+		Expires:  time.Now().Add(session.TimeToLiveCookie),
+		Secure:   true,
+		HttpOnly: true,
+	}
+
+	t.Run("Like GetPathParamError", func(t *testing.T) {
 		req := httptest.NewRequest(http.MethodPost, "/album/like", nil)
 		w := httptest.NewRecorder()
+
 		err := handler.Like(w, req)
 		assert.Equal(t, http.StatusBadRequest, err.(common_handler.StatusError).Code)
 	})
 
-	t.Run("GetCookieError", func(t *testing.T) {
+	t.Run("Like GetCookieError", func(t *testing.T) {
 		req := httptest.NewRequest(http.MethodPost, "/album/like", nil)
-		const albumId = "1"
 		req = mux.SetURLVars(req, map[string]string{"id": albumId})
 		w := httptest.NewRecorder()
 
@@ -223,21 +240,8 @@ func TestLike(t *testing.T) {
 		assert.Equal(t, http.StatusUnauthorized, err.(common_handler.StatusError).Code)
 	})
 
-	t.Run("Success", func(t *testing.T) {
-		const sessionId = "sessionID"
-		const userId = "qwer-qwer-qwer"
-		cookie := http.Cookie{
-			Name:     session.CookieName,
-			Value:    sessionId,
-			Expires:  time.Now().Add(session.TimeToLiveCookie),
-			Secure:   true,
-			HttpOnly: true,
-		}
-
+	t.Run("Like Success", func(t *testing.T) {
 		req := httptest.NewRequest(http.MethodPost, "/album/like", nil)
-		const albumId = "1"
-		const albumIdInt uint64 = 1
-
 		req = mux.SetURLVars(req, map[string]string{"id": albumId})
 		req.AddCookie(&cookie)
 		w := httptest.NewRecorder()
@@ -246,6 +250,58 @@ func TestLike(t *testing.T) {
 		mockAlbumUseCase.EXPECT().Like(userId, albumIdInt).Return(nil)
 
 		err := handler.Like(w, req)
+		assert.Nil(t, err)
+		assert.Equal(t, http.StatusNoContent, w.Code)
+	})
+
+	t.Run("IsLike GetPathParamError", func(t *testing.T) {
+		req := httptest.NewRequest(http.MethodPost, "/album/is_like", nil)
+		w := httptest.NewRecorder()
+
+		err := handler.IsLike(w, req)
+		assert.Equal(t, http.StatusBadRequest, err.(common_handler.StatusError).Code)
+	})
+
+	t.Run("IsLike GetUserIdByCookieError", func(t *testing.T) {
+		req := httptest.NewRequest(http.MethodPost, "/album/is_like", nil)
+		req = mux.SetURLVars(req, map[string]string{"id": albumId})
+		req.AddCookie(&cookie)
+		w := httptest.NewRecorder()
+
+		mockSessionUseCase.EXPECT().GetUserId(sessionId).Return("", errors.New("error while getting user"))
+
+		err := handler.IsLike(w, req)
+		assert.Equal(t, http.StatusUnauthorized, err.(common_handler.StatusError).Code)
+	})
+
+	t.Run("IsLike Success", func(t *testing.T) {
+		req := httptest.NewRequest(http.MethodPost, "/album/is_like", nil)
+		req = mux.SetURLVars(req, map[string]string{"id": albumId})
+		req.AddCookie(&cookie)
+		w := httptest.NewRecorder()
+
+		mockSessionUseCase.EXPECT().GetUserId(sessionId).Return(userId, nil)
+		mockAlbumUseCase.EXPECT().IsLike(userId, albumIdInt).Return(isLiked, nil)
+
+		err := handler.IsLike(w, req)
+		assert.Nil(t, err)
+
+		var received response.IsLiked
+		err = json.NewDecoder(w.Body).Decode(&received)
+		assert.Nil(t, err)
+		assert.Equal(t, response.IsLiked{IsLiked: isLiked}, received)
+	})
+
+	t.Run("Unlike Success", func(t *testing.T) {
+		req := httptest.NewRequest(http.MethodPost, "/album/unlike", nil)
+		req = mux.SetURLVars(req, map[string]string{"id": albumId})
+		req.AddCookie(&cookie)
+		w := httptest.NewRecorder()
+
+		mockSessionUseCase.EXPECT().GetUserId(sessionId).Return(userId, nil)
+		mockAlbumUseCase.EXPECT().Unlike(userId, albumIdInt).Return(nil)
+
+		err := handler.Unlike(w, req)
 		assert.Nil(t, err)
 		assert.Equal(t, http.StatusNoContent, w.Code)
 	})
