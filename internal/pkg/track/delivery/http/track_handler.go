@@ -180,3 +180,34 @@ func (handler *TrackHandler) Unlike(w http.ResponseWriter, r *http.Request) erro
 	w.WriteHeader(http.StatusNoContent)
 	return nil
 }
+
+func (handler *TrackHandler) GetUserTracks(w http.ResponseWriter, r *http.Request) error {
+	handler.logger.WithFields(logrus.Fields{
+		"request_id": utils.GenReqId(r.RequestURI + r.Method),
+	}).Infoln("GetUserTracks TrackHandler entered")
+
+	sessionId, err := response.GetCookie(r)
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusUnauthorized, Err: err}
+	}
+	handler.logger.Infoln("got cookie")
+
+	userId, err := handler.sessionUseCase.GetUserId(sessionId)
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusUnauthorized, Err: err}
+	}
+	handler.logger.Infoln("got user id by session id")
+
+	result, err := handler.trackUseCase.GetUserLikedTracks(userId)
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
+	}
+	handler.logger.Infoln("liked tracks for user ", userId, "get")
+
+	err = response.RenderJSON(w, track.LikedTracks{Tracks: result})
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
+	}
+	handler.logger.Infoln("response  formed")
+	return nil
+}

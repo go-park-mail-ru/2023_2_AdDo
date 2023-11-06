@@ -34,7 +34,7 @@ func (db *Postgres) getWithQuery(ctx context.Context, query string, args ...any)
 	result := make([]track.Response, 0)
 	for rows.Next() {
 		var t track.Response
-		err := rows.Scan(&t.Id, &t.Name, &t.Preview, &t.Content, &t.Duration, &t.ArtistName)
+		err := rows.Scan(&t.Id, &t.Name, &t.Preview, &t.Content, &t.Duration, &t.ArtistId, &t.ArtistName)
 		if err != nil {
 			db.logger.WithFields(logrus.Fields{
 				"query":    query,
@@ -52,7 +52,7 @@ func (db *Postgres) getWithQuery(ctx context.Context, query string, args ...any)
 
 func (db *Postgres) GetByAlbum(albumId uint64) ([]track.Response, error) {
 	db.logger.Infoln("TrackRepo GetByAlbum entered")
-	query := `select track.id, track.name, preview, content, duration, artist.name from track 
+	query := `select track.id, track.name, preview, content, duration, artist.id, artist.name from track 
     			join album_track on track.id = album_track.track_id  
 				join artist_track on track.id = artist_track.track_id 
     			join artist on artist.id = artist_track.artist_id 
@@ -62,7 +62,7 @@ func (db *Postgres) GetByAlbum(albumId uint64) ([]track.Response, error) {
 
 func (db *Postgres) GetByArtist(artistId uint64) ([]track.Response, error) {
 	db.logger.Infoln("TrackRepo GetByArtist entered")
-	query := `select track.id, track.name, preview, content, duration, artist.name from track
+	query := `select track.id, track.name, preview, content, duration, artist.id, artist.name from track
 				join artist_track on track.id = artist_track.track_id
     			join artist on artist.id = artist_track.artist_id 
 				where artist_track.artist_id = $1`
@@ -71,12 +71,22 @@ func (db *Postgres) GetByArtist(artistId uint64) ([]track.Response, error) {
 
 func (db *Postgres) GetByPlaylist(playlistId uint64) ([]track.Response, error) {
 	db.logger.Infoln("TrackRepo GetByPlaylist entered")
-	query := `select track.id, track.name, preview, content, duration, artist.name from track 
+	query := `select track.id, track.name, preview, content, duration, artist.id, artist.name from track 
     			join playlist_track on track.id = playlist_track.track_id 
       			join artist_track on track.id = artist_track.track_id 
     			join artist on artist.id = artist_track.artist_id 
 			    where playlist_track.playlist_id = $1`
 	return db.getWithQuery(context.Background(), query, playlistId)
+}
+
+func (db *Postgres) GetByUser(userId string) ([]track.Response, error) {
+	db.logger.Infoln("TrackRepo GetByUser entered")
+	query := `select track.id, track.name, preview, content, duration, artist.id, artist.name from track 
+    			join profile_track on track.id = profile_track.track_id 
+      			join artist_track on track.id = artist_track.track_id 
+    			join artist on artist.id = artist_track.artist_id 
+			    where profile_id = $1`
+	return db.getWithQuery(context.Background(), query, userId)
 }
 
 func (db *Postgres) CreateLike(userId string, trackId uint64) error {
@@ -151,18 +161,3 @@ func (db *Postgres) AddListen(trackId uint64) error {
 
 	return nil
 }
-
-//func (db *Postgres) GetAll() ([]track.Response, error) {
-//	query := "select id, name, preview, content from track"
-//	return db.getTracks(query, 0)
-//}
-//
-//func (db *Postgres) GetPopular(limit uint32) ([]track.Response, error) {
-//	query := "select id, name, preview, content from track order by play_count desc limit $1"
-//	return db.getTracks(query, limit)
-//}
-//
-//func (db *Postgres) GetLatest(limit uint32) ([]track.Response, error) {
-//	query := "select id, name, preview, content from track order by release_date desc limit $1"
-//	return db.getTracks(query, limit)
-//}

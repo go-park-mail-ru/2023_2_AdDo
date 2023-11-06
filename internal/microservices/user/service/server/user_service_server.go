@@ -155,3 +155,15 @@ func (us *UserManager) UpdateUserInfo(ctx context.Context, in *user_proto.UserDa
 
 	return &google_proto.Empty{}, nil
 }
+
+func (us *UserManager) GetUserName(ctx context.Context, in *session_proto.UserId) (*user_proto.UserName, error) {
+	us.Logger.Infoln("User Micros GetUserName entered")
+
+	userName, err := us.UserRepo.GetUserNameById(in.GetUserId())
+	if err != nil {
+		return nil, err
+	}
+	us.Logger.Infoln("session deleted from database")
+
+	return &user_proto.UserName{UserName: userName}, nil
+}

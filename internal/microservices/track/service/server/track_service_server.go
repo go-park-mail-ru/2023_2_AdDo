@@ -4,6 +4,7 @@ import (
 	"context"
 	google_proto "github.com/golang/protobuf/ptypes/empty"
 	"github.com/sirupsen/logrus"
+	session_proto "main/internal/microservices/session/proto"
 	track_proto "main/internal/microservices/track/proto"
 	"main/internal/pkg/album"
 	"main/internal/pkg/artist"
@@ -25,6 +26,27 @@ func NewTrackManager(repoTrack track.Repository, repoArtist artist.Repository, r
 		repoAlbum:  repoAlbum,
 		logger:     logger,
 	}
+}
+
+func SerializeTrack(in track.Response) *track_proto.Track {
+	return &track_proto.Track{
+		Id:         in.Id,
+		Name:       in.Name,
+		Preview:    in.Preview,
+		Content:    in.Content,
+		ArtistId:   in.ArtistId,
+		ArtistName: in.ArtistName,
+		Duration:   in.Duration,
+		IsLiked:    in.IsLiked,
+	}
+}
+
+func SerializeTracks(in []track.Response) *track_proto.TracksResponse {
+	tracks := make([]*track_proto.Track, 0)
+	for _, t := range in {
+		tracks = append(tracks, SerializeTrack(t))
+	}
+	return &track_proto.TracksResponse{Tracks: tracks}
 }
 
 func (tm *TrackManager) Listen(ctx context.Context, in *track_proto.TrackId) (*google_proto.Empty, error) {
@@ -73,4 +95,16 @@ func (tm *TrackManager) Like(ctx context.Context, in *track_proto.TrackToUserId)
 	tm.logger.Infoln("Like created for track ", in.GetTrackId(), " by user ", in.GetUserId())
 
 	return &google_proto.Empty{}, nil
+}
+
+func (tm *TrackManager) GetUserLikedTracks(ctx context.Context, in *session_proto.UserId) (*track_proto.TracksResponse, error) {
+	tm.logger.Infoln("Track Micros GetUserLikedTracks entered")
+
+	result, err := tm.repoTrack.GetByUser(in.GetUserId())
+	if err != nil {
+		tm.logger.Errorln(err)
+		return nil, err
+	}
+
+	return SerializeTracks(result), nil
 }

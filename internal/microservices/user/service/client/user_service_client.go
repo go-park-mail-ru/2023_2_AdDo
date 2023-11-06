@@ -87,6 +87,9 @@ func (c *Client) Logout(sessionId string) error {
 func (c *Client) UploadAvatar(userId string, src io.Reader, size int64) (string, error) {
 	c.logger.Infoln("User grpc client UploadAvatar entered")
 
+	_ = c.RemoveAvatar(userId)
+	c.logger.Infoln("last avatar and image removed")
+
 	avatarUrl, err := c.imageClient.UploadAvatar(src, size)
 	if err != nil {
 		return "", err
@@ -139,4 +142,16 @@ func (c *Client) UpdateUserInfo(userId string, u user_domain.User) error {
 	c.logger.Infoln("Info updated successfully")
 
 	return nil
+}
+
+func (c *Client) GetUserName(userId string) (string, error) {
+	c.logger.Infoln("user client GetUserName entered")
+
+	result, err := c.userClient.GetUserName(context.Background(), &session_proto.UserId{UserId: userId})
+	if err != nil {
+		return "", err
+	}
+	c.logger.Infoln("got user name")
+
+	return result.GetUserName(), nil
 }

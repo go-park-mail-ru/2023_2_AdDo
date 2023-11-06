@@ -5,7 +5,7 @@ import (
 	google_proto "github.com/golang/protobuf/ptypes/empty"
 	"github.com/sirupsen/logrus"
 	album_proto "main/internal/microservices/album/proto"
-	track_proto "main/internal/microservices/track/proto"
+	grpc_track_server "main/internal/microservices/track/service/server"
 	"main/internal/pkg/album"
 	"main/internal/pkg/artist"
 	"main/internal/pkg/track"
@@ -28,26 +28,6 @@ func NewAlbumManager(repoTrack track.Repository, repoArtist artist.Repository, r
 	}
 }
 
-func SerializeTrack(in track.Response) *track_proto.Track {
-	return &track_proto.Track{
-		Id:         in.Id,
-		Name:       in.Name,
-		Preview:    in.Preview,
-		Content:    in.Content,
-		ArtistName: in.ArtistName,
-		Duration:   in.Duration,
-		IsLiked:    in.IsLiked,
-	}
-}
-
-func SerializeTracks(in []track.Response) *track_proto.TracksResponse {
-	tracks := make([]*track_proto.Track, 0)
-	for _, t := range in {
-		tracks = append(tracks, SerializeTrack(t))
-	}
-	return &track_proto.TracksResponse{Tracks: tracks}
-}
-
 func SerializeAlbum(in album.Response) *album_proto.AlbumResponse {
 	return &album_proto.AlbumResponse{
 		Id:         in.Id,
@@ -55,7 +35,7 @@ func SerializeAlbum(in album.Response) *album_proto.AlbumResponse {
 		Preview:    in.Preview,
 		ArtistId:   in.ArtistId,
 		ArtistName: in.ArtistName,
-		Tracks:     SerializeTracks(in.Tracks),
+		Tracks:     grpc_track_server.SerializeTracks(in.Tracks),
 	}
 }
 

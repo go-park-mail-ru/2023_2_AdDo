@@ -5,34 +5,13 @@ import (
 	google_proto "github.com/golang/protobuf/ptypes/empty"
 	"github.com/sirupsen/logrus"
 	"main/internal/microservices/album/proto"
-	track_proto "main/internal/microservices/track/proto"
+	grpc_track "main/internal/microservices/track/service/client"
 	"main/internal/pkg/album"
-	"main/internal/pkg/track"
 )
 
 type Client struct {
 	albumManager proto.AlbumServiceClient
 	logger       *logrus.Logger
-}
-
-func DeserializeTrack(in *track_proto.Track) track.Response {
-	return track.Response{
-		Id:         in.GetId(),
-		Name:       in.GetName(),
-		Preview:    in.GetPreview(),
-		Content:    in.GetContent(),
-		ArtistName: in.GetArtistName(),
-		Duration:   in.GetDuration(),
-		IsLiked:    in.GetIsLiked(),
-	}
-}
-
-func DeserializeTracks(in *track_proto.TracksResponse) []track.Response {
-	result := make([]track.Response, 0)
-	for _, t := range in.GetTracks() {
-		result = append(result, DeserializeTrack(t))
-	}
-	return result
 }
 
 func DeserializeAlbum(in *proto.AlbumResponse) album.Response {
@@ -42,7 +21,7 @@ func DeserializeAlbum(in *proto.AlbumResponse) album.Response {
 		Preview:    in.GetPreview(),
 		ArtistId:   in.GetArtistId(),
 		ArtistName: in.GetArtistName(),
-		Tracks:     DeserializeTracks(in.GetTracks()),
+		Tracks:     grpc_track.DeserializeTracks(in.GetTracks()),
 	}
 }
 
