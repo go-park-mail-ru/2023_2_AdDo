@@ -84,7 +84,7 @@ func TestAlbumRepository_Get(t *testing.T) {
 	}
 }
 
-func TestAlbumRepository_CreateLike(t *testing.T) {
+func TestAlbumRepository_Like(t *testing.T) {
 	mock, err := pgxmock.NewPool()
 	if err != nil {
 		t.Fatal(err)
@@ -99,20 +99,31 @@ func TestAlbumRepository_CreateLike(t *testing.T) {
 	const userId = "1"
 	const albumId uint64 = 2
 
-	query := "insert into profile_album"
-
-	t.Run("Success", func(t *testing.T) {
-		mock.ExpectExec(query).WithArgs(userId, albumId).WillReturnResult(pgxmock.NewResult("insert", 1))
+	t.Run("CreateLike Success", func(t *testing.T) {
+		mock.ExpectExec("insert into profile_album").
+			WithArgs(userId, albumId).
+			WillReturnResult(pgxmock.NewResult("insert", 1))
 
 		err = repo.CreateLike(userId, albumId)
 		assert.Nil(t, err)
 	})
 
-	t.Run("Error", func(t *testing.T) {
-		mock.ExpectExec(query).WithArgs(userId, albumId).WillReturnError(errors.New("error while creating like"))
+	t.Run("CreateLike Error", func(t *testing.T) {
+		mock.ExpectExec("insert into profile_album").
+			WithArgs(userId, albumId).
+			WillReturnError(errors.New("error while creating like"))
 
 		err = repo.CreateLike(userId, albumId)
 		assert.Equal(t, errors.New("error while creating like"), err)
+	})
+
+	t.Run("DeleteLike", func(t *testing.T) {
+		mock.ExpectExec("delete from profile_album").
+			WithArgs(userId, albumId).
+			WillReturnResult(pgxmock.NewResult("delete", 1))
+
+		err = repo.DeleteLike(userId, albumId)
+		assert.Nil(t, err)
 	})
 
 	if err = mock.ExpectationsWereMet(); err != nil {

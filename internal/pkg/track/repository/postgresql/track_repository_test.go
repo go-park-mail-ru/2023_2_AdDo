@@ -22,15 +22,18 @@ func TestTrackRepository_getWithQuery(t *testing.T) {
 	}
 
 	expected := []track.Response{{
-		Id:      1,
-		Name:    "Track",
-		Preview: "Preview",
-		Content: "Content",
+		Id:         1,
+		Name:       "Track",
+		Preview:    "Preview",
+		Content:    "Content",
+		Duration:   100,
+		ArtistName: "Artist",
 	}}
 
-	query := "select track.id, name, preview, content from track"
-	rows := pgxmock.NewRows([]string{"id", "name", "preview", "content"}).
-		AddRow(expected[0].Id, expected[0].Name, expected[0].Preview, expected[0].Content)
+	query := "select id, name, preview, content, duration, artist_name from track"
+	rows := pgxmock.NewRows([]string{"id", "name", "preview", "content", "duration", "artist_name"}).
+		AddRow(expected[0].Id, expected[0].Name, expected[0].Preview, expected[0].Content, expected[0].Duration,
+			expected[0].ArtistName)
 
 	mock.ExpectQuery(query).WillReturnRows(rows)
 
@@ -46,7 +49,7 @@ func TestTrackRepository_getWithQuery(t *testing.T) {
 	}
 }
 
-func TestTrackRepository_CreateLike(t *testing.T) {
+func TestTrackRepository_Like(t *testing.T) {
 	mock, err := pgxmock.NewPool()
 	if err != nil {
 		t.Fatal(err)
@@ -58,14 +61,38 @@ func TestTrackRepository_CreateLike(t *testing.T) {
 		logger: logrus.New(),
 	}
 
-	const userId = "1"
-	const trackId uint64 = 2
+	const (
+		userId         = "c39cd8ee-8cdb-4f10-bce7-2d75514b5437"
+		trackId uint64 = 123
+	)
 
-	query := "insert into profile_track"
-	mock.ExpectExec(query).WithArgs(userId, trackId).WillReturnResult(pgxmock.NewResult("insert", 1))
+	t.Run("CreateLike", func(t *testing.T) {
+		mock.ExpectExec("insert into profile_track").
+			WithArgs(userId, trackId).
+			WillReturnResult(pgxmock.NewResult("insert", 1))
 
-	err = repo.CreateLike(userId, trackId)
-	assert.Nil(t, err)
+		err = repo.CreateLike(userId, trackId)
+		assert.Nil(t, err)
+	})
+
+	//t.Run("CheckLike", func(t *testing.T) {
+	//	mock.ExpectQuery("select count(*) from profile_track where profile_id = ? and track_id = ?").
+	//		WithArgs(userId, trackId).
+	//		WillReturnRows(pgxmock.NewRows([]string{"count(*)"}).AddRow(1))
+	//
+	//	isLiked, _ := repo.CheckLike(userId, trackId)
+	//	assert.True(t, isLiked)
+	//	assert.NoError(t, err)
+	//})
+
+	t.Run("DeleteLike", func(t *testing.T) {
+		mock.ExpectExec("delete from profile_track").
+			WithArgs(userId, trackId).
+			WillReturnResult(pgxmock.NewResult("delete", 1))
+
+		err = repo.DeleteLike(userId, trackId)
+		assert.Nil(t, err)
+	})
 
 	if err = mock.ExpectationsWereMet(); err != nil {
 		t.Errorf("Unfulfilled expectations: %v", err)

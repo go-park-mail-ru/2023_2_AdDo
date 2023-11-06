@@ -5,9 +5,11 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/golang/mock/gomock"
+	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	common_handler "main/internal/common/handler"
+	"main/internal/common/response"
 	"main/internal/pkg/session"
 	"main/internal/pkg/track"
 	session_mock "main/test/mocks/session"
@@ -81,40 +83,105 @@ func TestLike(t *testing.T) {
 		logger:         logrus.New(),
 	}
 
-	trackId := track.Id{Id: 1}
-	requestBody, err := json.Marshal(trackId)
-	assert.NoError(t, err)
+	const (
+		trackId           = "1"
+		trackIdInt uint64 = 1
+		sessionId         = "sessionID"
+		userId            = "qwer-qwer-qwer"
+		isLiked           = true
+	)
 
-	t.Run("GetCookieError", func(t *testing.T) {
-		req := httptest.NewRequest(http.MethodPost, "/like", bytes.NewBuffer(requestBody))
+	cookie := http.Cookie{
+		Name:     session.CookieName,
+		Value:    sessionId,
+		Expires:  time.Now().Add(session.TimeToLiveCookie),
+		Secure:   true,
+		HttpOnly: true,
+	}
+
+	t.Run("Like GetPathParamError", func(t *testing.T) {
+		req := httptest.NewRequest(http.MethodPost, "/track/like", nil)
+		w := httptest.NewRecorder()
+		err := handler.Like(w, req)
+		assert.Equal(t, http.StatusBadRequest, err.(common_handler.StatusError).Code)
+	})
+
+	t.Run("Like GetCookieError", func(t *testing.T) {
+		req := httptest.NewRequest(http.MethodPost, "/track/like", nil)
+		req = mux.SetURLVars(req, map[string]string{"id": trackId})
 		w := httptest.NewRecorder()
 
-		err = handler.Like(w, req)
-
-		assert.NotNil(t, err)
+		err := handler.Like(w, req)
 		assert.Equal(t, http.StatusUnauthorized, err.(common_handler.StatusError).Code)
 	})
 
-	t.Run("Success", func(t *testing.T) {
-		const sessionId = "sessionID"
-		const userId = "qwer-qwer-qwer"
-		cookie := http.Cookie{
-			Name:     session.CookieName,
-			Value:    sessionId,
-			Expires:  time.Now().Add(session.TimeToLiveCookie),
-			Secure:   true,
-			HttpOnly: true,
-		}
-
-		req := httptest.NewRequest(http.MethodPost, "/like", bytes.NewBuffer(requestBody))
+	t.Run("Like Success", func(t *testing.T) {
+		req := httptest.NewRequest(http.MethodPost, "/track/like", nil)
+		req = mux.SetURLVars(req, map[string]string{"id": trackId})
 		req.AddCookie(&cookie)
 		w := httptest.NewRecorder()
 
 		mockSessionUseCase.EXPECT().GetUserId(sessionId).Return(userId, nil)
-		mockTrackUseCase.EXPECT().Like(userId, trackId.Id).Return(nil)
+		mockTrackUseCase.EXPECT().Like(userId, trackIdInt).Return(nil)
 
-		err = handler.Like(w, req)
+		err := handler.Like(w, req)
+		assert.Nil(t, err)
+		assert.Equal(t, http.StatusNoContent, w.Code)
+	})
 
+	t.Run("IsLike GetUserIdByCookieError", func(t *testing.T) {
+		req := httptest.NewRequest(http.MethodPost, "/track/is_like", nil)
+		req = mux.SetURLVars(req, map[string]string{"id": trackId})
+		req.AddCookie(&cookie)
+		w := httptest.NewRecorder()
+
+		mockSessionUseCase.EXPECT().GetUserId(sessionId).Return("", errors.New("error while getting user"))
+
+		err := handler.IsLike(w, req)
+		assert.Equal(t, http.StatusUnauthorized, err.(common_handler.StatusError).Code)
+	})
+
+	t.Run("IsLike LikeCheckError", func(t *testing.T) {
+		req := httptest.NewRequest(http.MethodPost, "/track/is_like", nil)
+		req = mux.SetURLVars(req, map[string]string{"id": trackId})
+		req.AddCookie(&cookie)
+		w := httptest.NewRecorder()
+
+		mockSessionUseCase.EXPECT().GetUserId(sessionId).Return(userId, nil)
+		mockTrackUseCase.EXPECT().IsLike(userId, trackIdInt).Return(false, errors.New("error while checking like"))
+
+		err := handler.IsLike(w, req)
+		assert.Equal(t, http.StatusInternalServerError, err.(common_handler.StatusError).Code)
+	})
+
+	t.Run("IsLike Success", func(t *testing.T) {
+		req := httptest.NewRequest(http.MethodPost, "/track/is_like", nil)
+		req = mux.SetURLVars(req, map[string]string{"id": trackId})
+		req.AddCookie(&cookie)
+		w := httptest.NewRecorder()
+
+		mockSessionUseCase.EXPECT().GetUserId(sessionId).Return(userId, nil)
+		mockTrackUseCase.EXPECT().IsLike(userId, trackIdInt).Return(isLiked, nil)
+
+		err := handler.IsLike(w, req)
+		assert.Nil(t, err)
+
+		var received response.IsLiked
+		err = json.NewDecoder(w.Body).Decode(&received)
+		assert.Nil(t, err)
+		assert.Equal(t, response.IsLiked{IsLiked: isLiked}, received)
+	})
+
+	t.Run("Unlike Success", func(t *testing.T) {
+		req := httptest.NewRequest(http.MethodPost, "/track/unlike", nil)
+		req = mux.SetURLVars(req, map[string]string{"id": trackId})
+		req.AddCookie(&cookie)
+		w := httptest.NewRecorder()
+
+		mockSessionUseCase.EXPECT().GetUserId(sessionId).Return(userId, nil)
+		mockTrackUseCase.EXPECT().Unlike(userId, trackIdInt).Return(nil)
+
+		err := handler.Unlike(w, req)
 		assert.Nil(t, err)
 		assert.Equal(t, http.StatusNoContent, w.Code)
 	})
