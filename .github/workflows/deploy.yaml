@@ -19,12 +19,12 @@ jobs:
         run: docker build -t musicon-base -f build/package/base/Dockerfile .
 
       - name: Build micros image
-        run: build/ci/scripts/build_images.sh
-      
+        run: build/ci/scripts/build/build_micros.sh
+
       - uses: actions/upload-artifact@v3
         with:
           name: images
-          path: /tmp
+          path: /tmp/images/
           retention-days: 3
 
   # unit-test:
@@ -63,7 +63,7 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: Load docker images
-        run: build/ci/scripts/load_micros.sh
+        run: build/ci/scripts/load/load_micros.sh
 
       - name: Setup python3
         uses: actions/setup-python@v4
@@ -74,13 +74,12 @@ jobs:
         run: pip3 install requests names
 
       - name: Run integration test
-        run: |
-          docker compose -f deployments/test/docker-compose.yml up -d
-          python3 test/testsuite/run_test.py && echo "Integration tests passed!"
-          docker compose -f deployments/test/docker-compose.yml down
+        run: build/ci/scripts/test/integration_test.sh
 
   publish:
-    needs: 
+    if: github.event.pull_request.merged == true
+    # if: github.ref == 'refs/heads/main'
+    needs:
       # - unit-test
       - integration-test
     runs-on: ubuntu-latest
@@ -104,7 +103,7 @@ jobs:
           password: ${{ secrets.REGISTRY_PASSWORD }}  
       
       - name: Publish docker images
-        run: build/ci/scripts/publish_micros.sh
+        run: build/ci/scripts/publish/publish_micros.sh
 
   deploy:
     if: github.event.pull_request.merged == true
@@ -130,31 +129,38 @@ jobs:
           USERNAME: ${{ secrets.USERNAME }}
           PORT: ${{ secrets.PORT }}
           PASSWORD: ${{ secrets.PASSWORD }}
-          script: |
-            docker login registry.musicon.space -u ${{ secrets.REGISTRY_USERNAME }} -p ${{ secrets.REGISTRY_PASSWORD }}
-            cd addo-backend && make deploy
+          script:  |
+            cd addo-backend
+            build/ci/scripts/deploy/deploy.sh registry.musicon.space ${{ secrets.REGISTRY_USERNAME }} ${{ secrets.REGISTRY_PASSWORD }}
 
 
-      # - name: Build base image
-      #   uses: docker/build-push-action@v2
-      #   with:
-      #     context: .
-      #     file: ./build/package/base/Dockerfile
-      #     load: true
-      #     tags: musicon-base:latest
-      
-      # - name: Inspect
-      #   run: |
-      #     docker image inspect musicon-base:latest
-
-      # - name: Build album image
-      #   uses: docker/build-push-action@v2
-      #   with:
-      #     context: .
-      #     file: ./build/package/album/Dockerfile
-      #     tags: album:latest
-      #     outputs: type=docker,dest=/tmp/album.tar
-
+#   build:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - uses: actions/checkout@v3
+# 
+#       - name: Set up Docker Buildx
+#         uses: docker/setup-buildx-action@v3
+#       - name: Build base image
+#         uses: docker/build-push-action@v2
+#         with:
+#           context: .
+#           file: ./build/package/base/Dockerfile
+#           load: true
+#           tags: musicon-base:latest
+#       
+#       - name: Inspect
+#         run: |
+#           docker image inspect musicon-base:latest
+# 
+#       - name: Build album image
+#         uses: docker/build-push-action@v2
+#         with:
+#           context: .
+#           file: ./build/package/album/Dockerfile
+#           tags: album:latest
+#           outputs: type=docker,dest=/tmp/album.tar
+# 
 #       - name: Build artist image
 #         uses: docker/build-push-action@v2
 #         with:
@@ -210,14 +216,14 @@ jobs:
 #           file: ./build/package/user/Dockerfile
 #           tags: user:latest
 #           outputs: type=docker,dest=/tmp/user.tar
-
-  # lint:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #   - uses: actions/checkout@v3
-  #   - name: golangci-lint
-  #     uses: golangci/golangci-lint-action@v3
-  #     with:
-  #       version: latest
-  #       skip-pkg-cache: true
-  #       skip-build-cache: true
+# 
+#   lint:
+#     runs-on: ubuntu-latest
+#     steps:
+#     - uses: actions/checkout@v3
+#     - name: golangci-lint
+#       uses: golangci/golangci-lint-action@v3
+#       with:
+#         version: latest
+#         skip-pkg-cache: true
+#         skip-build-cache: true
