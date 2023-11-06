@@ -20,14 +20,14 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
 
   service-minio:
-    image: minio/minio
+    restart: always
+    image: minio/minio:RELEASE.2023-10-25T06-33-25Z
     volumes:
       - /etc/localtime:/etc/localtime:ro
     environment:
       MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
       MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
     command: server --console-address ":9001" /data
-
 
   create_buckets:
     image: minio/mc
