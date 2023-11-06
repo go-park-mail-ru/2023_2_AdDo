@@ -3,7 +3,7 @@ version: '3.9'
 services:
   service-minio:
     extends:
-      file: ../minio-services.yml
+      file: ../common-services.yml
       service: service-minio
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
@@ -13,7 +13,7 @@ services:
    
   create_buckets:
     extends:
-      file: ../minio-services.yml
+      file: ../common-services.yml
       service: create_buckets
     depends_on:
       service-minio:
@@ -60,72 +60,70 @@ services:
     command: "ls"
 
   user:
-    extends:
-      file: ../microservices/user/user-microservice.yml
-      service: user
-    deploy:
-      replicas: 1
+    image: user
     depends_on:
       common-service-waiter:
         condition: service_completed_successfully
-    env_file:
-      - .env
+    environment:
+      DATABASE_URL: "${DATABASE_URL}"
+    command: "/user"
 
   session:
-    extends:
-      file: ../microservices/session/session-microservice.yml
-      service: session
-    deploy:
-      replicas: 1
+    image: session
     depends_on:
       common-service-waiter:
         condition: service_completed_successfully
-    env_file:
-      - .env
+    environment:
+      DATABASE_URL: "${DATABASE_URL}"
+    command: "/session"
 
   track:
-    extends:
-      file: ../microservices/track/track-microservice.yml
-      service: track
-    deploy:
-      replicas: 1
+    image: track
     depends_on:
       common-service-waiter:
         condition: service_completed_successfully
-    env_file:
-      - .env
+    environment:
+      DATABASE_URL: "${DATABASE_URL}"
+    command: "/track"
+
 
   album:
-    extends:
-      file: ../microservices/album/album-microservice.yml
-      service: album
-    deploy:
-      replicas: 1
+    image: album
     depends_on:
       common-service-waiter:
         condition: service_completed_successfully
-    env_file:
-      - .env
+    environment:
+      DATABASE_URL: "${DATABASE_URL}"
+    command: "/album"
+
 
   playlist:
-    extends:
-      file: ../microservices/playlist/playlist-microservice.yml
-      service: playlist
+    image: playlist
     depends_on:
       common-service-waiter:
         condition: service_completed_successfully
-    env_file:
-      - .env
+    environment:
+      DATABASE_URL: "${DATABASE_URL}"
+    command: "/playlist"
+
 
   artist:
-    extends:
-      file: ../microservices/artist/artist-microservice.yml
-      service: artist
+    image: artist
     depends_on:
       common-service-waiter:
         condition: service_completed_successfully
-    env_file:
-      - .env
+    environment:
+      DATABASE_URL: "${DATABASE_URL}"
+    command: "/artist"
+
+  images:
+    image: images
+    depends_on:
+      common-service-waiter:
+        condition: service_completed_successfully
+    environment:
+      DATABASE_URL: "${DATABASE_URL}"
+    command: "/images"
 
   microservice-waiter:
     image: alpine
@@ -142,11 +140,11 @@ services:
         condition: service_started
       artist:
         condition: service_started
+      images:
+        condition: service_started
 
   musicon:
-    extends:
-      file: ../entrypoint/gateway.yml
-      service: musicon
+    image: entrypoint
     ports:
       - "8888:8080"
     depends_on:
@@ -154,3 +152,6 @@ services:
         condition: service_completed_successfully
       microservice-waiter:
         condition: service_completed_successfully
+    environment:
+      DATABASE_URL: "${DATABASE_URL}"
+    command: "/entrypoint"
