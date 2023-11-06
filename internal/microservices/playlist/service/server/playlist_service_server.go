@@ -38,12 +38,13 @@ func DeserializePlaylist(in *playlist_proto.PlaylistBase) playlist.Base {
 
 func SerializePlaylistResponse(in playlist.Response) *playlist_proto.PlaylistResponse {
 	return &playlist_proto.PlaylistResponse{
-		Id:        in.Id,
-		Name:      in.Name,
-		Preview:   in.Preview,
-		CreatorId: in.AuthorId,
-		IsYours:   in.IsYours,
-		Tracks:    grpc_track_server.SerializeTracks(in.Tracks),
+		Id:          in.Id,
+		Name:        in.Name,
+		Preview:     in.Preview,
+		CreatorId:   in.AuthorId,
+		CreatorName: in.AuthorName,
+		IsYours:     in.IsYours,
+		Tracks:      grpc_track_server.SerializeTracks(in.Tracks),
 	}
 }
 
@@ -64,16 +65,16 @@ func SerializePlaylistsBase(in []playlist.Base) *playlist_proto.PlaylistsBase {
 	return &playlist_proto.PlaylistsBase{Playlists: playlists}
 }
 
-func (pm *PlaylistManager) Create(ctx context.Context, in *playlist_proto.PlaylistBase) (*google_proto.Empty, error) {
+func (pm *PlaylistManager) Create(ctx context.Context, in *playlist_proto.PlaylistBase) (*playlist_proto.PlaylistResponse, error) {
 	pm.logger.Infoln("Playlist Service Create Method entered")
 
-	err := pm.repoPlaylist.Create(ctx, DeserializePlaylist(in))
+	result, err := pm.repoPlaylist.Create(ctx, DeserializePlaylist(in))
 	if err != nil {
 		return nil, err
 	}
 	pm.logger.Infoln("Playlist Created")
 
-	return &google_proto.Empty{}, nil
+	return SerializePlaylistResponse(result), nil
 }
 
 func (pm *PlaylistManager) Get(ctx context.Context, in *playlist_proto.PlaylistToUserId) (*playlist_proto.PlaylistResponse, error) {
@@ -230,7 +231,7 @@ func (pm *PlaylistManager) HasReadAccess(ctx context.Context, in *playlist_proto
 		return &playlist_proto.HasAccess{IsAccess: false}, nil
 	}
 
-	return &playlist_proto.HasAccess{IsAccess: isPrivate}, nil
+	return &playlist_proto.HasAccess{IsAccess: !isPrivate}, nil
 }
 
 func (pm *PlaylistManager) MakePrivate(ctx context.Context, in *playlist_proto.PlaylistId) (*google_proto.Empty, error) {

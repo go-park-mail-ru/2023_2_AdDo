@@ -1,7 +1,6 @@
 #!/bin/bash
 
 echo "Preparing environments.."
-docker build -t 2023_2_addo-musicon/base -f build/package/base/Dockerfile .
 docker compose -f deployments/test/docker-compose.yml up -d
 if [ $? -ne 0 ]; then
     echo "Error creating environment"

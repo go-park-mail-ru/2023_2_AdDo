@@ -14,6 +14,7 @@ type LikedTracks struct {
 
 type Response struct {
 	Id         uint64 `json:"Id" example:"1"`
+	ArtistId   uint64 `json:"ArtistId" example:"1"`
 	Name       string `json:"Name" example:"TrackName"`
 	Preview    string `json:"Preview" example:"TrackPreview"`
 	Content    string `json:"Content" example:"TrackContent"`
