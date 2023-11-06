@@ -2,7 +2,7 @@ name: ci/cd
 
 on:
   push:
-    branches: [main, PK-2]
+    branches: [main, PK-2, pipeline-fix]
   pull_request:
     types: [opened, reopened, closed]
 
