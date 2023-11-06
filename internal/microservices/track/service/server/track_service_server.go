@@ -34,6 +34,7 @@ func SerializeTrack(in track.Response) *track_proto.Track {
 		Name:       in.Name,
 		Preview:    in.Preview,
 		Content:    in.Content,
+		ArtistId:   in.ArtistId,
 		ArtistName: in.ArtistName,
 		Duration:   in.Duration,
 		IsLiked:    in.IsLiked,

@@ -19,29 +19,36 @@ func NewPostgres(pool postgres.PgxIFace, logger *logrus.Logger) Postgres {
 	}
 }
 
-func (p *Postgres) Create(ctx context.Context, base playlist.Base) error {
+func (p *Postgres) Create(ctx context.Context, base playlist.Base) (playlist.Response, error) {
 	p.logger.Infoln("Playlist Repo Create entered")
 
-	query := "insert into playlist (name, creator_id )values ($1, $2)"
-	_, err := p.Pool.Exec(ctx, query, base.Name, base.AuthorId)
+	var url any
+	var result playlist.Response
+	query := "insert into playlist (creator_id) values ($1) returning id, name, creator_id, preview"
+	err := p.Pool.QueryRow(ctx, query, base.AuthorId).Scan(&result.Id, &result.Name, &result.AuthorId, &url)
 	if err != nil {
 		p.logger.WithFields(logrus.Fields{
 			"error":         err,
 			"playlist base": base,
 			"query":         query,
 		}).Errorln("error while creating playlist row")
-		return err
+		return playlist.Response{}, err
 	}
 
-	return nil
+	if url != nil {
+		result.Preview = url.(string)
+	}
+
+	return result, nil
 }
 
 func (p *Postgres) Get(ctx context.Context, playlistId uint64) (playlist.Base, error) {
 	p.logger.Infoln("Playlist Repo Get entered")
 
+	var url any
 	var result playlist.Base
 	query := "select id, name, creator_id, preview from playlist where id = $1"
-	err := p.Pool.QueryRow(ctx, query, playlistId).Scan(&result.Id, &result.Name, &result.AuthorId, &result.Preview)
+	err := p.Pool.QueryRow(ctx, query, playlistId).Scan(&result.Id, &result.Name, &result.AuthorId, &url)
 	if err != nil {
 		p.logger.WithFields(logrus.Fields{
 			"error":       err,
@@ -51,12 +58,17 @@ func (p *Postgres) Get(ctx context.Context, playlistId uint64) (playlist.Base, e
 		return playlist.Base{}, err
 	}
 
+	if url != nil {
+		result.Preview = url.(string)
+	}
+
 	return result, nil
 }
 
 func (p *Postgres) GetByCreatorId(ctx context.Context, userId string) ([]playlist.Base, error) {
 	p.logger.Infoln("Playlist Repo GetByCreatorId entered")
 
+	var url any
 	result := make([]playlist.Base, 0)
 	query := "select id, name, creator_id, preview from playlist where creator_id = $1"
 	rows, err := p.Pool.Query(ctx, query, userId)
@@ -72,7 +84,7 @@ func (p *Postgres) GetByCreatorId(ctx context.Context, userId string) ([]playlis
 
 	for rows.Next() {
 		var base playlist.Base
-		err := rows.Scan(&base.Id, &base.Name, &base.AuthorId, &base.Preview)
+		err := rows.Scan(&base.Id, &base.Name, &base.AuthorId, &url)
 		if err != nil {
 			p.logger.WithFields(logrus.Fields{
 				"query":   query,
@@ -81,6 +93,11 @@ func (p *Postgres) GetByCreatorId(ctx context.Context, userId string) ([]playlis
 			}).Errorln("error scanning row")
 			return nil, err
 		}
+
+		if url != nil {
+			base.Preview = url.(string)
+		}
+
 		result = append(result, base)
 	}
 	p.logger.Infoln("Scanning rows success")
@@ -236,7 +253,7 @@ func (p *Postgres) IsCreator(ctx context.Context, userId string, playlistId uint
 
 	var creatorId string
 	query := "select creator_id from playlist where id = $1"
-	err := p.Pool.QueryRow(context.Background(), query, userId, playlistId).Scan(&creatorId)
+	err := p.Pool.QueryRow(context.Background(), query, playlistId).Scan(&creatorId)
 	if err != nil {
 		p.logger.WithFields(logrus.Fields{
 			"err":         err,

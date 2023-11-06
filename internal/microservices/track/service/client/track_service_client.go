@@ -23,6 +23,7 @@ func DeserializeTrack(in *track_proto.Track) track.Response {
 		Name:       in.GetName(),
 		Preview:    in.GetPreview(),
 		Content:    in.GetContent(),
+		ArtistId:   in.GetArtistId(),
 		ArtistName: in.GetArtistName(),
 		Duration:   in.GetDuration(),
 		IsLiked:    in.GetIsLiked(),

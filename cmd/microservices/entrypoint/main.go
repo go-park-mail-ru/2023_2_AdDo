@@ -73,7 +73,7 @@ func main() {
 	sessionAgent := grpc_session.NewClient(session2.NewSessionServiceClient(sessionConnection), logger)
 	trackAgent := grpc_track.NewClient(proto.NewTrackServiceClient(trackConnection), logger)
 	albumAgent := grpc_album.NewClient(proto2.NewAlbumServiceClient(albumConnection), logger)
-	playlistAgent := grpc_playlist.NewClient(proto3.NewPlaylistServiceClient(playlistConnection), imageAgent, logger)
+	playlistAgent := grpc_playlist.NewClient(userAgent, proto3.NewPlaylistServiceClient(playlistConnection), imageAgent, logger)
 	artistAgent := grpc_artist.NewClient(artist.NewArtistServiceClient(artistConnection), logger)
 
 	logger.Infoln("Clients to micros initialized")

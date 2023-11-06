@@ -153,3 +153,21 @@ func (db *Postgres) UpdateUserInfo(user user_domain.User) error {
 
 	return nil
 }
+
+func (db *Postgres) GetUserNameById(userId string) (string, error) {
+	db.logger.Infoln("UserRepo GetUserNameById entered")
+
+	var result string
+	query := "select profile.nickname from profile where id = $1"
+	err := db.Pool.QueryRow(context.Background(), query, userId).Scan(&result)
+	if err != nil {
+		db.logger.WithFields(logrus.Fields{
+			"err ":   err,
+			"user ":  userId,
+			"query ": query,
+		}).Errorln("Getting user nickname failed")
+		return result, err
+	}
+
+	return result, nil
+}

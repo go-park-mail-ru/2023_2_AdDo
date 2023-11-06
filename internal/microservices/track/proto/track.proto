@@ -31,9 +31,10 @@ message Track {
   string Name = 2;
   string Preview = 3;
   string Content = 4;
-  string ArtistName = 5;
-  uint32 Duration = 6;
-  bool isLiked = 7;
+  uint64 ArtistId = 5;
+  string ArtistName = 6;
+  uint32 Duration = 7;
+  bool isLiked = 8;
 }
 
 message TracksResponse {

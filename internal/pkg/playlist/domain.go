@@ -18,12 +18,13 @@ type Base struct {
 }
 
 type Response struct {
-	Id       uint64 `json:"Id" example:"1"`
-	Name     string `json:"Name" example:"PlaylistName"`
-	AuthorId string `json:"AuthorId" example:"sdfa-asdf-adsf"`
-	Preview  string `json:"Preview" example:"PlaylistPreview"`
-	IsYours  bool   `json:"IsYours" example:"true"`
-	Tracks   []track.Response
+	Id         uint64 `json:"Id" example:"1"`
+	Name       string `json:"Name" example:"PlaylistName"`
+	AuthorId   string `json:"AuthorId" example:"sdfa-asdf-adsf"`
+	AuthorName string `json:"AuthorName" example:"username"`
+	Preview    string `json:"Preview" example:"PlaylistPreview"`
+	IsYours    bool   `json:"IsYours" example:"true"`
+	Tracks     []track.Response
 }
 
 type ToTrackId struct {
@@ -32,7 +33,7 @@ type ToTrackId struct {
 }
 
 type UseCase interface {
-	Create(playlist Base) error
+	Create(playlist Base) (Response, error)
 	Get(userId string, playlistId uint64) (Response, error)
 	GetUserPlaylists(userId string) ([]Base, error)
 	AddTrack(playlistId, trackId uint64) error
@@ -50,7 +51,7 @@ type UseCase interface {
 }
 
 type Repository interface {
-	Create(ctx context.Context, playlist Base) error
+	Create(ctx context.Context, playlist Base) (Response, error)
 	Get(ctx context.Context, playlistId uint64) (Base, error)
 	GetByCreatorId(ctx context.Context, userId string) ([]Base, error)
 	AddTrack(ctx context.Context, playlistId, trackId uint64) error

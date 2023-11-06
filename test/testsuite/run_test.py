@@ -74,3 +74,7 @@ music_test.test_feed_success()
 music_test.test_new_success()
 music_test.test_most_liked_success()
 music_test.test_popular_success()
+
+
+playlist_test = playlist_test.PlaylistTest()
+playlist_test.test_playlist_use_case_success()

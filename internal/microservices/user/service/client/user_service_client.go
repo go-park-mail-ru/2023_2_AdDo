@@ -143,3 +143,15 @@ func (c *Client) UpdateUserInfo(userId string, u user_domain.User) error {
 
 	return nil
 }
+
+func (c *Client) GetUserName(userId string) (string, error) {
+	c.logger.Infoln("user client GetUserName entered")
+
+	result, err := c.userClient.GetUserName(context.Background(), &session_proto.UserId{UserId: userId})
+	if err != nil {
+		return "", err
+	}
+	c.logger.Infoln("got user name")
+
+	return result.GetUserName(), nil
+}

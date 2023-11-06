@@ -87,6 +87,7 @@ type UseCase interface {
 	UpdateUserInfo(userId string, user User) error
 	UploadAvatar(userId string, src io.Reader, size int64) (string, error)
 	RemoveAvatar(userId string) error
+	GetUserName(userId string) (string, error)
 }
 
 type Repository interface {
@@ -97,6 +98,7 @@ type Repository interface {
 	UpdateAvatarPath(userId string, path string) error
 	GetAvatarPath(userId string) (string, error)
 	RemoveAvatarPath(userId string) (string, error)
+	GetUserNameById(userId string) (string, error)
 }
 
 var (
