@@ -1,20 +1,22 @@
 #!/bin/bash
 
 echo "Preparing environments.."
-docker build -t musicon-base -f build/package/base/Dockerfile . \
-    && docker build -t user -f build/package/user/Dockerfile . \
-    && docker build -t album -f build/package/album/Dockerfile . \
-    && docker build -t artist -f build/package/artist/Dockerfile . \
-    && docker build -t entrypoint -f build/package/entrypoint/Dockerfile . \
-    && docker build -t images -f build/package/images/Dockerfile . \
-    && docker build -t playlist -f build/package/playlist/Dockerfile . \
-    && docker build -t session -f build/package/session/Dockerfile . \
-    && docker build -t track -f build/package/track/Dockerfile . \
 
+docker build -t musicon-base -f build/package/base/Dockerfile .
 if [ $? -ne 0 ]; then
-    echo "Error build images"
+    echo "Error while building musicon-base image"
     exit 1
 fi
+
+for dockerfile in build/package/micros/*/Dockerfile; do
+    image_name=$(basename $(dirname $dockerfile))
+    docker build -t $image_name -f $dockerfile .
+    if [ $? -ne "0" ]; then
+        echo "Error while building $image_name image"
+        exit 1
+    fi
+done
+echo "Built micros images successfully"
 
 docker compose -f deployments/test/docker-compose.yml up -d
 if [ $? -ne 0 ]; then
