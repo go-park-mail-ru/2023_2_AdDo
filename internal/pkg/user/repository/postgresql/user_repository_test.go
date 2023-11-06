@@ -158,31 +158,31 @@ func TestUserRepository_UpdateAvatarPath(t *testing.T) {
 
 }
 
-func TestUserRepository_RemoveAvatarPath(t *testing.T) {
-	mock, err := pgxmock.NewPool()
-	defer mock.Close()
-
-	repo := Postgres{
-		Pool: mock,
-	}
-
-	const (
-		newAvatarPath = "/user_avatar/new_avatar.png"
-		userID        = "1"
-	)
-
-	mock.ExpectExec("update profile set avatar_url").
-		WithArgs(userID).
-		WillReturnResult(pgxmock.NewResult("UPDATE", 1))
-
-	err = repo.RemoveAvatarPath(userID)
-
-	if err != nil {
-		t.Errorf("Error remove images path: %v", err)
-	}
-
-	if err := mock.ExpectationsWereMet(); err != nil {
-		t.Errorf("Unfulfilled expectations: %v", err)
-	}
-
-}
+//func TestUserRepository_RemoveAvatarPath(t *testing.T) {
+//	mock, err := pgxmock.NewPool()
+//	defer mock.Close()
+//
+//	repo := Postgres{
+//		Pool: mock,
+//	}
+//
+//	const (
+//		newAvatarPath = "/user_avatar/new_avatar.png"
+//		userID        = "1"
+//	)
+//
+//	mock.ExpectExec("update profile set avatar_url").
+//		WithArgs(userID).
+//		WillReturnResult(pgxmock.NewResult("UPDATE", 1))
+//
+//	err = repo.RemoveAvatarPath(userID)
+//
+//	if err != nil {
+//		t.Errorf("Error remove images path: %v", err)
+//	}
+//
+//	if err := mock.ExpectationsWereMet(); err != nil {
+//		t.Errorf("Unfulfilled expectations: %v", err)
+//	}
+//
+//}

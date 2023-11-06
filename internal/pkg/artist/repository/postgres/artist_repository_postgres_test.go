@@ -8,7 +8,7 @@ import (
 	"testing"
 )
 
-func TestArtistRepository_gettingById(t *testing.T) {
+func TestArtistRepository(t *testing.T) {
 	mock, err := pgxmock.NewPool()
 	if err != nil {
 		t.Fatal(err)
@@ -20,22 +20,28 @@ func TestArtistRepository_gettingById(t *testing.T) {
 		logger: logrus.New(),
 	}
 
+	const (
+		userId          = "40e6215d-b5c6-4896-987c-f30f3678f608"
+		artistId uint64 = 1
+		trackId  uint64 = 1
+		albumId  uint64 = 1
+	)
+
 	expectedArtists := []artist.Base{
 		{
-			Id:     1,
+			Id:     artistId,
 			Name:   "ArtistName",
-			Avatar: "Url to artist name images",
+			Avatar: "path/to/avatar.img",
 		},
 	}
 
 	t.Run("Get", func(t *testing.T) {
-		profileTable := pgxmock.NewRows([]string{"id", "name", "images"}).
+		row := pgxmock.NewRows([]string{"id", "name", "avatar"}).
 			AddRow(expectedArtists[0].Id, expectedArtists[0].Name, expectedArtists[0].Avatar)
 
-		artistId := uint64(1)
-		query := "select artist.id, name, images from artist where artist.id = ?"
+		query := "select artist.id, name, avatar from artist where artist.id = ?"
 
-		mock.ExpectQuery(query).WithArgs(artistId).WillReturnRows(profileTable)
+		mock.ExpectQuery(query).WithArgs(artistId).WillReturnRows(row)
 
 		received, err := repo.Get(artistId)
 		if err != nil {
@@ -45,11 +51,10 @@ func TestArtistRepository_gettingById(t *testing.T) {
 	})
 
 	t.Run("GetByTrackId", func(t *testing.T) {
-		profileTable := pgxmock.NewRows([]string{"id", "name", "images"}).
+		profileTable := pgxmock.NewRows([]string{"id", "name", "avatar"}).
 			AddRow(expectedArtists[0].Id, expectedArtists[0].Name, expectedArtists[0].Avatar)
 
-		trackId := uint64(1)
-		query := "select artist.id, name, images from artist join artist_track on artist.id = artist_track.artist_id where artist_track.track_id = ?"
+		query := "select artist.id, name, avatar from artist join artist_track on artist.id = artist_track.artist_id where artist_track.track_id = ?"
 
 		mock.ExpectQuery(query).WithArgs(trackId).WillReturnRows(profileTable)
 
@@ -61,11 +66,10 @@ func TestArtistRepository_gettingById(t *testing.T) {
 	})
 
 	t.Run("GetByAlbumId", func(t *testing.T) {
-		profileTable := pgxmock.NewRows([]string{"id", "name", "images"}).
+		profileTable := pgxmock.NewRows([]string{"id", "name", "avatar"}).
 			AddRow(expectedArtists[0].Id, expectedArtists[0].Name, expectedArtists[0].Avatar)
 
-		albumId := uint64(1)
-		query := "select artist.id, artist.name, images from artist join album on artist.id = album.artist_id where album.id = ?"
+		query := "select artist.id, artist.name, avatar from artist join album on artist.id = album.artist_id where album.id = ?"
 
 		mock.ExpectQuery(query).WithArgs(albumId).WillReturnRows(profileTable)
 
@@ -74,6 +78,24 @@ func TestArtistRepository_gettingById(t *testing.T) {
 			t.Errorf("Error getting artist by album id: %v", err)
 		}
 		assert.Equal(t, expectedArtists[0], received)
+	})
+
+	t.Run("CreateLike", func(t *testing.T) {
+		mock.ExpectExec("insert into profile_artist").
+			WithArgs(userId, artistId).
+			WillReturnResult(pgxmock.NewResult("insert", 1))
+
+		err = repo.CreateLike(userId, artistId)
+		assert.Nil(t, err)
+	})
+
+	t.Run("DeleteLike", func(t *testing.T) {
+		mock.ExpectExec("delete from profile_artist").
+			WithArgs(userId, artistId).
+			WillReturnResult(pgxmock.NewResult("delete", 1))
+
+		err = repo.DeleteLike(userId, artistId)
+		assert.Nil(t, err)
 	})
 
 	if err := mock.ExpectationsWereMet(); err != nil {

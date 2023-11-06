@@ -236,7 +236,7 @@ func (p *Postgres) IsCreator(ctx context.Context, userId string, playlistId uint
 
 	var creatorId string
 	query := "select creator_id from playlist where id = $1"
-	err := p.Pool.QueryRow(context.Background(), query, userId, playlistId).Scan(&creatorId)
+	err := p.Pool.QueryRow(context.Background(), query, playlistId).Scan(&creatorId)
 	if err != nil {
 		p.logger.WithFields(logrus.Fields{
 			"err":         err,
