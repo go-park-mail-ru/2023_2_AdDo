@@ -12,7 +12,6 @@ import (
 	"strconv"
 )
 
-const EnvPostgresQueryName = "DATABASE_URL"
 const Port = 8082
 
 func main() {

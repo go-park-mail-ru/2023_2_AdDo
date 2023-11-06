@@ -3,7 +3,6 @@
 		mocks-clean
 		database-clean
 		fill-database
-		docker-service-build
 		docker-service-start
 		clean
 		deploy
@@ -34,30 +33,25 @@ fill-database:
 fill-database-mock-data:
 	@cd database && python3 fill-db-script-mock-data.py;
 
-# билд контейнера с бэкендом
-docker-services-build:
-	$(CURDIR)/scripts/docker-services-build.sh
-
 # запуск сервисов в докере
 docker-services-start:
 	$(CURDIR)/scripts/docker-services-start.sh
 
-# Остановка контейнеров, удаление контейнеров, образов и сетей
+# Удаление продакшен контейнеров и сетей
 clean:
 	$(CURDIR)/scripts/docker-clean.sh
 
+# Удаление всех контейнеров, образов, сетей и вольюмов на хосте!
+hard-clean:
+	$(CURDIR)/scripts/docker-hard-clean.sh
+
 # Деплой без очистки данных - мы не теряем созданных пользователей и их лайки
 deploy:
-	@make clean
-	@make docker-services-build
+	@-make clean
 	@make docker-services-start
 
 # Деплой полностью сервиса без пользователей только с музыкой
 hard-deploy:
 	@-make database-clean
+	@make hard-clean
 	@make deploy
-
-registry-start:
-	@docker run -d -p 5000:5000 --restart=always --name musicon-registry registry:2
-	@DOCKER_OPTS="$DOCKER_OPTS --insecure-registry musicon-registry:5000"
-	@service docker restart
