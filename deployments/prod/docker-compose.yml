@@ -3,18 +3,18 @@ version: '3.9'
 services:
   service-minio:
     extends:
-      file: ../minio-services.yml
+      file: ../common-services.yml
       service: service-minio
     ports:
       - "9000:9000"
       - "9001:9001"
     volumes:
-      - ~/minio-data:/data
-#    healthcheck:
-      #      test: ["CMD-SHELL", "curl --fail http://localhost:9000/minio/health/live || exit 1"]
-      #      interval: 30s
-      #      timeout: 10s
-      #      retries: 3
+      - /data/minio:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 10s
+      retries: 3
+      timeout: 5s
     logging:
       driver: "fluentd"
       options: 
@@ -23,7 +23,7 @@ services:
 
   create_buckets:
     extends:
-      file: ../minio-services.yml
+      file: ../common-services.yml
       service: create_buckets
     depends_on:
       service-minio:
@@ -51,7 +51,7 @@ services:
     ports:
       - "5432:5432" # redundant
     volumes:
-      - ~/db-data:/var/lib/postgresql/data
+      - /data/postgres:/var/lib/postgresql/data
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U musicon" ]
       interval: 10s
@@ -93,7 +93,12 @@ services:
     environment:
       DATABASE_URL: "${DATABASE_URL}"
     command: "/user"
-  
+    logging:
+      driver: "fluentd"
+      options: 
+        fluentd-async-connect: "true"
+        tag: "backend.micro.user"
+        
   session:
     image: registry.musicon.space/session
     deploy:
@@ -102,10 +107,14 @@ services:
       common-service-waiter:
         condition: service_completed_successfully
     command: "/session"
+    logging:
+      driver: "fluentd"
+      options: 
+        fluentd-async-connect: "true"
+        tag: "backend.micro.session"
 
   track:
     image: registry.musicon.space/track
-
     deploy:
       replicas: 1
     depends_on:
@@ -114,6 +123,11 @@ services:
     environment:
       DATABASE_URL: "${DATABASE_URL}"
     command: "/track"
+    logging:
+      driver: "fluentd"
+      options: 
+        fluentd-async-connect: "true"
+        tag: "backend.micro.track"
 
   album:
     image: registry.musicon.space/album
@@ -125,6 +139,11 @@ services:
     environment:
       DATABASE_URL: "${DATABASE_URL}"
     command: "/album"
+    logging:
+      driver: "fluentd"
+      options: 
+        fluentd-async-connect: "true"
+        tag: "backend.micro.album"
 
   playlist:
     image: registry.musicon.space/playlist
@@ -136,6 +155,11 @@ services:
     environment:
       DATABASE_URL: "${DATABASE_URL}"
     command: "/playlist"
+    logging:
+      driver: "fluentd"
+      options: 
+        fluentd-async-connect: "true"
+        tag: "backend.micro.playlist"
 
   artist:
     image: registry.musicon.space/artist
@@ -147,6 +171,11 @@ services:
     environment:
       DATABASE_URL: "${DATABASE_URL}"
     command: "/artist"
+    logging:
+      driver: "fluentd"
+      options: 
+        fluentd-async-connect: "true"
+        tag: "backend.micro.artist"
 
   images:
     image: registry.musicon.space/images
@@ -158,6 +187,11 @@ services:
     environment:
       DATABASE_URL: "${DATABASE_URL}"
     command: "/images"
+    logging:
+      driver: "fluentd"
+      options: 
+        fluentd-async-connect: "true"
+        tag: "backend.micro.images"
 
   microservice-waiter:
     image: alpine
@@ -193,15 +227,10 @@ services:
       driver: "fluentd"
       options: 
         fluentd-async-connect: "true"
-        tag: "backend.server"
+        tag: "backend.musicon"
 
   wait-musicon:
     image: alpine
     depends_on:
       musicon:
         condition: service_started
-        
-  service-fluentd:
-    extends:
-      file: ../fluentd-service.yml
-      service: fluentd
