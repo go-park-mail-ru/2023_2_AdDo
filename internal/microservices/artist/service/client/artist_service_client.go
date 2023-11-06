@@ -4,8 +4,8 @@ import (
 	"context"
 	"github.com/sirupsen/logrus"
 	album_proto "main/internal/microservices/album/proto"
-	grpc_album "main/internal/microservices/album/service/client"
 	proto "main/internal/microservices/artist/proto"
+	grpc_track "main/internal/microservices/track/service/client"
 	"main/internal/pkg/album"
 	"main/internal/pkg/artist"
 )
@@ -45,7 +45,7 @@ func DeserializeArtist(in *proto.Artist) artist.Response {
 		Name:   in.GetName(),
 		Avatar: in.GetAvatar(),
 		Albums: DeserializeAlbumsBase(in.GetAlbums()),
-		Tracks: grpc_album.DeserializeTracks(in.GetTracks()),
+		Tracks: grpc_track.DeserializeTracks(in.GetTracks()),
 	}
 }
 

@@ -27,13 +27,16 @@ func (m *Middleware) ReadPlaylistAccess(next http.Handler) http.Handler {
 		playlistId, err := strconv.Atoi(mux.Vars(request)["id"])
 		if err != nil {
 			common_handler.Handler{H: default_handlers.BadRequest}.ServeHTTP(w, request)
+			return
 		}
 		m.logger.Infoln("Parsed playlistId from Vars")
 
 		hasAccess, err := m.playlistUseCase.HasReadAccess(uint64(playlistId))
 		if err != nil || !hasAccess {
 			common_handler.Handler{H: default_handlers.Forbidden}.ServeHTTP(w, request)
+			return
 		}
+		m.logger.Infoln("Ready to read")
 
 		next.ServeHTTP(w, request)
 	})

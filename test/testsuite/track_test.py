@@ -35,3 +35,18 @@ class TrackTest(unittest.TestCase):
         response = requests.get(utils.url + '/track/' + str(track_id) + '/is_like', headers=headers, cookies=cookies)
         self.assertEqual(200, response.status_code)
         self.assertEqual(False, response.json()['IsLiked'])
+
+    def test_track_collection_success(self):
+        headers, cookies = utils.init_authorized_user_headers_and_cookies()
+
+        track_id = 1
+        response = requests.post(utils.url + '/track/' + str(track_id) + '/like', headers=headers, cookies=cookies)
+        self.assertEqual(204, response.status_code)
+
+        track_id = 2
+        response = requests.post(utils.url + '/track/' + str(track_id) + '/like', headers=headers, cookies=cookies)
+        self.assertEqual(204, response.status_code)
+
+        response = requests.get(utils.url + '/collection/tracks', headers=headers, cookies=cookies)
+        self.assertEqual(200, response.status_code)
+        self.assertEqual(2, len(response.json()['Tracks']))

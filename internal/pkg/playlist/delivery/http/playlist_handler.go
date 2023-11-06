@@ -9,6 +9,7 @@ import (
 	"main/internal/common/utils"
 	"main/internal/pkg/playlist"
 	"main/internal/pkg/session"
+	"main/internal/pkg/track"
 	"net/http"
 	"strconv"
 )
@@ -45,18 +46,18 @@ func (handler *Handler) Create(w http.ResponseWriter, r *http.Request) error {
 	handler.logger.Infoln("Got user id")
 
 	var base playlist.Base
-	if err := json.NewDecoder(r.Body).Decode(&base); err != nil {
-		return common_handler.StatusError{Code: http.StatusBadRequest, Err: err}
-	}
 	base.AuthorId = userId
-	handler.logger.Infoln("Got base playlist formed")
 
-	err = handler.playlistUseCase.Create(base)
+	result, err := handler.playlistUseCase.Create(base)
 	if err != nil {
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}
 
-	w.WriteHeader(http.StatusNoContent)
+	err = response.RenderJSON(w, result)
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
+	}
+
 	return nil
 }
 
@@ -67,6 +68,7 @@ func (handler *Handler) Get(w http.ResponseWriter, r *http.Request) error {
 
 	sessionId, err := response.GetCookie(r)
 	if err != nil {
+		handler.logger.Errorln("error get from cookie", sessionId, err)
 		return common_handler.StatusError{Code: http.StatusUnauthorized, Err: err}
 	}
 	handler.logger.Infoln("Got Cookie")
@@ -100,13 +102,19 @@ func (handler *Handler) AddTrack(w http.ResponseWriter, r *http.Request) error {
 		"request_id": utils.GenReqId(r.RequestURI + r.Method),
 	}).Infoln("PlaylistAddTrack Handler entered")
 
-	var ids playlist.ToTrackId
+	playlistId, err := strconv.Atoi(mux.Vars(r)["id"])
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusBadRequest, Err: err}
+	}
+	handler.logger.Infoln("Parsed playlistId from Vars")
+
+	var ids track.Id
 	if err := json.NewDecoder(r.Body).Decode(&ids); err != nil {
 		return common_handler.StatusError{Code: http.StatusBadRequest, Err: err}
 	}
 	handler.logger.Infoln("Got playlist and track ids")
 
-	err := handler.playlistUseCase.AddTrack(ids.PlaylistId, ids.TrackId)
+	err = handler.playlistUseCase.AddTrack(uint64(playlistId), ids.Id)
 	if err != nil {
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}
@@ -120,13 +128,19 @@ func (handler *Handler) RemoveTrack(w http.ResponseWriter, r *http.Request) erro
 		"request_id": utils.GenReqId(r.RequestURI + r.Method),
 	}).Infoln("PlaylistRemoveTrack Handler entered")
 
-	var ids playlist.ToTrackId
+	playlistId, err := strconv.Atoi(mux.Vars(r)["id"])
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusBadRequest, Err: err}
+	}
+	handler.logger.Infoln("Parsed playlistId from Vars")
+
+	var ids track.Id
 	if err := json.NewDecoder(r.Body).Decode(&ids); err != nil {
 		return common_handler.StatusError{Code: http.StatusBadRequest, Err: err}
 	}
 	handler.logger.Infoln("Got playlist and track ids")
 
-	err := handler.playlistUseCase.RemoveTrack(ids.PlaylistId, ids.TrackId)
+	err = handler.playlistUseCase.RemoveTrack(uint64(playlistId), ids.Id)
 	if err != nil {
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}

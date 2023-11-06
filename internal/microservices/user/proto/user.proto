@@ -15,11 +15,16 @@ service UserService {
   rpc UploadAvatar(ImageToUser) returns (google.protobuf.Empty) {}
   rpc RemoveAvatar(UserId) returns (ImageUrl) {}
   rpc UpdateUserInfo(UserData) returns (google.protobuf.Empty) {}
+  rpc GetUserName(UserId) returns (UserName) {}
 }
 
 message ImageToUser {
   ImageUrl url = 1;
   UserId id = 2;
+}
+
+message UserName {
+  string UserName = 1;
 }
 
 message UserData {

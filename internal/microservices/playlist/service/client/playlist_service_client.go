@@ -4,33 +4,36 @@ import (
 	"context"
 	"github.com/sirupsen/logrus"
 	"io"
-	grpc_album "main/internal/microservices/album/service/client"
 	image_proto "main/internal/microservices/image/proto"
 	grpc_image "main/internal/microservices/image/service/client"
 	playlist_proto "main/internal/microservices/playlist/proto"
 	grpc_playlist_server "main/internal/microservices/playlist/service/server"
 	session_proto "main/internal/microservices/session/proto"
+	grpc_track "main/internal/microservices/track/service/client"
+	grpc_user "main/internal/microservices/user/service/client"
 	"main/internal/pkg/playlist"
 )
 
 type Client struct {
 	playlistManager playlist_proto.PlaylistServiceClient
+	userClient      grpc_user.Client
 	imageClient     grpc_image.Client
 	logger          *logrus.Logger
 }
 
-func NewClient(pm playlist_proto.PlaylistServiceClient, client grpc_image.Client, logger *logrus.Logger) Client {
-	return Client{playlistManager: pm, logger: logger, imageClient: client}
+func NewClient(um grpc_user.Client, pm playlist_proto.PlaylistServiceClient, client grpc_image.Client, logger *logrus.Logger) Client {
+	return Client{userClient: um, playlistManager: pm, logger: logger, imageClient: client}
 }
 
 func DeserializePlaylistResponse(in *playlist_proto.PlaylistResponse) playlist.Response {
 	return playlist.Response{
-		Id:       in.GetId(),
-		Name:     in.GetName(),
-		IsYours:  in.GetIsYours(),
-		AuthorId: in.GetCreatorId(),
-		Preview:  in.GetPreview(),
-		Tracks:   grpc_album.DeserializeTracks(in.GetTracks()),
+		Id:         in.GetId(),
+		Name:       in.GetName(),
+		IsYours:    in.GetIsYours(),
+		AuthorId:   in.GetCreatorId(),
+		AuthorName: in.GetCreatorName(),
+		Preview:    in.GetPreview(),
+		Tracks:     grpc_track.DeserializeTracks(in.GetTracks()),
 	}
 }
 
@@ -42,15 +45,21 @@ func DeserializePlaylistsBase(in *playlist_proto.PlaylistsBase) []playlist.Base 
 	return result
 }
 
-func (c *Client) Create(base playlist.Base) error {
+func (c *Client) Create(base playlist.Base) (playlist.Response, error) {
 	c.logger.Infoln("Playlist client  entered")
 
-	_, err := c.playlistManager.Create(context.Background(), grpc_playlist_server.SerializePlaylistBase(base))
+	result, err := c.playlistManager.Create(context.Background(), grpc_playlist_server.SerializePlaylistBase(base))
 	if err != nil {
-		return err
+		return playlist.Response{}, err
 	}
 
-	return nil
+	creatorName, err := c.userClient.GetUserName(result.CreatorId)
+	if err != nil {
+		return playlist.Response{}, err
+	}
+	result.CreatorName = creatorName
+
+	return DeserializePlaylistResponse(result), nil
 }
 
 func (c *Client) Get(userId string, playlistId uint64) (playlist.Response, error) {
@@ -60,6 +69,12 @@ func (c *Client) Get(userId string, playlistId uint64) (playlist.Response, error
 	if err != nil {
 		return playlist.Response{}, err
 	}
+
+	creatorName, err := c.userClient.GetUserName(result.CreatorId)
+	if err != nil {
+		return playlist.Response{}, err
+	}
+	result.CreatorName = creatorName
 
 	return DeserializePlaylistResponse(result), nil
 }
@@ -99,6 +114,9 @@ func (c *Client) RemoveTrack(playlistId, trackId uint64) error {
 
 func (c *Client) UpdatePreview(playlistId uint64, src io.Reader, size int64) error {
 	c.logger.Infoln("Playlist client  entered")
+
+	_ = c.RemovePreview(playlistId)
+	c.logger.Infoln("Last preview and image removed")
 
 	url, err := c.imageClient.UploadPlaylistImage(src, size)
 	if err != nil {

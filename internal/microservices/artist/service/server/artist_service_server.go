@@ -6,6 +6,7 @@ import (
 	"github.com/sirupsen/logrus"
 	grpc_album_server "main/internal/microservices/album/service/server"
 	artist_proto "main/internal/microservices/artist/proto"
+	grpc_track_server "main/internal/microservices/track/service/server"
 	"main/internal/pkg/album"
 	"main/internal/pkg/artist"
 	"main/internal/pkg/track"
@@ -34,7 +35,7 @@ func SerializeArtist(in artist.Response) *artist_proto.Artist {
 		Name:   in.Name,
 		Avatar: in.Avatar,
 		Albums: grpc_album_server.SerializeAlbumsBase(in.Albums),
-		Tracks: grpc_album_server.SerializeTracks(in.Tracks),
+		Tracks: grpc_track_server.SerializeTracks(in.Tracks),
 	}
 }
 
