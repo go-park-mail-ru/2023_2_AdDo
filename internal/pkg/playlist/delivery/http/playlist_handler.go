@@ -46,6 +46,9 @@ func (handler *Handler) Create(w http.ResponseWriter, r *http.Request) error {
 	handler.logger.Infoln("Got user id")
 
 	var base playlist.Base
+	// if err := json.NewDecoder(r.Body).Decode(&base); err != nil {
+	// 	return common_handler.StatusError{Code: http.StatusBadRequest, Err: err}
+	// }
 	base.AuthorId = userId
 
 	result, err := handler.playlistUseCase.Create(base)

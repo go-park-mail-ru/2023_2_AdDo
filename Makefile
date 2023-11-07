@@ -23,6 +23,8 @@ database-clean:
 
 # запуск интеграционных тестов
 integration-test:
+	$(CURDIR)/scripts/docker-base-build.sh
+	$(CURDIR)/scripts/docker-services-build.sh
 	$(CURDIR)/scripts/integration-test.sh
 
 # генерируем скрипт для заполнения базы данных основными данными

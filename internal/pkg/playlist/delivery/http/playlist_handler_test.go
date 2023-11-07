@@ -4,10 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"github.com/golang/mock/gomock"
-	"github.com/gorilla/mux"
-	"github.com/sirupsen/logrus"
-	"github.com/stretchr/testify/assert"
 	common_handler "main/internal/common/handler"
 	"main/internal/common/response"
 	"main/internal/pkg/playlist"
@@ -19,6 +15,11 @@ import (
 	"net/http/httptest"
 	"testing"
 	"time"
+
+	"github.com/golang/mock/gomock"
+	"github.com/gorilla/mux"
+	"github.com/sirupsen/logrus"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestCreateAndGet(t *testing.T) {
@@ -51,11 +52,18 @@ func TestCreateAndGet(t *testing.T) {
 
 	t.Run("Create", func(t *testing.T) {
 		playlistBase := playlist.Base{
-			Id:       playlistIdInt,
-			Name:     "Playlist",
+			// Id:       playlistIdInt,
+			// Name:     "Playlist",
 			AuthorId: userId,
-			Preview:  "preview",
+			// Preview:  "preview",
 		}
+		// playlistResponse := playlist.Response{
+		// 	Id:       playlistIdInt,
+		// 	Name:     "Playlist",
+		// 	AuthorId: userId,
+		// 	Preview:  "preview",
+		// }
+		playlistResponse := playlist.Response{}
 		requestBody, err := json.Marshal(playlistBase)
 		assert.Nil(t, err)
 
@@ -64,11 +72,11 @@ func TestCreateAndGet(t *testing.T) {
 		w := httptest.NewRecorder()
 
 		mockSessionUseCase.EXPECT().GetUserId(sessionId).Return(userId, nil)
-		mockPlaylistUseCase.EXPECT().Create(playlistBase).Return(nil)
+		mockPlaylistUseCase.EXPECT().Create(playlistBase).Return(playlistResponse, nil)
 
 		err = handler.Create(w, req)
 		assert.Nil(t, err)
-		assert.Equal(t, http.StatusNoContent, w.Code)
+		assert.Equal(t, http.StatusOK, w.Code)
 	})
 
 	t.Run("Get", func(t *testing.T) {

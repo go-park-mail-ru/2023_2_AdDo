@@ -9,8 +9,20 @@ mockgen -source=internal/pkg/album/domain.go -destination=test/mocks/album/album
 mockgen -source=internal/pkg/image/domain.go -destination=test/mocks/avatar/avatar_mock.go -package=avatar_mock;
 mockgen -source=internal/pkg/playlist/domain.go -destination=test/mocks/playlist/playlist_mock.go -package=playlist_mock;
 
+# for domain in internal/pkg/*/domain.go; do
+#     package_name=$(basename $(dirname $domain))
+#     echo "mockgen -source=${domain} -destination=test/mocks/${package_name}/${package_name}_mock.go -package=${package_name}_mock;"
+#     mockgen -source=${domain} -destination=test/mocks/${package_name}/${package_name}_mock.go -package=${package_name}_mock;
+# done
+# mockgen -source=internal/pkg/image/domain.go -destination=test/mocks/avatar/avatar_mock.go -package=avatar_mock;
+
 echo "Running unit tests..."
 go test -coverprofile=all_files -coverpkg=./... ./...
+if [ $? -ne "0" ];then
+    echo "Unit tests failed"
+    exit 1
+fi
 cat all_files | grep -v "cmd" | grep -v "test" | grep -v "init" | grep -v "/.*proto.*" | grep -v "mock" > testing_files
 go tool cover -func=testing_files
 rm testing_files all_files
+rm -r test/mocks
