@@ -29,8 +29,7 @@ func NewClient(client user_proto.UserServiceClient, imageClient grpc_image.Clien
 func (c *Client) Register(user user_domain.User) error {
 	c.logger.Infoln("Grpc client to UserService: Register Method")
 
-	_, err := c.userClient.Register(context.Background(), grpc_server_user.SerializeUserData(user))
-	if err != nil {
+	if _, err := c.userClient.Register(context.Background(), grpc_server_user.SerializeUserData(user)); err != nil {
 		return err
 	}
 
@@ -76,8 +75,7 @@ func (c *Client) GetUserInfo(sessionId string) (user_domain.User, error) {
 func (c *Client) Logout(sessionId string) error {
 	c.logger.Infoln("Grpc client to UserService: Logout Method")
 
-	_, err := c.userClient.LogOut(context.Background(), &session_proto.SessionId{SessionId: sessionId})
-	if err != nil {
+	if _, err := c.userClient.LogOut(context.Background(), &session_proto.SessionId{SessionId: sessionId}); err != nil {
 		return err
 	}
 
@@ -96,11 +94,10 @@ func (c *Client) UploadAvatar(userId string, src io.Reader, size int64) (string,
 	}
 	c.logger.Infoln("Image uploaded")
 
-	_, err = c.userClient.UploadAvatar(context.Background(), &user_proto.ImageToUser{
+	if _, err = c.userClient.UploadAvatar(context.Background(), &user_proto.ImageToUser{
 		Url: &image_proto.ImageUrl{Url: avatarUrl},
 		Id:  &session_proto.UserId{UserId: userId},
-	})
-	if err != nil {
+	}); err != nil {
 		return "", err
 	}
 	c.logger.Infoln("Avatar path add to db")
@@ -117,16 +114,10 @@ func (c *Client) RemoveAvatar(userId string) error {
 	}
 	c.logger.Infoln("avatar removed", avatarUrl.GetUrl())
 
-	err = c.imageClient.RemoveImage(avatarUrl.GetUrl())
-	if err != nil {
+	if err = c.imageClient.RemoveImage(avatarUrl.GetUrl()); err != nil {
 		return err
 	}
 	c.logger.Infoln("images removed")
-
-	if err != nil {
-		return err
-	}
-	c.logger.Infoln("Avatar Removed")
 
 	return nil
 }
@@ -135,8 +126,7 @@ func (c *Client) UpdateUserInfo(userId string, u user_domain.User) error {
 	c.logger.Infoln("User grpc client UpdateUserInfo entered")
 
 	u.Id = userId
-	_, err := c.userClient.UpdateUserInfo(context.Background(), grpc_server_user.SerializeUserData(u))
-	if err != nil {
+	if _, err := c.userClient.UpdateUserInfo(context.Background(), grpc_server_user.SerializeUserData(u)); err != nil {
 		return err
 	}
 	c.logger.Infoln("Info updated successfully")

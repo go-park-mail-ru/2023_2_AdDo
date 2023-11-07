@@ -18,9 +18,7 @@ func InitPostgres(env string) (*pgxpool.Pool, error) {
 	}
 	fmt.Println("Postgres db successfully connected!")
 
-	err = conn.Ping(context.Background())
-
-	if err != nil {
+	if err = conn.Ping(context.Background()); err != nil {
 		return nil, err
 	}
 	fmt.Println("Postgres db pinged")

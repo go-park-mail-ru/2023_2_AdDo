@@ -41,8 +41,7 @@ func DeserializeTracks(in *track_proto.TracksResponse) []track.Response {
 func (c *Client) Listen(trackId uint64) error {
 	c.logger.Infoln("Track Client Listen entered")
 
-	_, err := c.trackManager.Listen(context.Background(), &track_proto.TrackId{TrackId: trackId})
-	if err != nil {
+	if _, err := c.trackManager.Listen(context.Background(), &track_proto.TrackId{TrackId: trackId}); err != nil {
 		return err
 	}
 
@@ -52,8 +51,7 @@ func (c *Client) Listen(trackId uint64) error {
 func (c *Client) Like(userId string, trackId uint64) error {
 	c.logger.Infoln("Track Client Like entered")
 
-	_, err := c.trackManager.Like(context.Background(), &track_proto.TrackToUserId{TrackId: trackId, UserId: userId})
-	if err != nil {
+	if _, err := c.trackManager.Like(context.Background(), &track_proto.TrackToUserId{TrackId: trackId, UserId: userId}); err != nil {
 		return err
 	}
 
@@ -74,8 +72,7 @@ func (c *Client) IsLike(userId string, trackId uint64) (bool, error) {
 func (c *Client) Unlike(userId string, trackId uint64) error {
 	c.logger.Infoln("Track Client Unlike entered")
 
-	_, err := c.trackManager.Unlike(context.Background(), &track_proto.TrackToUserId{TrackId: trackId, UserId: userId})
-	if err != nil {
+	if _, err := c.trackManager.Unlike(context.Background(), &track_proto.TrackToUserId{TrackId: trackId, UserId: userId}); err != nil {
 		return err
 	}
 

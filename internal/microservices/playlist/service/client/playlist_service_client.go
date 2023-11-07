@@ -93,8 +93,7 @@ func (c *Client) GetUserPlaylists(userId string) ([]playlist.Base, error) {
 func (c *Client) AddTrack(playlistId, trackId uint64) error {
 	c.logger.Infoln("Playlist client  entered")
 
-	_, err := c.playlistManager.AddTrack(context.Background(), &playlist_proto.PlaylistToTrackId{PlaylistId: playlistId, TrackId: trackId})
-	if err != nil {
+	if _, err := c.playlistManager.AddTrack(context.Background(), &playlist_proto.PlaylistToTrackId{PlaylistId: playlistId, TrackId: trackId}); err != nil {
 		return err
 	}
 
@@ -104,8 +103,7 @@ func (c *Client) AddTrack(playlistId, trackId uint64) error {
 func (c *Client) RemoveTrack(playlistId, trackId uint64) error {
 	c.logger.Infoln("Playlist client RemoveTrack  entered")
 
-	_, err := c.playlistManager.RemoveTrack(context.Background(), &playlist_proto.PlaylistToTrackId{PlaylistId: playlistId, TrackId: trackId})
-	if err != nil {
+	if _, err := c.playlistManager.RemoveTrack(context.Background(), &playlist_proto.PlaylistToTrackId{PlaylistId: playlistId, TrackId: trackId}); err != nil {
 		return err
 	}
 
@@ -124,8 +122,7 @@ func (c *Client) UpdatePreview(playlistId uint64, src io.Reader, size int64) err
 	}
 	c.logger.Infoln("Image Uploaded")
 
-	_, err = c.playlistManager.UpdatePreview(context.Background(), &playlist_proto.PlaylistIdToImageUrl{Id: playlistId, Url: &image_proto.ImageUrl{Url: url}})
-	if err != nil {
+	if _, err = c.playlistManager.UpdatePreview(context.Background(), &playlist_proto.PlaylistIdToImageUrl{Id: playlistId, Url: &image_proto.ImageUrl{Url: url}}); err != nil {
 		return err
 	}
 
@@ -141,8 +138,7 @@ func (c *Client) RemovePreview(playlistId uint64) error {
 	}
 	c.logger.Infoln("Path deleted from db")
 
-	err = c.imageClient.RemoveImage(url.GetUrl())
-	if err != nil {
+	if err = c.imageClient.RemoveImage(url.GetUrl()); err != nil {
 		return err
 	}
 	c.logger.Infoln("Image deleted from sss")
@@ -153,8 +149,7 @@ func (c *Client) RemovePreview(playlistId uint64) error {
 func (c *Client) DeleteById(playlistId uint64) error {
 	c.logger.Infoln("Playlist client  entered")
 
-	_, err := c.playlistManager.DeleteById(context.Background(), &playlist_proto.PlaylistId{Id: playlistId})
-	if err != nil {
+	if _, err := c.playlistManager.DeleteById(context.Background(), &playlist_proto.PlaylistId{Id: playlistId}); err != nil {
 		return err
 	}
 
@@ -164,8 +159,7 @@ func (c *Client) DeleteById(playlistId uint64) error {
 func (c *Client) Like(userId string, playlistId uint64) error {
 	c.logger.Infoln("Client to Playlist Micros Like entered")
 
-	_, err := c.playlistManager.Like(context.Background(), &playlist_proto.PlaylistToUserId{UserId: userId, PlaylistId: playlistId})
-	if err != nil {
+	if _, err := c.playlistManager.Like(context.Background(), &playlist_proto.PlaylistToUserId{UserId: userId, PlaylistId: playlistId}); err != nil {
 		return err
 	}
 
@@ -186,8 +180,7 @@ func (c *Client) IsLike(userId string, playlistId uint64) (bool, error) {
 func (c *Client) Unlike(userId string, playlistId uint64) error {
 	c.logger.Infoln("Client to Playlist Micros Unlike entered")
 
-	_, err := c.playlistManager.Unlike(context.Background(), &playlist_proto.PlaylistToUserId{UserId: userId, PlaylistId: playlistId})
-	if err != nil {
+	if _, err := c.playlistManager.Unlike(context.Background(), &playlist_proto.PlaylistToUserId{UserId: userId, PlaylistId: playlistId}); err != nil {
 		return err
 	}
 
@@ -219,8 +212,7 @@ func (c *Client) HasReadAccess(playlistId uint64) (bool, error) {
 func (c *Client) MakePrivate(playlistId uint64) error {
 	c.logger.Infoln("Client to Playlist Micros MakePrivate entered")
 
-	_, err := c.playlistManager.MakePrivate(context.Background(), &playlist_proto.PlaylistId{Id: playlistId})
-	if err != nil {
+	if _, err := c.playlistManager.MakePrivate(context.Background(), &playlist_proto.PlaylistId{Id: playlistId}); err != nil {
 		return err
 	}
 
@@ -230,8 +222,7 @@ func (c *Client) MakePrivate(playlistId uint64) error {
 func (c *Client) MakePublic(playlistId uint64) error {
 	c.logger.Infoln("Client to Playlist Micros MakePublic entered")
 
-	_, err := c.playlistManager.MakePublic(context.Background(), &playlist_proto.PlaylistId{Id: playlistId})
-	if err != nil {
+	if _, err := c.playlistManager.MakePublic(context.Background(), &playlist_proto.PlaylistId{Id: playlistId}); err != nil {
 		return err
 	}
 

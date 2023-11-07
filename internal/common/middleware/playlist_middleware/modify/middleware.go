@@ -49,8 +49,7 @@ func (m *Middleware) ModifyPlaylistAccess(next http.Handler) http.Handler {
 		}
 		m.logger.Infoln("Parsed playlistId from Vars")
 
-		hasAccess, err := m.playlistUseCase.HasModifyAccess(userId, uint64(playlistId))
-		if err != nil || !hasAccess {
+		if hasAccess, err := m.playlistUseCase.HasModifyAccess(userId, uint64(playlistId)); err != nil || !hasAccess {
 			common_handler.Handler{H: default_handlers.Forbidden}.ServeHTTP(w, request)
 			return
 		}

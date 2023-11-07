@@ -22,7 +22,7 @@ class UserAvatarTest(unittest.TestCase):
 
     def test_user_avatar_success(self):
         headers, cookies = utils.init_authorized_user_headers_and_cookies()
-        avatar = open('test/testsuite/user_avatar_image.png', 'rb')
+        avatar = open('user_avatar_image.png', 'rb')
         files = {'Avatar': avatar}
 
         response = requests.post(utils.url + '/upload_avatar', headers=headers, cookies=cookies, files=files)

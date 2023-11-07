@@ -56,14 +56,12 @@ func (handler *UserHandler) SignUp(w http.ResponseWriter, r *http.Request) error
 	}
 	handler.logger.Infoln("User model decoded from request body")
 
-	err := u.Validate()
-	if err != nil {
+	if err := u.Validate(); err != nil {
 		return common_handler.StatusError{Code: http.StatusBadRequest, Err: err}
 	}
 	handler.logger.Infoln("User model is valid")
 
-	err = handler.userUseCase.Register(u)
-	if err != nil {
+	if err := handler.userUseCase.Register(u); err != nil {
 		return common_handler.StatusError{Code: http.StatusConflict, Err: err}
 	}
 	handler.logger.Infoln("User signed up")
@@ -104,8 +102,7 @@ func (handler *UserHandler) Login(w http.ResponseWriter, r *http.Request) error 
 	}
 	handler.logger.Infoln("User credentials parsed from body")
 
-	err := credentials.Validate()
-	if err != nil {
+	if err := credentials.Validate(); err != nil {
 		return common_handler.StatusError{Code: http.StatusBadRequest, Err: err}
 	}
 	handler.logger.Infoln("User credentials are valid")
@@ -146,8 +143,7 @@ func (handler *UserHandler) Auth(w http.ResponseWriter, r *http.Request) error {
 	}
 	handler.logger.Infoln("session id got")
 
-	isAuth, err := handler.userUseCase.Auth(sessionId)
-	if err != nil || !isAuth {
+	if isAuth, err := handler.userUseCase.Auth(sessionId); err != nil || !isAuth {
 		return common_handler.StatusError{Code: http.StatusUnauthorized, Err: err}
 	}
 	handler.logger.Infoln("auth success")
@@ -223,8 +219,7 @@ func (handler *UserHandler) Me(w http.ResponseWriter, r *http.Request) error {
 	}
 	handler.logger.Infoln("Got user info from db successfully")
 
-	err = response.RenderJSON(w, user)
-	if err != nil {
+	if err = response.RenderJSON(w, user); err != nil {
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}
 	handler.logger.Infoln("Response body rendered")
@@ -275,8 +270,7 @@ func (handler *UserHandler) UploadAvatar(w http.ResponseWriter, r *http.Request)
 	}
 	handler.logger.Infoln("images uploaded")
 
-	err = response.RenderJSON(w, user_domain.UploadAvatarResponse{Url: url})
-	if err != nil {
+	if err = response.RenderJSON(w, user_domain.UploadAvatarResponse{Url: url}); err != nil {
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}
 	handler.logger.Infoln("response formed: ", url)
@@ -347,8 +341,7 @@ func (handler *UserHandler) UpdateUserInfo(w http.ResponseWriter, r *http.Reques
 	}
 	handler.logger.Infoln("User model decoded from request body")
 
-	err = u.ValidateForUpdate()
-	if err != nil {
+	if err = u.ValidateForUpdate(); err != nil {
 		return common_handler.StatusError{Code: http.StatusBadRequest, Err: err}
 	}
 	handler.logger.Infoln("User model is valid")
@@ -358,8 +351,7 @@ func (handler *UserHandler) UpdateUserInfo(w http.ResponseWriter, r *http.Reques
 		return common_handler.StatusError{Code: http.StatusUnauthorized, Err: err}
 	}
 
-	err = handler.userUseCase.UpdateUserInfo(userId, u)
-	if err != nil {
+	if err = handler.userUseCase.UpdateUserInfo(userId, u); err != nil {
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}
 

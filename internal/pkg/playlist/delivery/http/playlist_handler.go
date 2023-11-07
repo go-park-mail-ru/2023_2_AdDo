@@ -53,8 +53,7 @@ func (handler *Handler) Create(w http.ResponseWriter, r *http.Request) error {
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}
 
-	err = response.RenderJSON(w, result)
-	if err != nil {
+	if err = response.RenderJSON(w, result); err != nil {
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}
 
@@ -90,8 +89,7 @@ func (handler *Handler) Get(w http.ResponseWriter, r *http.Request) error {
 		return common_handler.StatusError{Code: http.StatusNotFound, Err: err}
 	}
 
-	err = response.RenderJSON(w, result)
-	if err != nil {
+	if err = response.RenderJSON(w, result); err != nil {
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}
 	return nil
@@ -114,8 +112,7 @@ func (handler *Handler) AddTrack(w http.ResponseWriter, r *http.Request) error {
 	}
 	handler.logger.Infoln("Got playlist and track ids")
 
-	err = handler.playlistUseCase.AddTrack(uint64(playlistId), ids.Id)
-	if err != nil {
+	if err = handler.playlistUseCase.AddTrack(uint64(playlistId), ids.Id); err != nil {
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}
 
@@ -140,8 +137,7 @@ func (handler *Handler) RemoveTrack(w http.ResponseWriter, r *http.Request) erro
 	}
 	handler.logger.Infoln("Got playlist and track ids")
 
-	err = handler.playlistUseCase.RemoveTrack(uint64(playlistId), ids.Id)
-	if err != nil {
+	if err = handler.playlistUseCase.RemoveTrack(uint64(playlistId), ids.Id); err != nil {
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}
 
@@ -167,8 +163,7 @@ func (handler *Handler) UpdatePreview(w http.ResponseWriter, r *http.Request) er
 	defer src.Close()
 	handler.logger.Infoln("formed file")
 
-	err = handler.playlistUseCase.UpdatePreview(uint64(playlistId), src, hdr.Size)
-	if err != nil {
+	if err = handler.playlistUseCase.UpdatePreview(uint64(playlistId), src, hdr.Size); err != nil {
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}
 
@@ -199,8 +194,7 @@ func (handler *Handler) Like(w http.ResponseWriter, r *http.Request) error {
 	}
 	handler.logger.Infoln("got user id by cookie")
 
-	err = handler.playlistUseCase.Like(userId, uint64(playlistId))
-	if err != nil {
+	if err = handler.playlistUseCase.Like(userId, uint64(playlistId)); err != nil {
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}
 	handler.logger.Infoln("playlist like created successfully")
@@ -238,8 +232,7 @@ func (handler *Handler) IsLike(w http.ResponseWriter, r *http.Request) error {
 	}
 	handler.logger.Infoln("User like checked")
 
-	err = response.RenderJSON(w, response.IsLiked{IsLiked: isLiked})
-	if err != nil {
+	if err = response.RenderJSON(w, response.IsLiked{IsLiked: isLiked}); err != nil {
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}
 	handler.logger.Infoln("response  formed")
@@ -270,8 +263,7 @@ func (handler *Handler) Unlike(w http.ResponseWriter, r *http.Request) error {
 	}
 	handler.logger.Infoln("got user id by cookie")
 
-	err = handler.playlistUseCase.Unlike(userId, uint64(playlistId))
-	if err != nil {
+	if err = handler.playlistUseCase.Unlike(userId, uint64(playlistId)); err != nil {
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}
 	handler.logger.Infoln("playlist like deleted successfully")
@@ -291,8 +283,7 @@ func (handler *Handler) Delete(w http.ResponseWriter, r *http.Request) error {
 	}
 	handler.logger.Infoln("Parsed playlistId from Vars")
 
-	err = handler.playlistUseCase.DeleteById(uint64(playlistId))
-	if err != nil {
+	if err = handler.playlistUseCase.DeleteById(uint64(playlistId)); err != nil {
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}
 
@@ -311,8 +302,7 @@ func (handler *Handler) MakePublic(w http.ResponseWriter, r *http.Request) error
 	}
 	handler.logger.Infoln("Parsed playlistId from Vars")
 
-	err = handler.playlistUseCase.MakePublic(uint64(playlistId))
-	if err != nil {
+	if err = handler.playlistUseCase.MakePublic(uint64(playlistId)); err != nil {
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}
 
@@ -331,8 +321,7 @@ func (handler *Handler) MakePrivate(w http.ResponseWriter, r *http.Request) erro
 	}
 	handler.logger.Infoln("Parsed playlistId from Vars")
 
-	err = handler.playlistUseCase.MakePrivate(uint64(playlistId))
-	if err != nil {
+	if err = handler.playlistUseCase.MakePrivate(uint64(playlistId)); err != nil {
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}
 

@@ -144,8 +144,7 @@ func (handler *AlbumHandler) AlbumTracks(w http.ResponseWriter, r *http.Request)
 	}
 	handler.logger.Infoln("got album by id")
 
-	err = response.RenderJSON(w, result)
-	if err != nil {
+	if err = response.RenderJSON(w, result); err != nil {
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}
 	handler.logger.Infoln("formed response")
@@ -156,8 +155,7 @@ func (handler *AlbumHandler) AlbumTracks(w http.ResponseWriter, r *http.Request)
 func (handler *AlbumHandler) handleQuery(albums []album.Response, w http.ResponseWriter, r *http.Request) error {
 	handler.logger.Infoln("handle query entered")
 
-	err := response.RenderJSON(w, albums)
-	if err != nil {
+	if err := response.RenderJSON(w, albums); err != nil {
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}
 	handler.logger.Infoln("formed response")
@@ -203,8 +201,7 @@ func (handler *AlbumHandler) Like(w http.ResponseWriter, r *http.Request) error 
 	}
 	handler.logger.Infoln("got user id by cookie")
 
-	err = handler.albumUseCase.Like(userId, uint64(albumId))
-	if err != nil {
+	if err = handler.albumUseCase.Like(userId, uint64(albumId)); err != nil {
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}
 	handler.logger.Infoln("like created successfully")
@@ -242,8 +239,7 @@ func (handler *AlbumHandler) IsLike(w http.ResponseWriter, r *http.Request) erro
 	}
 	handler.logger.Infoln("artist like checked")
 
-	err = response.RenderJSON(w, response.IsLiked{IsLiked: isLiked})
-	if err != nil {
+	if err = response.RenderJSON(w, response.IsLiked{IsLiked: isLiked}); err != nil {
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}
 	handler.logger.Infoln("response  formed")
@@ -274,8 +270,7 @@ func (handler *AlbumHandler) Unlike(w http.ResponseWriter, r *http.Request) erro
 	}
 	handler.logger.Infoln("got user id by cookie")
 
-	err = handler.albumUseCase.Unlike(userId, uint64(albumId))
-	if err != nil {
+	if err = handler.albumUseCase.Unlike(userId, uint64(albumId)); err != nil {
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}
 	handler.logger.Infoln("like deleted successfully")

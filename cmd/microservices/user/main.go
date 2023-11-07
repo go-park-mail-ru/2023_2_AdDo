@@ -1,11 +1,11 @@
 package main
 
 import (
-	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	microservices_init "main/cmd/microservices"
 	init_db "main/init/postgres_db"
 	init_redis "main/init/redis_db"
+	log "main/internal/common/logger"
 	user_proto "main/internal/microservices/user/proto"
 	grpc_server_user "main/internal/microservices/user/service/server"
 	session_repository_redis "main/internal/pkg/session/repository/redis"
@@ -18,8 +18,11 @@ const EnvPostgresQueryName = "DATABASE_URL"
 
 const Port = 8081
 
+var loggerSingleton = log.Singleton{}
+
 func main() {
-	logger := logrus.New()
+	logger := loggerSingleton.GetLogger()
+
 	lis, err := net.Listen("tcp", ":"+strconv.Itoa(Port))
 	if err != nil {
 		logger.Errorln("err while starting use micros: ", err)

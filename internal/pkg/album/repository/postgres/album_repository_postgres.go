@@ -61,8 +61,7 @@ func (p Postgres) Get(albumId uint64) (album.Base, error) {
 	var result album.Base
 
 	query := "select id, name, preview from album where id = $1"
-	err := p.Pool.QueryRow(context.Background(), query, albumId).Scan(&result.Id, &result.Name, &result.Preview)
-	if err != nil {
+	if err := p.Pool.QueryRow(context.Background(), query, albumId).Scan(&result.Id, &result.Name, &result.Preview); err != nil {
 		p.logger.WithFields(logrus.Fields{
 			"err":      err,
 			"album id": albumId,
@@ -116,8 +115,7 @@ func (p Postgres) CreateLike(userId string, albumId uint64) error {
 	p.logger.Infoln("Album Repo CreateLike entered")
 
 	query := "insert into profile_album (profile_id, album_id) values ($1, $2)"
-	_, err := p.Pool.Exec(context.Background(), query, userId, albumId)
-	if err != nil {
+	if _, err := p.Pool.Exec(context.Background(), query, userId, albumId); err != nil {
 		p.logger.WithFields(logrus.Fields{
 			"err":      err,
 			"album id": albumId,
@@ -135,8 +133,7 @@ func (p Postgres) CheckLike(userId string, albumId uint64) (bool, error) {
 
 	var counter int
 	query := "select count(*) from profile_album where profile_id = $1 and album_id = $2"
-	err := p.Pool.QueryRow(context.Background(), query, userId, albumId).Scan(&counter)
-	if err != nil {
+	if err := p.Pool.QueryRow(context.Background(), query, userId, albumId).Scan(&counter); err != nil {
 		p.logger.Errorln(err)
 		return false, err
 	}
@@ -153,8 +150,7 @@ func (p Postgres) DeleteLike(userId string, albumId uint64) error {
 	p.logger.Infoln("Album Repo DeleteLike entered")
 
 	query := "delete from profile_album where profile_id = $1 and album_id = $2"
-	_, err := p.Pool.Exec(context.Background(), query, userId, albumId)
-	if err != nil {
+	if _, err := p.Pool.Exec(context.Background(), query, userId, albumId); err != nil {
 		p.logger.WithFields(logrus.Fields{
 			"err":      err,
 			"album id": albumId,

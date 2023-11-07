@@ -1,10 +1,10 @@
 package main
 
 import (
-	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	microservices_init "main/cmd/microservices"
 	init_db "main/init/postgres_db"
+	log "main/internal/common/logger"
 	proto2 "main/internal/microservices/album/proto"
 	grpc_album_server "main/internal/microservices/album/service/server"
 	album_repository "main/internal/pkg/album/repository/postgres"
@@ -15,11 +15,13 @@ import (
 )
 
 const EnvPostgresQueryName = "DATABASE_URL"
-
 const Port = 8084
 
+var loggerSingleton = log.Singleton{}
+
 func main() {
-	logger := logrus.New()
+	logger := loggerSingleton.GetLogger()
+
 	lis, err := net.Listen("tcp", ":"+strconv.Itoa(Port))
 	if err != nil {
 		logger.Errorln("err while starting album micros: ", err)
@@ -45,8 +47,7 @@ func main() {
 	}()
 
 	logger.Infoln("starting server at " + strconv.Itoa(Port))
-	err = server.Serve(lis)
-	if err != nil {
+	if err = server.Serve(lis); err != nil {
 		logger.Fatalln("terminated ERROR!!!")
 	}
 }

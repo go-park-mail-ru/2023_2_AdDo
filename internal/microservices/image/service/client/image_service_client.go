@@ -51,8 +51,7 @@ func (c *Client) UploadPlaylistImage(src io.Reader, size int64) (string, error) 
 func (c *Client) RemoveImage(url string) error {
 	c.logger.Infoln("Image client RemoveImage entered")
 
-	_, err := c.imageManager.RemoveImage(context.Background(), &image_proto.ImageUrl{Url: url})
-	if err != nil {
+	if _, err := c.imageManager.RemoveImage(context.Background(), &image_proto.ImageUrl{Url: url}); err != nil {
 		return err
 	}
 	c.logger.Infoln("images removed")

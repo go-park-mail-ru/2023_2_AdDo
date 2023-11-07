@@ -22,8 +22,7 @@ func (db *Postgres) Create(user user_domain.User) error {
 	db.logger.Infoln("UserRepo Create entered")
 
 	query := "insert into profile (email, password, nickname, birth_date) values ($1, $2, $3, $4)"
-	_, err := db.Pool.Exec(context.Background(), query, user.Email, utils.GetMD5Sum(user.Password), user.Username, user.BirthDate)
-	if err != nil {
+	if _, err := db.Pool.Exec(context.Background(), query, user.Email, utils.GetMD5Sum(user.Password), user.Username, user.BirthDate); err != nil {
 		db.logger.WithFields(logrus.Fields{
 			"err":       err,
 			"user_data": user,
@@ -44,8 +43,7 @@ func (db *Postgres) GetById(id string) (user_domain.User, error) {
 	var avatar pgtype.Text
 
 	query := "select email, nickname, birth_date, avatar_url from profile where id = $1"
-	err := db.Pool.QueryRow(context.Background(), query, id).Scan(&user.Email, &user.Username, &dt, &avatar)
-	if err != nil {
+	if err := db.Pool.QueryRow(context.Background(), query, id).Scan(&user.Email, &user.Username, &dt, &avatar); err != nil {
 		db.logger.WithFields(logrus.Fields{
 			"err":       err,
 			"user_data": user,
@@ -59,7 +57,7 @@ func (db *Postgres) GetById(id string) (user_domain.User, error) {
 	user.Avatar = avatar.String
 	db.logger.Infoln("birthday and images formatted")
 
-	return user, err
+	return user, nil
 }
 
 func (db *Postgres) CheckEmailAndPassword(email, password string) (string, error) {
@@ -68,8 +66,7 @@ func (db *Postgres) CheckEmailAndPassword(email, password string) (string, error
 	var userId string
 
 	query := "select id from profile where email = $1 and password = $2"
-	err := db.Pool.QueryRow(context.Background(), query, email, utils.GetMD5Sum(password)).Scan(&userId)
-	if err != nil {
+	if err := db.Pool.QueryRow(context.Background(), query, email, utils.GetMD5Sum(password)).Scan(&userId); err != nil {
 		db.logger.WithFields(logrus.Fields{
 			"err":       err,
 			"user_data": email,
@@ -84,8 +81,7 @@ func (db *Postgres) CheckEmailAndPassword(email, password string) (string, error
 
 func (db *Postgres) UpdateAvatarPath(userId string, path string) error {
 	query := "update profile set avatar_url = $1 where id = $2"
-	_, err := db.Pool.Exec(context.Background(), query, path, userId)
-	if err != nil {
+	if _, err := db.Pool.Exec(context.Background(), query, path, userId); err != nil {
 		db.logger.WithFields(logrus.Fields{
 			"err":   err,
 			"path":  path,
@@ -101,8 +97,7 @@ func (db *Postgres) GetAvatarPath(userId string) (string, error) {
 	var path any
 
 	query := "select avatar_url from profile where id = $1"
-	err := db.Pool.QueryRow(context.Background(), query, userId).Scan(&path)
-	if err != nil {
+	if err := db.Pool.QueryRow(context.Background(), query, userId).Scan(&path); err != nil {
 		db.logger.WithFields(logrus.Fields{
 			"err":     err,
 			"user id": userId,
@@ -127,8 +122,7 @@ func (db *Postgres) RemoveAvatarPath(userId string) (string, error) {
 	}
 
 	query := "update profile set avatar_url = null where id = $1"
-	_, err = db.Pool.Exec(context.Background(), query, userId)
-	if err != nil {
+	if _, err = db.Pool.Exec(context.Background(), query, userId); err != nil {
 		return "", err
 	}
 	db.logger.Infoln("Avatar removed", url)
@@ -140,8 +134,7 @@ func (db *Postgres) UpdateUserInfo(user user_domain.User) error {
 	db.logger.Infoln("UserRepo UpdateUserInfo entered")
 
 	query := "update profile set nickname = $1, email = $2, birth_date = $3 where id = $4"
-	_, err := db.Pool.Exec(context.Background(), query, user.Username, user.Email, user.BirthDate, user.Id)
-	if err != nil {
+	if _, err := db.Pool.Exec(context.Background(), query, user.Username, user.Email, user.BirthDate, user.Id); err != nil {
 		db.logger.WithFields(logrus.Fields{
 			"err ":   err,
 			"user ":  user,
@@ -159,8 +152,7 @@ func (db *Postgres) GetUserNameById(userId string) (string, error) {
 
 	var result string
 	query := "select profile.nickname from profile where id = $1"
-	err := db.Pool.QueryRow(context.Background(), query, userId).Scan(&result)
-	if err != nil {
+	if err := db.Pool.QueryRow(context.Background(), query, userId).Scan(&result); err != nil {
 		db.logger.WithFields(logrus.Fields{
 			"err ":   err,
 			"user ":  userId,

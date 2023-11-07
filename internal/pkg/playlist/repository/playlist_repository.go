@@ -25,8 +25,7 @@ func (p *Postgres) Create(ctx context.Context, base playlist.Base) (playlist.Res
 	var url any
 	var result playlist.Response
 	query := "insert into playlist (creator_id) values ($1) returning id, name, creator_id, preview"
-	err := p.Pool.QueryRow(ctx, query, base.AuthorId).Scan(&result.Id, &result.Name, &result.AuthorId, &url)
-	if err != nil {
+	if err := p.Pool.QueryRow(ctx, query, base.AuthorId).Scan(&result.Id, &result.Name, &result.AuthorId, &url); err != nil {
 		p.logger.WithFields(logrus.Fields{
 			"error":         err,
 			"playlist base": base,
@@ -48,8 +47,7 @@ func (p *Postgres) Get(ctx context.Context, playlistId uint64) (playlist.Base, e
 	var url any
 	var result playlist.Base
 	query := "select id, name, creator_id, preview from playlist where id = $1"
-	err := p.Pool.QueryRow(ctx, query, playlistId).Scan(&result.Id, &result.Name, &result.AuthorId, &url)
-	if err != nil {
+	if err := p.Pool.QueryRow(ctx, query, playlistId).Scan(&result.Id, &result.Name, &result.AuthorId, &url); err != nil {
 		p.logger.WithFields(logrus.Fields{
 			"error":       err,
 			"playlist id": playlistId,
@@ -84,8 +82,7 @@ func (p *Postgres) GetByCreatorId(ctx context.Context, userId string) ([]playlis
 
 	for rows.Next() {
 		var base playlist.Base
-		err := rows.Scan(&base.Id, &base.Name, &base.AuthorId, &url)
-		if err != nil {
+		if err := rows.Scan(&base.Id, &base.Name, &base.AuthorId, &url); err != nil {
 			p.logger.WithFields(logrus.Fields{
 				"query":   query,
 				"err":     err,
@@ -109,8 +106,7 @@ func (p *Postgres) AddTrack(ctx context.Context, playlistId, trackId uint64) err
 	p.logger.Infoln("Playlist Repo AddTrack entered")
 
 	query := "insert into playlist_track (playlist_id, track_id) values ($1, $2)"
-	_, err := p.Pool.Exec(ctx, query, playlistId, trackId)
-	if err != nil {
+	if _, err := p.Pool.Exec(ctx, query, playlistId, trackId); err != nil {
 		p.logger.WithFields(logrus.Fields{
 			"error":       err,
 			"playlist id": playlistId,
@@ -126,8 +122,7 @@ func (p *Postgres) RemoveTrack(ctx context.Context, playlistId, trackId uint64) 
 	p.logger.Infoln("Playlist Repo RemoveTrack entered")
 
 	query := "delete from playlist_track where playlist_id = $1 and track_id = $2"
-	_, err := p.Pool.Exec(ctx, query, playlistId, trackId)
-	if err != nil {
+	if _, err := p.Pool.Exec(ctx, query, playlistId, trackId); err != nil {
 		p.logger.WithFields(logrus.Fields{
 			"error":       err,
 			"playlist id": playlistId,
@@ -143,8 +138,7 @@ func (p *Postgres) UpdateImage(ctx context.Context, playlistId uint64, image str
 	p.logger.Infoln("Playlist Repo UpdateImage entered")
 
 	query := "update playlist set preview = $1 where id = $2"
-	_, err := p.Pool.Exec(ctx, query, image, playlistId)
-	if err != nil {
+	if _, err := p.Pool.Exec(ctx, query, image, playlistId); err != nil {
 		p.logger.WithFields(logrus.Fields{
 			"error":           err,
 			"images url path": image,
@@ -162,8 +156,7 @@ func (p *Postgres) RemovePreviewPath(ctx context.Context, playlistId uint64) (st
 
 	var result string
 	query := "update playlist set preview = null where id = $1 returning preview"
-	err := p.Pool.QueryRow(ctx, query, playlistId).Scan(&result)
-	if err != nil {
+	if err := p.Pool.QueryRow(ctx, query, playlistId).Scan(&result); err != nil {
 		p.logger.WithFields(logrus.Fields{
 			"error":       err,
 			"playlist id": playlistId,
@@ -180,8 +173,7 @@ func (p *Postgres) Delete(ctx context.Context, playlistId uint64) error {
 	p.logger.Infoln("Playlist Repo Delete entered")
 
 	query := "delete from playlist where playlist.id = $1"
-	_, err := p.Pool.Exec(ctx, query, playlistId)
-	if err != nil {
+	if _, err := p.Pool.Exec(ctx, query, playlistId); err != nil {
 		p.logger.WithFields(logrus.Fields{
 			"error":       err,
 			"playlist id": playlistId,
@@ -197,8 +189,7 @@ func (p *Postgres) CreateLike(ctx context.Context, userId string, playlistId uin
 	p.logger.Infoln("Playlist Repo CreateLike entered")
 
 	query := "insert into profile_playlist (profile_id, playlist_id) values ($1, $2)"
-	_, err := p.Pool.Exec(context.Background(), query, userId, playlistId)
-	if err != nil {
+	if _, err := p.Pool.Exec(context.Background(), query, userId, playlistId); err != nil {
 		p.logger.WithFields(logrus.Fields{
 			"err":         err,
 			"playlist Id": playlistId,
@@ -216,8 +207,7 @@ func (p *Postgres) CheckLike(ctx context.Context, userId string, playlistId uint
 
 	var counter int
 	query := "select count(*) from profile_playlist where profile_id = $1 and playlist_id = $2"
-	err := p.Pool.QueryRow(context.Background(), query, userId, playlistId).Scan(&counter)
-	if err != nil {
+	if err := p.Pool.QueryRow(context.Background(), query, userId, playlistId).Scan(&counter); err != nil {
 		p.logger.Errorln(err)
 		return false, err
 	}
@@ -234,8 +224,7 @@ func (p *Postgres) DeleteLike(ctx context.Context, userId string, playlistId uin
 	p.logger.Infoln("playlist Repo CreateLike entered")
 
 	query := "delete from profile_playlist where profile_id = $1 and playlist_id = $2"
-	_, err := p.Pool.Exec(context.Background(), query, userId, playlistId)
-	if err != nil {
+	if _, err := p.Pool.Exec(context.Background(), query, userId, playlistId); err != nil {
 		p.logger.WithFields(logrus.Fields{
 			"err":         err,
 			"playlist Id": playlistId,
@@ -253,8 +242,7 @@ func (p *Postgres) IsCreator(ctx context.Context, userId string, playlistId uint
 
 	var creatorId string
 	query := "select creator_id from playlist where id = $1"
-	err := p.Pool.QueryRow(context.Background(), query, playlistId).Scan(&creatorId)
-	if err != nil {
+	if err := p.Pool.QueryRow(context.Background(), query, playlistId).Scan(&creatorId); err != nil {
 		p.logger.WithFields(logrus.Fields{
 			"err":         err,
 			"playlist Id": playlistId,
@@ -272,8 +260,7 @@ func (p *Postgres) IsPrivate(ctx context.Context, playlistId uint64) (bool, erro
 
 	var isPrivate bool
 	query := "select is_private from playlist where id = $1"
-	err := p.Pool.QueryRow(context.Background(), query, playlistId).Scan(&isPrivate)
-	if err != nil {
+	if err := p.Pool.QueryRow(context.Background(), query, playlistId).Scan(&isPrivate); err != nil {
 		p.logger.WithFields(logrus.Fields{
 			"err":         err,
 			"playlist Id": playlistId,
@@ -290,8 +277,7 @@ func (p *Postgres) MakePublic(ctx context.Context, playlistId uint64) error {
 	p.logger.Infoln("Album Repo MakePublic entered")
 
 	query := "update playlist set is_private = false where id = $1"
-	_, err := p.Pool.Exec(context.Background(), query, playlistId)
-	if err != nil {
+	if _, err := p.Pool.Exec(context.Background(), query, playlistId); err != nil {
 		p.logger.WithFields(logrus.Fields{
 			"err":         err,
 			"playlist Id": playlistId,
@@ -307,8 +293,7 @@ func (p *Postgres) MakePrivate(ctx context.Context, playlistId uint64) error {
 	p.logger.Infoln("Album Repo MakePrivate entered")
 
 	query := "update playlist set is_private = true where id = $1"
-	_, err := p.Pool.Exec(context.Background(), query, playlistId)
-	if err != nil {
+	if _, err := p.Pool.Exec(context.Background(), query, playlistId); err != nil {
 		p.logger.WithFields(logrus.Fields{
 			"err":         err,
 			"playlist Id": playlistId,

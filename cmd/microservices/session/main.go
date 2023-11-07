@@ -1,10 +1,10 @@
 package main
 
 import (
-	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	microservices_init "main/cmd/microservices"
 	init_redis "main/init/redis_db"
+	log "main/internal/common/logger"
 	session "main/internal/microservices/session/proto"
 	grpc_session_server "main/internal/microservices/session/service/server"
 	session_repository_redis "main/internal/pkg/session/repository/redis"
@@ -14,8 +14,11 @@ import (
 
 const Port = 8082
 
+var loggerSingleton = log.Singleton{}
+
 func main() {
-	logger := logrus.New()
+	logger := loggerSingleton.GetLogger()
+
 	lis, err := net.Listen("tcp", ":"+strconv.Itoa(Port))
 	if err != nil {
 		logger.Errorln("err while starting session micros: ", err)

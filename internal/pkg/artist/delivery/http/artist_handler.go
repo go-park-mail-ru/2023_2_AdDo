@@ -54,8 +54,7 @@ func (handler *ArtistHandler) ArtistInfo(w http.ResponseWriter, r *http.Request)
 	}
 	handler.logger.Infoln("Got artist from use case")
 
-	err = response.RenderJSON(w, artistInfo)
-	if err != nil {
+	if err = response.RenderJSON(w, artistInfo); err != nil {
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}
 	handler.logger.Infoln("response  formed")
@@ -86,8 +85,7 @@ func (handler *ArtistHandler) Like(w http.ResponseWriter, r *http.Request) error
 	}
 	handler.logger.Infoln("got user id by session id")
 
-	err = handler.ArtistUseCase.Like(userId, uint64(artistId))
-	if err != nil {
+	if err = handler.ArtistUseCase.Like(userId, uint64(artistId)); err != nil {
 		return common_handler.StatusError{Code: http.StatusNotFound, Err: err}
 	}
 	handler.logger.Infoln("Like created")
@@ -125,8 +123,7 @@ func (handler *ArtistHandler) IsLike(w http.ResponseWriter, r *http.Request) err
 	}
 	handler.logger.Infoln("User like checked")
 
-	err = response.RenderJSON(w, response.IsLiked{IsLiked: isLiked})
-	if err != nil {
+	if err = response.RenderJSON(w, response.IsLiked{IsLiked: isLiked}); err != nil {
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}
 	handler.logger.Infoln("response  formed")
@@ -157,8 +154,7 @@ func (handler *ArtistHandler) Unlike(w http.ResponseWriter, r *http.Request) err
 	}
 	handler.logger.Infoln("got user id by session id")
 
-	err = handler.ArtistUseCase.Unlike(userId, uint64(artistId))
-	if err != nil {
+	if err = handler.ArtistUseCase.Unlike(userId, uint64(artistId)); err != nil {
 		return common_handler.StatusError{Code: http.StatusNotFound, Err: err}
 	}
 	handler.logger.Infoln("Like deleted")

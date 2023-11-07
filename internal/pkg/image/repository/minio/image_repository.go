@@ -27,15 +27,14 @@ func (mn Minio) UploadPlaylistImage(avatar avatar_domain.Base) (string, error) {
 }
 
 func (mn Minio) create(avatar avatar_domain.Base, bucketName string) (string, error) {
-	_, err := mn.client.PutObject(
+	if _, err := mn.client.PutObject(
 		context.Background(),
 		minio_init.UserAvatarBucketName,
 		avatar.Name,
 		avatar.Payload,
 		avatar.PayloadSize,
 		minio.PutObjectOptions{ContentType: avatar.ContentType},
-	)
-	if err != nil {
+	); err != nil {
 		return "", err
 	}
 

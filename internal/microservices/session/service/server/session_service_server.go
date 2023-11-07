@@ -20,8 +20,7 @@ func NewSessionManager(repoSession session.Repository, logger *logrus.Logger) Se
 func (sm *SessionManager) CheckSession(ctx context.Context, in *pb.SessionId) (*pb.Status, error) {
 	sm.logger.Infoln("Session Micros CheckSession entered")
 
-	_, err := sm.repoSession.Get(in.GetSessionId())
-	if err != nil {
+	if _, err := sm.repoSession.Get(in.GetSessionId()); err != nil {
 		return &pb.Status{IsOk: false}, err
 	}
 	sm.logger.Infoln("Session id matched with an database one")

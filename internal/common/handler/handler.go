@@ -30,8 +30,8 @@ type Handler struct {
 }
 
 func (h Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	err := h.H(w, r)
-	if err != nil {
+
+	if err := h.H(w, r); err != nil {
 		var e Error
 		switch {
 		case errors.As(err, &e):
