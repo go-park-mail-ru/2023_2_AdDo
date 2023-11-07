@@ -1,5 +1,5 @@
 FROM alpine:3.17 AS release
 
-COPY --from=musicon-base /source/bin/user /user
+COPY --from=registry.musicon.space/base /source/bin/user /user
 
 CMD ["/user"]

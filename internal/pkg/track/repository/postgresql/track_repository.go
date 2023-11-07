@@ -34,8 +34,7 @@ func (db *Postgres) getWithQuery(ctx context.Context, query string, args ...any)
 	result := make([]track.Response, 0)
 	for rows.Next() {
 		var t track.Response
-		err := rows.Scan(&t.Id, &t.Name, &t.Preview, &t.Content, &t.Duration, &t.ArtistId, &t.ArtistName)
-		if err != nil {
+		if err := rows.Scan(&t.Id, &t.Name, &t.Preview, &t.Content, &t.Duration, &t.ArtistId, &t.ArtistName); err != nil {
 			db.logger.WithFields(logrus.Fields{
 				"query":    query,
 				"track_id": t.Id,
@@ -93,8 +92,7 @@ func (db *Postgres) CreateLike(userId string, trackId uint64) error {
 	db.logger.Infoln("TrackRepo CreateLike entered")
 
 	query := "insert into profile_track (profile_id, track_id) values ($1, $2)"
-	_, err := db.Pool.Exec(context.Background(), query, userId, trackId)
-	if err != nil {
+	if _, err := db.Pool.Exec(context.Background(), query, userId, trackId); err != nil {
 		db.logger.WithFields(logrus.Fields{
 			"query":    query,
 			"track id": trackId,
@@ -112,8 +110,7 @@ func (db *Postgres) CheckLike(userId string, trackId uint64) (bool, error) {
 
 	var counter int
 	query := "select count(*) from profile_track where profile_id = $1 and track_id = $2"
-	err := db.Pool.QueryRow(context.Background(), query, userId, trackId).Scan(&counter)
-	if err != nil {
+	if err := db.Pool.QueryRow(context.Background(), query, userId, trackId).Scan(&counter); err != nil {
 		db.logger.Errorln(err)
 		return false, err
 	}
@@ -130,8 +127,7 @@ func (db *Postgres) DeleteLike(userId string, trackId uint64) error {
 	db.logger.Infoln("TrackRepo DeleteLike entered")
 
 	query := "delete from profile_track where profile_id = $1 and track_id = $2"
-	_, err := db.Pool.Exec(context.Background(), query, userId, trackId)
-	if err != nil {
+	if _, err := db.Pool.Exec(context.Background(), query, userId, trackId); err != nil {
 		db.logger.WithFields(logrus.Fields{
 			"query":    query,
 			"track id": trackId,
@@ -148,8 +144,7 @@ func (db *Postgres) AddListen(trackId uint64) error {
 	db.logger.Infoln("TrackRepo AddListen entered")
 
 	query := "update track set play_count = play_count + 1 where id = $1"
-	_, err := db.Pool.Exec(context.Background(), query, trackId)
-	if err != nil {
+	if _, err := db.Pool.Exec(context.Background(), query, trackId); err != nil {
 		db.logger.WithFields(logrus.Fields{
 			"query":    query,
 			"track id": trackId,

@@ -53,8 +53,7 @@ func (handler *TrackHandler) Listen(w http.ResponseWriter, r *http.Request) erro
 	}
 	handler.logger.Infoln("track id decoded")
 
-	err := handler.trackUseCase.Listen(trackId.Id)
-	if err != nil {
+	if err := handler.trackUseCase.Listen(trackId.Id); err != nil {
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}
 	handler.logger.Infoln("play count for track ", trackId, "incremented")
@@ -100,8 +99,7 @@ func (handler *TrackHandler) Like(w http.ResponseWriter, r *http.Request) error 
 	}
 	handler.logger.Infoln("got user id by session id")
 
-	err = handler.trackUseCase.Like(userId, uint64(trackId))
-	if err != nil {
+	if err = handler.trackUseCase.Like(userId, uint64(trackId)); err != nil {
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}
 	handler.logger.Infoln("like for track ", trackId, "created")
@@ -139,8 +137,7 @@ func (handler *TrackHandler) IsLike(w http.ResponseWriter, r *http.Request) erro
 	}
 	handler.logger.Infoln("like for track ", trackId, "checked")
 
-	err = response.RenderJSON(w, response.IsLiked{IsLiked: isLiked})
-	if err != nil {
+	if err = response.RenderJSON(w, response.IsLiked{IsLiked: isLiked}); err != nil {
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}
 	handler.logger.Infoln("response  formed")
@@ -171,8 +168,7 @@ func (handler *TrackHandler) Unlike(w http.ResponseWriter, r *http.Request) erro
 	}
 	handler.logger.Infoln("got user id by session id")
 
-	err = handler.trackUseCase.Unlike(userId, uint64(trackId))
-	if err != nil {
+	if err = handler.trackUseCase.Unlike(userId, uint64(trackId)); err != nil {
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}
 	handler.logger.Infoln("like for track ", trackId, "deleted")
@@ -204,8 +200,7 @@ func (handler *TrackHandler) GetUserTracks(w http.ResponseWriter, r *http.Reques
 	}
 	handler.logger.Infoln("liked tracks for user ", userId, "get")
 
-	err = response.RenderJSON(w, track.LikedTracks{Tracks: result})
-	if err != nil {
+	if err = response.RenderJSON(w, track.LikedTracks{Tracks: result}); err != nil {
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}
 	handler.logger.Infoln("response  formed")

@@ -52,8 +52,7 @@ func SerializeTracks(in []track.Response) *track_proto.TracksResponse {
 func (tm *TrackManager) Listen(ctx context.Context, in *track_proto.TrackId) (*google_proto.Empty, error) {
 	tm.logger.Infoln("Track Micros Listen entered")
 
-	err := tm.repoTrack.AddListen(in.GetTrackId())
-	if err != nil {
+	if err := tm.repoTrack.AddListen(in.GetTrackId()); err != nil {
 		return nil, err
 	}
 	tm.logger.Infoln("listen for track ", in.GetTrackId(), " added")
@@ -76,8 +75,7 @@ func (tm *TrackManager) IsLike(ctx context.Context, in *track_proto.TrackToUserI
 func (tm *TrackManager) Unlike(ctx context.Context, in *track_proto.TrackToUserId) (*google_proto.Empty, error) {
 	tm.logger.Infoln("Track Micros Like entered")
 
-	err := tm.repoTrack.DeleteLike(in.GetUserId(), in.GetTrackId())
-	if err != nil {
+	if err := tm.repoTrack.DeleteLike(in.GetUserId(), in.GetTrackId()); err != nil {
 		return nil, err
 	}
 	tm.logger.Infoln("Like deleted for track ", in.GetTrackId(), " by user ", in.GetUserId())
@@ -88,8 +86,7 @@ func (tm *TrackManager) Unlike(ctx context.Context, in *track_proto.TrackToUserI
 func (tm *TrackManager) Like(ctx context.Context, in *track_proto.TrackToUserId) (*google_proto.Empty, error) {
 	tm.logger.Infoln("Track Micros Like entered")
 
-	err := tm.repoTrack.CreateLike(in.GetUserId(), in.GetTrackId())
-	if err != nil {
+	if err := tm.repoTrack.CreateLike(in.GetUserId(), in.GetTrackId()); err != nil {
 		return nil, err
 	}
 	tm.logger.Infoln("Like created for track ", in.GetTrackId(), " by user ", in.GetUserId())

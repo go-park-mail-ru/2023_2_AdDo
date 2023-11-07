@@ -1,10 +1,10 @@
 package main
 
 import (
-	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	microservices_init "main/cmd/microservices"
 	init_minio "main/init/minio"
+	log "main/internal/common/logger"
 	image_proto "main/internal/microservices/image/proto"
 	grpc_image_server "main/internal/microservices/image/service/server"
 	image_repository "main/internal/pkg/image/repository/minio"
@@ -14,8 +14,11 @@ import (
 
 const Port = 8087
 
+var loggerSingleton = log.Singleton{}
+
 func main() {
-	logger := logrus.New()
+	logger := loggerSingleton.GetLogger()
+
 	lis, err := net.Listen("tcp", ":"+strconv.Itoa(Port))
 	if err != nil {
 		logger.Errorln("err while starting images micros: ", err)

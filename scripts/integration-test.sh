@@ -11,7 +11,7 @@ echo "Preparing successful done"
 
 echo "Running tests with empty database..."
 
-python3 test/testsuite/run_test.py
+cd test/testsuite && python3 run_test.py
 if [ $? -ne 0 ]; then
     echo "Integration test failed"
     exit 1

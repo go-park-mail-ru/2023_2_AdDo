@@ -22,8 +22,7 @@ func (redis *Redis) Create(userId string) (string, error) {
 
 	sessionId := uuid.New().String()
 
-	err := redis.database.Set(context.Background(), sessionId, userId, session.TimeToLiveCookie).Err()
-	if err != nil {
+	if err := redis.database.Set(context.Background(), sessionId, userId, session.TimeToLiveCookie).Err(); err != nil {
 		redis.logger.WithFields(logrus.Fields{
 			"err":     err.Error(),
 			"user_id": userId,
@@ -54,8 +53,7 @@ func (redis *Redis) Get(sessionId string) (string, error) {
 func (redis *Redis) Delete(sessionId string) error {
 	redis.logger.Infoln("SessionRepo Get entered")
 
-	err := redis.database.Del(context.Background(), sessionId).Err()
-	if err != nil {
+	if err := redis.database.Del(context.Background(), sessionId).Err(); err != nil {
 		redis.logger.WithFields(logrus.Fields{
 			"err":        err.Error(),
 			"session id": sessionId,

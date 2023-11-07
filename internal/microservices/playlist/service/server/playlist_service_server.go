@@ -119,8 +119,7 @@ func (pm *PlaylistManager) GetUserPlaylists(ctx context.Context, in *session_pro
 func (pm *PlaylistManager) AddTrack(ctx context.Context, in *playlist_proto.PlaylistToTrackId) (*google_proto.Empty, error) {
 	pm.logger.Infoln("Playlist Service AddTrack Method entered")
 
-	err := pm.repoPlaylist.AddTrack(ctx, in.GetPlaylistId(), in.GetTrackId())
-	if err != nil {
+	if err := pm.repoPlaylist.AddTrack(ctx, in.GetPlaylistId(), in.GetTrackId()); err != nil {
 		return nil, err
 	}
 	pm.logger.Infoln("Track Added")
@@ -131,8 +130,7 @@ func (pm *PlaylistManager) AddTrack(ctx context.Context, in *playlist_proto.Play
 func (pm *PlaylistManager) RemoveTrack(ctx context.Context, in *playlist_proto.PlaylistToTrackId) (*google_proto.Empty, error) {
 	pm.logger.Infoln("Playlist Service RemoveTrack Method entered")
 
-	err := pm.repoPlaylist.RemoveTrack(ctx, in.GetPlaylistId(), in.GetTrackId())
-	if err != nil {
+	if err := pm.repoPlaylist.RemoveTrack(ctx, in.GetPlaylistId(), in.GetTrackId()); err != nil {
 		return nil, err
 	}
 	pm.logger.Infoln("TrackRemoved")
@@ -143,8 +141,7 @@ func (pm *PlaylistManager) RemoveTrack(ctx context.Context, in *playlist_proto.P
 func (pm *PlaylistManager) UpdatePreview(ctx context.Context, in *playlist_proto.PlaylistIdToImageUrl) (*google_proto.Empty, error) {
 	pm.logger.Infoln("Playlist Service UpdatePreview Method entered")
 
-	err := pm.repoPlaylist.UpdateImage(ctx, in.GetId(), in.GetUrl().GetUrl())
-	if err != nil {
+	if err := pm.repoPlaylist.UpdateImage(ctx, in.GetId(), in.GetUrl().GetUrl()); err != nil {
 		return nil, err
 	}
 	pm.logger.Infoln("Photo Updated")
@@ -167,8 +164,7 @@ func (pm *PlaylistManager) RemovePreview(ctx context.Context, in *playlist_proto
 func (pm *PlaylistManager) DeleteById(ctx context.Context, in *playlist_proto.PlaylistId) (*google_proto.Empty, error) {
 	pm.logger.Infoln("Playlist Service DeleteById Method entered")
 
-	err := pm.repoPlaylist.Delete(ctx, in.GetId())
-	if err != nil {
+	if err := pm.repoPlaylist.Delete(ctx, in.GetId()); err != nil {
 		return nil, err
 	}
 	pm.logger.Infoln("Playlist Deleted")
@@ -179,8 +175,7 @@ func (pm *PlaylistManager) DeleteById(ctx context.Context, in *playlist_proto.Pl
 func (pm *PlaylistManager) Like(ctx context.Context, in *playlist_proto.PlaylistToUserId) (*google_proto.Empty, error) {
 	pm.logger.Infoln("Album Micros Like entered")
 
-	err := pm.repoPlaylist.CreateLike(context.Background(), in.GetUserId(), in.GetPlaylistId())
-	if err != nil {
+	if err := pm.repoPlaylist.CreateLike(context.Background(), in.GetUserId(), in.GetPlaylistId()); err != nil {
 		return nil, err
 	}
 	pm.logger.Infoln("Like created")
@@ -203,8 +198,7 @@ func (pm *PlaylistManager) IsLike(ctx context.Context, in *playlist_proto.Playli
 func (pm *PlaylistManager) Unlike(ctx context.Context, in *playlist_proto.PlaylistToUserId) (*google_proto.Empty, error) {
 	pm.logger.Infoln("Playlist Micros Like entered")
 
-	err := pm.repoPlaylist.DeleteLike(context.Background(), in.GetUserId(), in.GetPlaylistId())
-	if err != nil {
+	if err := pm.repoPlaylist.DeleteLike(context.Background(), in.GetUserId(), in.GetPlaylistId()); err != nil {
 		return nil, err
 	}
 	pm.logger.Infoln("Like deleted")
@@ -237,8 +231,7 @@ func (pm *PlaylistManager) HasReadAccess(ctx context.Context, in *playlist_proto
 func (pm *PlaylistManager) MakePrivate(ctx context.Context, in *playlist_proto.PlaylistId) (*google_proto.Empty, error) {
 	pm.logger.Infoln("Album Micros MakePrivate entered")
 
-	err := pm.repoPlaylist.MakePrivate(ctx, in.GetId())
-	if err != nil {
+	if err := pm.repoPlaylist.MakePrivate(ctx, in.GetId()); err != nil {
 		return nil, nil
 	}
 
@@ -248,8 +241,7 @@ func (pm *PlaylistManager) MakePrivate(ctx context.Context, in *playlist_proto.P
 func (pm *PlaylistManager) MakePublic(ctx context.Context, in *playlist_proto.PlaylistId) (*google_proto.Empty, error) {
 	pm.logger.Infoln("Album Micros MakePublic entered")
 
-	err := pm.repoPlaylist.MakePublic(ctx, in.GetId())
-	if err != nil {
+	if err := pm.repoPlaylist.MakePublic(ctx, in.GetId()); err != nil {
 		return nil, nil
 	}
 

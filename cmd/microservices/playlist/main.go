@@ -1,10 +1,10 @@
 package main
 
 import (
-	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	microservices_init "main/cmd/microservices"
 	init_db "main/init/postgres_db"
+	log "main/internal/common/logger"
 	proto2 "main/internal/microservices/playlist/proto"
 	grpc_playlist_server "main/internal/microservices/playlist/service/server"
 	playlist_repository "main/internal/pkg/playlist/repository"
@@ -17,8 +17,11 @@ const EnvPostgresQueryName = "DATABASE_URL"
 
 const Port = 8085
 
+var loggerSingleton = log.Singleton{}
+
 func main() {
-	logger := logrus.New()
+	logger := loggerSingleton.GetLogger()
+
 	lis, err := net.Listen("tcp", ":"+strconv.Itoa(Port))
 	if err != nil {
 		logger.Errorln("err while starting playlist micros: ", err)

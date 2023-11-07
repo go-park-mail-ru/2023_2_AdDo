@@ -51,8 +51,7 @@ func SerializeUserData(in user_domain.User) *user_proto.UserData {
 func (us *UserManager) Register(ctx context.Context, in *user_proto.UserData) (*google_proto.Empty, error) {
 	us.Logger.Infoln("User Micros Register entered")
 
-	err := us.UserRepo.Create(DeserializeUserData(in))
-	if err != nil {
+	if err := us.UserRepo.Create(DeserializeUserData(in)); err != nil {
 		return nil, err
 	}
 	us.Logger.Infoln("New User Created")
@@ -81,8 +80,7 @@ func (us *UserManager) LogIn(ctx context.Context, in *user_proto.UserCredentials
 func (us *UserManager) Auth(ctx context.Context, in *session_proto.SessionId) (*session_proto.Status, error) {
 	us.Logger.Infoln("User Micros Auth entered")
 
-	_, err := us.AuthRepo.Get(in.GetSessionId())
-	if err != nil {
+	if _, err := us.AuthRepo.Get(in.GetSessionId()); err != nil {
 		return &session_proto.Status{IsOk: false}, session.ErrSessionDoesNotExist
 	}
 	us.Logger.Infoln("Got User Session From Database")
@@ -111,8 +109,7 @@ func (us *UserManager) GetUserInfo(ctx context.Context, in *session_proto.Sessio
 func (us *UserManager) LogOut(ctx context.Context, in *session_proto.SessionId) (*google_proto.Empty, error) {
 	us.Logger.Infoln("User Micros LogOut entered")
 
-	err := us.AuthRepo.Delete(in.GetSessionId())
-	if err != nil {
+	if err := us.AuthRepo.Delete(in.GetSessionId()); err != nil {
 		return nil, err
 	}
 	us.Logger.Infoln("session deleted from database")
@@ -123,8 +120,7 @@ func (us *UserManager) LogOut(ctx context.Context, in *session_proto.SessionId) 
 func (us *UserManager) UploadAvatar(ctx context.Context, in *user_proto.ImageToUser) (*google_proto.Empty, error) {
 	us.Logger.Infoln("User Micros UploadAvatar entered")
 
-	err := us.UserRepo.UpdateAvatarPath(in.GetId().GetUserId(), in.GetUrl().GetUrl())
-	if err != nil {
+	if err := us.UserRepo.UpdateAvatarPath(in.GetId().GetUserId(), in.GetUrl().GetUrl()); err != nil {
 		return nil, err
 	}
 	us.Logger.Infoln("Avatar Path updated")
@@ -147,8 +143,7 @@ func (us *UserManager) RemoveAvatar(ctx context.Context, in *session_proto.UserI
 func (us *UserManager) UpdateUserInfo(ctx context.Context, in *user_proto.UserData) (*google_proto.Empty, error) {
 	us.Logger.Infoln("User Micros UpdateUserInfo entered")
 
-	err := us.UserRepo.UpdateUserInfo(DeserializeUserData(in))
-	if err != nil {
+	if err := us.UserRepo.UpdateUserInfo(DeserializeUserData(in)); err != nil {
 		return nil, err
 	}
 	us.Logger.Infoln("Info updated")

@@ -63,8 +63,7 @@ func (c *Client) GetArtistInfo(artistId uint64) (artist.Response, error) {
 func (c *Client) Like(userId string, artistId uint64) error {
 	c.logger.Infoln("Client for artist micros")
 
-	_, err := c.artistManager.Like(context.Background(), &proto.ArtistToUserId{UserId: userId, ArtistId: artistId})
-	if err != nil {
+	if _, err := c.artistManager.Like(context.Background(), &proto.ArtistToUserId{UserId: userId, ArtistId: artistId}); err != nil {
 		return err
 	}
 
@@ -85,8 +84,7 @@ func (c *Client) IsLike(userId string, artistId uint64) (bool, error) {
 func (c *Client) Unlike(userId string, artistId uint64) error {
 	c.logger.Infoln("Client for artist micros")
 
-	_, err := c.artistManager.Unlike(context.Background(), &proto.ArtistToUserId{UserId: userId, ArtistId: artistId})
-	if err != nil {
+	if _, err := c.artistManager.Unlike(context.Background(), &proto.ArtistToUserId{UserId: userId, ArtistId: artistId}); err != nil {
 		return err
 	}
 

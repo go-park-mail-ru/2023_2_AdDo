@@ -76,8 +76,7 @@ func (am *ArtistManager) GetArtistInfo(ctx context.Context, in *artist_proto.Art
 func (am *ArtistManager) Like(ctx context.Context, in *artist_proto.ArtistToUserId) (*google_proto.Empty, error) {
 	am.logger.Infoln("Artist Micros Like entered")
 
-	err := am.repoArtist.CreateLike(in.GetUserId(), in.GetArtistId())
-	if err != nil {
+	if err := am.repoArtist.CreateLike(in.GetUserId(), in.GetArtistId()); err != nil {
 		return nil, err
 	}
 	am.logger.Infoln("Like created")
@@ -100,8 +99,7 @@ func (am *ArtistManager) IsLike(ctx context.Context, in *artist_proto.ArtistToUs
 func (am *ArtistManager) Unlike(ctx context.Context, in *artist_proto.ArtistToUserId) (*google_proto.Empty, error) {
 	am.logger.Infoln("Artist Micros Like entered")
 
-	err := am.repoArtist.DeleteLike(in.GetUserId(), in.GetArtistId())
-	if err != nil {
+	if err := am.repoArtist.DeleteLike(in.GetUserId(), in.GetArtistId()); err != nil {
 		return nil, err
 	}
 	am.logger.Infoln("Like created")

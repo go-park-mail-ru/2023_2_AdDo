@@ -14,8 +14,7 @@ func InitRedis() (*redis.Client, error) {
 	})
 	fmt.Println("Redis db client created!")
 
-	_, err := rdb.Ping(context.Background()).Result()
-	if err != nil {
+	if _, err := rdb.Ping(context.Background()).Result(); err != nil {
 		return nil, err
 	}
 	fmt.Println("Redis db successfully connected!")

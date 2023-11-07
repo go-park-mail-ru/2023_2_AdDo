@@ -32,8 +32,7 @@ func (s *Default) GetUserId(sessionId string) (string, error) {
 func (s *Default) CheckSession(sessionId string) (bool, error) {
 	s.logger.Infoln("SessionUseCase CheckSession entered")
 
-	_, err := s.repoSession.Get(sessionId)
-	if err != nil {
+	if _, err := s.repoSession.Get(sessionId); err != nil {
 		return false, session.ErrSessionDoesNotExist
 	}
 	s.logger.Infoln("Session id matched with an db one")

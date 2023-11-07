@@ -174,8 +174,7 @@ func (am *AlbumManager) formResponse(albumBase []album.Base) (*album_proto.Album
 func (am *AlbumManager) Like(ctx context.Context, in *album_proto.AlbumToUserId) (*google_proto.Empty, error) {
 	am.logger.Infoln("Album Micros Like entered")
 
-	err := am.repoAlbum.CreateLike(in.GetUserId(), in.GetAlbumId())
-	if err != nil {
+	if err := am.repoAlbum.CreateLike(in.GetUserId(), in.GetAlbumId()); err != nil {
 		return nil, err
 	}
 	am.logger.Infoln("Like created")
@@ -198,8 +197,7 @@ func (am *AlbumManager) IsLike(ctx context.Context, in *album_proto.AlbumToUserI
 func (am *AlbumManager) Unlike(ctx context.Context, in *album_proto.AlbumToUserId) (*google_proto.Empty, error) {
 	am.logger.Infoln("Album Micros Like entered")
 
-	err := am.repoAlbum.DeleteLike(in.GetUserId(), in.GetAlbumId())
-	if err != nil {
+	if err := am.repoAlbum.DeleteLike(in.GetUserId(), in.GetAlbumId()); err != nil {
 		return nil, err
 	}
 	am.logger.Infoln("Like created")

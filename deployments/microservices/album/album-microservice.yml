@@ -4,4 +4,4 @@ services:
   album:
     build:
       context: ../../..
-      dockerfile: build/package/album/Dockerfile
+      dockerfile: build/package/micros/album/Dockerfile

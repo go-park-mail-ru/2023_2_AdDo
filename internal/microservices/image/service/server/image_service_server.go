@@ -62,8 +62,7 @@ func (im *ImageManager) UploadPlaylistImage(ctx context.Context, in *image_proto
 func (im *ImageManager) RemoveImage(ctx context.Context, url *image_proto.ImageUrl) (*google_proto.Empty, error) {
 	im.logger.Infoln("Image micros RemoveImage entered")
 
-	err := im.repoImage.Remove(url.GetUrl())
-	if err != nil {
+	if err := im.repoImage.Remove(url.GetUrl()); err != nil {
 		return nil, err
 	}
 	im.logger.Infoln("Image deleted")
