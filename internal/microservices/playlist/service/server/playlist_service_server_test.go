@@ -2,19 +2,21 @@ package grpc_playlist_server
 
 import (
 	"context"
-	"github.com/golang/mock/gomock"
-	google_proto "github.com/golang/protobuf/ptypes/empty"
-	"github.com/sirupsen/logrus"
-	"github.com/stretchr/testify/assert"
 	image_proto "main/internal/microservices/image/proto"
 	playlist_proto "main/internal/microservices/playlist/proto"
 	session_proto "main/internal/microservices/session/proto"
 	track_proto "main/internal/microservices/track/proto"
+	grpc_track_server "main/internal/microservices/track/service/server"
 	"main/internal/pkg/playlist"
 	"main/internal/pkg/track"
 	playlist_mock "main/test/mocks/playlist"
 	track_mock "main/test/mocks/track"
 	"testing"
+
+	"github.com/golang/mock/gomock"
+	google_proto "github.com/golang/protobuf/ptypes/empty"
+	"github.com/sirupsen/logrus"
+	"github.com/stretchr/testify/assert"
 )
 
 func Test_Create(t *testing.T) {
@@ -34,16 +36,21 @@ func Test_Create(t *testing.T) {
 
 	in := &playlist_proto.PlaylistBase{CreatorId: "creatorId"}
 
-	expected := playlist.Response{
+	mockResponse := playlist.Response{
 		AuthorId: in.CreatorId,
 		Name:     in.GetName(),
+	}
+
+	expected := &playlist_proto.PlaylistResponse{
+		CreatorId: in.CreatorId,
+		Tracks:     grpc_track_server.SerializeTracks([]track.Response{}),
 	}
 
 	deserialized := playlist.Base{
 		AuthorId: in.CreatorId,
 	}
 
-	mockPlaylistRepo.EXPECT().Create(ctx, deserialized).Return(expected, nil)
+	mockPlaylistRepo.EXPECT().Create(ctx, deserialized).Return(mockResponse, nil)
 
 	result, err := playlistManager.Create(ctx, in)
 	assert.Nil(t, err)
@@ -279,7 +286,7 @@ func Test_Access(t *testing.T) {
 
 		result, err := playlistManager.HasReadAccess(ctx, in)
 		assert.Nil(t, err)
-		assert.Equal(t, &playlist_proto.HasAccess{IsAccess: isPrivate}, result)
+		assert.Equal(t, &playlist_proto.HasAccess{IsAccess: !isPrivate}, result)
 	})
 
 	t.Run("MakePrivate", func(t *testing.T) {

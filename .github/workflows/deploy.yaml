@@ -16,7 +16,7 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: Build base image
-        run: docker build -t musicon-base -f build/package/base/Dockerfile .
+        run: docker build -t registry.musicon.space/base -f build/package/base/Dockerfile .
 
       - name: Build micros image
         run: build/ci/scripts/build/build_micros.sh
@@ -25,25 +25,25 @@ jobs:
         with:
           name: images
           path: /tmp/images/
-          retention-days: 3
+          retention-days: 1
 
-  # unit-test:
-  #   needs: 
-  #     - build
-  #     # - lint
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v3
-  #     - name: Setup Go 
-  #       uses: actions/setup-go@v4 
-  #       with:
-  #         go-version: '1.21.x'
-  #     - name: Install dependencies
-  #       run: |
-  #         go mod download && go mod tidy 
-  #         go install github.com/golang/mock/mockgen@v1.6.0
-  #     - name: Run unit test
-  #       run: make unit-test
+  unit-test:
+    needs: 
+      - build
+      # - lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Go 
+        uses: actions/setup-go@v4 
+        with:
+          go-version: '1.21.x'
+      - name: Install dependencies
+        run: |
+          go mod download && go mod tidy 
+          go install github.com/golang/mock/mockgen@v1.6.0
+      - name: Run unit test
+        run: make unit-test
 
   integration-test:
     needs: 
@@ -74,13 +74,13 @@ jobs:
         run: pip3 install requests names
 
       - name: Run integration test
-        run: build/ci/scripts/test/integration_test.sh
+        run: scripts/integration-test.sh 
 
   publish:
     if: github.event.pull_request.merged == true
     # if: github.ref == 'refs/heads/main'
     needs:
-      # - unit-test
+      - unit-test
       - integration-test
     runs-on: ubuntu-latest
     steps:
@@ -131,7 +131,8 @@ jobs:
           PASSWORD: ${{ secrets.PASSWORD }}
           script:  |
             cd addo-backend
-            build/ci/scripts/deploy/deploy.sh registry.musicon.space ${{ secrets.REGISTRY_USERNAME }} ${{ secrets.REGISTRY_PASSWORD }}
+            docker login registry.musicon.space ${{ secrets.REGISTRY_USERNAME }} ${{ secrets.REGISTRY_PASSWORD }}
+            make deploy
 
 
 #   build:

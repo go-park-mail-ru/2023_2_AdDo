@@ -33,7 +33,7 @@ type ToTrackId struct {
 }
 
 type UseCase interface {
-	Create(playlist Base) (Response, error)
+	Create(pl Base) (Response, error)
 	Get(userId string, playlistId uint64) (Response, error)
 	GetUserPlaylists(userId string) ([]Base, error)
 	AddTrack(playlistId, trackId uint64) error
@@ -51,7 +51,7 @@ type UseCase interface {
 }
 
 type Repository interface {
-	Create(ctx context.Context, playlist Base) (Response, error)
+	Create(ctx context.Context, pl Base) (Response, error)
 	Get(ctx context.Context, playlistId uint64) (Base, error)
 	GetByCreatorId(ctx context.Context, userId string) ([]Base, error)
 	AddTrack(ctx context.Context, playlistId, trackId uint64) error

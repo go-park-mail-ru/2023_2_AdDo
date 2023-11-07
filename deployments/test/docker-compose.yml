@@ -60,7 +60,7 @@ services:
     command: "ls"
 
   user:
-    image: user
+    image: registry.musicon.space/user:test
     depends_on:
       common-service-waiter:
         condition: service_completed_successfully
@@ -69,7 +69,7 @@ services:
     command: "/user"
 
   session:
-    image: session
+    image: registry.musicon.space/session:test
     depends_on:
       common-service-waiter:
         condition: service_completed_successfully
@@ -78,7 +78,7 @@ services:
     command: "/session"
 
   track:
-    image: track
+    image: registry.musicon.space/track:test
     depends_on:
       common-service-waiter:
         condition: service_completed_successfully
@@ -88,7 +88,7 @@ services:
 
 
   album:
-    image: album
+    image: registry.musicon.space/album:test
     depends_on:
       common-service-waiter:
         condition: service_completed_successfully
@@ -98,7 +98,7 @@ services:
 
 
   playlist:
-    image: playlist
+    image: registry.musicon.space/playlist:test
     depends_on:
       common-service-waiter:
         condition: service_completed_successfully
@@ -108,7 +108,7 @@ services:
 
 
   artist:
-    image: artist
+    image: registry.musicon.space/artist:test
     depends_on:
       common-service-waiter:
         condition: service_completed_successfully
@@ -117,7 +117,7 @@ services:
     command: "/artist"
 
   images:
-    image: images
+    image: registry.musicon.space/images:test
     depends_on:
       common-service-waiter:
         condition: service_completed_successfully
@@ -144,7 +144,7 @@ services:
         condition: service_started
 
   musicon:
-    image: entrypoint
+    image: registry.musicon.space/entrypoint:test
     ports:
       - "8888:8080"
     depends_on:

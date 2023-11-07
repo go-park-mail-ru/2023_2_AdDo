@@ -18,7 +18,7 @@ if [ $? -ne 0 ]; then
 fi
 echo "Tests passed"
 
-rm -r test/testsuite/__pycache__
+rm -r __pycache__ && cd ../..
 docker compose -f deployments/test/docker-compose.yml down
 if [ $? -ne 0 ]; then
     echo "Error delete test environment"
