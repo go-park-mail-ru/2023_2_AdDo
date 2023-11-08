@@ -32,7 +32,7 @@ const SecondInMinute = 60
 
 func CastTimeToString(duration int) string {
 	minutes := duration / SecondInMinute
-	seconds := duration % SecondInMinute * minutes
+	seconds := duration % SecondInMinute
 
 	return fmt.Sprintf("%d:%02d", minutes, seconds)
 }
