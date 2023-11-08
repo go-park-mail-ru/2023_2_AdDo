@@ -1,0 +1,78 @@
+syntax = "proto3";
+
+option go_package = "main/internal/microservices/playlist/proto";
+import "google/protobuf/empty.proto";
+import "track.proto";
+import "session.proto";
+import "image.proto";
+// protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative -I../proto -I../../track/proto -I../../session/proto -I../../image/proto  playlist.proto
+
+service PlaylistService {
+  rpc Create (PlaylistBase) returns (PlaylistResponse) {}
+  rpc Get (PlaylistToUserId) returns (PlaylistResponse) {}
+  rpc GetUserPlaylists (UserId) returns (PlaylistsBase) {}
+  rpc AddTrack (PlaylistToTrackId) returns (google.protobuf.Empty) {}
+  rpc RemoveTrack (PlaylistToTrackId) returns (google.protobuf.Empty) {}
+  rpc UpdatePreview (PlaylistIdToImageUrl) returns (google.protobuf.Empty) {}
+  rpc RemovePreview (PlaylistId) returns (ImageUrl) {}
+  rpc DeleteById (PlaylistId) returns (google.protobuf.Empty) {}
+  rpc Like (PlaylistToUserId) returns (google.protobuf.Empty) {}
+  rpc IsLike (PlaylistToUserId) returns (IsLikedPlaylist) {}
+  rpc Unlike (PlaylistToUserId) returns (google.protobuf.Empty) {}
+  rpc HasModifyAccess (PlaylistToUserId) returns (HasAccess) {}
+  rpc HasReadAccess (PlaylistId) returns (HasAccess) {}
+  rpc MakePrivate (PlaylistId) returns (google.protobuf.Empty) {}
+  rpc MakePublic (PlaylistId) returns (google.protobuf.Empty) {}
+}
+
+message IsLikedPlaylist {
+  bool IsLiked = 1;
+}
+
+message HasAccess {
+  bool IsAccess = 1;
+}
+
+message PlaylistToUserId {
+  string userId = 1;
+  uint64 playlistId = 2;
+}
+
+message PlaylistId {
+  uint64 id = 1;
+}
+
+message PlaylistToTrackId {
+  uint64 playlistId = 1;
+  uint64 trackId = 2;
+}
+
+message PlaylistIdToImageUrl {
+  uint64 id = 1;
+  ImageUrl url = 2;
+}
+
+message PlaylistBase {
+  uint64 Id = 1;
+  string Name = 2;
+  string CreatorId = 3;
+  string Preview = 4;
+}
+
+message PlaylistResponse {
+  uint64 Id = 1;
+  string Name = 2;
+  string Preview = 3;
+  string CreatorName = 4;
+  string CreatorId = 6;
+  bool IsYours = 7;
+  TracksResponse Tracks = 8;
+}
+
+message PlaylistsResponse {
+  repeated PlaylistResponse playlists = 1;
+}
+
+message PlaylistsBase {
+  repeated PlaylistBase playlists = 1;
+}

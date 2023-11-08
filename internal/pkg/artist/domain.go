@@ -1,20 +1,37 @@
 package artist
 
-type Artist struct {
-	Id     uint64
-	Name   string
-	Avatar string
-	Album  []uint64
-	Track  []uint64
-}
+import (
+	"main/internal/pkg/album"
+	"main/internal/pkg/track"
+)
 
-type Response struct {
+type Base struct {
 	Id     uint64 `json:"Id" example:"1"`
 	Name   string `json:"Name" example:"ArtistName"`
 	Avatar string `json:"Avatar" example:"ArtistAvatar"`
 }
 
+type Response struct {
+	Id     uint64           `json:"Id" example:"1"`
+	Name   string           `json:"Name" example:"ArtistName"`
+	Avatar string           `json:"Avatar" example:"ArtistAvatar"`
+	Albums []album.Base     `json:"Albums"`
+	Tracks []track.Response `json:"Tracks"`
+}
+
+type UseCase interface {
+	GetArtistInfo(artistId uint64) (Response, error)
+	Like(userId string, artistId uint64) error
+	IsLike(userId string, artistId uint64) (bool, error)
+	Unlike(userId string, artistId uint64) error
+}
+
 type Repository interface {
-	GetByTrackId(trackId uint64) ([]Response, error)
-	GetByAlbumId(albumId uint64) (Response, error)
+	//GetTracks(artistId uint64) ([]track.Response, error)
+	GetByTrackId(trackId uint64) ([]Base, error)
+	GetByAlbumId(albumId uint64) (Base, error)
+	Get(artistId uint64) (Base, error)
+	CreateLike(userId string, artistId uint64) error
+	CheckLike(userId string, artistId uint64) (bool, error)
+	DeleteLike(userId string, artistId uint64) error
 }

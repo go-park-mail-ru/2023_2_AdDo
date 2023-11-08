@@ -1,0 +1,42 @@
+syntax = "proto3";
+
+option go_package = "main/internal/microservices/track/proto";
+
+import "google/protobuf/empty.proto";
+import "session.proto";
+// protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative -I../proto  -I../../session/proto   track.proto
+service TrackService {
+  rpc Listen (TrackId) returns (google.protobuf.Empty) {}
+  rpc Like (TrackToUserId) returns (google.protobuf.Empty) {}
+  rpc IsLike (TrackToUserId) returns (IsLikedTrack) {}
+  rpc Unlike (TrackToUserId) returns (google.protobuf.Empty) {}
+  rpc GetUserLikedTracks (UserId) returns (TracksResponse) {}
+}
+
+message IsLikedTrack {
+  bool isLiked = 1;
+}
+
+message TrackId {
+  uint64 trackId = 1;
+}
+
+message TrackToUserId {
+  string userId = 1;
+  uint64 trackId = 2;
+}
+
+message Track {
+  uint64 Id = 1;
+  string Name = 2;
+  string Preview = 3;
+  string Content = 4;
+  uint64 ArtistId = 5;
+  string ArtistName = 6;
+  string Duration = 7;
+  bool isLiked = 8;
+}
+
+message TracksResponse {
+  repeated Track tracks = 1;
+}

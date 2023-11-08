@@ -1,46 +1,142 @@
 package artist_repository
 
 import (
-	"database/sql"
+	"context"
+	"github.com/sirupsen/logrus"
+	"main/internal/common/pgxiface"
 	"main/internal/pkg/artist"
 )
 
 type Postgres struct {
-	db *sql.DB
+	Pool   postgres.PgxIFace
+	logger *logrus.Logger
 }
 
-func NewPostgres(db *sql.DB) Postgres {
+func NewPostgres(pool postgres.PgxIFace, logger *logrus.Logger) Postgres {
 	return Postgres{
-		db: db,
+		Pool:   pool,
+		logger: logger,
 	}
 }
 
-func (repo *Postgres) GetByTrackId(trackId uint64) ([]artist.Response, error) {
-	result := make([]artist.Response, 0)
+func (p *Postgres) Get(artistId uint64) (artist.Base, error) {
+	p.logger.Infoln("Artist Repo Get entered")
+
+	var result artist.Base
+
+	query := "select artist.id, name, avatar from artist where artist.id = $1"
+	if err := p.Pool.QueryRow(context.Background(), query, artistId).Scan(&result.Id, &result.Name, &result.Avatar); err != nil {
+		p.logger.WithFields(logrus.Fields{
+			"err":       err,
+			"artist id": artistId,
+			"query":     query,
+		}).Errorln("Getting an artist query completed with error")
+		return result, err
+	}
+	p.logger.Infoln("Got artist by id")
+
+	return result, nil
+}
+
+func (p *Postgres) GetByTrackId(trackId uint64) ([]artist.Base, error) {
+	p.logger.Infoln("Artist Repo GetByTrackId entered")
+
+	result := make([]artist.Base, 0)
+
 	query := "select artist.id, name, avatar from artist join artist_track on artist.id = artist_track.artist_id where artist_track.track_id = $1"
-	rows, err := repo.db.Query(query, trackId)
+	rows, err := p.Pool.Query(context.Background(), query, trackId)
 	if err != nil {
+		p.logger.WithFields(logrus.Fields{
+			"err":      err,
+			"track id": trackId,
+			"query":    query,
+		}).Errorln("Getting an artist by track id query completed with error")
 		return nil, err
 	}
 	defer rows.Close()
+	p.logger.Infoln("Got artist")
+
 	for rows.Next() {
-		var artist artist.Response
-		err := rows.Scan(&artist.Id, &artist.Name, &artist.Avatar)
-		if err != nil {
+		var a artist.Base
+
+		if err := rows.Scan(&a.Id, &a.Name, &a.Avatar); err != nil {
 			return nil, err
 		}
-		result = append(result, artist)
+
+		result = append(result, a)
 	}
+	p.logger.Infoln("Formed response")
+
 	return result, nil
 }
 
-func (repo *Postgres) GetByAlbumId(albumId uint64) (artist.Response, error) {
-	var result artist.Response
+func (p *Postgres) GetByAlbumId(albumId uint64) (artist.Base, error) {
+	p.logger.Infoln("Artist Repo GetByAlbumId entered")
+
+	var result artist.Base
+
 	query := "select artist.id, artist.name, avatar from artist join album on artist.id = album.artist_id where album.id = $1"
-	err := repo.db.QueryRow(query, albumId).Scan(&result.Id, &result.Name, &result.Avatar)
-	if err != nil {
-		return artist.Response{}, err
+	if err := p.Pool.QueryRow(context.Background(), query, albumId).Scan(&result.Id, &result.Name, &result.Avatar); err != nil {
+		p.logger.WithFields(logrus.Fields{
+			"err":      err,
+			"album id": albumId,
+			"query":    query,
+		}).Errorln("Getting an artist by album id query completed with error")
+		return artist.Base{}, err
 	}
+	p.logger.Infoln("Got artist by album id")
 
 	return result, nil
+}
+
+func (p *Postgres) CreateLike(userId string, artistId uint64) error {
+	p.logger.Infoln("Artist Repo CreateLike entered")
+
+	query := "insert into profile_artist (profile_id, artist_id) values ($1, $2)"
+	if _, err := p.Pool.Exec(context.Background(), query, userId, artistId); err != nil {
+		p.logger.WithFields(logrus.Fields{
+			"err":       err,
+			"artist id": artistId,
+			"query":     query,
+		}).Errorln("creating like error")
+		return err
+	}
+	p.logger.Infoln("Like Created")
+
+	return nil
+}
+
+func (p *Postgres) CheckLike(userId string, artistId uint64) (bool, error) {
+	p.logger.Infoln("Artist Repo CheckLike entered")
+
+	var counter int
+	query := "select count(*) from profile_artist where profile_id = $1 and artist_id = $2"
+	if err := p.Pool.QueryRow(context.Background(), query, userId, artistId).Scan(&counter); err != nil {
+		p.logger.Errorln(err)
+		return false, err
+	}
+	p.logger.Infoln("like checked")
+
+	if counter == 0 {
+		return false, nil
+	}
+
+	return true, nil
+}
+
+func (p *Postgres) DeleteLike(userId string, artistId uint64) error {
+	p.logger.Infoln("Artist Repo DeleteLike entered")
+
+	query := "delete from profile_artist where profile_id = $1 and artist_id = $2"
+	if _, err := p.Pool.Exec(context.Background(), query, userId, artistId); err != nil {
+		p.logger.WithFields(logrus.Fields{
+			"err":       err,
+			"artist Id": artistId,
+			"query":     query,
+		}).Errorln("delete like error")
+		return err
+	}
+	p.logger.Infoln("Like deleted")
+
+	return nil
 }

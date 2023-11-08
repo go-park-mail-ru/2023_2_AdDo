@@ -1,75 +1,41 @@
 package album_repository
 
 import (
-	"github.com/DATA-DOG/go-sqlmock"
+	"context"
+	"errors"
+	"github.com/pashagolub/pgxmock/v3"
+	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"main/internal/pkg/album"
 	"testing"
 )
 
-func TestArtistRepository_GetByTrackId(t *testing.T) {
-	db, mock, err := sqlmock.New()
+func TestAlbumRepository_getWithQuery(t *testing.T) {
+	mock, err := pgxmock.NewPool()
 	if err != nil {
-		t.Fatalf("Failed to create mock database: %v", err)
+		t.Fatal(err)
 	}
-	defer db.Close()
+	defer mock.Close()
 
 	repo := Postgres{
-		db: db,
+		Pool:   mock,
+		logger: logrus.New(),
 	}
 
-	trackId := uint64(1)
-
-	expectedArtists := []album.Response{album.Response{
+	const artistId uint64 = 1
+	expectedAlbums := []album.Base{{
 		Id:      1,
 		Name:    "AlbumName",
 		Preview: "Url to album preview",
 	}}
 
-	profileTable := sqlmock.NewRows([]string{"id", "name", "preview"}).
-		AddRow(expectedArtists[0].Id, expectedArtists[0].Name, expectedArtists[0].Preview)
-
-	mock.ExpectQuery("select album.id, name, preview from album").
-		WithArgs(trackId).WillReturnRows(profileTable)
-
-	received, err := repo.GetByTrackId(trackId)
-	if err != nil {
-		t.Errorf("Error getting albums by track id: %v", err)
-	}
-
-	assert.Equal(t, expectedArtists, received)
-
-	if err := mock.ExpectationsWereMet(); err != nil {
-		t.Errorf("Unfulfilled expectations: %v", err)
-	}
-}
-
-func TestArtistRepository_GetByArtistId(t *testing.T) {
-	db, mock, err := sqlmock.New()
-	if err != nil {
-		t.Fatalf("Failed to create mock database: %v", err)
-	}
-	defer db.Close()
-
-	repo := Postgres{
-		db: db,
-	}
-
-	artistId := uint64(1)
-
-	expectedAlbums := []album.Response{album.Response{
-		Id:      1,
-		Name:    "AlbumName",
-		Preview: "Url to album preview",
-	}}
-
-	profileTable := sqlmock.NewRows([]string{"id", "name", "preview"}).
+	query := "select id, name, preview from album where artist_id = ?"
+	result := pgxmock.NewRows([]string{"id", "name", "preview"}).
 		AddRow(expectedAlbums[0].Id, expectedAlbums[0].Name, expectedAlbums[0].Preview)
 
-	mock.ExpectQuery("select id, name, preview from album").
-		WithArgs(artistId).WillReturnRows(profileTable)
+	mock.ExpectQuery(query).WithArgs(artistId).WillReturnRows(result)
 
-	received, err := repo.GetByArtistId(artistId)
+	received, err := repo.getWithQuery(context.Background(), query, artistId)
 	if err != nil {
 		t.Errorf("Error getting albums by artist id: %v", err)
 	}
@@ -77,6 +43,90 @@ func TestArtistRepository_GetByArtistId(t *testing.T) {
 	assert.Equal(t, expectedAlbums, received)
 
 	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Errorf("Unfulfilled expectations: %v", err)
+	}
+}
+
+func TestAlbumRepository_Get(t *testing.T) {
+	mock, err := pgxmock.NewPool()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer mock.Close()
+
+	repo := Postgres{
+		Pool:   mock,
+		logger: logrus.New(),
+	}
+
+	const albumId uint64 = 1
+	expectedAlbum := album.Base{
+		Id:      1,
+		Name:    "AlbumName",
+		Preview: "Url to album preview",
+	}
+
+	query := "select id, name, preview from album where id = ?"
+	row := pgxmock.NewRows([]string{"id", "name", "preview"}).
+		AddRow(expectedAlbum.Id, expectedAlbum.Name, expectedAlbum.Preview)
+
+	mock.ExpectQuery(query).WithArgs(albumId).WillReturnRows(row)
+
+	received, err := repo.Get(albumId)
+	if err != nil {
+		t.Errorf("Error getting album by id: %v", err)
+	}
+
+	assert.Equal(t, expectedAlbum, received)
+
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Errorf("Unfulfilled expectations: %v", err)
+	}
+}
+
+func TestAlbumRepository_Like(t *testing.T) {
+	mock, err := pgxmock.NewPool()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer mock.Close()
+
+	repo := Postgres{
+		Pool:   mock,
+		logger: logrus.New(),
+	}
+
+	const userId = "1"
+	const albumId uint64 = 2
+
+	t.Run("CreateLike Success", func(t *testing.T) {
+		mock.ExpectExec("insert into profile_album").
+			WithArgs(userId, albumId).
+			WillReturnResult(pgxmock.NewResult("insert", 1))
+
+		err = repo.CreateLike(userId, albumId)
+		assert.Nil(t, err)
+	})
+
+	t.Run("CreateLike Error", func(t *testing.T) {
+		mock.ExpectExec("insert into profile_album").
+			WithArgs(userId, albumId).
+			WillReturnError(errors.New("error while creating like"))
+
+		err = repo.CreateLike(userId, albumId)
+		assert.Equal(t, errors.New("error while creating like"), err)
+	})
+
+	t.Run("DeleteLike", func(t *testing.T) {
+		mock.ExpectExec("delete from profile_album").
+			WithArgs(userId, albumId).
+			WillReturnResult(pgxmock.NewResult("delete", 1))
+
+		err = repo.DeleteLike(userId, albumId)
+		assert.Nil(t, err)
+	})
+
+	if err = mock.ExpectationsWereMet(); err != nil {
 		t.Errorf("Unfulfilled expectations: %v", err)
 	}
 }

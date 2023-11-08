@@ -1,0 +1,157 @@
+version: '3.9'
+
+services:
+  service-minio:
+    extends:
+      file: ../common-services.yml
+      service: service-minio
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 10s
+      retries: 3
+      timeout: 5s
+   
+  create_buckets:
+    extends:
+      file: ../common-services.yml
+      service: create_buckets
+    depends_on:
+      service-minio:
+        condition: service_healthy
+
+  service-db-redis:
+    extends:
+      file: ../common-services.yml
+      service: service-db-redis
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  service-db-postgres:
+    extends:
+      file: ../common-services.yml
+      service: service-db-postgres
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U musicon" ]
+      interval: 10s
+      retries: 3
+      timeout: 5s
+
+  consul:
+    image: consul:1.15
+    ports:
+      - "8500:8500"
+
+  common-service-waiter:
+    image: alpine
+    depends_on:
+      service-db-postgres:
+        condition: service_healthy
+      service-db-redis:
+        condition: service_healthy
+      service-minio:
+        condition: service_healthy
+      create_buckets:
+        condition: service_completed_successfully
+      consul:
+        condition: service_started
+    command: "ls"
+
+  user:
+    image: registry.musicon.space/user:test
+    depends_on:
+      common-service-waiter:
+        condition: service_completed_successfully
+    environment:
+      DATABASE_URL: "${DATABASE_URL}"
+    command: "/user"
+
+  session:
+    image: registry.musicon.space/session:test
+    depends_on:
+      common-service-waiter:
+        condition: service_completed_successfully
+    environment:
+      DATABASE_URL: "${DATABASE_URL}"
+    command: "/session"
+
+  track:
+    image: registry.musicon.space/track:test
+    depends_on:
+      common-service-waiter:
+        condition: service_completed_successfully
+    environment:
+      DATABASE_URL: "${DATABASE_URL}"
+    command: "/track"
+
+
+  album:
+    image: registry.musicon.space/album:test
+    depends_on:
+      common-service-waiter:
+        condition: service_completed_successfully
+    environment:
+      DATABASE_URL: "${DATABASE_URL}"
+    command: "/album"
+
+
+  playlist:
+    image: registry.musicon.space/playlist:test
+    depends_on:
+      common-service-waiter:
+        condition: service_completed_successfully
+    environment:
+      DATABASE_URL: "${DATABASE_URL}"
+    command: "/playlist"
+
+
+  artist:
+    image: registry.musicon.space/artist:test
+    depends_on:
+      common-service-waiter:
+        condition: service_completed_successfully
+    environment:
+      DATABASE_URL: "${DATABASE_URL}"
+    command: "/artist"
+
+  images:
+    image: registry.musicon.space/images:test
+    depends_on:
+      common-service-waiter:
+        condition: service_completed_successfully
+    environment:
+      DATABASE_URL: "${DATABASE_URL}"
+    command: "/images"
+
+  microservice-waiter:
+    image: alpine
+    depends_on:
+      user:
+        condition: service_started
+      session:
+        condition: service_started
+      track:
+        condition: service_started
+      album:
+        condition: service_started
+      playlist:
+        condition: service_started
+      artist:
+        condition: service_started
+      images:
+        condition: service_started
+
+  musicon:
+    image: registry.musicon.space/entrypoint:test
+    ports:
+      - "8888:8080"
+    depends_on:
+      common-service-waiter:
+        condition: service_completed_successfully
+      microservice-waiter:
+        condition: service_completed_successfully
+    environment:
+      DATABASE_URL: "${DATABASE_URL}"
+    command: "/entrypoint"

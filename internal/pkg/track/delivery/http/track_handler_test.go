@@ -1,12 +1,15 @@
 package track_delivery
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
-	"io"
-	"main/internal/pkg/album"
-	"main/internal/pkg/artist"
-	common_handler "main/internal/pkg/common/handler"
+	"github.com/golang/mock/gomock"
+	"github.com/gorilla/mux"
+	"github.com/sirupsen/logrus"
+	"github.com/stretchr/testify/assert"
+	common_handler "main/internal/common/handler"
+	"main/internal/common/response"
 	"main/internal/pkg/session"
 	"main/internal/pkg/track"
 	session_mock "main/test/mocks/session"
@@ -15,12 +18,9 @@ import (
 	"net/http/httptest"
 	"testing"
 	"time"
-
-	"github.com/golang/mock/gomock"
-	"github.com/stretchr/testify/assert"
 )
 
-func TestMusic(t *testing.T) {
+func TestListen(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -30,71 +30,159 @@ func TestMusic(t *testing.T) {
 	handler := &TrackHandler{
 		trackUseCase:   mockTrackUseCase,
 		sessionUseCase: mockSessionUseCase,
+		logger:         logrus.New(),
 	}
 
+	trackId := track.Id{Id: 999}
+	requestBody, err := json.Marshal(trackId)
+	assert.NoError(t, err)
+
+	t.Run("DecodeRequestBodyError", func(t *testing.T) {
+		req := httptest.NewRequest(http.MethodPost, "/listen", nil)
+		w := httptest.NewRecorder()
+
+		err := handler.Listen(w, req)
+
+		assert.NotNil(t, err)
+		assert.Equal(t, http.StatusBadRequest, err.(common_handler.StatusError).Code)
+	})
+
+	t.Run("InternalError", func(t *testing.T) {
+		req := httptest.NewRequest(http.MethodPost, "/listen", bytes.NewBuffer(requestBody))
+		w := httptest.NewRecorder()
+
+		mockTrackUseCase.EXPECT().Listen(trackId.Id).Return(errors.New("add listen failed"))
+		err = handler.Listen(w, req)
+
+		assert.NotNil(t, err)
+		assert.Equal(t, http.StatusInternalServerError, err.(common_handler.StatusError).Code)
+	})
+
 	t.Run("Success", func(t *testing.T) {
-		expectedTracks := []track.Response{
-			{
-				Id:     1,
-				Name:   "Track 1",
-				Artist: []artist.Response{artist.Response{Name: "Artist 1"}},
-				Album:  []album.Response{album.Response{Name: "Album 1"}},
-			},
-			{
-				Id:     2,
-				Name:   "Track 2",
-				Artist: []artist.Response{artist.Response{Name: "Artist 2"}},
-				Album:  []album.Response{album.Response{Name: "Album 2"}},
-			},
-		}
-		sessionId := "sessionId"
-		mockTrackUseCase.EXPECT().GetAll().Return(expectedTracks, nil)
-		//mockSessionUseCase.EXPECT().CheckSession(sessionId, uint64(1)).Return(true, nil)
+		req := httptest.NewRequest(http.MethodPost, "/listen", bytes.NewBuffer(requestBody))
+		w := httptest.NewRecorder()
 
-		req, err := http.NewRequest(http.MethodGet, "/music?id=1", nil)
+		mockTrackUseCase.EXPECT().Listen(trackId.Id).Return(nil)
+		err = handler.Listen(w, req)
 
-		assert.NoError(t, err)
-		cookie := http.Cookie{
-			Name:    session.CookieName,
-			Value:   sessionId,
-			Path:    "",
-			Domain:  "",
-			Expires: time.Time{},
-		}
+		assert.Nil(t, err)
+		assert.Equal(t, http.StatusNoContent, w.Code)
+	})
+}
+
+func TestLike(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockTrackUseCase := track_mock.NewMockUseCase(ctrl)
+	mockSessionUseCase := session_mock.NewMockUseCase(ctrl)
+
+	handler := &TrackHandler{
+		trackUseCase:   mockTrackUseCase,
+		sessionUseCase: mockSessionUseCase,
+		logger:         logrus.New(),
+	}
+
+	const (
+		trackId           = "1"
+		trackIdInt uint64 = 1
+		sessionId         = "sessionID"
+		userId            = "qwer-qwer-qwer"
+		isLiked           = true
+	)
+
+	cookie := http.Cookie{
+		Name:     session.CookieName,
+		Value:    sessionId,
+		Expires:  time.Now().Add(session.TimeToLiveCookie),
+		Secure:   true,
+		HttpOnly: true,
+	}
+
+	t.Run("Like GetPathParamError", func(t *testing.T) {
+		req := httptest.NewRequest(http.MethodPost, "/track/like", nil)
+		w := httptest.NewRecorder()
+		err := handler.Like(w, req)
+		assert.Equal(t, http.StatusBadRequest, err.(common_handler.StatusError).Code)
+	})
+
+	t.Run("Like GetCookieError", func(t *testing.T) {
+		req := httptest.NewRequest(http.MethodPost, "/track/like", nil)
+		req = mux.SetURLVars(req, map[string]string{"id": trackId})
+		w := httptest.NewRecorder()
+
+		err := handler.Like(w, req)
+		assert.Equal(t, http.StatusUnauthorized, err.(common_handler.StatusError).Code)
+	})
+
+	t.Run("Like Success", func(t *testing.T) {
+		req := httptest.NewRequest(http.MethodPost, "/track/like", nil)
+		req = mux.SetURLVars(req, map[string]string{"id": trackId})
 		req.AddCookie(&cookie)
+		w := httptest.NewRecorder()
 
-		rec := httptest.NewRecorder()
+		mockSessionUseCase.EXPECT().GetUserId(sessionId).Return(userId, nil)
+		mockTrackUseCase.EXPECT().Like(userId, trackIdInt).Return(nil)
 
-		err = handler.Music(rec, req)
-		assert.NoError(t, err)
-
-		assert.Equal(t, http.StatusOK, rec.Code)
-		assert.Equal(t, "application/json", rec.Header().Get("Content-Type"))
-		receivedTracks := make([]track.Response, 0)
-		body, err := io.ReadAll(rec.Body)
-		if err != nil {
-			t.Errorf("error reading response")
-		}
-		json.Unmarshal(body, &receivedTracks)
-		assert.Equal(t, expectedTracks, receivedTracks)
+		err := handler.Like(w, req)
+		assert.Nil(t, err)
+		assert.Equal(t, http.StatusNoContent, w.Code)
 	})
 
-	t.Run("Error - TrackUseCase.GetAll", func(t *testing.T) {
-		mockTrackUseCase.EXPECT().GetAll().Return(nil, errors.New("error"))
+	t.Run("IsLike GetUserIdByCookieError", func(t *testing.T) {
+		req := httptest.NewRequest(http.MethodPost, "/track/is_like", nil)
+		req = mux.SetURLVars(req, map[string]string{"id": trackId})
+		req.AddCookie(&cookie)
+		w := httptest.NewRecorder()
 
-		req, err := http.NewRequest(http.MethodGet, "/music", nil)
-		assert.NoError(t, err)
+		mockSessionUseCase.EXPECT().GetUserId(sessionId).Return("", errors.New("error while getting user"))
 
-		rec := httptest.NewRecorder()
-
-		err = handler.Music(rec, req)
-		assert.Error(t, err)
-		assert.IsType(t, common_handler.StatusError{}, err)
-
-		statusErr, _ := err.(common_handler.StatusError)
-		assert.Equal(t, http.StatusInternalServerError, statusErr.Code)
-		assert.Equal(t, "error", statusErr.Err.Error())
+		err := handler.IsLike(w, req)
+		assert.Equal(t, http.StatusUnauthorized, err.(common_handler.StatusError).Code)
 	})
 
-	// TODO: Add more test cases for different scenarios
+	t.Run("IsLike LikeCheckError", func(t *testing.T) {
+		req := httptest.NewRequest(http.MethodPost, "/track/is_like", nil)
+		req = mux.SetURLVars(req, map[string]string{"id": trackId})
+		req.AddCookie(&cookie)
+		w := httptest.NewRecorder()
+
+		mockSessionUseCase.EXPECT().GetUserId(sessionId).Return(userId, nil)
+		mockTrackUseCase.EXPECT().IsLike(userId, trackIdInt).Return(false, errors.New("error while checking like"))
+
+		err := handler.IsLike(w, req)
+		assert.Equal(t, http.StatusInternalServerError, err.(common_handler.StatusError).Code)
+	})
+
+	t.Run("IsLike Success", func(t *testing.T) {
+		req := httptest.NewRequest(http.MethodPost, "/track/is_like", nil)
+		req = mux.SetURLVars(req, map[string]string{"id": trackId})
+		req.AddCookie(&cookie)
+		w := httptest.NewRecorder()
+
+		mockSessionUseCase.EXPECT().GetUserId(sessionId).Return(userId, nil)
+		mockTrackUseCase.EXPECT().IsLike(userId, trackIdInt).Return(isLiked, nil)
+
+		err := handler.IsLike(w, req)
+		assert.Nil(t, err)
+
+		var received response.IsLiked
+		err = json.NewDecoder(w.Body).Decode(&received)
+		assert.Nil(t, err)
+		assert.Equal(t, response.IsLiked{IsLiked: isLiked}, received)
+	})
+
+	t.Run("Unlike Success", func(t *testing.T) {
+		req := httptest.NewRequest(http.MethodPost, "/track/unlike", nil)
+		req = mux.SetURLVars(req, map[string]string{"id": trackId})
+		req.AddCookie(&cookie)
+		w := httptest.NewRecorder()
+
+		mockSessionUseCase.EXPECT().GetUserId(sessionId).Return(userId, nil)
+		mockTrackUseCase.EXPECT().Unlike(userId, trackIdInt).Return(nil)
+
+		err := handler.Unlike(w, req)
+		assert.Nil(t, err)
+		assert.Equal(t, http.StatusNoContent, w.Code)
+	})
 }

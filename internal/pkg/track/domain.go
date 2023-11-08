@@ -2,49 +2,44 @@ package track
 
 import (
 	"errors"
-	"main/internal/pkg/album"
-	"main/internal/pkg/artist"
 )
 
-type ArtistTrackResponse struct {
-	Id      uint64
-	Name    string
-	Preview string
+type Id struct {
+	Id uint64 `json:"Id" example:"1"`
 }
 
-type ArtistAlbumResponse struct {
-	Id      uint64
-	Name    string
-	Preview string
-}
-
-type Track struct {
-	Id      uint64
-	Name    string
-	Artist  []uint64
-	Album   []uint64
-	Preview string
-	Content string
+type LikedTracks struct {
+	Tracks []Response `json:"Tracks"`
 }
 
 type Response struct {
-	Id      uint64 `json:"Id" example:"1"`
-	Name    string `json:"Name" example:"TrackName"`
-	Artist  []artist.Response `json:"Artist"`
-	Album   []album.Response `json:"Album"`
-	Preview string `json:"Preview" example:"TrackPreview"`
-	Content string `json:"Content" example:"TrackContent"`
+	Id         uint64 `json:"Id" example:"1"`
+	ArtistId   uint64 `json:"ArtistId" example:"1"`
+	Name       string `json:"Name" example:"TrackName"`
+	Preview    string `json:"Preview" example:"TrackPreview"`
+	Content    string `json:"Content" example:"TrackContent"`
+	ArtistName string `json:"ArtistName" example:"ArtiName"`
+	Duration   string `json:"Duration" example:"1:20"`
+	IsLiked    bool   `json:"IsLiked" example:"false"`
 }
 
 type UseCase interface {
-	//Add(track Track) (uint64, error)
-	GetAll() ([]Response, error)
-	//GetPopular() ([]Response, error)
-	//GetFavourite(userId uint64) ([]Response, error)
+	GetUserLikedTracks(userId string) ([]Response, error)
+	Listen(trackId uint64) error
+	Like(userId string, trackId uint64) error
+	IsLike(userId string, trackId uint64) (bool, error)
+	Unlike(userId string, trackId uint64) error
 }
 
 type Repository interface {
-	GetAll() ([]Response, error)
+	GetByUser(userId string) ([]Response, error)
+	GetByPlaylist(playlistId uint64) ([]Response, error)
+	GetByAlbum(albumId uint64) ([]Response, error)
+	GetByArtist(artistId uint64) ([]Response, error)
+	CreateLike(userId string, trackId uint64) error
+	CheckLike(userId string, trackId uint64) (bool, error)
+	DeleteLike(userId string, trackId uint64) error
+	AddListen(trackId uint64) error
 }
 
 var (

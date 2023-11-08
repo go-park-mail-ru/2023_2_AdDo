@@ -4,13 +4,18 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	common_handler "main/internal/pkg/common/handler"
+	"github.com/sirupsen/logrus"
+	"image"
+	"image/png"
+	"main/internal/common/handler"
+	avatar_domain "main/internal/pkg/image"
 	"main/internal/pkg/session"
 	user_domain "main/internal/pkg/user"
+	session_mock "main/test/mocks/session"
 	user_mock "main/test/mocks/user"
+	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
-	"strconv"
 	"testing"
 	"time"
 
@@ -22,10 +27,10 @@ func TestSignUp(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	// Создаем mock для UseCase
-	mockUseCase := user_mock.NewMockUseCase(ctrl)
+	mockUserUseCase := user_mock.NewMockUseCase(ctrl)
+	mockSessionUseCase := session_mock.NewMockUseCase(ctrl)
 
-	handler := NewHandler(mockUseCase)
+	handler := NewHandler(mockUserUseCase, mockSessionUseCase, logrus.New())
 
 	t.Run("DecodeRequestBodyError", func(t *testing.T) {
 		requestBody := bytes.NewBufferString(`{"name": "John"`) // некорректный JSON
@@ -54,26 +59,38 @@ func TestSignUp(t *testing.T) {
 		assert.Equal(t, http.StatusBadRequest, err.(common_handler.StatusError).Code)
 	})
 
-	t.Run("Success", func(t *testing.T) {
-		user := user_domain.User{Id: 1, Username: "John", Email: "john@example.com", BirthDate: "12-12-2003", Password: "password"}
-		sessionId := "sesId"
+	t.Run("Invalid password", func(t *testing.T) {
+		user := user_domain.User{Username: "John", Email: "john@example.com", Password: "gshdfghlsdhflgkhslkdfhglkhskdfhglksdfhgshkfhgksdhghslsdfgkjdgf", BirthDate: "12-12-2003"}
+
 		requestBody, err := json.Marshal(user)
 		assert.NoError(t, err)
 
 		req := httptest.NewRequest(http.MethodPost, "/signup", bytes.NewBuffer(requestBody))
 		w := httptest.NewRecorder()
 
-		mockUseCase.EXPECT().Register(user).Return(nil)
-		mockUseCase.EXPECT().Login(user.Email, user.Password).Return(user.Id, sessionId, nil)
+		err = handler.SignUp(w, req)
+
+		assert.NotNil(t, err)
+		assert.Equal(t, http.StatusBadRequest, err.(common_handler.StatusError).Code)
+	})
+
+	t.Run("Success", func(t *testing.T) {
+		user := user_domain.User{Id: "qwer-qwer-qwer", Username: "John", Email: "john@example.com", BirthDate: "12-12-2003", Password: "password"}
+		const sessionId = "sesId"
+		requestBody, err := json.Marshal(user)
+		assert.NoError(t, err)
+
+		req := httptest.NewRequest(http.MethodPost, "/signup", bytes.NewBuffer(requestBody))
+		w := httptest.NewRecorder()
+
+		mockUserUseCase.EXPECT().Register(user).Return(nil)
+		mockUserUseCase.EXPECT().Login(user.Email, user.Password).Return(sessionId, nil)
 		err = handler.SignUp(w, req)
 
 		assert.Nil(t, err)
-		assert.Equal(t, http.StatusOK, w.Code)
+		assert.Equal(t, http.StatusNoContent, w.Code)
 
-		expectedResponse := user_domain.ResponseId{Id: 1}
-		expectedResponseBody, err := json.Marshal(expectedResponse)
 		assert.NoError(t, err)
-		assert.Equal(t, expectedResponseBody, w.Body.Bytes())
 	})
 }
 
@@ -81,10 +98,10 @@ func TestLogin(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	// Создаем mock для UseCase
-	mockUseCase := user_mock.NewMockUseCase(ctrl)
+	mockUserUseCase := user_mock.NewMockUseCase(ctrl)
+	mockSessionUseCase := session_mock.NewMockUseCase(ctrl)
 
-	handler := NewHandler(mockUseCase)
+	handler := NewHandler(mockUserUseCase, mockSessionUseCase, logrus.New())
 
 	t.Run("DecodeRequestBodyError", func(t *testing.T) {
 		requestBody := bytes.NewBufferString(`{"email": "john@example.`) // некорректный JSON
@@ -107,7 +124,7 @@ func TestLogin(t *testing.T) {
 		req := httptest.NewRequest(http.MethodPost, "/login", bytes.NewBuffer(requestBody))
 		w := httptest.NewRecorder()
 
-		mockUseCase.EXPECT().Login(user.Email, user.Password).Return(uint64(0), "", errors.New("login failed"))
+		mockUserUseCase.EXPECT().Login(user.Email, user.Password).Return("", errors.New("login failed"))
 
 		err = handler.Login(w, req)
 
@@ -117,6 +134,8 @@ func TestLogin(t *testing.T) {
 
 	t.Run("Success", func(t *testing.T) {
 		user := user_domain.User{Email: "john@example.com", Password: "password"}
+		const sessionIdExpected = "sessionIdExpected"
+		const firstCookie = 0
 
 		requestBody, err := json.Marshal(user)
 		assert.NoError(t, err)
@@ -124,15 +143,17 @@ func TestLogin(t *testing.T) {
 		req := httptest.NewRequest(http.MethodPost, "/login", bytes.NewBuffer(requestBody))
 		w := httptest.NewRecorder()
 
-		mockUseCase.EXPECT().Login(user.Email, user.Password).Return(uint64(123), "sessionID", nil)
+		mockUserUseCase.EXPECT().Login(user.Email, user.Password).Return(sessionIdExpected, nil)
 
 		err = handler.Login(w, req)
 
 		assert.Nil(t, err)
-		assert.Equal(t, http.StatusOK, w.Code)
-		cookie := w.Result().Cookies()[0]
-		assert.Equal(t, "sessionID", cookie.Value)
-		assert.Equal(t, time.Now().Add(session.TimeToLive).Unix(), cookie.Expires.Unix())
+		assert.Equal(t, http.StatusNoContent, w.Code)
+
+		cookie := w.Result().Cookies()[firstCookie]
+		sessionIdReceived := cookie.Value
+		assert.Equal(t, sessionIdExpected, sessionIdReceived)
+		assert.Equal(t, time.Now().Add(session.TimeToLiveCookie).Unix(), cookie.Expires.Unix())
 	})
 }
 
@@ -140,24 +161,13 @@ func TestAuth(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	// Создаем mock для UseCase
-	mockUseCase := user_mock.NewMockUseCase(ctrl)
+	mockUserUseCase := user_mock.NewMockUseCase(ctrl)
+	mockSessionUseCase := session_mock.NewMockUseCase(ctrl)
 
-	handler := NewHandler(mockUseCase)
-
-	t.Run("InvalidID", func(t *testing.T) {
-		req := httptest.NewRequest(http.MethodGet, "/auth?id=invalid", nil)
-		w := httptest.NewRecorder()
-
-		err := handler.Auth(w, req)
-
-		assert.NotNil(t, err)
-		assert.Equal(t, http.StatusBadRequest, err.(common_handler.StatusError).Code)
-	})
+	handler := NewHandler(mockUserUseCase, mockSessionUseCase, logrus.New())
 
 	t.Run("GetCookieError", func(t *testing.T) {
-		id := 123
-		req := httptest.NewRequest(http.MethodGet, "/auth?id="+strconv.Itoa(id), nil)
+		req := httptest.NewRequest(http.MethodGet, "/auth", nil)
 		w := httptest.NewRecorder()
 
 		err := handler.Auth(w, req)
@@ -167,20 +177,19 @@ func TestAuth(t *testing.T) {
 	})
 
 	t.Run("AuthError", func(t *testing.T) {
-		id := 123
 		sessionId := "sessionID"
 		cookie := http.Cookie{
 			Name:     session.CookieName,
 			Value:    sessionId,
-			Expires:  time.Now().Add(session.TimeToLive),
+			Expires:  time.Now().Add(session.TimeToLiveCookie),
 			Secure:   true,
 			HttpOnly: true,
 		}
-		req := httptest.NewRequest(http.MethodGet, "/auth?id="+strconv.Itoa(id), nil)
+		req := httptest.NewRequest(http.MethodGet, "/auth", nil)
 		req.AddCookie(&cookie)
 		w := httptest.NewRecorder()
 
-		mockUseCase.EXPECT().Auth(uint64(id), sessionId).Return(false, errors.New("unauthorized"))
+		mockUserUseCase.EXPECT().Auth(sessionId).Return(false, errors.New("unauthorized"))
 
 		err := handler.Auth(w, req)
 
@@ -189,28 +198,25 @@ func TestAuth(t *testing.T) {
 	})
 
 	t.Run("Success", func(t *testing.T) {
-		id := 123
-		sessionId := "sessionID"
+		const sessionId = "sessionID"
 		cookie := http.Cookie{
 			Name:     session.CookieName,
 			Value:    sessionId,
-			Expires:  time.Now().Add(session.TimeToLive),
+			Expires:  time.Now().Add(session.TimeToLiveCookie),
 			Secure:   true,
 			HttpOnly: true,
 		}
-		user := user_domain.User{Id: uint64(id), Username: "John"}
 
-		req := httptest.NewRequest(http.MethodGet, "/auth?id="+strconv.Itoa(id), nil)
+		req := httptest.NewRequest(http.MethodGet, "/auth", nil)
 		req.AddCookie(&cookie)
 		w := httptest.NewRecorder()
 
-		mockUseCase.EXPECT().Auth(uint64(id), sessionId).Return(true, nil)
-		mockUseCase.EXPECT().GetUserInfo(uint64(id)).Return(user, nil)
+		mockUserUseCase.EXPECT().Auth(sessionId).Return(true, nil)
 
 		err := handler.Auth(w, req)
 
 		assert.Nil(t, err)
-		assert.Equal(t, http.StatusOK, w.Code)
+		assert.Equal(t, http.StatusNoContent, w.Code)
 	})
 }
 
@@ -218,25 +224,32 @@ func TestLogOut(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	mockUseCase := user_mock.NewMockUseCase(ctrl)
-	handler := UserHandler{userUseCase: mockUseCase}
+	mockUserUseCase := user_mock.NewMockUseCase(ctrl)
+	mockSessionUseCase := session_mock.NewMockUseCase(ctrl)
+
+	handler := NewHandler(mockUserUseCase, mockSessionUseCase, logrus.New())
 
 	t.Run("Success", func(t *testing.T) {
-		userID := 1
-		u := user_domain.User{Id: uint64(userID)}
+		const sessionId = "sessionID"
+		cookie := http.Cookie{
+			Name:     session.CookieName,
+			Value:    sessionId,
+			Expires:  time.Now().Add(session.TimeToLiveCookie),
+			Secure:   true,
+			HttpOnly: true,
+		}
 
-		mockUseCase.EXPECT().Logout(uint64(userID)).Return(nil)
+		mockUserUseCase.EXPECT().Logout(sessionId).Return(nil)
 
-		reqBody, _ := json.Marshal(u)
-		req := httptest.NewRequest(http.MethodPost, "/logout", bytes.NewBuffer(reqBody))
+		req := httptest.NewRequest(http.MethodDelete, "/logout", nil)
+		req.AddCookie(&cookie)
+
 		w := httptest.NewRecorder()
 
 		err := handler.LogOut(w, req)
-
 		assert.NoError(t, err)
-		assert.Equal(t, http.StatusOK, w.Code)
+		assert.Equal(t, http.StatusNoContent, w.Code)
 
-		// Проверяем, что cookie установлен с временем завершения
 		cookies := w.Result().Cookies()
 
 		if len(cookies) != 0 {
@@ -245,17 +258,178 @@ func TestLogOut(t *testing.T) {
 	})
 
 	t.Run("Unauthorized", func(t *testing.T) {
-		userID := 1
-		u := user_domain.User{Id: uint64(userID)}
-
-		mockUseCase.EXPECT().Logout(uint64(userID)).Return(errors.New("unauthorized"))
-
-		reqBody, _ := json.Marshal(u)
-		req := httptest.NewRequest(http.MethodPost, "/logout", bytes.NewBuffer(reqBody))
+		req := httptest.NewRequest(http.MethodDelete, "/logout", nil)
 		w := httptest.NewRecorder()
 
 		err := handler.LogOut(w, req)
+		assert.Error(t, err)
+	})
+}
+
+func TestUploadAvatar(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	const url = "/upload_avatar"
+
+	mockUserUseCase := user_mock.NewMockUseCase(ctrl)
+	mockSessionUseCase := session_mock.NewMockUseCase(ctrl)
+
+	handler := NewHandler(mockUserUseCase, mockSessionUseCase, logrus.New())
+
+	body := new(bytes.Buffer)
+	writer := multipart.NewWriter(body)
+
+	part, err := writer.CreateFormFile("Avatar", "images.png")
+	if err != nil {
+		t.Error(err)
+	}
+
+	width := 32
+	height := 24
+
+	upLeft := image.Point{0, 0}
+	lowRight := image.Point{width, height}
+
+	img := image.NewRGBA(image.Rectangle{upLeft, lowRight})
+	err = png.Encode(part, img)
+	if err != nil {
+		t.Error(err)
+	}
+
+	writer.Close()
+
+	t.Run("Success", func(t *testing.T) {
+		const sessionID = "sessionID"
+		cookie := http.Cookie{
+			Name:     session.CookieName,
+			Value:    sessionID,
+			Expires:  time.Now().Add(session.TimeToLiveCookie),
+			Secure:   true,
+			HttpOnly: true,
+		}
+		const userId = "1"
+
+		req := httptest.NewRequest(http.MethodPost, url, body)
+		req.Header.Add("Content-Type", writer.FormDataContentType())
+		req.AddCookie(&cookie)
+
+		src, hdr, err := req.FormFile("Avatar")
+		if err != nil {
+			t.Error(err)
+		}
+		mockSessionUseCase.EXPECT().GetUserId(sessionID).Return(userId, nil)
+		mockUserUseCase.EXPECT().UploadAvatar(userId, src, hdr.Size)
+
+		w := httptest.NewRecorder()
+
+		err = handler.UploadAvatar(w, req)
+		assert.NoError(t, err)
+		assert.Equal(t, http.StatusOK, w.Code)
+	})
+
+	t.Run("RequestWithoutFile", func(t *testing.T) {
+		const sessionID = "sessionID"
+		cookie := http.Cookie{
+			Name:     session.CookieName,
+			Value:    sessionID,
+			Expires:  time.Now().Add(session.TimeToLiveCookie),
+			Secure:   true,
+			HttpOnly: true,
+		}
+		const userId = "1"
+
+		req := httptest.NewRequest(http.MethodPost, url, nil)
+		req.Header.Add("Content-Type", writer.FormDataContentType())
+		req.AddCookie(&cookie)
+
+		mockSessionUseCase.EXPECT().GetUserId(sessionID).Return(userId, nil)
+
+		w := httptest.NewRecorder()
+
+		err = handler.UploadAvatar(w, req)
+		assert.Error(t, err)
+		assert.Equal(t, http.StatusBadRequest, err.(common_handler.Error).Status())
+	})
+
+	t.Run("Unauthorized", func(t *testing.T) {
+		req := httptest.NewRequest(http.MethodPost, url, body)
+
+		w := httptest.NewRecorder()
+
+		err = handler.UploadAvatar(w, req)
+		assert.Error(t, err)
+		assert.Equal(t, http.StatusUnauthorized, err.(common_handler.StatusError).Code)
+	})
+}
+
+func TestRemoveAvatar(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	const url = "/remove_avatar"
+
+	mockUserUseCase := user_mock.NewMockUseCase(ctrl)
+	mockSessionUseCase := session_mock.NewMockUseCase(ctrl)
+
+	handler := NewHandler(mockUserUseCase, mockSessionUseCase, logrus.New())
+
+	t.Run("Success", func(t *testing.T) {
+		const sessionId = "sessionID"
+		cookie := http.Cookie{
+			Name:     session.CookieName,
+			Value:    sessionId,
+			Expires:  time.Now().Add(session.TimeToLiveCookie),
+			Secure:   true,
+			HttpOnly: true,
+		}
+		const userId = "1"
+
+		mockSessionUseCase.EXPECT().GetUserId(sessionId).Return(userId, nil)
+		mockUserUseCase.EXPECT().RemoveAvatar(userId).Return(nil)
+
+		req := httptest.NewRequest(http.MethodPut, url, nil)
+		req.AddCookie(&cookie)
+
+		w := httptest.NewRecorder()
+
+		err := handler.RemoveAvatar(w, req)
+		assert.NoError(t, err)
+		assert.Equal(t, http.StatusNoContent, w.Code)
+	})
+
+	t.Run("Conflict", func(t *testing.T) {
+		const sessionId = "sessionID"
+		cookie := http.Cookie{
+			Name:     session.CookieName,
+			Value:    sessionId,
+			Expires:  time.Now().Add(session.TimeToLiveCookie),
+			Secure:   true,
+			HttpOnly: true,
+		}
+		const userId = "1"
+
+		mockSessionUseCase.EXPECT().GetUserId(sessionId).Return(userId, nil)
+		mockUserUseCase.EXPECT().RemoveAvatar(userId).Return(avatar_domain.ErrAvatarDoesNotExist)
+
+		req := httptest.NewRequest(http.MethodPut, url, nil)
+		req.AddCookie(&cookie)
+
+		w := httptest.NewRecorder()
+
+		err := handler.RemoveAvatar(w, req)
 
 		assert.Error(t, err)
+		assert.Equal(t, http.StatusConflict, err.(common_handler.StatusError).Code)
+	})
+
+	t.Run("Unauthorized", func(t *testing.T) {
+		req := httptest.NewRequest(http.MethodPut, url, nil)
+
+		w := httptest.NewRecorder()
+
+		err := handler.RemoveAvatar(w, req)
+		assert.Error(t, err)
+		assert.Equal(t, http.StatusUnauthorized, err.(common_handler.StatusError).Code)
 	})
 }

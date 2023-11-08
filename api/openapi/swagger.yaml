@@ -1,6 +1,6 @@
 basePath: /api/v1
 definitions:
-  album.Response:
+  album.Base:
     properties:
       Id:
         example: 1
@@ -12,8 +12,34 @@ definitions:
         example: AlbumPreview
         type: string
     type: object
+  album.Response:
+    properties:
+      ArtistId:
+        example: 1
+        type: integer
+      ArtistName:
+        example: ArtistName
+        type: string
+      Id:
+        example: 1
+        type: integer
+      Name:
+        example: AlbumName
+        type: string
+      Preview:
+        example: AlbumPreview
+        type: string
+      Tracks:
+        items:
+          $ref: '#/definitions/track.Response'
+        type: array
+    type: object
   artist.Response:
     properties:
+      Albums:
+        items:
+          $ref: '#/definitions/album.Base'
+        type: array
       Avatar:
         example: ArtistAvatar
         type: string
@@ -23,17 +49,13 @@ definitions:
       Name:
         example: ArtistName
         type: string
+      Tracks:
+        items:
+          $ref: '#/definitions/track.Response'
+        type: array
     type: object
   track.Response:
     properties:
-      Album:
-        items:
-          $ref: '#/definitions/album.Response'
-        type: array
-      Artist:
-        items:
-          $ref: '#/definitions/artist.Response'
-        type: array
       Content:
         example: TrackContent
         type: string
@@ -47,20 +69,11 @@ definitions:
         example: TrackPreview
         type: string
     type: object
-  user_delivery.userCrds:
+  user_domain.UploadAvatarResponse:
     properties:
-      Email:
-        example: example@gmail.com
+      AvatarUrl:
+        example: /user-images/images.png
         type: string
-      Password:
-        example: password
-        type: string
-    type: object
-  user_domain.ResponseId:
-    properties:
-      Id:
-        example: 1
-        type: integer
     type: object
   user_domain.User:
     properties:
@@ -74,13 +87,22 @@ definitions:
         example: example@gmail.com
         type: string
       Id:
-        example: 1
-        type: integer
+        example: qwer-werw-we4w
+        type: string
       Password:
         example: password
         type: string
       Username:
         example: john
+        type: string
+    type: object
+  user_domain.UserCredentials:
+    properties:
+      Email:
+        example: example@gmail.com
+        type: string
+      Password:
+        example: password
         type: string
     type: object
 host: musicon.space
@@ -94,12 +116,12 @@ info:
   title: MusicOn API
   version: "1.0"
 paths:
-  /auth:
+  /album/{id}:
     get:
-      description: check user's authentication by cookie and user_id
+      description: return album info with all tracks
       parameters:
-      - description: user id
-        in: query
+      - description: album id
+        in: path
         name: id
         required: true
         type: integer
@@ -109,13 +131,65 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/user_domain.User'
+            $ref: '#/definitions/album.Response'
         "400":
           description: Bad Request
           schema:
             type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      tags:
+      - album
+  /artist/{id}:
+    get:
+      description: return artist info
+      parameters:
+      - description: artist id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/artist.Response'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      tags:
+      - artist
+  /auth:
+    get:
+      description: check user's authentication by cookie and set csrf-token
+      responses:
+        "200":
+          description: OK
+          headers:
+            Set-Cookie:
+              description: Set X-Csrf-Token in Cookie
+              type: string
+            X-Csrf-Token:
+              description: Set X-Csrf-Token in header
+              type: string
         "401":
           description: Unauthorized
+          headers:
+            Set-Cookie:
+              description: Set X-Csrf-Token in Cookie
+              type: string
+            X-Csrf-Token:
+              description: Set X-Csrf-Token in header
+              type: string
           schema:
             type: string
         "500":
@@ -124,35 +198,79 @@ paths:
             type: string
       security:
       - cookieAuth: []
-      - csrfToken: []
       tags:
       - user
-  /login:
-    post:
-      consumes:
-      - application/json
-      description: login user
-      parameters:
-      - description: User email and password
-        in: body
-        name: userCrds
-        required: true
-        schema:
-          $ref: '#/definitions/user_delivery.userCrds'
+  /feed:
+    get:
+      description: return all albums
       produces:
       - application/json
       responses:
         "200":
           description: OK
-          headers:
-            JSESSIONID:
-              description: cookie
-              type: string
-            X-CSRFTOKEN:
-              description: csrf token
-              type: string
           schema:
-            $ref: '#/definitions/user_domain.ResponseId'
+            items:
+              $ref: '#/definitions/album.Response'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      tags:
+      - album
+  /like:
+    post:
+      consumes:
+      - application/json
+      description: like track
+      parameters:
+      - description: track id
+        in: body
+        name: trackId
+        required: true
+        schema:
+          type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/track.Response'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "403":
+          description: Forbidden
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - csrfToken: []
+      - cookieCsrfToken: []
+      tags:
+      - track
+  /listen:
+    post:
+      consumes:
+      - application/json
+      description: listen track
+      parameters:
+      - description: track id
+        in: body
+        name: trackId
+        required: true
+        schema:
+          type: integer
+      responses:
+        "200":
+          description: OK
         "400":
           description: Bad Request
           schema:
@@ -165,29 +283,59 @@ paths:
           description: Internal Server Error
           schema:
             type: string
+      security:
+      - csrfToken: []
+      - cookieCsrfToken: []
       tags:
-      - user
-  /logout:
+      - track
+  /login:
     post:
       consumes:
       - application/json
-      description: logout user
+      description: login user
       parameters:
-      - description: user id
+      - description: User email and password
         in: body
-        name: id
+        name: userCrds
         required: true
         schema:
-          type: integer
+          $ref: '#/definitions/user_domain.UserCredentials'
       responses:
         "200":
           description: OK
+          headers:
+            Set-Cookie:
+              description: Set JSESSIONID in Cookie
+              type: string
         "400":
           description: Bad Request
           schema:
             type: string
+        "403":
+          description: Forbidden
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - csrfToken: []
+      - cookieCsrfToken: []
+      tags:
+      - user
+  /logout:
+    post:
+      description: logout user
+      responses:
+        "200":
+          description: OK
         "401":
           description: Unauthorized
+          schema:
+            type: string
+        "403":
+          description: Forbidden
           schema:
             type: string
         "500":
@@ -197,16 +345,40 @@ paths:
       security:
       - cookieAuth: []
       - csrfToken: []
+      - cookieCsrfToken: []
       tags:
       - user
-  /music:
+  /me:
     get:
-      description: return all tracks
-      parameters:
-      - description: user id
-        in: query
-        name: id
-        type: integer
+      description: get user info
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/user_domain.User'
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "403":
+          description: Forbidden
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - cookieAuth: []
+      - csrfToken: []
+      - cookieCsrfToken: []
+      tags:
+      - user
+  /most_liked:
+    get:
+      description: return albums sorted by likes count
       produces:
       - application/json
       responses:
@@ -214,14 +386,62 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/track.Response'
+              $ref: '#/definitions/album.Response'
             type: array
-        "400":
-          description: Bad Request
+        "500":
+          description: Internal Server Error
           schema:
             type: string
+      tags:
+      - album
+  /new:
+    get:
+      description: return new albums
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/album.Response'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      tags:
+      - album
+  /popular:
+    get:
+      description: return albums sorted by listen count
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/album.Response'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      tags:
+      - album
+  /remove_avatar:
+    post:
+      description: Remove user images
+      responses:
+        "200":
+          description: OK
         "401":
           description: Unauthorized
+          schema:
+            type: string
+        "409":
+          description: Conflict
           schema:
             type: string
         "500":
@@ -231,8 +451,9 @@ paths:
       security:
       - cookieAuth: []
       - csrfToken: []
+      - cookieCsrfToken: []
       tags:
-      - track
+      - user
   /sign_up:
     post:
       consumes:
@@ -245,15 +466,19 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/user_domain.User'
-      produces:
-      - application/json
       responses:
         "200":
           description: OK
-          schema:
-            $ref: '#/definitions/user_domain.ResponseId'
+          headers:
+            Set-Cookie:
+              description: Set JSESSIONID in Cookie
+              type: string
         "400":
           description: Bad Request
+          schema:
+            type: string
+        "403":
+          description: Forbidden
           schema:
             type: string
         "409":
@@ -264,15 +489,54 @@ paths:
           description: Internal Server Error
           schema:
             type: string
+      security:
+      - csrfToken: []
+      - cookieCsrfToken: []
+      tags:
+      - user
+  /upload_avatar:
+    post:
+      description: Upload user images
+      parameters:
+      - description: User images
+        in: formData
+        name: Avatar
+        required: true
+        type: file
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/user_domain.UploadAvatarResponse'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - cookieAuth: []
+      - csrfToken: []
+      - cookieCsrfToken: []
       tags:
       - user
 securityDefinitions:
   cookieAuth:
-    in: header
+    in: cookie
     name: JSESSIONID
+    type: apiKey
+  cookieCsrfToken:
+    in: cookie
+    name: X-Csrf-Token
     type: apiKey
   csrfToken:
     in: header
-    name: X-CSRFTOKEN
+    name: X-Csrf-Token
     type: apiKey
 swagger: "2.0"

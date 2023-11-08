@@ -1,44 +1,36 @@
-name: Deploy
+name: ci/cd
 
 on:
   push:
-    branches:
-      - clean_arch
-      - http_server_init
+    branches: [main, PK-2, pipeline-fix]
+  pull_request:
+    types: [opened, reopened, closed]
 
-jobs:
-
+jobs:    
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Setup Go 
-        uses: actions/setup-go@v4 
-        with:
-          go-version: '1.21.x'
-      - name: Install dependencies
-        run: go mod download && go mod tidy
-      - name: Build musicon
-        run: go build -o bin/musicon cmd/musicon/main.go
-      # - name: Upload musicon
-      #   uses: action/upload-artifacts@v3
-      #   with:
-      #     name: musicon
-      #     path: ./bin/musicon
-      # - name: Setup Python 
-      #   uses: actions/setup-python@v4 
-      #   with:
-      #     python-version: '3.10'
-      # - name: Create db_init
-      #   run: python3 ./database/fill_db_script.py
-      # - name: Upload db_init
-      #   uses: actions/upload-artifact@v3
-      #   with:
-      #     name: db_init
-      #     path: ./database/
 
-  test:
-    needs: build
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build base image
+        run: docker build -t registry.musicon.space/base -f build/package/base/Dockerfile .
+
+      - name: Build micros image
+        run: build/ci/scripts/build/build_micros.sh
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: images
+          path: /tmp/images/
+          retention-days: 1
+
+  unit-test:
+    needs: 
+      - build
+      # - lint
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -50,13 +42,77 @@ jobs:
         run: |
           go mod download && go mod tidy 
           go install github.com/golang/mock/mockgen@v1.6.0
-      - name: Test musicon
-        run: |
-          cd test/script/ && chmod +x mockgen.sh  && ./mockgen.sh
-          go test ../../internal/...
-  
+      - name: Run unit test
+        run: make unit-test
+
+  integration-test:
+    needs: 
+      - build
+      # - lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Download artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: images
+          path: /tmp/images/
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Load docker images
+        run: build/ci/scripts/load/load_micros.sh test
+
+      - name: Docker images
+        run: docker images
+
+      - name: Setup python3
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10' 
+
+      - name: Install python dependencies
+        run: pip3 install requests names
+
+      - name: Run integration test
+        run: scripts/integration-test.sh 
+
+  publish:
+    if: github.event.pull_request.merged == true
+    # if: github.ref == 'refs/heads/main'
+    needs:
+      - unit-test
+      - integration-test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Download artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: images
+          path: /tmp/images/
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Private Docker Registry
+        uses: docker/login-action@v1
+        with:
+          registry: registry.musicon.space
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}  
+      
+      - name: Publish docker images
+        run: build/ci/scripts/publish/publish_micros.sh latest
+
   deploy:
-    needs: test
+    if: github.event.pull_request.merged == true
+    # if: github.ref == 'refs/heads/main'
+    needs:
+      - publish
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -69,11 +125,6 @@ jobs:
           PASSWORD: ${{ secrets.PASSWORD }}
           source: "."
           target: ~/addo-backend
-      # - name: Download db_init
-      #   uses: actions/download-artifact@v3
-      #   with:
-      #     name: db_init
-      #     path: ~/addo-backend/database
       - name: Executing remote command
         uses: appleboy/ssh-action@master
         with:
@@ -81,4 +132,102 @@ jobs:
           USERNAME: ${{ secrets.USERNAME }}
           PORT: ${{ secrets.PORT }}
           PASSWORD: ${{ secrets.PASSWORD }}
-          script: cd addo-backend && chmod +x deploy.sh && ./deploy.sh
+          script:  |
+            cd addo-backend
+            docker login registry.musicon.space ${{ secrets.REGISTRY_USERNAME }} ${{ secrets.REGISTRY_PASSWORD }}
+            make deploy
+
+
+#   build:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - uses: actions/checkout@v3
+# 
+#       - name: Set up Docker Buildx
+#         uses: docker/setup-buildx-action@v3
+#       - name: Build base image
+#         uses: docker/build-push-action@v2
+#         with:
+#           context: .
+#           file: ./build/package/base/Dockerfile
+#           load: true
+#           tags: musicon-base:latest
+#       
+#       - name: Inspect
+#         run: |
+#           docker image inspect musicon-base:latest
+# 
+#       - name: Build album image
+#         uses: docker/build-push-action@v2
+#         with:
+#           context: .
+#           file: ./build/package/album/Dockerfile
+#           tags: album:latest
+#           outputs: type=docker,dest=/tmp/album.tar
+# 
+#       - name: Build artist image
+#         uses: docker/build-push-action@v2
+#         with:
+#           context: .
+#           file: ./build/package/artist/Dockerfile
+#           tags: artist:latest
+#           outputs: type=docker,dest=/tmp/artist.tar
+# 
+#       - name: Build entrypoint image
+#         uses: docker/build-push-action@v2
+#         with:
+#           context: .
+#           file: ./build/package/entrypoint/Dockerfile
+#           tags: entrypoint:latest
+#           outputs: type=docker,dest=/tmp/entrypoint.tar
+# 
+#       - name: Build images image
+#         uses: docker/build-push-action@v2
+#         with:
+#           context: .
+#           file: ./build/package/images/Dockerfile
+#           tags: images:latest
+#           outputs: type=docker,dest=/tmp/images.tar
+# 
+#       - name: Build playlist image
+#         uses: docker/build-push-action@v2
+#         with:
+#           context: .
+#           file: ./build/package/playlist/Dockerfile
+#           tags: playlist:latest
+#           outputs: type=docker,dest=/tmp/playlist.tar
+# 
+#       - name: Build session image
+#         uses: docker/build-push-action@v2
+#         with:
+#           context: .
+#           file: ./build/package/session/Dockerfile
+#           tags: session:latest
+#           outputs: type=docker,dest=/tmp/session.tar
+# 
+#       - name: Build track image
+#         uses: docker/build-push-action@v2
+#         with:
+#           context: .
+#           file: ./build/package/track/Dockerfile
+#           tags: track:latest
+#           outputs: type=docker,dest=/tmp/track.tar
+# 
+#       - name: Build user image
+#         uses: docker/build-push-action@v2
+#         with:
+#           context: .
+#           file: ./build/package/user/Dockerfile
+#           tags: user:latest
+#           outputs: type=docker,dest=/tmp/user.tar
+# 
+#   lint:
+#     runs-on: ubuntu-latest
+#     steps:
+#     - uses: actions/checkout@v3
+#     - name: golangci-lint
+#       uses: golangci/golangci-lint-action@v3
+#       with:
+#         version: latest
+#         skip-pkg-cache: true
+#         skip-build-cache: true

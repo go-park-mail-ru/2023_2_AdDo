@@ -2,12 +2,12 @@ package router_init
 
 import (
 	"github.com/gorilla/mux"
-	common_handler "main/internal/pkg/common/handler"
-	track_delivery "main/internal/pkg/track/delivery/http"
-	user_delivery "main/internal/pkg/user/delivery/http"
+	"github.com/sirupsen/logrus"
 	httpSwagger "github.com/swaggo/http-swagger/v2"
 	_ "main/api/openapi"
-
+	"main/internal/common/handler"
+	"main/internal/common/middleware/common"
+	"net/http"
 )
 
 //	@title			MusicOn API
@@ -19,24 +19,71 @@ import (
 //	@license.name	Apache 2.0
 //	@license.url	http://www.apache.org/licenses/LICENSE-2.0.html
 
-//	@SecurityDefinitions.apikey	cookieAuth 
-//	@in							header
+//	@SecurityDefinitions.apikey	cookieAuth
+//	@in							cookie
 //	@name						JSESSIONID
 
-//	@SecurityDefinitions.apikey	csrfToken 
+//	@SecurityDefinitions.apikey	csrfToken
 //	@in							header
-//	@name						X-CSRFTOKEN
+//	@name						X-Csrf-Token
 
-//	@host		musicon.space
-//	@BasePath	/api/v1
-func New(router *mux.Router, userHandler user_delivery.UserHandler, trackHandler track_delivery.TrackHandler) *mux.Router {
-	router.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
-	router.Handle("/api/v1/sign_up", common_handler.Handler{H: userHandler.SignUp}).Methods("POST")
-	router.Handle("/api/v1/login", common_handler.Handler{H: userHandler.Login}).Methods("POST")
-	router.Handle("/api/v1/auth", common_handler.Handler{H: userHandler.Auth}).Methods("GET")
-	router.Handle("/api/v1/logout", common_handler.Handler{H: userHandler.LogOut}).Methods("POST")
+//	@SecurityDefinitions.apikey	cookieCsrfToken
+//	@in							cookie
+//	@name						X-Csrf-Token
 
-	router.Handle("/api/v1/music", common_handler.Handler{H: trackHandler.Music}).Methods("GET")
+// @host		musicon.space
+// @BasePath	/api/v1
+const MethodPost = "POST"
+const MethodGet = "GET"
+const MethodPut = "PUT"
+const MethodDelete = "DELETE"
 
-	return router
+type Route struct {
+	Method  string
+	Handler func(w http.ResponseWriter, r *http.Request) error
+	Path    string
 }
+
+func NewRoute(p string, h func(w http.ResponseWriter, r *http.Request) error, m string) Route {
+	return Route{
+		Method:  m,
+		Handler: h,
+		Path:    p,
+	}
+}
+
+type Config struct {
+	Routes           []Route
+	Prefix           string
+	Middlewares      []mux.MiddlewareFunc
+	SubRouterConfigs []Config
+}
+
+func New(config Config, logger *logrus.Logger) http.Handler {
+	router := mux.NewRouter()
+	router.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
+
+	for _, route := range config.Routes {
+		router.Handle(config.Prefix+route.Path, common_handler.Handler{H: route.Handler}).Methods(route.Method)
+	}
+
+	for _, subConfig := range config.SubRouterConfigs {
+		subRouter := router.PathPrefix("").Subrouter()
+		for _, route := range subConfig.Routes {
+			subRouter.Handle(config.Prefix+subConfig.Prefix+route.Path, common_handler.Handler{H: route.Handler}).Methods(route.Method)
+		}
+
+		subRouter.Use(subConfig.Middlewares...)
+	}
+
+	router.Use(config.Middlewares...)
+
+	routerWithMiddleware := common.Logging(router, logger)
+	routerWithMiddleware = common.PanicRecovery(routerWithMiddleware, logger)
+
+	return routerWithMiddleware
+}
+
+/// TODO написать ручки на все коллекции: треки, артисты, плейлисты и альбомы, все коллекции возвращают имя владельца и его фото, тесты на них
+/// TODO полнотекстовый поиск по артистам, трекам и альбомам среди имен, поиск работает в реальном времени
+/// TODO easyjson для сериализации и десериализации
