@@ -19,7 +19,7 @@ type Response struct {
 	Preview    string `json:"Preview" example:"TrackPreview"`
 	Content    string `json:"Content" example:"TrackContent"`
 	ArtistName string `json:"ArtistName" example:"ArtiName"`
-	Duration   uint32 `json:"Duration" example:"0"`
+	Duration   string `json:"Duration" example:"1:20"`
 	IsLiked    bool   `json:"IsLiked" example:"false"`
 }
 

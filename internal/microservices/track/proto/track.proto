@@ -33,7 +33,7 @@ message Track {
   string Content = 4;
   uint64 ArtistId = 5;
   string ArtistName = 6;
-  uint32 Duration = 7;
+  string Duration = 7;
   bool isLiked = 8;
 }
 
