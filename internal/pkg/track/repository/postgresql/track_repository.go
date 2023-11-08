@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/sirupsen/logrus"
 	"main/internal/common/pgxiface"
+	"main/internal/common/utils"
 	"main/internal/pkg/track"
 )
 
@@ -33,8 +34,9 @@ func (db *Postgres) getWithQuery(ctx context.Context, query string, args ...any)
 
 	result := make([]track.Response, 0)
 	for rows.Next() {
+		durationInSeconds := 0
 		var t track.Response
-		if err := rows.Scan(&t.Id, &t.Name, &t.Preview, &t.Content, &t.Duration, &t.ArtistId, &t.ArtistName); err != nil {
+		if err := rows.Scan(&t.Id, &t.Name, &t.Preview, &t.Content, &durationInSeconds, &t.ArtistId, &t.ArtistName); err != nil {
 			db.logger.WithFields(logrus.Fields{
 				"query":    query,
 				"track_id": t.Id,
@@ -42,6 +44,7 @@ func (db *Postgres) getWithQuery(ctx context.Context, query string, args ...any)
 			}).Errorln("get rows scanning")
 			return nil, err
 		}
+		t.Duration = utils.CastTimeToString(durationInSeconds)
 		result = append(result, t)
 	}
 	db.logger.Infoln("result formed successfully")

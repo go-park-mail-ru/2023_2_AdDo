@@ -50,7 +50,7 @@ func Test_GetAlbum(t *testing.T) {
 			Preview:    "Preview1",
 			Content:    "Content1",
 			ArtistName: "Artist1",
-			Duration:   100,
+			Duration:   "1:40",
 			IsLiked:    true,
 		},
 		{
@@ -59,7 +59,7 @@ func Test_GetAlbum(t *testing.T) {
 			Preview:    "Preview2",
 			Content:    "Content2",
 			ArtistName: "Artist2",
-			Duration:   200,
+			Duration:   "1:40",
 			IsLiked:    false,
 		},
 	}
@@ -85,7 +85,7 @@ func Test_GetAlbum(t *testing.T) {
 					Preview:    "Preview1",
 					Content:    "Content1",
 					ArtistName: "Artist1",
-					Duration:   100,
+					Duration:   "1:40",
 					IsLiked:    true,
 				},
 				{
@@ -94,7 +94,7 @@ func Test_GetAlbum(t *testing.T) {
 					Preview:    "Preview2",
 					Content:    "Content2",
 					ArtistName: "Artist2",
-					Duration:   200,
+					Duration:   "1:40",
 					IsLiked:    false,
 				},
 			}},

@@ -54,7 +54,7 @@ func Test_GetArtistInfo(t *testing.T) {
 			Preview:    "Preview1",
 			Content:    "Content1",
 			ArtistName: "Artist",
-			Duration:   100,
+			Duration:   "1:40",
 			IsLiked:    true,
 		},
 	}
@@ -85,7 +85,7 @@ func Test_GetArtistInfo(t *testing.T) {
 					Preview:    "Preview1",
 					Content:    "Content1",
 					ArtistName: "Artist",
-					Duration:   100,
+					Duration:   "1:40",
 					IsLiked:    true,
 				},
 			},

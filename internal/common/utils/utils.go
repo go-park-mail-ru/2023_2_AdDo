@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/md5"
 	"encoding/hex"
+	"fmt"
 	"github.com/google/uuid"
 	"io"
 )
@@ -25,4 +26,13 @@ func GenReqId(s string) string {
 func GetReaderFromBytes(in []byte) io.Reader {
 	result := bytes.NewReader(in)
 	return result
+}
+
+const SecondInMinute = 60
+
+func CastTimeToString(duration int) string {
+	minutes := duration / SecondInMinute
+	seconds := duration % SecondInMinute * minutes
+
+	return fmt.Sprintf("%d:%02d", minutes, seconds)
 }

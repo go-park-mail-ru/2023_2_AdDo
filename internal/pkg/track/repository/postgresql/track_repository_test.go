@@ -26,14 +26,15 @@ func TestTrackRepository_getWithQuery(t *testing.T) {
 		Name:       "Track",
 		Preview:    "Preview",
 		Content:    "Content",
-		Duration:   100,
+		Duration:   "1:40",
 		ArtistName: "Artist",
 		ArtistId:   1,
 	}}
+	const TrackIntDuration = 100
 
 	query := "select id, name, preview, content, duration, artist.id, artist_name from track"
 	rows := pgxmock.NewRows([]string{"id", "name", "preview", "content", "duration", "artist.id", "artist_name"}).
-		AddRow(expected[0].Id, expected[0].Name, expected[0].Preview, expected[0].Content, expected[0].Duration,
+		AddRow(expected[0].Id, expected[0].Name, expected[0].Preview, expected[0].Content, TrackIntDuration,
 			expected[0].ArtistId, expected[0].ArtistName)
 
 	mock.ExpectQuery(query).WillReturnRows(rows)
