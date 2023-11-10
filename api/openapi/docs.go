@@ -22,13 +22,14 @@ const docTemplate = `{
     "paths": {
         "/album/{id}": {
             "get": {
-                "description": "return album info with all tracks",
+                "description": "Return album info with all tracks",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "album"
                 ],
+                "summary": "AlbumTracks",
                 "parameters": [
                     {
                         "type": "integer",
@@ -60,19 +61,25 @@ const docTemplate = `{
                 }
             }
         },
-        "/artist/{id}": {
+        "/album/{id}/is_like": {
             "get": {
-                "description": "return artist info",
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "description": "Check if album is liked",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "artist"
+                    "album"
                 ],
+                "summary": "IsLike",
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "artist id",
+                        "description": "album id",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -82,7 +89,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/artist.Response"
+                            "$ref": "#/definitions/response.IsLiked"
                         }
                     },
                     "400": {
@@ -91,54 +98,16 @@ const docTemplate = `{
                             "type": "string"
                         }
                     },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/auth": {
-            "get": {
-                "security": [
-                    {
-                        "cookieAuth": []
-                    }
-                ],
-                "description": "check user's authentication by cookie and set csrf-token",
-                "tags": [
-                    "user"
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "headers": {
-                            "Set-Cookie": {
-                                "type": "string",
-                                "description": "Set X-Csrf-Token in Cookie"
-                            },
-                            "X-Csrf-Token": {
-                                "type": "string",
-                                "description": "Set X-Csrf-Token in header"
-                            }
-                        }
-                    },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
                             "type": "string"
-                        },
-                        "headers": {
-                            "Set-Cookie": {
-                                "type": "string",
-                                "description": "Set X-Csrf-Token in Cookie"
-                            },
-                            "X-Csrf-Token": {
-                                "type": "string",
-                                "description": "Set X-Csrf-Token in header"
-                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "string"
                         }
                     },
                     "500": {
@@ -150,37 +119,12 @@ const docTemplate = `{
                 }
             }
         },
-        "/feed": {
-            "get": {
-                "description": "return all albums",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "album"
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/album.Response"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/like": {
+        "/album/{id}/like": {
             "post": {
                 "security": [
+                    {
+                        "cookieAuth": []
+                    },
                     {
                         "csrfToken": []
                     },
@@ -188,30 +132,23 @@ const docTemplate = `{
                         "cookieCsrfToken": []
                     }
                 ],
-                "description": "like track",
-                "consumes": [
-                    "application/json"
-                ],
+                "description": "Like album",
                 "tags": [
-                    "track"
+                    "album"
                 ],
+                "summary": "Like",
                 "parameters": [
                     {
-                        "description": "track id",
-                        "name": "trackId",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
+                        "type": "integer",
+                        "description": "album id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/track.Response"
-                        }
+                    "204": {
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Bad Request",
@@ -240,6 +177,392 @@ const docTemplate = `{
                 }
             }
         },
+        "/album/{id}/unlike": {
+            "delete": {
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {
+                        "csrfToken": []
+                    },
+                    {
+                        "cookieCsrfToken": []
+                    }
+                ],
+                "description": "Unlike album",
+                "tags": [
+                    "album"
+                ],
+                "summary": "Unlike",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "album id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/artist/{id}": {
+            "get": {
+                "description": "Return artist info",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "artist"
+                ],
+                "summary": "ArtistInfo",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "artist id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/artist.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/artist/{id}/is_like": {
+            "get": {
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "description": "Check if artist is liked",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "artist"
+                ],
+                "summary": "IsLike",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "artist id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.IsLiked"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/artist/{id}/like": {
+            "post": {
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {
+                        "csrfToken": []
+                    },
+                    {
+                        "cookieCsrfToken": []
+                    }
+                ],
+                "description": "Like artist",
+                "tags": [
+                    "artist"
+                ],
+                "summary": "Like",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "artist id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/artist/{id}/unlike": {
+            "delete": {
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {
+                        "csrfToken": []
+                    },
+                    {
+                        "cookieCsrfToken": []
+                    }
+                ],
+                "description": "Unlike artist",
+                "tags": [
+                    "artist"
+                ],
+                "summary": "Unlike",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "artist id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth": {
+            "get": {
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "description": "Check user's authentication by cookie and set csrf-token",
+                "tags": [
+                    "user"
+                ],
+                "summary": "Auth",
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "headers": {
+                            "Set-Cookie": {
+                                "type": "string",
+                                "description": "Set X-Csrf-Token in Cookie"
+                            },
+                            "X-Csrf-Token": {
+                                "type": "string",
+                                "description": "Set X-Csrf-Token in header"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/collection/tracks": {
+            "get": {
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "description": "Get user tracks",
+                "tags": [
+                    "track"
+                ],
+                "summary": "GetUserTracks",
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/feed": {
+            "get": {
+                "description": "Return all albums",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "album"
+                ],
+                "summary": "Feed",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/album.Response"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/listen": {
             "post": {
                 "security": [
@@ -250,13 +573,14 @@ const docTemplate = `{
                         "cookieCsrfToken": []
                     }
                 ],
-                "description": "listen track",
+                "description": "Listen track",
                 "consumes": [
                     "application/json"
                 ],
                 "tags": [
                     "track"
                 ],
+                "summary": "Listen",
                 "parameters": [
                     {
                         "description": "track id",
@@ -269,8 +593,8 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "OK"
+                    "204": {
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Bad Request",
@@ -303,13 +627,14 @@ const docTemplate = `{
                         "cookieCsrfToken": []
                     }
                 ],
-                "description": "login user",
+                "description": "Login user",
                 "consumes": [
                     "application/json"
                 ],
                 "tags": [
                     "user"
                 ],
+                "summary": "Login",
                 "parameters": [
                     {
                         "description": "User email and password",
@@ -322,8 +647,8 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "OK",
+                    "204": {
+                        "description": "No Content",
                         "headers": {
                             "Set-Cookie": {
                                 "type": "string",
@@ -365,13 +690,14 @@ const docTemplate = `{
                         "cookieCsrfToken": []
                     }
                 ],
-                "description": "logout user",
+                "description": "Logout user",
                 "tags": [
                     "user"
                 ],
+                "summary": "LogOut",
                 "responses": {
-                    "200": {
-                        "description": "OK"
+                    "204": {
+                        "description": "No Content"
                     },
                     "401": {
                         "description": "Unauthorized",
@@ -407,13 +733,14 @@ const docTemplate = `{
                         "cookieCsrfToken": []
                     }
                 ],
-                "description": "get user info",
+                "description": "Get user info",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "user"
                 ],
+                "summary": "Me",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -444,13 +771,14 @@ const docTemplate = `{
         },
         "/most_liked": {
             "get": {
-                "description": "return albums sorted by likes count",
+                "description": "Return albums sorted by likes count",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "album"
                 ],
+                "summary": "MostLiked",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -472,13 +800,14 @@ const docTemplate = `{
         },
         "/new": {
             "get": {
-                "description": "return new albums",
+                "description": "Return new albums",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "album"
                 ],
+                "summary": "New",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -498,15 +827,674 @@ const docTemplate = `{
                 }
             }
         },
+        "/playlist": {
+            "post": {
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {
+                        "csrfToken": []
+                    },
+                    {
+                        "cookieCsrfToken": []
+                    }
+                ],
+                "description": "Create playlist",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "playlist"
+                ],
+                "summary": "Create",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/playlist.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/playlist/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "description": "Return playlist info and tracks",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "playlist"
+                ],
+                "summary": "Get",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "playlist id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/artist.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {
+                        "csrfToken": []
+                    },
+                    {
+                        "cookieCsrfToken": []
+                    }
+                ],
+                "description": "Delete playlist",
+                "tags": [
+                    "playlist"
+                ],
+                "summary": "Delete",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "playlist id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/playlist/{id}/add_track": {
+            "post": {
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "description": "Add track to playlist",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "playlist"
+                ],
+                "summary": "AddTrack",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "playlist id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "track id",
+                        "name": "trackId",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/track.Id"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/playlist/{id}/is_like": {
+            "get": {
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "description": "Check if playlist is liked",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "playlist"
+                ],
+                "summary": "IsLike",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "playlist id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.IsLiked"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/playlist/{id}/like": {
+            "post": {
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {
+                        "csrfToken": []
+                    },
+                    {
+                        "cookieCsrfToken": []
+                    }
+                ],
+                "description": "Like playlist",
+                "tags": [
+                    "playlist"
+                ],
+                "summary": "Like",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "playlist id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/playlist/{id}/make_private": {
+            "put": {
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {
+                        "csrfToken": []
+                    },
+                    {
+                        "cookieCsrfToken": []
+                    }
+                ],
+                "description": "Make playlist private",
+                "tags": [
+                    "playlist"
+                ],
+                "summary": "MakePrivate",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "playlist id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/playlist/{id}/make_public": {
+            "put": {
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {
+                        "csrfToken": []
+                    },
+                    {
+                        "cookieCsrfToken": []
+                    }
+                ],
+                "description": "Make playlist public",
+                "tags": [
+                    "playlist"
+                ],
+                "summary": "MakePublic",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "playlist id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/playlist/{id}/remove_track": {
+            "delete": {
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "description": "Remove track from playlist",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "playlist"
+                ],
+                "summary": "RemoveTrack",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "playlist id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "track id",
+                        "name": "trackId",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/track.Id"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/playlist/{id}/unlike": {
+            "delete": {
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {
+                        "csrfToken": []
+                    },
+                    {
+                        "cookieCsrfToken": []
+                    }
+                ],
+                "description": "Unlike playlist",
+                "tags": [
+                    "playlist"
+                ],
+                "summary": "Unlike",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "playlist id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/playlist/{id}/update_preview": {
+            "post": {
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {
+                        "csrfToken": []
+                    },
+                    {
+                        "cookieCsrfToken": []
+                    }
+                ],
+                "description": "Update playlist preview",
+                "tags": [
+                    "playlist"
+                ],
+                "summary": "UpdatePreview",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "playlist id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "file",
+                        "description": "preview image",
+                        "name": "image",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/popular": {
             "get": {
-                "description": "return albums sorted by listen count",
+                "description": "Return albums sorted by listen count",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "album"
                 ],
+                "summary": "Popular",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -543,12 +1531,19 @@ const docTemplate = `{
                 "tags": [
                     "user"
                 ],
+                "summary": "RemoveAvatar",
                 "responses": {
-                    "200": {
-                        "description": "OK"
+                    "204": {
+                        "description": "No Content"
                     },
                     "401": {
                         "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
                         "schema": {
                             "type": "string"
                         }
@@ -578,13 +1573,14 @@ const docTemplate = `{
                         "cookieCsrfToken": []
                     }
                 ],
-                "description": "register user",
+                "description": "Register user",
                 "consumes": [
                     "application/json"
                 ],
                 "tags": [
                     "user"
                 ],
+                "summary": "SignUp",
                 "parameters": [
                     {
                         "description": "User data",
@@ -597,8 +1593,8 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "OK",
+                    "204": {
+                        "description": "No Content",
                         "headers": {
                             "Set-Cookie": {
                                 "type": "string",
@@ -633,6 +1629,249 @@ const docTemplate = `{
                 }
             }
         },
+        "/track/{id}/is_like": {
+            "get": {
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "description": "Check if track is liked",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "track"
+                ],
+                "summary": "IsLike",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "track id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.IsLiked"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/track/{id}/like": {
+            "post": {
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {
+                        "csrfToken": []
+                    },
+                    {
+                        "cookieCsrfToken": []
+                    }
+                ],
+                "description": "Like track",
+                "tags": [
+                    "track"
+                ],
+                "summary": "Like",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "track id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/track/{id}/unlike": {
+            "delete": {
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {
+                        "csrfToken": []
+                    },
+                    {
+                        "cookieCsrfToken": []
+                    }
+                ],
+                "description": "Unlike track",
+                "tags": [
+                    "track"
+                ],
+                "summary": "Unlike",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "track id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/update_info": {
+            "put": {
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {
+                        "csrfToken": []
+                    },
+                    {
+                        "cookieCsrfToken": []
+                    }
+                ],
+                "description": "Update user info",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "UpdateUserInfo",
+                "parameters": [
+                    {
+                        "description": "User data",
+                        "name": "userData",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/user_domain.User"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content",
+                        "headers": {
+                            "Set-Cookie": {
+                                "type": "string",
+                                "description": "Set JSESSIONID in Cookie"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/upload_avatar": {
             "post": {
                 "security": [
@@ -650,6 +1889,7 @@ const docTemplate = `{
                 "tags": [
                     "user"
                 ],
+                "summary": "UploadAvatar",
                 "parameters": [
                     {
                         "type": "file",
@@ -674,6 +1914,12 @@ const docTemplate = `{
                     },
                     "401": {
                         "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
                         "schema": {
                             "type": "string"
                         }
@@ -766,16 +2012,84 @@ const docTemplate = `{
                 }
             }
         },
-        "track.Response": {
+        "playlist.Response": {
             "type": "object",
             "properties": {
-                "Content": {
+                "AuthorId": {
                     "type": "string",
-                    "example": "TrackContent"
+                    "example": "sdfa-asdf-adsf"
+                },
+                "AuthorName": {
+                    "type": "string",
+                    "example": "username"
                 },
                 "Id": {
                     "type": "integer",
                     "example": 1
+                },
+                "IsYours": {
+                    "type": "boolean",
+                    "example": true
+                },
+                "Name": {
+                    "type": "string",
+                    "example": "PlaylistName"
+                },
+                "Preview": {
+                    "type": "string",
+                    "example": "PlaylistPreview"
+                },
+                "tracks": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/track.Response"
+                    }
+                }
+            }
+        },
+        "response.IsLiked": {
+            "type": "object",
+            "properties": {
+                "IsLiked": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "track.Id": {
+            "type": "object",
+            "properties": {
+                "Id": {
+                    "type": "integer",
+                    "example": 1
+                }
+            }
+        },
+        "track.Response": {
+            "type": "object",
+            "properties": {
+                "ArtistId": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "ArtistName": {
+                    "type": "string",
+                    "example": "ArtiName"
+                },
+                "Content": {
+                    "type": "string",
+                    "example": "TrackContent"
+                },
+                "Duration": {
+                    "type": "string",
+                    "example": "1:20"
+                },
+                "Id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "IsLiked": {
+                    "type": "boolean",
+                    "example": false
                 },
                 "Name": {
                     "type": "string",

@@ -31,7 +31,8 @@ func NewHandler(track track.UseCase, session session.UseCase, logger *logrus.Log
 
 // Listen
 //
-//	@Description	listen track
+//	@Summary		Listen
+//	@Description	Listen track
 //	@Tags			track
 //	@Accept			json
 //	@Param			trackId	body	integer	true	"track id"
@@ -64,18 +65,19 @@ func (handler *TrackHandler) Listen(w http.ResponseWriter, r *http.Request) erro
 
 // Like
 //
-//	@Description	like track
+//	@Summary		Like
+//	@Description	Like track
 //	@Tags			track
+//	@Security		cookieAuth
 //	@Security		csrfToken
 //	@Security		cookieCsrfToken
-//	@Accept			json
-//	@Param			trackId	body		integer	true	"track id"
-//	@Success		200		{object}	track.Response
-//	@Failure		400		{string}	errMsg
-//	@Failure		401		{string}	errMsg
-//	@Failure		403		{string}	errMsg
-//	@Failure		500		{string}	errMsg
-//	@Router			/like [post]
+//	@Param			id	path	integer	true	"track id"
+//	@Success		204
+//	@Failure		400	{string}	errMsg
+//	@Failure		401	{string}	errMsg
+//	@Failure		403	{string}	errMsg
+//	@Failure		500	{string}	errMsg
+//	@Router			/track/{id}/like [post]
 func (handler *TrackHandler) Like(w http.ResponseWriter, r *http.Request) error {
 	handler.logger.WithFields(logrus.Fields{
 		"request_id": utils.GenReqId(r.RequestURI + r.Method),
@@ -108,6 +110,19 @@ func (handler *TrackHandler) Like(w http.ResponseWriter, r *http.Request) error 
 	return nil
 }
 
+// IsLike
+//
+//	@Summary		IsLike
+//	@Description	Check if track is liked
+//	@Tags			track
+//	@Security		cookieAuth
+//	@Produce		json
+//	@Param			id	path		integer	true	"track id"
+//	@Success		200	{object}	response.IsLiked
+//	@Failure		400	{string}	errMsg
+//	@Failure		401	{string}	errMsg
+//	@Failure		500	{string}	errMsg
+//	@Router			/track/{id}/is_like [get]
 func (handler *TrackHandler) IsLike(w http.ResponseWriter, r *http.Request) error {
 	handler.logger.WithFields(logrus.Fields{
 		"request_id": utils.GenReqId(r.RequestURI + r.Method),
@@ -145,6 +160,21 @@ func (handler *TrackHandler) IsLike(w http.ResponseWriter, r *http.Request) erro
 	return nil
 }
 
+// Unlike
+//
+//	@Summary		Unlike
+//	@Description	Unlike track
+//	@Tags			track
+//	@Security		cookieAuth
+//	@Security		csrfToken
+//	@Security		cookieCsrfToken
+//	@Param			id	path	integer	true	"track id"
+//	@Success		204
+//	@Failure		400	{string}	errMsg
+//	@Failure		401	{string}	errMsg
+//	@Failure		403	{string}	errMsg
+//	@Failure		500	{string}	errMsg
+//	@Router			/track/{id}/unlike [delete]
 func (handler *TrackHandler) Unlike(w http.ResponseWriter, r *http.Request) error {
 	handler.logger.WithFields(logrus.Fields{
 		"request_id": utils.GenReqId(r.RequestURI + r.Method),
@@ -177,6 +207,17 @@ func (handler *TrackHandler) Unlike(w http.ResponseWriter, r *http.Request) erro
 	return nil
 }
 
+// GetUserTracks
+//
+//	@Summary		GetUserTracks
+//	@Description	Get user tracks
+//	@Tags			track
+//	@Security		cookieAuth
+//	@Success		204
+//	@Failure		400	{string}	errMsg
+//	@Failure		401	{string}	errMsg
+//	@Failure		500	{string}	errMsg
+//	@Router			/collection/tracks [get]
 func (handler *TrackHandler) GetUserTracks(w http.ResponseWriter, r *http.Request) error {
 	handler.logger.WithFields(logrus.Fields{
 		"request_id": utils.GenReqId(r.RequestURI + r.Method),
