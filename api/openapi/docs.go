@@ -505,13 +505,19 @@ const docTemplate = `{
                     }
                 ],
                 "description": "Get user tracks",
+                "produces": [
+                    "application/json"
+                ],
                 "tags": [
                     "track"
                 ],
                 "summary": "GetUserTracks",
                 "responses": {
-                    "204": {
-                        "description": "No Content"
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/track.LikedTracks"
+                        }
                     },
                     "400": {
                         "description": "Bad Request",
@@ -2061,6 +2067,17 @@ const docTemplate = `{
                 "Id": {
                     "type": "integer",
                     "example": 1
+                }
+            }
+        },
+        "track.LikedTracks": {
+            "type": "object",
+            "properties": {
+                "Tracks": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/track.Response"
+                    }
                 }
             }
         },

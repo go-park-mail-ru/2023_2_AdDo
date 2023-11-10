@@ -212,8 +212,9 @@ func (handler *TrackHandler) Unlike(w http.ResponseWriter, r *http.Request) erro
 //	@Summary		GetUserTracks
 //	@Description	Get user tracks
 //	@Tags			track
+//	@Produce		json
 //	@Security		cookieAuth
-//	@Success		204
+//	@Success		200 {object}	track.LikedTracks
 //	@Failure		400	{string}	errMsg
 //	@Failure		401	{string}	errMsg
 //	@Failure		500	{string}	errMsg
