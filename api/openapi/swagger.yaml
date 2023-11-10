@@ -90,6 +90,13 @@ definitions:
         example: 1
         type: integer
     type: object
+  track.LikedTracks:
+    properties:
+      Tracks:
+        items:
+          $ref: '#/definitions/track.Response'
+        type: array
+    type: object
   track.Response:
     properties:
       ArtistId:
@@ -465,9 +472,13 @@ paths:
   /collection/tracks:
     get:
       description: Get user tracks
+      produces:
+      - application/json
       responses:
-        "204":
-          description: No Content
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/track.LikedTracks'
         "400":
           description: Bad Request
           schema:
