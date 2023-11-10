@@ -31,7 +31,8 @@ func NewHandler(trackUseCase track.UseCase, albumUseCase album.UseCase, session 
 
 // Feed
 //
-//	@Description	return all albums
+//	@Summary		Feed
+//	@Description	Return all albums
 //	@Tags			album
 //	@Produce		json
 //	@Success		200	{array}		album.Response
@@ -53,7 +54,8 @@ func (handler *AlbumHandler) Feed(w http.ResponseWriter, r *http.Request) error 
 
 // New
 //
-//	@Description	return new albums
+//	@Summary		New
+//	@Description	Return new albums
 //	@Tags			album
 //	@Produce		json
 //	@Success		200	{array}		album.Response
@@ -75,7 +77,8 @@ func (handler *AlbumHandler) New(w http.ResponseWriter, r *http.Request) error {
 
 // MostLiked
 //
-//	@Description	return albums sorted by likes count
+//	@Summary		MostLiked
+//	@Description	Return albums sorted by likes count
 //	@Tags			album
 //	@Produce		json
 //	@Success		200	{array}		album.Response
@@ -97,7 +100,8 @@ func (handler *AlbumHandler) MostLiked(w http.ResponseWriter, r *http.Request) e
 
 // Popular
 //
-//	@Description	return albums sorted by listen count
+//	@Summary		Popular
+//	@Description	Return albums sorted by listen count
 //	@Tags			album
 //	@Produce		json
 //	@Success		200	{array}		album.Response
@@ -119,7 +123,8 @@ func (handler *AlbumHandler) Popular(w http.ResponseWriter, r *http.Request) err
 
 // AlbumTracks
 //
-//	@Description	return album info with all tracks
+//	@Summary		AlbumTracks
+//	@Description	Return album info with all tracks
 //	@Tags			album
 //	@Produce		json
 //	@Param			id	path		integer	true	"album id"
@@ -165,19 +170,19 @@ func (handler *AlbumHandler) handleQuery(albums []album.Response, w http.Respons
 
 // Like
 //
-//	@Description	like album
-//	@Tags			track
+//	@Summary		Like
+//	@Description	Like album
+//	@Tags			album
+//	@Security		cookieAuth
 //	@Security		csrfToken
 //	@Security		cookieCsrfToken
-//	@Accept			json
-//	@Param			trackId	body		integer	true	"track id"
+//	@Param			id	path	integer	true	"album id"
 //	@Success		204
-//	@Failure		400		{string}	errMsg
-//	@Failure		401		{string}	errMsg
-//	@Failure		403		{string}	errMsg
-//	@Failure		500		{string}	errMsg
-//	@Router			/like [post]
-
+//	@Failure		400	{string}	errMsg
+//	@Failure		401	{string}	errMsg
+//	@Failure		403	{string}	errMsg
+//	@Failure		500	{string}	errMsg
+//	@Router			/album/{id}/like [post]
 func (handler *AlbumHandler) Like(w http.ResponseWriter, r *http.Request) error {
 	handler.logger.WithFields(logrus.Fields{
 		"request_id": utils.GenReqId(r.RequestURI + r.Method),
@@ -210,6 +215,20 @@ func (handler *AlbumHandler) Like(w http.ResponseWriter, r *http.Request) error 
 	return nil
 }
 
+// IsLike
+//
+//	@Summary		IsLike
+//	@Description	Check if album is liked
+//	@Tags			album
+//	@Security		cookieAuth
+//	@Produce		json
+//	@Param			id	path		integer	true	"album id"
+//	@Success		200	{object}	response.IsLiked
+//	@Failure		400	{string}	errMsg
+//	@Failure		401	{string}	errMsg
+//	@Failure		404	{string}	errMsg
+//	@Failure		500	{string}	errMsg
+//	@Router			/album/{id}/is_like [get]
 func (handler *AlbumHandler) IsLike(w http.ResponseWriter, r *http.Request) error {
 	handler.logger.WithFields(logrus.Fields{
 		"request_id": utils.GenReqId(r.RequestURI + r.Method),
@@ -247,6 +266,21 @@ func (handler *AlbumHandler) IsLike(w http.ResponseWriter, r *http.Request) erro
 	return nil
 }
 
+// Unlike
+//
+//	@Summary		Unlike
+//	@Description	Unlike album
+//	@Tags			album
+//	@Security		cookieAuth
+//	@Security		csrfToken
+//	@Security		cookieCsrfToken
+//	@Param			id	path	integer	true	"album id"
+//	@Success		204
+//	@Failure		400	{string}	errMsg
+//	@Failure		401	{string}	errMsg
+//	@Failure		403	{string}	errMsg
+//	@Failure		500	{string}	errMsg
+//	@Router			/album/{id}/unlike [delete]
 func (handler *AlbumHandler) Unlike(w http.ResponseWriter, r *http.Request) error {
 	handler.logger.WithFields(logrus.Fields{
 		"request_id": utils.GenReqId(r.RequestURI + r.Method),
