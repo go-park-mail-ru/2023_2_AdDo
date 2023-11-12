@@ -133,6 +133,8 @@ func (handler *Handler) Get(w http.ResponseWriter, r *http.Request) error {
 //	@Description	Add track to playlist
 //	@Tags			playlist
 //	@Security		cookieAuth
+//	@Security		csrfToken
+//	@Security		cookieCsrfToken
 //	@Accept			json
 //	@Param			id		path	integer		true	"playlist id"
 //	@Param			trackId	body	track.Id	true	"track id"
@@ -173,6 +175,8 @@ func (handler *Handler) AddTrack(w http.ResponseWriter, r *http.Request) error {
 //	@Description	Remove track from playlist
 //	@Tags			playlist
 //	@Security		cookieAuth
+//	@Security		csrfToken
+//	@Security		cookieCsrfToken
 //	@Accept			json
 //	@Param			id		path	integer		true	"playlist id"
 //	@Param			trackId	body	track.Id	true	"track id"

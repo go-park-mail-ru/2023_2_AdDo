@@ -334,7 +334,7 @@ func (handler *UserHandler) RemoveAvatar(w http.ResponseWriter, r *http.Request)
 //	@Failure		403	{string}	errMsg
 //	@Failure		404	{string}	errMsg
 //	@Failure		500	{string}	errMsg
-//	@Header			204	{string}	Set-Cookie	"Set JSESSIONID in Cookie"
+//	@Header			204	{string}
 //	@Router			/update_info [put]
 func (handler *UserHandler) UpdateUserInfo(w http.ResponseWriter, r *http.Request) error {
 	handler.logger.WithFields(logrus.Fields{
