@@ -6,6 +6,7 @@ import (
 	"google.golang.org/grpc"
 	"main/init/middleware"
 	router_init "main/init/router"
+	csrf "main/internal/common/get_csrf"
 	log "main/internal/common/logger"
 	modify_playlist "main/internal/common/middleware/playlist_middleware/modify"
 	read_playlist "main/internal/common/middleware/playlist_middleware/read"
@@ -97,6 +98,7 @@ func main() {
 
 	routerConfig := router_init.Config{
 		Routes: []router_init.Route{
+			router_init.NewRoute("/get_csrf", csrf.GetCSRF, http.MethodGet),
 			router_init.NewRoute("/sign_up", userHandler.SignUp, http.MethodPost),
 			router_init.NewRoute("/login", userHandler.Login, http.MethodPost),
 			router_init.NewRoute("/update_info", userHandler.UpdateUserInfo, http.MethodPut),
