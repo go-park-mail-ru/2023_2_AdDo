@@ -78,7 +78,7 @@ with open("fill_data/data_filling.sql", "w") as file:
         print("Artist:", artist_name)
 
         # во всех url пробел заменяется на нижнее подчеркивание
-        artist_avatar_url = "/images/avatars/artists/" + artist_name.replace(" ", "_") + ".jpg"
+        artist_avatar_url = "/images/artists/" + artist_name.replace(" ", "_") + ".webp"
         print("Avatar:", server + artist_avatar_url, "\n")
         check_url(artist_avatar_url)
 
@@ -92,7 +92,7 @@ with open("fill_data/data_filling.sql", "w") as file:
             print("Album:", album_name)
 
             album_release = album["album_release_date"]
-            album_image = ("/images/tracks/" + artist_name + "/" + album_name + ".jpg").replace(" ", "_")
+            album_image = ("/images/tracks/" + artist_name + "/" + album_name + ".webp").replace(" ", "_")
             print("Album image:", server + album_image, "\n")
             check_url(album_image)
 
