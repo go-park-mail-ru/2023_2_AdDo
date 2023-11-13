@@ -1,13 +1,18 @@
 package router_init
 
 import (
+	_ "main/api/openapi"
+	common_handler "main/internal/common/handler"
+	"main/internal/common/metrics"
+	"main/internal/common/middleware/common"
+	prom "main/internal/common/middleware/prometheus"
+	"net/http"
+
 	"github.com/gorilla/mux"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/sirupsen/logrus"
 	httpSwagger "github.com/swaggo/http-swagger/v2"
-	_ "main/api/openapi"
-	"main/internal/common/handler"
-	"main/internal/common/middleware/common"
-	"net/http"
 )
 
 //	@title			MusicOn API
@@ -61,7 +66,12 @@ type Config struct {
 
 func New(config Config, logger *logrus.Logger) http.Handler {
 	router := mux.NewRouter()
-	router.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
+	router.PathPrefix("/swagger").Handler(httpSwagger.WrapHandler)
+
+	reg := prometheus.NewRegistry()
+	metrics := metrics.New(reg)
+	// router.PathPrefix("/metrics").Handler(promhttp.Handler())
+	router.PathPrefix("/metrics").Handler(promhttp.HandlerFor(reg, promhttp.HandlerOpts{Registry: reg}))
 
 	for _, route := range config.Routes {
 		router.Handle(config.Prefix+route.Path, common_handler.Handler{H: route.Handler}).Methods(route.Method)
@@ -79,6 +89,7 @@ func New(config Config, logger *logrus.Logger) http.Handler {
 	router.Use(config.Middlewares...)
 
 	routerWithMiddleware := common.Logging(router, logger)
+	routerWithMiddleware = prom.CollectMetrics(routerWithMiddleware, metrics)
 	routerWithMiddleware = common.PanicRecovery(routerWithMiddleware, logger)
 
 	return routerWithMiddleware
