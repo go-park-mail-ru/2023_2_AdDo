@@ -4,8 +4,7 @@ import (
 	"main/internal/common/metrics"
 	"net/http"
 	"strconv"
-
-	"github.com/prometheus/client_golang/prometheus"
+	"time"
 )
 
 type responseWriter struct {
@@ -24,17 +23,16 @@ func (rw *responseWriter) WriteHeader(code int) {
 
 func CollectMetrics(next http.Handler, metrics metrics.Metrics) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		start := time.Now()
+		rw := NewResponseWriter(w)
+		next.ServeHTTP(rw, r)
+		elasped := time.Since(start).Seconds()
+
+		statusCode := strconv.Itoa(rw.statusCode)
 		path := r.RequestURI
 		method := r.Method
 
-		timer := prometheus.NewTimer(metrics.HttpDuration.WithLabelValues(path, method))
-		rw := NewResponseWriter(w)
-		next.ServeHTTP(rw, r)
-
-		statusCode := rw.statusCode
-
-		metrics.TotalRequests.WithLabelValues(path, method, strconv.Itoa(statusCode)).Inc()
-
-		timer.ObserveDuration()
+		metrics.TotalRequests.WithLabelValues(path, method, statusCode).Inc()
+		metrics.HttpDuration.WithLabelValues(path, method, statusCode).Observe(elasped)
 	})
 }
