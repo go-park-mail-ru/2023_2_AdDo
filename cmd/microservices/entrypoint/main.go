@@ -1,9 +1,6 @@
 package main
 
 import (
-	"github.com/gorilla/mux"
-	_ "github.com/lib/pq"
-	"google.golang.org/grpc"
 	"main/init/middleware"
 	router_init "main/init/router"
 	csrf "main/internal/common/get_csrf"
@@ -30,6 +27,11 @@ import (
 	track_delivery "main/internal/pkg/track/delivery/http"
 	user_delivery "main/internal/pkg/user/delivery/http"
 	"net/http"
+
+	"github.com/gorilla/mux"
+	_ "github.com/lib/pq"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 const EnvPostgresQueryName = "DATABASE_URL"
@@ -40,37 +42,37 @@ var loggerSingleton = log.Singleton{}
 func main() {
 	logger := loggerSingleton.GetLogger()
 
-	userConnection, err := grpc.Dial("user:8081", grpc.WithInsecure())
+	userConnection, err := grpc.Dial("user:8081", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		logger.Fatalln("error connecting to user micros ", err)
 	}
 
-	sessionConnection, err := grpc.Dial("session:8082", grpc.WithInsecure())
+	sessionConnection, err := grpc.Dial("session:8082", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		logger.Fatalln("error connecting to session micros ", err)
 	}
 
-	trackConnection, err := grpc.Dial("track:8083", grpc.WithInsecure())
+	trackConnection, err := grpc.Dial("track:8083", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		logger.Fatalln("error connecting to track micros ", err)
 	}
 
-	albumConnection, err := grpc.Dial("album:8084", grpc.WithInsecure())
+	albumConnection, err := grpc.Dial("album:8084", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		logger.Fatalln("error connecting to album micros ", err)
 	}
 
-	playlistConnection, err := grpc.Dial("playlist:8085", grpc.WithInsecure())
+	playlistConnection, err := grpc.Dial("playlist:8085", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		logger.Fatalln("error connecting to playlist micros ", err)
 	}
 
-	artistConnection, err := grpc.Dial("artist:8086", grpc.WithInsecure())
+	artistConnection, err := grpc.Dial("artist:8086", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		logger.Fatalln("error connecting to artist micros ", err)
 	}
 
-	imageConnection, err := grpc.Dial("images:8087", grpc.WithInsecure())
+	imageConnection, err := grpc.Dial("images:8087", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		logger.Fatalln("error connecting to images micros ", err)
 	}
