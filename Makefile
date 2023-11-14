@@ -1,5 +1,6 @@
 .PHONY: unit-test
 		integration-test
+		mocks-gen
 		mocks-clean
 		database-clean
 		fill-database
@@ -12,6 +13,10 @@
 unit-test:
 	@make mocks-clean
 	$(CURDIR)/scripts/unit-test.sh
+
+# генерация моков
+mocks-gen:
+	$(CURDIR)/scripts/mocks-gen.sh
 
 # удаление моков
 mocks-clean:
