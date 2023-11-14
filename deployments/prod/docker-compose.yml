@@ -63,6 +63,31 @@ services:
         fluentd-async-connect: "true"
         tag: "backend.postgres"
 
+  node-exporter:
+    extends:
+      file: ../pgn.yml
+      service: node-exporter
+
+  prometheus:
+    extends:
+      file: ../pgn.yml
+      service: prometheus
+    volumes:
+      - /data/prometheus:/prometheus
+    depends_on:
+      musicon:
+        condition: service_started
+
+  grafana:
+    extends:
+      file: ../pgn.yml
+      service: grafana
+    volumes:
+      - /data/grafana:/var/lib/grafana
+    depends_on:
+      musicon:
+        condition: service_started
+
   consul:
     image: consul:1.15
     ports:

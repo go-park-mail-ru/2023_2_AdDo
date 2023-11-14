@@ -39,18 +39,31 @@ services:
       retries: 3
       timeout: 5s
 
+  node-exporter:
+    extends:
+      file: ../pgn.yml
+      service: node-exporter
+
   prometheus:
     extends:
-      file: ../prometheus-grafana.yml
+      file: ../pgn.yml
       service: prometheus
+    depends_on:
+      musicon:
+        condition: service_started
 
   grafana:
     extends:
-      file: ../prometheus-grafana.yml
+      file: ../pgn.yml
       service: grafana
-    volumes:
-      - ../../configs/grafana/provisioning:/etc/grafana/provisioning
-      - ../../configs/grafana/dashboards:/var/lib/grafana/dashboards
+    depends_on:
+      musicon:
+        condition: service_started
+      prometheus:
+        condition: service_started
+      node-exporter:
+        condition: service_started
+
   consul:
     image: consul:1.15
     ports:
