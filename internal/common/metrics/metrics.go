@@ -25,7 +25,7 @@ func New(reg prometheus.Registerer) Metrics {
 				Name: namePrefix + "response_time_seconds",
 				Help: "Duration of HTTP requests.",
 			},
-			[]string{"path", "method"},
+			[]string{"path", "method", "code"},
 		),
 	}
 	reg.MustRegister(m.TotalRequests)
