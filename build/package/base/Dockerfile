@@ -1,4 +1,4 @@
-FROM golang:1.21-alpine AS builder
+FROM registry.musicon.space/env AS builder
 
 WORKDIR /source
 
@@ -11,8 +11,7 @@ COPY go.mod go.sum ./
 ENV CGO_ENABLED 0
 ENV GOOS linux
 
-RUN go mod download && go mod tidy \
-    && go build -o bin/user cmd/microservices/user/main.go \
+RUN go build -o bin/user cmd/microservices/user/main.go \
     && go build -o bin/session cmd/microservices/session/main.go \
     && go build -o bin/artist cmd/microservices/artist/main.go \
     && go build -o bin/track cmd/microservices/track/main.go \
@@ -20,3 +19,16 @@ RUN go mod download && go mod tidy \
     && go build -o bin/images cmd/microservices/images/main.go \
     && go build -o bin/album cmd/microservices/album/main.go \
     && go build -o bin/entrypoint cmd/microservices/entrypoint/main.go
+
+FROM alpine:3.17
+
+COPY --from=builder \ 
+    /source/bin/user \
+    /source/bin/session \
+    /source/bin/artist \
+    /source/bin/track \
+    /source/bin/playlist \
+    /source/bin/images \
+    /source/bin/album \
+    /source/bin/entrypoint \
+    /source/bin/
