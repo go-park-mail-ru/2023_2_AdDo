@@ -40,7 +40,11 @@ func PanicRecovery(next http.Handler, logger *logrus.Logger) http.Handler {
 				}).Infoln("panic happened")
 
 				w.WriteHeader(http.StatusInternalServerError)
-				io.WriteString(w, `{"status": 500, "err": "Unknown error"}`)
+				_, err := io.WriteString(w, `{"status": 500, "err": "Unknown error"}`)
+				if err != nil {
+					logger.Errorln(err.Error())
+				}
+				
 			}
 		}(w, request)
 
