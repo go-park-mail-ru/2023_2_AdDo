@@ -16,7 +16,7 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: Build base image
-        run: docker build -t registry.musicon.space/base -f build/package/base/Dockerfile .
+        run: build/ci/scripts/build/build_base.sh
 
       - name: Build micros image
         run: build/ci/scripts/build/build_micros.sh
