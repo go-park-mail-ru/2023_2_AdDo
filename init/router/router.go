@@ -70,6 +70,7 @@ func New(config Config, logger *logrus.Logger) http.Handler {
 
 	reg := prometheus.NewRegistry()
 	metrics := metrics.New(reg)
+	handlersMap := prom.NewHandlersMap()
 	// router.PathPrefix("/metrics").Handler(promhttp.Handler())
 	router.PathPrefix("/metrics").Handler(promhttp.HandlerFor(reg, promhttp.HandlerOpts{Registry: reg}))
 
@@ -89,7 +90,7 @@ func New(config Config, logger *logrus.Logger) http.Handler {
 	router.Use(config.Middlewares...)
 
 	routerWithMiddleware := common.Logging(router, logger)
-	routerWithMiddleware = prom.CollectMetrics(routerWithMiddleware, metrics)
+	routerWithMiddleware = prom.CollectMetrics(routerWithMiddleware, metrics, handlersMap)
 	routerWithMiddleware = common.PanicRecovery(routerWithMiddleware, logger)
 
 	return routerWithMiddleware

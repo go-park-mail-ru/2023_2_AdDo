@@ -18,14 +18,14 @@ func New(reg prometheus.Registerer) Metrics {
 				Name: namePrefix + "requests_total",
 				Help: "Number of get requests.",
 			},
-			[]string{"path", "method", "code"},
+			[]string{"path", "method", "code", "handler"},
 		),
 		HttpDuration: promauto.NewHistogramVec(
 			prometheus.HistogramOpts{
 				Name: namePrefix + "response_time_seconds",
 				Help: "Duration of HTTP requests.",
 			},
-			[]string{"path", "method", "code"},
+			[]string{"path", "method", "code", "handler"},
 		),
 	}
 	reg.MustRegister(m.TotalRequests)

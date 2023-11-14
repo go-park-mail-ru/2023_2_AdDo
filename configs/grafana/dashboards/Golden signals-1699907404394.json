@@ -12,7 +12,7 @@
       "name": "VAR_REMO",
       "type": "constant",
       "label": "remo",
-      "value": "",
+      "value": "${VAR_REMO}",
       "description": ""
     }
   ],
@@ -147,7 +147,7 @@
       },
       "gridPos": {
         "h": 7,
-        "w": 8,
+        "w": 9,
         "x": 0,
         "y": 1
       },
@@ -157,7 +157,7 @@
           "calcs": [],
           "displayMode": "list",
           "placement": "right",
-          "showLegend": true
+          "showLegend": false
         },
         "tooltip": {
           "mode": "single",
@@ -171,7 +171,8 @@
             "uid": "prometheus_datasource"
           },
           "editorMode": "code",
-          "expr": "sum by(path) (rate(musicon_requests_total{path=~\"/api/v1/.*\"}[$rate_time]))",
+          "exemplar": false,
+          "expr": "sum(rate(musicon_requests_total{handler!=\"\"}[$rate_interval]))",
           "instant": false,
           "legendFormat": "__auto",
           "range": true,
@@ -211,8 +212,8 @@
       },
       "gridPos": {
         "h": 7,
-        "w": 4,
-        "x": 8,
+        "w": 3,
+        "x": 9,
         "y": 1
       },
       "id": 2,
@@ -238,7 +239,7 @@
             "uid": "prometheus_datasource"
           },
           "editorMode": "code",
-          "expr": "sum(rate(musicon_requests_total{path=~\"/api/v1/.*\"}[$rate_time]))",
+          "expr": "sum(rate(musicon_requests_total{handler!=\"\"}[$rate_interval]))",
           "instant": false,
           "legendFormat": "__auto",
           "range": true,
@@ -246,6 +247,175 @@
         }
       ],
       "title": "RPS",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus_datasource"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "axisSoftMax": 1,
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 0.05
+              }
+            ]
+          },
+          "unit": "percentunit"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 9,
+        "x": 12,
+        "y": 1
+      },
+      "id": 16,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "right",
+          "showLegend": false
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus_datasource"
+          },
+          "editorMode": "code",
+          "expr": "sum(rate(musicon_requests_total{handler!=\"\", code=~\"4..|5..\"}[$rate_interval])) / sum(rate(musicon_requests_total{handler!=\"\"}[$rate_interval]))",
+          "instant": false,
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Errors rate",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus_datasource"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "#EAB839",
+                "value": 0.04
+              },
+              {
+                "color": "red",
+                "value": 0.08
+              }
+            ]
+          },
+          "unit": "percentunit"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 3,
+        "x": 21,
+        "y": 1
+      },
+      "id": 15,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "10.2.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus_datasource"
+          },
+          "editorMode": "code",
+          "expr": "sum(rate(musicon_requests_total{handler!=\"\", code=~\"4..|5..\"}[$rate_interval])) / sum(rate(musicon_requests_total{handler!=\"\"}[$rate_interval]))",
+          "instant": false,
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Errors rate",
       "type": "stat"
     },
     {
@@ -300,27 +470,27 @@
               },
               {
                 "color": "red",
-                "value": 0.05
+                "value": 80
               }
             ]
           },
-          "unit": "percentunit"
+          "unit": "none"
         },
         "overrides": []
       },
       "gridPos": {
         "h": 7,
-        "w": 8,
+        "w": 12,
         "x": 0,
         "y": 8
       },
-      "id": 16,
+      "id": 19,
       "options": {
         "legend": {
           "calcs": [],
           "displayMode": "list",
           "placement": "right",
-          "showLegend": false
+          "showLegend": true
         },
         "tooltip": {
           "mode": "single",
@@ -334,14 +504,15 @@
             "uid": "prometheus_datasource"
           },
           "editorMode": "code",
-          "expr": "sum(rate(musicon_requests_total{path=~\"/api/v1/.*\", code=~\"4..|5..\"}[$rate_time])) / sum(rate(musicon_requests_total{path=~\"/api/v1/.*\"}[$rate_time]))",
+          "exemplar": false,
+          "expr": "sum(rate(musicon_requests_total{handler!=\"\"}[$rate_interval])) by(handler)",
           "instant": false,
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
         }
       ],
-      "title": "Errors rate",
+      "title": "RPS",
       "type": "timeseries"
     },
     {
@@ -349,11 +520,44 @@
         "type": "prometheus",
         "uid": "prometheus_datasource"
       },
-      "description": "",
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "thresholds"
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "axisSoftMax": 1,
+            "axisSoftMin": 0,
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
           },
           "mappings": [],
           "thresholds": {
@@ -365,36 +569,33 @@
               },
               {
                 "color": "red",
-                "value": 80
+                "value": 0.05
               }
             ]
           },
-          "unit": "none"
+          "unit": "percentunit"
         },
         "overrides": []
       },
       "gridPos": {
         "h": 7,
-        "w": 4,
-        "x": 8,
+        "w": 12,
+        "x": 12,
         "y": 8
       },
-      "id": 15,
+      "id": 21,
       "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "right",
+          "showLegend": true
         },
-        "textMode": "auto"
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
       },
-      "pluginVersion": "10.2.0",
       "targets": [
         {
           "datasource": {
@@ -402,7 +603,7 @@
             "uid": "prometheus_datasource"
           },
           "editorMode": "code",
-          "expr": "sum(rate(musicon_requests_total{path=~\"/api/v1/.*\", code=~\"4..|5..\"}[$rate_time])) / sum(rate(musicon_requests_total{path=~\"/api/v1/.*\"}[$rate_time]))",
+          "expr": "sum(rate(musicon_requests_total{handler!=\"\", code=~\"4..|5..\"}[$rate_interval])) by(handler) / sum(rate(musicon_requests_total{handler!=\"\"}[$rate_interval])) by(handler)",
           "instant": false,
           "legendFormat": "__auto",
           "range": true,
@@ -410,7 +611,7 @@
         }
       ],
       "title": "Errors rate",
-      "type": "stat"
+      "type": "timeseries"
     },
     {
       "datasource": {
@@ -477,12 +678,12 @@
         "x": 0,
         "y": 15
       },
-      "id": 17,
+      "id": 18,
       "options": {
         "legend": {
           "calcs": [],
           "displayMode": "list",
-          "placement": "bottom",
+          "placement": "right",
           "showLegend": true
         },
         "tooltip": {
@@ -497,7 +698,102 @@
             "uid": "prometheus_datasource"
           },
           "editorMode": "code",
-          "expr": "sum by(path) (rate(musicon_response_time_seconds_sum{code=~\"2..\"}[15s])) / sum by(path) (rate(musicon_response_time_seconds_count{code=~\"2..\"}[15s])) * 1000",
+          "expr": "histogram_quantile($quantile, sum(rate(musicon_response_time_seconds_bucket{code=~\"2..\", handler!=\"\"}[$rate_interval])) by (le, handler)) * 1000",
+          "instant": false,
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Latency",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus_datasource"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 15
+      },
+      "id": 20,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "right",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus_datasource"
+          },
+          "editorMode": "code",
+          "expr": "sum by(handler) (rate(musicon_response_time_seconds_sum{handler!=\"\", code=~\"2..\"}[$rate_interval])) / sum by(handler) (rate(musicon_response_time_seconds_count{handler!=\"\", code=~\"2..\"}[$rate_interval])) * 1000",
           "instant": false,
           "legendFormat": "__auto",
           "range": true,
@@ -609,7 +905,7 @@
             "uid": "prometheus_datasource"
           },
           "editorMode": "code",
-          "expr": "1 - avg(rate(node_cpu_seconds_total{mode=\"idle\"}[$rate_time]))",
+          "expr": "1 - avg(rate(node_cpu_seconds_total{mode=\"idle\"}[$rate_interval]))",
           "instant": false,
           "legendFormat": "__auto",
           "range": true,
@@ -639,6 +935,10 @@
                 "value": null
               },
               {
+                "color": "#EAB839",
+                "value": 0.6
+              },
+              {
                 "color": "red",
                 "value": 0.75
               }
@@ -650,7 +950,7 @@
       },
       "gridPos": {
         "h": 7,
-        "w": 4,
+        "w": 3,
         "x": 12,
         "y": 24
       },
@@ -677,7 +977,7 @@
             "uid": "prometheus_datasource"
           },
           "editorMode": "code",
-          "expr": "1 - avg(rate(node_cpu_seconds_total{mode=\"idle\"}[$rate_time]))",
+          "expr": "1 - avg(rate(node_cpu_seconds_total{mode=\"idle\"}[$rate_interval]))",
           "instant": false,
           "legendFormat": "__auto",
           "range": true,
@@ -707,6 +1007,10 @@
                 "value": null
               },
               {
+                "color": "#EAB839",
+                "value": 0.6
+              },
+              {
                 "color": "red",
                 "value": 0.75
               }
@@ -718,8 +1022,8 @@
       },
       "gridPos": {
         "h": 7,
-        "w": 4,
-        "x": 16,
+        "w": 3,
+        "x": 15,
         "y": 24
       },
       "id": 10,
@@ -745,7 +1049,7 @@
             "uid": "prometheus_datasource"
           },
           "editorMode": "code",
-          "expr": "1 - avg(rate(node_cpu_seconds_total{mode=\"idle\"}[$rate_time]))",
+          "expr": "1 - avg(rate(node_cpu_seconds_total{mode=\"idle\"}[$rate_interval]))",
           "instant": false,
           "legendFormat": "__auto",
           "range": true,
@@ -785,7 +1089,7 @@
       "gridPos": {
         "h": 7,
         "w": 3,
-        "x": 20,
+        "x": 18,
         "y": 24
       },
       "id": 9,
@@ -819,6 +1123,69 @@
         }
       ],
       "title": "CPU cores",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus_datasource"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "dark-blue",
+                "value": null
+              }
+            ]
+          },
+          "unit": "bytes"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 3,
+        "x": 21,
+        "y": 24
+      },
+      "id": 13,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "10.2.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus_datasource"
+          },
+          "editorMode": "code",
+          "expr": "node_filesystem_size_bytes{instance=\"node-exporter:9100\",job=\"node-exporter\",mountpoint=\"/\",fstype!=\"rootfs\"}",
+          "instant": false,
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "RootFS Total",
       "type": "stat"
     },
     {
@@ -936,8 +1303,12 @@
                 "value": null
               },
               {
-                "color": "red",
+                "color": "#EAB839",
                 "value": 0.8
+              },
+              {
+                "color": "red",
+                "value": 0.9
               }
             ]
           },
@@ -947,7 +1318,7 @@
       },
       "gridPos": {
         "h": 7,
-        "w": 4,
+        "w": 3,
         "x": 12,
         "y": 31
       },
@@ -974,7 +1345,7 @@
             "uid": "prometheus_datasource"
           },
           "editorMode": "code",
-          "expr": "((avg_over_time(node_memory_MemTotal_bytes[$rate_time]) - avg_over_time(node_memory_MemFree_bytes[$rate_time])) / (avg_over_time(node_memory_MemTotal_bytes[$rate_time]) ))",
+          "expr": "((avg_over_time(node_memory_MemTotal_bytes[$rate_interval]) - avg_over_time(node_memory_MemFree_bytes[$rate_interval])) / (avg_over_time(node_memory_MemTotal_bytes[$rate_interval]) ))",
           "instant": false,
           "legendFormat": "__auto",
           "range": true,
@@ -1003,8 +1374,12 @@
                 "value": null
               },
               {
-                "color": "red",
+                "color": "#EAB839",
                 "value": 0.8
+              },
+              {
+                "color": "red",
+                "value": 0.9
               }
             ]
           },
@@ -1014,8 +1389,8 @@
       },
       "gridPos": {
         "h": 7,
-        "w": 4,
-        "x": 16,
+        "w": 3,
+        "x": 15,
         "y": 31
       },
       "id": 11,
@@ -1041,7 +1416,7 @@
             "uid": "prometheus_datasource"
           },
           "editorMode": "code",
-          "expr": "((avg_over_time(node_memory_MemTotal_bytes[$rate_time]) - avg_over_time(node_memory_MemFree_bytes[$rate_time])) / (avg_over_time(node_memory_MemTotal_bytes[$rate_time]) ))",
+          "expr": "((avg_over_time(node_memory_MemTotal_bytes[$rate_interval]) - avg_over_time(node_memory_MemFree_bytes[$rate_interval])) / (avg_over_time(node_memory_MemTotal_bytes[$rate_interval]) ))",
           "instant": false,
           "legendFormat": "__auto",
           "range": true,
@@ -1078,7 +1453,7 @@
       "gridPos": {
         "h": 7,
         "w": 3,
-        "x": 20,
+        "x": 18,
         "y": 31
       },
       "id": 12,
@@ -1129,69 +1504,6 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "dark-blue",
-                "value": null
-              }
-            ]
-          },
-          "unit": "bytes"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 6,
-        "w": 3,
-        "x": 0,
-        "y": 38
-      },
-      "id": 13,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "auto"
-      },
-      "pluginVersion": "10.2.0",
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus_datasource"
-          },
-          "editorMode": "code",
-          "expr": "node_filesystem_size_bytes{instance=\"node-exporter:9100\",job=\"node-exporter\",mountpoint=\"/\",fstype!=\"rootfs\"}",
-          "instant": false,
-          "legendFormat": "__auto",
-          "range": true,
-          "refId": "A"
-        }
-      ],
-      "title": "RootFS Total",
-      "type": "stat"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus_datasource"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
                 "color": "green",
                 "value": null
               },
@@ -1210,10 +1522,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 6,
+        "h": 7,
         "w": 3,
-        "x": 3,
-        "y": 38
+        "x": 21,
+        "y": 31
       },
       "id": 14,
       "options": {
@@ -1238,7 +1550,7 @@
             "uid": "prometheus_datasource"
           },
           "editorMode": "code",
-          "expr": "100 - ((avg_over_time(node_filesystem_avail_bytes{job=\"node-exporter\",mountpoint=\"/\",fstype!=\"rootfs\"}[$rate_time]) * 100) / avg_over_time(node_filesystem_size_bytes{job=\"node-exporter\",mountpoint=\"/\",fstype!=\"rootfs\"}[$rate_time]))",
+          "expr": "100 - ((avg_over_time(node_filesystem_avail_bytes{job=\"node-exporter\",mountpoint=\"/\",fstype!=\"rootfs\"}[$rate_interval]) * 100) / avg_over_time(node_filesystem_size_bytes{job=\"node-exporter\",mountpoint=\"/\",fstype!=\"rootfs\"}[$rate_interval]))",
           "instant": false,
           "legendFormat": "__auto",
           "range": true,
@@ -1249,7 +1561,7 @@
       "type": "gauge"
     }
   ],
-  "refresh": "",
+  "refresh": false,
   "schemaVersion": 38,
   "tags": [],
   "templating": {
@@ -1257,20 +1569,20 @@
       {
         "current": {
           "selected": false,
-          "text": "30s",
-          "value": "30s"
+          "text": "15m",
+          "value": "15m"
         },
         "hide": 0,
-        "label": "rate_time",
-        "name": "rate_time",
+        "label": "Rate interval",
+        "name": "rate_interval",
         "options": [
           {
             "selected": true,
-            "text": "30s",
-            "value": "30s"
+            "text": "15m",
+            "value": "15m"
           }
         ],
-        "query": "30s",
+        "query": "15m",
         "skipUrlSync": false,
         "type": "textbox"
       },
@@ -1292,17 +1604,37 @@
             "selected": false
           }
         ]
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "0.95",
+          "value": "0.95"
+        },
+        "hide": 0,
+        "label": "Quantile",
+        "name": "quantile",
+        "options": [
+          {
+            "selected": true,
+            "text": "0.95",
+            "value": "0.95"
+          }
+        ],
+        "query": "0.95",
+        "skipUrlSync": false,
+        "type": "textbox"
       }
     ]
   },
   "time": {
-    "from": "now-15m",
+    "from": "now-5m",
     "to": "now"
   },
   "timepicker": {},
   "timezone": "",
-  "title": "Golden signals",
-  "uid": "dae7c391-e2e1-443a-8979-012b4d4e7c01",
-  "version": 10,
+  "title": "Golden signal",
+  "uid": "dae7c391-e2e1-443a-8979-012b4d4e7c011",
+  "version": 5,
   "weekStart": ""
 }
