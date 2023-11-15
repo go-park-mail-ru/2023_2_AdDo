@@ -1,0 +1,44 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: playlist
+  labels:
+    app: playlist-svc
+  namespace: musicon
+spec:
+  clusterIP: None
+  ports:
+  - port: 8085
+    name: playlist
+  selector:
+    app: playlist-svc
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: playlist-deploy
+  labels:
+    app: playlist-svc
+  namespace: musicon
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: playlist-svc
+  template:
+    metadata:
+      labels:
+        app: playlist-svc
+      namespace: musicon
+    spec:
+      imagePullSecrets:
+        - name: regcred
+      containers:
+      - name: playlist
+        image: registry.musicon.space/playlist:1.0
+        imagePullPolicy: IfNotPresent
+        command: ["/playlist"]
+        env:
+        - name: DATABASE_URL
+          value: "postgres://musicon:musicon@musicon.space:5432/musicon"
