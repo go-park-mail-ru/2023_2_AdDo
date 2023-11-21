@@ -1,0 +1,25 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: musicon-ingress
+  # annotations:
+  #   cert-manager.io/cluster-issuer: letsencrypt
+  namespace: musicon
+spec:
+  # tls:
+  # - hosts:
+  #   - backend.musicon.space
+  #   secretName: musicon-tls
+  ingressClassName: nginx
+  rules:
+  - host: backend.musicon.space
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/"
+        backend:
+          service:
+            name: entrypoint
+            port:
+              number: 8080
