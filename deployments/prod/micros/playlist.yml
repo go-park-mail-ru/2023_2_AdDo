@@ -36,9 +36,9 @@ spec:
         - name: regcred
       containers:
       - name: playlist
-        image: registry.musicon.space/playlist:1.0
-        imagePullPolicy: IfNotPresent
+        image: registry.musicon.space/playlist
+        imagePullPolicy: Always
         command: ["/playlist"]
         env:
         - name: DATABASE_URL
-          value: "postgres://musicon:musicon@musicon.space:5432/musicon"
+          value: "postgres://musicon@musicon.space:5433/musicon"

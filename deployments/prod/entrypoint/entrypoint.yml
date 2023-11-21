@@ -1,0 +1,79 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: entrypoint-deploy
+  labels:
+    app: entrypoint-svc
+  namespace: musicon
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: entrypoint-svc
+  template:
+    metadata:
+      labels:
+        app: entrypoint-svc
+      namespace: musicon
+    spec:
+      imagePullSecrets:
+        - name: regcred
+      containers:
+      - name: entrypoint
+        image: registry.musicon.space/entrypoint
+        imagePullPolicy: Always
+        command: ["/entrypoint"]
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: entrypoint
+  labels:
+    app: entrypoint-svc
+  namespace: musicon
+spec:
+  clusterIP: None
+  ports:
+  - port: 8080
+    name: entrypoint
+  selector:
+    app: entrypoint-svc
+# ---
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   name: entrypoint-service
+#   namespace: musicon
+# spec:
+#   type: LoadBalancer
+#   selector:
+#     app: entrypoint-svc
+#   ports:
+#     - port: 8080 
+#       targetPort: 8080
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: musicon-ingress
+  # annotations:
+  #   cert-manager.io/cluster-issuer: letsencrypt
+  namespace: musicon
+spec:
+  # tls:
+  # - hosts:
+  #   - backend.musicon.space
+  #   secretName: musicon-tls
+  ingressClassName: nginx
+  rules:
+  - host: backend.musicon.space
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/"
+        backend:
+          service:
+            name: entrypoint
+            port:
+              number: 8080
