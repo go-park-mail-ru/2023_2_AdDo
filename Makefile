@@ -2,7 +2,6 @@
 		integration-test
 		mocks-gen
 		mocks-clean
-		clean
 
 # Запуск юнит-тестов в файл
 unit-test:
@@ -22,7 +21,3 @@ integration-test:
 	$(CURDIR)/scripts/docker-base-build.sh
 	$(CURDIR)/scripts/docker-services-build.sh test
 	$(CURDIR)/scripts/integration-test.sh
-
-# Удаление всех контейнеров, образов, сетей и вольюмов на хосте!
-hard-clean:
-	$(CURDIR)/scripts/docker-hard-clean.sh
