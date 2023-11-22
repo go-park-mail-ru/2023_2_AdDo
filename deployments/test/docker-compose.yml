@@ -37,8 +37,8 @@ services:
     restart: always
     image: postgres:14
     volumes:
-      -  ../../db/migrations/db_schema.sql:/docker-entrypoint-initdb.d/db_schema.sql
-      -  ../../db/fill_data/data_filling.sql:/docker-entrypoint-initdb.d/data_filling.sql
+      -  ../../db/migrations/db_schema.sql:/docker-entrypoint-initdb.d/migration_1.sql
+      -  ../../db/fill_data/data_filling.sql:/docker-entrypoint-initdb.d/migration_2.sql
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_DB: ${POSTGRES_DB}
