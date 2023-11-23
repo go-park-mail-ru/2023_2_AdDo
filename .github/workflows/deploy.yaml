@@ -1,8 +1,8 @@
-name: ci/cd
+name: continuous-deployment
 
 on:
   push:
-    branches: [main, PK-2, pipeline-fix]
+    branches: [main, PK-3]
   pull_request:
     types: [opened, reopened, closed]
 
@@ -11,16 +11,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-
       - name: Build base image
         run: docker build -t registry.musicon.space/base -f build/package/base/Dockerfile .
-
       - name: Build micros image
         run: build/ci/scripts/build/build_micros.sh
-
       - uses: actions/upload-artifact@v3
         with:
           name: images
@@ -28,7 +24,6 @@ jobs:
           retention-days: 1
 
   lint:
-    needs: build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -43,7 +38,7 @@ jobs:
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v3
         with:
-          version: latest
+          version: v1.54
           skip-pkg-cache: true
           skip-build-cache: true
   
@@ -72,30 +67,21 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-
       - name: Download artifact
         uses: actions/download-artifact@v2
         with:
           name: images
           path: /tmp/images/
-      
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-
       - name: Load docker images
         run: build/ci/scripts/load/load_micros.sh test
-
-      - name: Docker images
-        run: docker images
-
       - name: Setup python3
         uses: actions/setup-python@v4
         with:
           python-version: '3.10' 
-
       - name: Install python dependencies
         run: pip3 install requests names
-
       - name: Run integration test
         run: scripts/integration-test.sh 
 
@@ -107,147 +93,71 @@ jobs:
       - integration-test
     runs-on: ubuntu-latest
     steps:
+      - name: Set release tag env var
+        run: echo "RELEASE_TAG=${{ github.ref_name }}.$(date +'%Y-%m-%dT%H-%M-%S')" >> $GITHUB_ENV
+      - name: Write release tag in release_tag.txt
+        run: touch release_tag.txt && echo ${{ env.RELEASE_TAG }} > release_tag.txt
+      - uses: actions/upload-artifact@v3
+        with:
+          name: release_tag
+          path: release_tag.txt
+          retention-days: 1
       - uses: actions/checkout@v3
-
       - name: Download artifact
         uses: actions/download-artifact@v2
         with:
           name: images
           path: /tmp/images/
-
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-
       - name: Login to Private Docker Registry
         uses: docker/login-action@v1
         with:
           registry: registry.musicon.space
           username: ${{ secrets.REGISTRY_USERNAME }}
           password: ${{ secrets.REGISTRY_PASSWORD }}  
-      
       - name: Publish docker images
-        run: build/ci/scripts/publish/publish_micros.sh latest
+        run: build/ci/scripts/publish/publish_micros.sh ${{ env.RELEASE_TAG }}
 
   deploy:
+    name: deploy
+    # if: github.ref == 'refs/heads/master'
     if: github.event.pull_request.merged == true
-    # if: github.ref == 'refs/heads/main'
-    needs:
-      - publish
+    needs: publish
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - name: Copy repository content to VM
-        uses: appleboy/scp-action@master
+      - name: Download artifact
+        uses: actions/download-artifact@v2
         with:
-          HOST: ${{ secrets.HOST }}
-          USERNAME: ${{ secrets.USERNAME }}
-          PORT: ${{ secrets.PORT }}
-          PASSWORD: ${{ secrets.PASSWORD }}
-          source: "."
-          target: ~/addo-backend
-      - name: Executing remote command
-        uses: appleboy/ssh-action@master
+          name: release_tag
+      - name: Set release tag env var
+        run: echo "RELEASE_TAG=$(cat release_tag.txt)" >> $GITHUB_ENV
+      - name: Set the Kubernetes context
+        uses: azure/k8s-set-context@v2
         with:
-          HOST: ${{ secrets.HOST }}
-          USERNAME: ${{ secrets.USERNAME }}
-          PORT: ${{ secrets.PORT }}
-          PASSWORD: ${{ secrets.PASSWORD }}
-          script:  |
-            cd addo-backend
-            docker login registry.musicon.space ${{ secrets.REGISTRY_USERNAME }} ${{ secrets.REGISTRY_PASSWORD }}
-            make deploy
-
-
-#   build:
-#     runs-on: ubuntu-latest
-#     steps:
-#       - uses: actions/checkout@v3
-# 
-#       - name: Set up Docker Buildx
-#         uses: docker/setup-buildx-action@v3
-#       - name: Build base image
-#         uses: docker/build-push-action@v2
-#         with:
-#           context: .
-#           file: ./build/package/base/Dockerfile
-#           load: true
-#           tags: musicon-base:latest
-#       
-#       - name: Inspect
-#         run: |
-#           docker image inspect musicon-base:latest
-# 
-#       - name: Build album image
-#         uses: docker/build-push-action@v2
-#         with:
-#           context: .
-#           file: ./build/package/album/Dockerfile
-#           tags: album:latest
-#           outputs: type=docker,dest=/tmp/album.tar
-# 
-#       - name: Build artist image
-#         uses: docker/build-push-action@v2
-#         with:
-#           context: .
-#           file: ./build/package/artist/Dockerfile
-#           tags: artist:latest
-#           outputs: type=docker,dest=/tmp/artist.tar
-# 
-#       - name: Build entrypoint image
-#         uses: docker/build-push-action@v2
-#         with:
-#           context: .
-#           file: ./build/package/entrypoint/Dockerfile
-#           tags: entrypoint:latest
-#           outputs: type=docker,dest=/tmp/entrypoint.tar
-# 
-#       - name: Build images image
-#         uses: docker/build-push-action@v2
-#         with:
-#           context: .
-#           file: ./build/package/images/Dockerfile
-#           tags: images:latest
-#           outputs: type=docker,dest=/tmp/images.tar
-# 
-#       - name: Build playlist image
-#         uses: docker/build-push-action@v2
-#         with:
-#           context: .
-#           file: ./build/package/playlist/Dockerfile
-#           tags: playlist:latest
-#           outputs: type=docker,dest=/tmp/playlist.tar
-# 
-#       - name: Build session image
-#         uses: docker/build-push-action@v2
-#         with:
-#           context: .
-#           file: ./build/package/session/Dockerfile
-#           tags: session:latest
-#           outputs: type=docker,dest=/tmp/session.tar
-# 
-#       - name: Build track image
-#         uses: docker/build-push-action@v2
-#         with:
-#           context: .
-#           file: ./build/package/track/Dockerfile
-#           tags: track:latest
-#           outputs: type=docker,dest=/tmp/track.tar
-# 
-#       - name: Build user image
-#         uses: docker/build-push-action@v2
-#         with:
-#           context: .
-#           file: ./build/package/user/Dockerfile
-#           tags: user:latest
-#           outputs: type=docker,dest=/tmp/user.tar
-# 
-#   lint:
-#     runs-on: ubuntu-latest
-#     steps:
-#     - uses: actions/checkout@v3
-#     - name: golangci-lint
-#       uses: golangci/golangci-lint-action@v3
-#       with:
-#         version: latest
-#         skip-pkg-cache: true
-#         skip-build-cache: true
+          method: service-account
+          k8s-url: https://185.151.147.27:6443
+          k8s-secret: ${{ secrets.KUBERNETES_SECRET }}
+      - name: Checkout source code
+        uses: actions/checkout@v3
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v3
+        id: install
+      - name: Deploy to the Kubernetes cluster
+        uses: azure/k8s-deploy@v4
+        with:
+          namespace: musicon
+          manifests: |
+            deployments/prod/entrypoint
+            deployments/prod/redis
+            deployments/prod/micros
+          images: |
+            registry.musicon.space/entrypoint:${{ env.RELEASE_TAG }}
+            registry.musicon.space/album:${{ env.RELEASE_TAG }}
+            registry.musicon.space/artist:${{ env.RELEASE_TAG }}
+            registry.musicon.space/images:${{ env.RELEASE_TAG }}
+            registry.musicon.space/playlist:${{ env.RELEASE_TAG }}
+            registry.musicon.space/session:${{ env.RELEASE_TAG }}
+            registry.musicon.space/track:${{ env.RELEASE_TAG }}
+            registry.musicon.space/user:${{ env.RELEASE_TAG }}
+          imagepullsecrets: regcred
