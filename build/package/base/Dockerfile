@@ -5,7 +5,11 @@ WORKDIR /source
 ENV CGO_ENABLED 0
 ENV GOOS linux
 
-COPY . .
+COPY init init
+COPY internal internal
+COPY cmd cmd
+COPY api api
+COPY go.mod go.sum ./
 
 RUN go mod download \
     && go mod tidy \
