@@ -9,7 +9,7 @@ import (
 
 func NewCors() mux.MiddlewareFunc {
 	return handlers.CORS(
-		handlers.AllowedOrigins([]string{"musicon.space", "www.musicon.space"}),
+		handlers.AllowedOrigins([]string{"musicon.space", "www.musicon.space", "survey.musicon.space"}),
 		handlers.AllowedMethods([]string{"POST", "GET", "PUT", "DELETE", "OPTIONS"}),
 		handlers.AllowedHeaders([]string{"Content-Type", "X-Csrf-Token"}),
 		handlers.ExposedHeaders([]string{session.CookieName}),

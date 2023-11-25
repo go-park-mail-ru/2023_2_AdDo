@@ -42,7 +42,7 @@ func SerializeUint64ToString(in map[uint64]string) []*survey_proto.Uint64ToStrin
 
 func SerializeStringToUint64(in map[string]uint64) []*survey_proto.StringToUint64 {
 	answers := make([]*survey_proto.StringToUint64, len(in))
-	for questionId, answerText := range in {
+	for answerText, questionId := range in {
 		answers = append(answers, &survey_proto.StringToUint64{
 			Key:   answerText,
 			Value: questionId,

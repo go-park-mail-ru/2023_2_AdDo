@@ -81,7 +81,7 @@ func main() {
 		logger.Fatalln("error connecting to images micros ", err)
 	}
 
-	surveyConnection, err := grpc.Dial("images:8088", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	surveyConnection, err := grpc.Dial("survey:8088", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		logger.Fatalln("error connecting to survey micros ", err)
 	}
