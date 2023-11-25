@@ -7,6 +7,7 @@ import (
 	log "main/internal/common/logger"
 	modify_playlist "main/internal/common/middleware/playlist_middleware/modify"
 	read_playlist "main/internal/common/middleware/playlist_middleware/read"
+	check_vote "main/internal/common/middleware/survey_middleware"
 	proto2 "main/internal/microservices/album/proto"
 	grpc_album "main/internal/microservices/album/service/client"
 	artist "main/internal/microservices/artist/proto"
@@ -24,6 +25,7 @@ import (
 	album_delivery "main/internal/pkg/album/delivery/http"
 	artist_delivery "main/internal/pkg/artist/delivery/http"
 	playlist_delivery "main/internal/pkg/playlist/delivery/http"
+	survey_delivery "main/internal/pkg/survey/delivery"
 	track_delivery "main/internal/pkg/track/delivery/http"
 	user_delivery "main/internal/pkg/user/delivery/http"
 	"net/http"
@@ -91,10 +93,12 @@ func main() {
 	userHandler := user_delivery.NewHandler(&userAgent, &sessionAgent, logger)
 	trackHandler := track_delivery.NewHandler(&trackAgent, &sessionAgent, logger)
 	playlistHandler := playlist_delivery.NewHandler(&playlistAgent, &sessionAgent, logger)
+	surveyHandler := survey_delivery.NewHandler(&surveyAgent, &sessionAgent)
 	logger.Infoln("Deliveries initialized")
 
 	modifyPlaylistMiddleware := modify_playlist.NewMiddleware(&playlistAgent, &sessionAgent, logger)
 	readPlaylistMiddleware := read_playlist.NewMiddleware(&playlistAgent, logger)
+	checkVoteMiddleware := check_vote.NewMiddleware(&surveyAgent)
 	corsMiddleware := middleware.NewCors()
 	csrfMiddleware := middleware.NewCSRF()
 
@@ -130,6 +134,7 @@ func main() {
 			router_init.NewRoute("/artist/{id}/unlike", artistHandler.Unlike, http.MethodDelete),
 			router_init.NewRoute("/artist/{id}", artistHandler.ArtistInfo, http.MethodGet),
 			router_init.NewRoute("/playlist", playlistHandler.Create, http.MethodPost),
+			router_init.NewRoute("/survey/{id}/is_submit", surveyHandler.IsSubmit, http.MethodGet),
 		},
 		Prefix: "/api/v1",
 		Middlewares: []mux.MiddlewareFunc{
@@ -165,7 +170,19 @@ func main() {
 					modifyPlaylistMiddleware.ModifyPlaylistAccess,
 				},
 				SubRouterConfigs: nil,
-			}},
+			},
+
+			router_init.Config{
+				Routes: []router_init.Route{
+					router_init.NewRoute("/survey/submit/{id}", surveyHandler.Submit, http.MethodPost),
+				},
+				Prefix: "",
+				Middlewares: []mux.MiddlewareFunc{
+					checkVoteMiddleware.CheckUserVote,
+				},
+				SubRouterConfigs: nil,
+			},
+		},
 	}
 	router := router_init.New(routerConfig, logger)
 

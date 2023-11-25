@@ -20,7 +20,6 @@ type UseCase interface {
 
 type Repository interface {
 	SubmitSurveyAnswers(userId string, surveyId uint64, answers map[uint64]string) error
-	SubmitSurveyAnswers(userId string, surveyId uint64, answers map[uint64]string) error
 	IsUserSubmitSurvey(userId string, surveyId uint64) (bool, error)
 	GetSurveyStats(surveyId uint64) (StatResponse, error)
 	Get(surveyId uint64) (Response, error)
