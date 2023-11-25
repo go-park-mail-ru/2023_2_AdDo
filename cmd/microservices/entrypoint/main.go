@@ -18,6 +18,7 @@ import (
 	grpc_playlist "main/internal/microservices/playlist/service/client"
 	session2 "main/internal/microservices/session/proto"
 	grpc_session "main/internal/microservices/session/service/client"
+	proto5 "main/internal/microservices/survey/proto"
 	"main/internal/microservices/track/proto"
 	grpc_track "main/internal/microservices/track/service/client"
 	user_client "main/internal/microservices/user/proto"
@@ -79,6 +80,11 @@ func main() {
 		logger.Fatalln("error connecting to images micros ", err)
 	}
 
+	surveyConnection, err := grpc.Dial("images:8088", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		logger.Fatalln("error connecting to survey micros ", err)
+	}
+
 	imageAgent := grpc_image.NewClient(proto4.NewImageServiceClient(imageConnection), logger)
 	userAgent := grpc_user.NewClient(user_client.NewUserServiceClient(userConnection), imageAgent, logger)
 	sessionAgent := grpc_session.NewClient(session2.NewSessionServiceClient(sessionConnection), logger)
@@ -86,6 +92,7 @@ func main() {
 	albumAgent := grpc_album.NewClient(proto2.NewAlbumServiceClient(albumConnection), logger)
 	playlistAgent := grpc_playlist.NewClient(userAgent, proto3.NewPlaylistServiceClient(playlistConnection), imageAgent, logger)
 	artistAgent := grpc_artist.NewClient(artist.NewArtistServiceClient(artistConnection), logger)
+	surveyAgent := grpc_survey.NewClient(proto5.NewSurveyServiceClient(surveyConnection), logger)
 	logger.Infoln("Clients to micros initialized")
 
 	albumHandler := album_delivery.NewHandler(&trackAgent, &albumAgent, &sessionAgent, logger)
@@ -93,7 +100,7 @@ func main() {
 	userHandler := user_delivery.NewHandler(&userAgent, &sessionAgent, logger)
 	trackHandler := track_delivery.NewHandler(&trackAgent, &sessionAgent, logger)
 	playlistHandler := playlist_delivery.NewHandler(&playlistAgent, &sessionAgent, logger)
-	surveyHandler := survey_delivery.NewHandler(&surveyAgent, &sessionAgent)
+	surveyHandler := survey_delivery.NewHandler(&surveyAgent, &sessionAgent, logger)
 	logger.Infoln("Deliveries initialized")
 
 	modifyPlaylistMiddleware := modify_playlist.NewMiddleware(&playlistAgent, &sessionAgent, logger)

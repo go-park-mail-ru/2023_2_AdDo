@@ -18,12 +18,12 @@ message Uint64ToString {
 }
 
 message StringToUint64 {
-  string value = 1;
-  uint64 key = 2;
+  string key = 1;
+  uint64 value = 2;
 }
 
 message Survey {
-  UserSurvey survey = 1;
+  UserSurvey userSurvey = 1;
   repeated Uint64ToString answers = 2;
 }
 
@@ -33,7 +33,7 @@ message UserSurvey {
 }
 
 message SurveyId {
-  string surveyId = 1;
+  uint64 surveyId = 1;
 }
 
 message IsOk {
