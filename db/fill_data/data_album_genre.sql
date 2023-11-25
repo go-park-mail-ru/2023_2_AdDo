@@ -1,0 +1,22 @@
+INSERT INTO album_genre ( album_id, genre_id ) VALUES
+( ( SELECT id FROM album WHERE name = 'Gospel' ), ( SELECT id FROM genre WHERE name = 'rap' ) ),
+( ( SELECT id FROM album WHERE name = 'Last One Standing' ), ( SELECT id FROM genre WHERE name = 'rap' ) ),
+( ( SELECT id FROM album WHERE name = 'Killer' ), ( SELECT id FROM genre WHERE name = 'rap' ) ),
+( ( SELECT id FROM album WHERE name = 'Music To Be Murdered By - Side B' ), ( SELECT id FROM genre WHERE name = 'foreignrap' ) ),
+( ( SELECT id FROM album WHERE name = 'The Adventures Of Moon Man & Slim Shady' ), ( SELECT id FROM genre WHERE name = 'rap' ) ),
+( ( SELECT id FROM album WHERE name = 'Music To Be Murdered By' ), ( SELECT id FROM genre WHERE name = 'foreignrap' ) ),
+( ( SELECT id FROM album WHERE name = 'Bang' ), ( SELECT id FROM genre WHERE name = 'foreignrap' ) ),
+( ( SELECT id FROM album WHERE name = 'Killshot' ), ( SELECT id FROM genre WHERE name = 'foreignrap' ) ),
+( ( SELECT id FROM album WHERE name = 'Kamikaze' ), ( SELECT id FROM genre WHERE name = 'foreignrap' ) ),
+( ( SELECT id FROM album WHERE name = 'Nowhere Fast' ), ( SELECT id FROM genre WHERE name = 'rap' ) ),
+( ( SELECT id FROM album WHERE name = 'Chloraseptic' ), ( SELECT id FROM genre WHERE name = 'rap' ) ),
+( ( SELECT id FROM album WHERE name = 'Revival' ), ( SELECT id FROM genre WHERE name = 'foreignrap' ) ),
+( ( SELECT id FROM album WHERE name = 'Campaign Speech' ), ( SELECT id FROM genre WHERE name = 'foreignrap' ) ),
+( ( SELECT id FROM album WHERE name = 'Detroit Vs. Everybody' ), ( SELECT id FROM genre WHERE name = 'foreignrap' ) ),
+( ( SELECT id FROM album WHERE name = 'Twerk Dat Pop That (feat. Eminem & Royce da 5''9")' ), ( SELECT id FROM genre WHERE name = 'foreignrap' ) ),
+( ( SELECT id FROM album WHERE name = 'Twerk Dat Pop That (Clean) [feat. Eminem & Royce da 5''9"]' ), ( SELECT id FROM genre WHERE name = 'foreignrap' ) ),
+( ( SELECT id FROM album WHERE name = 'The Marshall Mathers LP2' ), ( SELECT id FROM genre WHERE name = 'foreignrap' ) ),
+( ( SELECT id FROM album WHERE name = 'My Life' ), ( SELECT id FROM genre WHERE name = 'foreignrap' ) ),
+( ( SELECT id FROM album WHERE name = 'I Need A Doctor' ), ( SELECT id FROM genre WHERE name = 'electronics' ) ),
+( ( SELECT id FROM album WHERE name = 'Recovery' ), ( SELECT id FROM genre WHERE name = 'foreignrap' ) )
+;

@@ -55,6 +55,12 @@ func (p Postgres) GetByLikeCount(limit uint32) ([]album.Base, error) {
 	return p.getWithQuery(context.Background(), query, limit)
 }
 
+func (p Postgres) Search(text string, limit uint32) ([]album.Base, error) {
+	p.logger.Infoln("Album Repo Search entered")
+	query := "select album.id, name, preview from album where to_tsvector('russian', album.name) @@ to_tsquery('russian', $1) limit $2"
+	return p.getWithQuery(context.Background(), query, text, limit)
+}
+
 func (p Postgres) Get(albumId uint64) (album.Base, error) {
 	p.logger.Infoln("Album Repo Get entered")
 

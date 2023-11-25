@@ -8,6 +8,7 @@
 *.so
 *.dylib
 
+test/testsuite/__pycache__
 # Test binary, built with `go test -c`
 *.test
 

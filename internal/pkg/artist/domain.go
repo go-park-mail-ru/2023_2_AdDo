@@ -34,4 +34,5 @@ type Repository interface {
 	CreateLike(userId string, artistId uint64) error
 	CheckLike(userId string, artistId uint64) (bool, error)
 	DeleteLike(userId string, artistId uint64) error
+	Search(text string) ([]Base, error)
 }

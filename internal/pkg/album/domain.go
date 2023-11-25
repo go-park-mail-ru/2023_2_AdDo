@@ -43,6 +43,7 @@ type Repository interface {
 	CreateLike(userId string, albumId uint64) error
 	CheckLike(userId string, albumId uint64) (bool, error)
 	DeleteLike(userId string, albumId uint64) error
+	Search(text string) ([]Base, error)
 }
 
 const LimitForMainPage = 10
