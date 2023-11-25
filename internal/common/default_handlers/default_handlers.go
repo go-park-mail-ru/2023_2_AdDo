@@ -17,3 +17,7 @@ func Forbidden(w http.ResponseWriter, r *http.Request) error {
 func BadRequest(w http.ResponseWriter, r *http.Request) error {
 	return common_handler.StatusError{Code: http.StatusBadRequest, Err: errors.New("have no useful params")}
 }
+
+func Internal(w http.ResponseWriter, r *http.Request) error {
+	return common_handler.StatusError{Code: http.StatusInternalServerError, Err: errors.New("internal error")}
+}
