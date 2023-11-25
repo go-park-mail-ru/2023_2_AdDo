@@ -117,3 +117,24 @@ create table if not exists profile_playlist (
     foreign key (playlist_id) references playlist (id) on delete cascade,
     constraint unique_profile_playlist UNIQUE (profile_id, playlist_id)
 );
+
+create table if not exists survey (
+    id serial primary key,
+    title text unique not null
+);
+
+create table if not exists survey_question (
+    id serial primary key,
+    title text unique not null,
+    survey_id int not null,
+    foreign key (survey_id) references survey (id) on delete cascade
+);
+
+create table if not exists survey_answer (
+    id serial primary key,
+    profile_id uuid not null,
+    foreign key (profile_id) references profile (id) on delete cascade,
+    question_id int not null,
+    foreign key (question_id) references survey_question (id) on delete cascade,
+    answer int not null
+);
