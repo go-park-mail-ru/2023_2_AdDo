@@ -14,14 +14,15 @@ type UseCase interface {
 	SubmitSurvey(userId string, surveyId uint64, answer map[uint64]string) error
 	IsSubmit(userId string, surveyId uint64) (bool, error)
 	GetSurveyStats(surveyId uint64) (StatResponse, error)
-	Get(id uint64) (Response, error)
+	Get(surveyId uint64) (Response, error)
 	GetAllStats() ([]StatResponse, error)
 }
 
 type Repository interface {
 	SubmitSurveyAnswers(userId string, surveyId uint64, answers map[uint64]string) error
+	SubmitSurveyAnswers(userId string, surveyId uint64, answers map[uint64]string) error
 	IsUserSubmitSurvey(userId string, surveyId uint64) (bool, error)
 	GetSurveyStats(surveyId uint64) (StatResponse, error)
-	Get(id uint64) (Response, error)
+	Get(surveyId uint64) (Response, error)
 	GetAllStats() ([]StatResponse, error)
 }

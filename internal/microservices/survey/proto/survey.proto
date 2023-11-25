@@ -3,19 +3,53 @@ syntax = "proto3";
 option go_package = "main/internal/microservices/survey/proto";
 
 import "google/protobuf/empty.proto";
-import "session.proto";
 //    protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative -I ../proto -I../../session/proto  survey.proto
 service SurveyService {
-  rpc Submit(Survey) returns (google.protobuf.Empty) {}
+  rpc SubmitSurvey(Survey) returns (google.protobuf.Empty) {}
+  rpc IsSubmit(UserSurvey) returns (IsOk) {}
+  rpc GetSurveyStats(SurveyId) returns (StatResponse) {}
+  rpc Get(SurveyId) returns (Response) {} 
+  rpc GetAllStats(google.protobuf.Empty) returns (StatResponses) {} 
 }
 
-message Answer {
-  string questionId = 1;
-  string answerText = 2;
+message Uint64ToString {
+  uint64 key = 1;
+  string value = 2;
+}
+
+message StringToUint64 {
+  string value = 1;
+  uint64 key = 2;
 }
 
 message Survey {
-  UserId userId = 1;
-  string surveyId = 2; 
-  repeated Answer answers = 3;
+  UserSurvey survey = 1;
+  repeated Uint64ToString answers = 2;
+}
+
+message UserSurvey {
+  string userId = 1;
+  uint64 surveyId = 2; 
+}
+
+message SurveyId {
+  string surveyId = 1;
+}
+
+message IsOk {
+  bool ok = 1;
+}
+
+message StatResponse {
+  uint64 surveyId = 1;
+  repeated StringToUint64 questionToAverage = 2;
+}
+
+message StatResponses {
+  repeated StatResponse statResponses = 1;
+}
+
+message Response {
+  uint64 surveyId = 1;
+  repeated Uint64ToString questionIdToText = 2;
 }
