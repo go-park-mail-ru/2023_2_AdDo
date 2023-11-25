@@ -26,6 +26,7 @@ import (
 	album_delivery "main/internal/pkg/album/delivery/http"
 	artist_delivery "main/internal/pkg/artist/delivery/http"
 	playlist_delivery "main/internal/pkg/playlist/delivery/http"
+	survey_delivery "main/internal/pkg/survey/delivery"
 	track_delivery "main/internal/pkg/track/delivery/http"
 	user_delivery "main/internal/pkg/user/delivery/http"
 	"net/http"
@@ -88,6 +89,7 @@ func main() {
 	userHandler := user_delivery.NewHandler(&userAgent, &sessionAgent, logger)
 	trackHandler := track_delivery.NewHandler(&trackAgent, &sessionAgent, logger)
 	playlistHandler := playlist_delivery.NewHandler(&playlistAgent, &sessionAgent, logger)
+	surveyHandler := survey_delivery.NewHandler(&surveyAgent, &sessionAgent)
 	logger.Infoln("Deliveries initialized")
 
 	modifyPlaylistMiddleware := modify_playlist.NewMiddleware(&playlistAgent, &sessionAgent, logger)
@@ -126,6 +128,7 @@ func main() {
 			router_init.NewRoute("/artist/{id}/unlike", artistHandler.Unlike, http.MethodDelete),
 			router_init.NewRoute("/artist/{id}", artistHandler.ArtistInfo, http.MethodGet),
 			router_init.NewRoute("/playlist", playlistHandler.Create, http.MethodPost),
+			router_init.NewRoute("/survey/submit/{id}", surveyHandler.Submit, http.MethodPost),
 		},
 		Prefix: "/api/v1",
 		Middlewares: []mux.MiddlewareFunc{
