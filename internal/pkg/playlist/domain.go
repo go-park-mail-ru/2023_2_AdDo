@@ -66,4 +66,5 @@ type Repository interface {
 	IsPrivate(ctx context.Context, playlistId uint64) (bool, error)
 	MakePublic(ctx context.Context, playlistId uint64) error
 	MakePrivate(ctx context.Context, playlistId uint64) error
+	Search(ctx context.Context, text string) ([]Base, error)
 }

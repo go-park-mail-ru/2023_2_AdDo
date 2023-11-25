@@ -38,18 +38,16 @@ func (p *Postgres) Get(artistId uint64) (artist.Base, error) {
 	return result, nil
 }
 
-func (p *Postgres) GetByTrackId(trackId uint64) ([]artist.Base, error) {
-	p.logger.Infoln("Artist Repo GetByTrackId entered")
+func (p *Postgres) getWithQuery(ctx context.Context, query string, args ...any) ([]artist.Base, error) {
+	p.logger.Infoln("Artist Repo getWithQuery entered")
 
 	result := make([]artist.Base, 0)
 
-	query := "select artist.id, name, avatar from artist join artist_track on artist.id = artist_track.artist_id where artist_track.track_id = $1"
-	rows, err := p.Pool.Query(context.Background(), query, trackId)
+	rows, err := p.Pool.Query(context.Background(), query, args...)
 	if err != nil {
 		p.logger.WithFields(logrus.Fields{
-			"err":      err,
-			"track id": trackId,
-			"query":    query,
+			"err":   err,
+			"query": query,
 		}).Errorln("Getting an artist by track id query completed with error")
 		return nil, err
 	}
@@ -68,6 +66,20 @@ func (p *Postgres) GetByTrackId(trackId uint64) ([]artist.Base, error) {
 	p.logger.Infoln("Formed response")
 
 	return result, nil
+}
+
+func (p *Postgres) GetByTrackId(trackId uint64) ([]artist.Base, error) {
+	p.logger.Infoln("Artist Repo GetByTrackId entered")
+
+	query := "select artist.id, name, avatar from artist join artist_track on artist.id = artist_track.artist_id where artist_track.track_id = $1"
+	return p.getWithQuery(context.Background(), query, trackId)
+}
+
+func (p *Postgres) Search(text string) ([]artist.Base, error) {
+	p.logger.Infoln("Artist Repo Search entered")
+
+	query := "select artist.id, artist.name, artist.avatar from artist join artist_track on artist.id = artist_track.artist_id where to_tsvector('russian', artist.name) @@ to_tsquery('russian', $1)"
+	return p.getWithQuery(context.Background(), query, text)
 }
 
 func (p *Postgres) GetByAlbumId(albumId uint64) (artist.Base, error) {
