@@ -27,6 +27,40 @@ func NewHandler(survey survey.UseCase, session session.UseCase, logger *logrus.L
 	}
 }
 
+func (handler *SurveyHandler) IsSubmit(w http.ResponseWriter, r *http.Request) error {
+	handler.logger.WithFields(logrus.Fields{
+		"request_id": utils.GenReqId(r.RequestURI + r.Method),
+	}).Infoln("IsSubmit Handler entered")
+
+	surveyId, err := strconv.Atoi(mux.Vars(r)["id"])
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusBadRequest, Err: err}
+	}
+	handler.logger.Infoln("Parsed surveyId from Vars")
+
+	sessionId, err := response.GetCookie(r)
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusUnauthorized, Err: err}
+	}
+	handler.logger.Infoln("Got Cookie")
+
+	userId, err := handler.sessionUseCase.GetUserId(sessionId)
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusUnauthorized, Err: err}
+	}
+	handler.logger.Infoln("Got user id")
+
+	isSubmit, err := handler.surveyUseCase.IsSubmit(userId, uint64(surveyId))
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
+	}
+	if isSubmit {
+		return common_handler.StatusError{Code: http.StatusConflict, Err: err}
+	}
+	w.WriteHeader(http.StatusNoContent)
+	return nil
+}
+
 func (handler *SurveyHandler) Submit(w http.ResponseWriter, r *http.Request) error {
 	handler.logger.WithFields(logrus.Fields{
 		"request_id": utils.GenReqId(r.RequestURI + r.Method),

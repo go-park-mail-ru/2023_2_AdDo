@@ -130,6 +130,7 @@ func main() {
 			router_init.NewRoute("/artist/{id}/unlike", artistHandler.Unlike, http.MethodDelete),
 			router_init.NewRoute("/artist/{id}", artistHandler.ArtistInfo, http.MethodGet),
 			router_init.NewRoute("/playlist", playlistHandler.Create, http.MethodPost),
+			router_init.NewRoute("/survey/{id}/is_submit", surveyHandler.IsSubmit, http.MethodGet),
 		},
 		Prefix: "/api/v1",
 		Middlewares: []mux.MiddlewareFunc{
