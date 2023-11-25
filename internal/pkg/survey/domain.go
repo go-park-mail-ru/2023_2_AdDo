@@ -1,13 +1,13 @@
 package survey
 
 type StatResponse struct {
-	id                uint64
-	questionToAverage map[string]int
+	Id                uint64
+	QuestionToAverage map[string]int
 }
 
 type Response struct {
-	id               uint64
-	questionIdToText map[uint64]string
+	Id               uint64
+	QuestionIdToText map[uint64]string
 }
 
 type UseCase interface {
