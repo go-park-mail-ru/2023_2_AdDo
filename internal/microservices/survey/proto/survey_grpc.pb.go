@@ -23,7 +23,11 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type SurveyServiceClient interface {
-	Submit(ctx context.Context, in *Survey, opts ...grpc.CallOption) (*empty.Empty, error)
+	SubmitSurvey(ctx context.Context, in *Survey, opts ...grpc.CallOption) (*empty.Empty, error)
+	IsSubmit(ctx context.Context, in *UserSurvey, opts ...grpc.CallOption) (*IsOk, error)
+	GetSurveyStats(ctx context.Context, in *SurveyId, opts ...grpc.CallOption) (*StatResponse, error)
+	Get(ctx context.Context, in *SurveyId, opts ...grpc.CallOption) (*Response, error)
+	GetAllStats(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*StatResponses, error)
 }
 
 type surveyServiceClient struct {
@@ -34,9 +38,45 @@ func NewSurveyServiceClient(cc grpc.ClientConnInterface) SurveyServiceClient {
 	return &surveyServiceClient{cc}
 }
 
-func (c *surveyServiceClient) Submit(ctx context.Context, in *Survey, opts ...grpc.CallOption) (*empty.Empty, error) {
+func (c *surveyServiceClient) SubmitSurvey(ctx context.Context, in *Survey, opts ...grpc.CallOption) (*empty.Empty, error) {
 	out := new(empty.Empty)
-	err := c.cc.Invoke(ctx, "/SurveyService/Submit", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/SurveyService/SubmitSurvey", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *surveyServiceClient) IsSubmit(ctx context.Context, in *UserSurvey, opts ...grpc.CallOption) (*IsOk, error) {
+	out := new(IsOk)
+	err := c.cc.Invoke(ctx, "/SurveyService/IsSubmit", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *surveyServiceClient) GetSurveyStats(ctx context.Context, in *SurveyId, opts ...grpc.CallOption) (*StatResponse, error) {
+	out := new(StatResponse)
+	err := c.cc.Invoke(ctx, "/SurveyService/GetSurveyStats", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *surveyServiceClient) Get(ctx context.Context, in *SurveyId, opts ...grpc.CallOption) (*Response, error) {
+	out := new(Response)
+	err := c.cc.Invoke(ctx, "/SurveyService/Get", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *surveyServiceClient) GetAllStats(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*StatResponses, error) {
+	out := new(StatResponses)
+	err := c.cc.Invoke(ctx, "/SurveyService/GetAllStats", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -47,7 +87,11 @@ func (c *surveyServiceClient) Submit(ctx context.Context, in *Survey, opts ...gr
 // All implementations must embed UnimplementedSurveyServiceServer
 // for forward compatibility
 type SurveyServiceServer interface {
-	Submit(context.Context, *Survey) (*empty.Empty, error)
+	SubmitSurvey(context.Context, *Survey) (*empty.Empty, error)
+	IsSubmit(context.Context, *UserSurvey) (*IsOk, error)
+	GetSurveyStats(context.Context, *SurveyId) (*StatResponse, error)
+	Get(context.Context, *SurveyId) (*Response, error)
+	GetAllStats(context.Context, *empty.Empty) (*StatResponses, error)
 	mustEmbedUnimplementedSurveyServiceServer()
 }
 
@@ -55,8 +99,20 @@ type SurveyServiceServer interface {
 type UnimplementedSurveyServiceServer struct {
 }
 
-func (UnimplementedSurveyServiceServer) Submit(context.Context, *Survey) (*empty.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Submit not implemented")
+func (UnimplementedSurveyServiceServer) SubmitSurvey(context.Context, *Survey) (*empty.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SubmitSurvey not implemented")
+}
+func (UnimplementedSurveyServiceServer) IsSubmit(context.Context, *UserSurvey) (*IsOk, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method IsSubmit not implemented")
+}
+func (UnimplementedSurveyServiceServer) GetSurveyStats(context.Context, *SurveyId) (*StatResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetSurveyStats not implemented")
+}
+func (UnimplementedSurveyServiceServer) Get(context.Context, *SurveyId) (*Response, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Get not implemented")
+}
+func (UnimplementedSurveyServiceServer) GetAllStats(context.Context, *empty.Empty) (*StatResponses, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetAllStats not implemented")
 }
 func (UnimplementedSurveyServiceServer) mustEmbedUnimplementedSurveyServiceServer() {}
 
@@ -71,20 +127,92 @@ func RegisterSurveyServiceServer(s grpc.ServiceRegistrar, srv SurveyServiceServe
 	s.RegisterService(&SurveyService_ServiceDesc, srv)
 }
 
-func _SurveyService_Submit_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _SurveyService_SubmitSurvey_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(Survey)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(SurveyServiceServer).Submit(ctx, in)
+		return srv.(SurveyServiceServer).SubmitSurvey(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/SurveyService/Submit",
+		FullMethod: "/SurveyService/SubmitSurvey",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(SurveyServiceServer).Submit(ctx, req.(*Survey))
+		return srv.(SurveyServiceServer).SubmitSurvey(ctx, req.(*Survey))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SurveyService_IsSubmit_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UserSurvey)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SurveyServiceServer).IsSubmit(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/SurveyService/IsSubmit",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SurveyServiceServer).IsSubmit(ctx, req.(*UserSurvey))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SurveyService_GetSurveyStats_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SurveyId)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SurveyServiceServer).GetSurveyStats(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/SurveyService/GetSurveyStats",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SurveyServiceServer).GetSurveyStats(ctx, req.(*SurveyId))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SurveyService_Get_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SurveyId)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SurveyServiceServer).Get(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/SurveyService/Get",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SurveyServiceServer).Get(ctx, req.(*SurveyId))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SurveyService_GetAllStats_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(empty.Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SurveyServiceServer).GetAllStats(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/SurveyService/GetAllStats",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SurveyServiceServer).GetAllStats(ctx, req.(*empty.Empty))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -97,8 +225,24 @@ var SurveyService_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*SurveyServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "Submit",
-			Handler:    _SurveyService_Submit_Handler,
+			MethodName: "SubmitSurvey",
+			Handler:    _SurveyService_SubmitSurvey_Handler,
+		},
+		{
+			MethodName: "IsSubmit",
+			Handler:    _SurveyService_IsSubmit_Handler,
+		},
+		{
+			MethodName: "GetSurveyStats",
+			Handler:    _SurveyService_GetSurveyStats_Handler,
+		},
+		{
+			MethodName: "Get",
+			Handler:    _SurveyService_Get_Handler,
+		},
+		{
+			MethodName: "GetAllStats",
+			Handler:    _SurveyService_GetAllStats_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
