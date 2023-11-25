@@ -18,6 +18,7 @@ import (
 	grpc_playlist "main/internal/microservices/playlist/service/client"
 	session2 "main/internal/microservices/session/proto"
 	grpc_session "main/internal/microservices/session/service/client"
+	grpc_survey "main/internal/microservices/survey/service/client"
 	proto5 "main/internal/microservices/survey/proto"
 	"main/internal/microservices/track/proto"
 	grpc_track "main/internal/microservices/track/service/client"
@@ -93,7 +94,7 @@ func main() {
 	playlistAgent := grpc_playlist.NewClient(userAgent, proto3.NewPlaylistServiceClient(playlistConnection), imageAgent, logger)
 	artistAgent := grpc_artist.NewClient(artist.NewArtistServiceClient(artistConnection), logger)
 
-	surveyAgent := grpc_survey.NewClient(proto5.NewSurveyServiceClient(surveyConnection), logger)
+	surveyAgent := grpc_survey.NewClient(proto5.NewSurveyServiceClient(surveyConnection))
 	logger.Infoln("Clients to micros initialized")
 
 	albumHandler := album_delivery.NewHandler(&trackAgent, &albumAgent, &sessionAgent, logger)
