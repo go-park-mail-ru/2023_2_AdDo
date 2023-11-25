@@ -19,7 +19,7 @@ func NewPostgres(pool postgres.PgxIFace, logger *logrus.Logger) Postgres {
 	}
 }
 
-func (p *Postgres) SubmitSurveyAnswers(userId string, surveyId uint64, answers map[int]string) error {
+func (p *Postgres) SubmitSurveyAnswers(userId string, surveyId uint64, answers map[uint64]string) error {
 	p.logger.Infoln("Survey Repo Get entered")
 
 	query := `insert into answer (profile_id, survey_id, question_id, answer) values ( $1, $2, `
