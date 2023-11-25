@@ -123,18 +123,28 @@ create table if not exists survey (
     title text unique not null
 );
 
-create table if not exists survey_question (
+create table if not exists question (
     id serial primary key,
-    title text unique not null,
-    survey_id int not null,
-    foreign key (survey_id) references survey (id) on delete cascade
+    title text unique not null
 );
 
-create table if not exists survey_answer (
+create table if not exists survey_question (
+    id serial primary key,
+    survey_id int not null,
+    foreign key (survey_id) references survey (id) on delete cascade,
+    question_id int not null,
+    foreign key (question_id) references question (id) on delete cascade
+);
+
+create table if not exists answer (
     id serial primary key,
     profile_id uuid not null,
     foreign key (profile_id) references profile (id) on delete cascade,
     question_id int not null,
-    foreign key (question_id) references survey_question (id) on delete cascade,
+    foreign key (question_id) references question (id) on delete cascade,
+    survey_id int not null,
+    foreign key (survey_id) references survey (id) on delete cascade,
     answer int not null
 );
+
+
