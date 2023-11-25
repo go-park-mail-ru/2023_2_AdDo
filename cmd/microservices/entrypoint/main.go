@@ -86,6 +86,7 @@ func main() {
 	albumAgent := grpc_album.NewClient(proto2.NewAlbumServiceClient(albumConnection), logger)
 	playlistAgent := grpc_playlist.NewClient(userAgent, proto3.NewPlaylistServiceClient(playlistConnection), imageAgent, logger)
 	artistAgent := grpc_artist.NewClient(artist.NewArtistServiceClient(artistConnection), logger)
+	//surveyAgent
 	logger.Infoln("Clients to micros initialized")
 
 	albumHandler := album_delivery.NewHandler(&trackAgent, &albumAgent, &sessionAgent, logger)
@@ -93,12 +94,12 @@ func main() {
 	userHandler := user_delivery.NewHandler(&userAgent, &sessionAgent, logger)
 	trackHandler := track_delivery.NewHandler(&trackAgent, &sessionAgent, logger)
 	playlistHandler := playlist_delivery.NewHandler(&playlistAgent, &sessionAgent, logger)
-	surveyHandler := survey_delivery.NewHandler(&surveyAgent, &sessionAgent)
+	surveyHandler := survey_delivery.NewHandler(&surveyAgent, &sessionAgent, logger)
 	logger.Infoln("Deliveries initialized")
 
 	modifyPlaylistMiddleware := modify_playlist.NewMiddleware(&playlistAgent, &sessionAgent, logger)
 	readPlaylistMiddleware := read_playlist.NewMiddleware(&playlistAgent, logger)
-	checkVoteMiddleware := check_vote.NewMiddleware(&surveyAgent)
+	checkVoteMiddleware := check_vote.NewMiddleware(&surveyAgent, &sessionAgent, logger)
 	corsMiddleware := middleware.NewCors()
 	csrfMiddleware := middleware.NewCSRF()
 
@@ -134,7 +135,9 @@ func main() {
 			router_init.NewRoute("/artist/{id}/unlike", artistHandler.Unlike, http.MethodDelete),
 			router_init.NewRoute("/artist/{id}", artistHandler.ArtistInfo, http.MethodGet),
 			router_init.NewRoute("/playlist", playlistHandler.Create, http.MethodPost),
+			router_init.NewRoute("/survey/{id}", surveyHandler.GetSurvey, http.MethodGet),
 			router_init.NewRoute("/survey/{id}/is_submit", surveyHandler.IsSubmit, http.MethodGet),
+			router_init.NewRoute("/survey/{id}/get_stat", surveyHandler.GetStat, http.MethodGet),
 		},
 		Prefix: "/api/v1",
 		Middlewares: []mux.MiddlewareFunc{

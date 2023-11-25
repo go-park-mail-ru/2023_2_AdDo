@@ -27,6 +27,41 @@ func NewHandler(survey survey.UseCase, session session.UseCase, logger *logrus.L
 	}
 }
 
+func (handler *SurveyHandler) GetSurvey(w http.ResponseWriter, r *http.Request) error {
+	handler.logger.WithFields(logrus.Fields{
+		"request_id": utils.GenReqId(r.RequestURI + r.Method),
+	}).Infoln("GetStat Handler entered")
+
+	surveyId, err := strconv.Atoi(mux.Vars(r)["id"])
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusBadRequest, Err: err}
+	}
+	handler.logger.Infoln("Parsed surveyId from Vars")
+
+	sessionId, err := response.GetCookie(r)
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusUnauthorized, Err: err}
+	}
+	handler.logger.Infoln("Got Cookie")
+
+	_, err = handler.sessionUseCase.CheckSession(sessionId)
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusUnauthorized, Err: err}
+	}
+	handler.logger.Infoln("Got user id")
+
+	surveyResp, err := handler.surveyUseCase.Get(uint64(surveyId))
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
+	}
+	handler.logger.Infoln("Get survey")
+	if err = response.RenderJSON(w, surveyResp); err != nil {
+		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
+	}
+	handler.logger.Infoln("Response formed")
+	return nil
+}
+
 func (handler *SurveyHandler) IsSubmit(w http.ResponseWriter, r *http.Request) error {
 	handler.logger.WithFields(logrus.Fields{
 		"request_id": utils.GenReqId(r.RequestURI + r.Method),
@@ -84,7 +119,7 @@ func (handler *SurveyHandler) Submit(w http.ResponseWriter, r *http.Request) err
 	}
 	handler.logger.Infoln("Got user id")
 
-	var answer map[int]string
+	var answer map[uint64]string
 	if err = json.NewDecoder(r.Body).Decode(&answer); err != nil {
 		return common_handler.StatusError{Code: http.StatusBadRequest, Err: err}
 	}
@@ -95,5 +130,41 @@ func (handler *SurveyHandler) Submit(w http.ResponseWriter, r *http.Request) err
 	}
 
 	w.WriteHeader(http.StatusNoContent)
+	return nil
+}
+
+func (handler *SurveyHandler) GetStat(w http.ResponseWriter, r *http.Request) error {
+	handler.logger.WithFields(logrus.Fields{
+		"request_id": utils.GenReqId(r.RequestURI + r.Method),
+	}).Infoln("GetStat Handler entered")
+
+	surveyId, err := strconv.Atoi(mux.Vars(r)["id"])
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusBadRequest, Err: err}
+	}
+	handler.logger.Infoln("Parsed surveyId from Vars")
+
+	sessionId, err := response.GetCookie(r)
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusUnauthorized, Err: err}
+	}
+	handler.logger.Infoln("Got Cookie")
+
+	userId, err := handler.sessionUseCase.GetUserId(sessionId)
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusUnauthorized, Err: err}
+	}
+	handler.logger.Infoln("Got user id")
+
+	stat, err := handler.surveyUseCase.GetSurveyStats(uint64(surveyId))
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
+	}
+	handler.logger.Infoln("Get stat", userId, "get")
+
+	if err = response.RenderJSON(w, stat); err != nil {
+		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
+	}
+	handler.logger.Infoln("Response formed")
 	return nil
 }
