@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+option go_package = "main/internal/microservices/survey/proto";
+
+import "google/protobuf/empty.proto";
+import "session.proto";
+//    protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative -I ../proto -I../../session/proto  survey.proto
+service SurveyService {
+  rpc Submit(Survey) returns (google.protobuf.Empty) {}
+}
+
+message Answer {
+  string questionId = 1;
+  string answerText = 2;
+}
+
+message Survey {
+  UserId userId = 1;
+  string surveyId = 2; 
+  repeated Answer answers = 3;
+}
