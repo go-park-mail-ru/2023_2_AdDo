@@ -1,7 +1,0 @@
-version: '3.9'
-
-services:
-  album:
-    build:
-      context: ../../..
-      dockerfile: build/package/micros/album/Dockerfile

@@ -28,6 +28,20 @@ func NewHandler(pu playlist.UseCase, su session.UseCase, logger *logrus.Logger) 
 	}
 }
 
+// Create
+//
+//	@Summary		Create
+//	@Description	Create playlist
+//	@Tags			playlist
+//	@Security		cookieAuth
+//	@Security		csrfToken
+//	@Security		cookieCsrfToken
+//	@Produce		json
+//	@Success		200	{object}	playlist.Response
+//	@Failure		401	{string}	errMsg
+//	@Failure		403	{string}	errMsg
+//	@Failure		500	{string}	errMsg
+//	@Router			/playlist [post]
 func (handler *Handler) Create(w http.ResponseWriter, r *http.Request) error {
 	handler.logger.WithFields(logrus.Fields{
 		"request_id": utils.GenReqId(r.RequestURI + r.Method),
@@ -63,6 +77,21 @@ func (handler *Handler) Create(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
+// Get
+//
+//	@Summary		Get
+//	@Description	Return playlist info and tracks
+//	@Tags			playlist
+//	@Security		cookieAuth
+//	@Produce		json
+//	@Param			id	path		integer	true	"playlist id"
+//	@Success		200	{object}	artist.Response
+//	@Failure		400	{string}	errMsg
+//	@Failure		401	{string}	errMsg
+//	@Failure		403	{string}	errMsg
+//	@Failure		404	{string}	errMsg
+//	@Failure		500	{string}	errMsg
+//	@Router			/playlist/{id} [get]
 func (handler *Handler) Get(w http.ResponseWriter, r *http.Request) error {
 	handler.logger.WithFields(logrus.Fields{
 		"request_id": utils.GenReqId(r.RequestURI + r.Method),
@@ -98,6 +127,23 @@ func (handler *Handler) Get(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
+// AddTrack
+//
+//	@Summary		AddTrack
+//	@Description	Add track to playlist
+//	@Tags			playlist
+//	@Security		cookieAuth
+//	@Security		csrfToken
+//	@Security		cookieCsrfToken
+//	@Accept			json
+//	@Param			id		path	integer		true	"playlist id"
+//	@Param			trackId	body	track.Id	true	"track id"
+//	@Success		204
+//	@Failure		400	{string}	errMsg
+//	@Failure		401	{string}	errMsg
+//	@Failure		403	{string}	errMsg
+//	@Failure		500	{string}	errMsg
+//	@Router			/playlist/{id}/add_track [post]
 func (handler *Handler) AddTrack(w http.ResponseWriter, r *http.Request) error {
 	handler.logger.WithFields(logrus.Fields{
 		"request_id": utils.GenReqId(r.RequestURI + r.Method),
@@ -123,6 +169,23 @@ func (handler *Handler) AddTrack(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
+// RemoveTrack
+//
+//	@Summary		RemoveTrack
+//	@Description	Remove track from playlist
+//	@Tags			playlist
+//	@Security		cookieAuth
+//	@Security		csrfToken
+//	@Security		cookieCsrfToken
+//	@Accept			json
+//	@Param			id		path	integer		true	"playlist id"
+//	@Param			trackId	body	track.Id	true	"track id"
+//	@Success		204
+//	@Failure		400	{string}	errMsg
+//	@Failure		401	{string}	errMsg
+//	@Failure		403	{string}	errMsg
+//	@Failure		500	{string}	errMsg
+//	@Router			/playlist/{id}/remove_track [delete]
 func (handler *Handler) RemoveTrack(w http.ResponseWriter, r *http.Request) error {
 	handler.logger.WithFields(logrus.Fields{
 		"request_id": utils.GenReqId(r.RequestURI + r.Method),
@@ -148,6 +211,22 @@ func (handler *Handler) RemoveTrack(w http.ResponseWriter, r *http.Request) erro
 	return nil
 }
 
+// UpdatePreview
+//
+//	@Summary		UpdatePreview
+//	@Description	Update playlist preview
+//	@Tags			playlist
+//	@Security		cookieAuth
+//	@Security		csrfToken
+//	@Security		cookieCsrfToken
+//	@Param			id		path		integer	true	"playlist id"
+//	@Param			image	formData	file	true	"preview image"
+//	@Success		204
+//	@Failure		400	{string}	errMsg
+//	@Failure		401	{string}	errMsg
+//	@Failure		403	{string}	errMsg
+//	@Failure		500	{string}	errMsg
+//	@Router			/playlist/{id}/update_preview [post]
 func (handler *Handler) UpdatePreview(w http.ResponseWriter, r *http.Request) error {
 	handler.logger.WithFields(logrus.Fields{
 		"request_id": utils.GenReqId(r.RequestURI + r.Method),
@@ -174,6 +253,21 @@ func (handler *Handler) UpdatePreview(w http.ResponseWriter, r *http.Request) er
 	return nil
 }
 
+// Like
+//
+//	@Summary		Like
+//	@Description	Like playlist
+//	@Tags			playlist
+//	@Security		cookieAuth
+//	@Security		csrfToken
+//	@Security		cookieCsrfToken
+//	@Param			id	path	integer	true	"playlist id"
+//	@Success		204
+//	@Failure		400	{string}	errMsg
+//	@Failure		401	{string}	errMsg
+//	@Failure		403	{string}	errMsg
+//	@Failure		500	{string}	errMsg
+//	@Router			/playlist/{id}/like [post]
 func (handler *Handler) Like(w http.ResponseWriter, r *http.Request) error {
 	handler.logger.WithFields(logrus.Fields{
 		"request_id": utils.GenReqId(r.RequestURI + r.Method),
@@ -206,6 +300,21 @@ func (handler *Handler) Like(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
+// IsLike
+//
+//	@Summary		IsLike
+//	@Description	Check if playlist is liked
+//	@Tags			playlist
+//	@Security		cookieAuth
+//	@Produce		json
+//	@Param			id	path		integer	true	"playlist id"
+//	@Success		200	{object}	response.IsLiked
+//	@Failure		400	{string}	errMsg
+//	@Failure		401	{string}	errMsg
+//	@Failure		403	{string}	errMsg
+//	@Failure		404	{string}	errMsg
+//	@Failure		500	{string}	errMsg
+//	@Router			/playlist/{id}/is_like [get]
 func (handler *Handler) IsLike(w http.ResponseWriter, r *http.Request) error {
 	handler.logger.WithFields(logrus.Fields{
 		"request_id": utils.GenReqId(r.RequestURI + r.Method),
@@ -243,6 +352,21 @@ func (handler *Handler) IsLike(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
+// Unlike
+//
+//	@Summary		Unlike
+//	@Description	Unlike playlist
+//	@Tags			playlist
+//	@Security		cookieAuth
+//	@Security		csrfToken
+//	@Security		cookieCsrfToken
+//	@Param			id	path	integer	true	"playlist id"
+//	@Success		204
+//	@Failure		400	{string}	errMsg
+//	@Failure		401	{string}	errMsg
+//	@Failure		403	{string}	errMsg
+//	@Failure		500	{string}	errMsg
+//	@Router			/playlist/{id}/unlike [delete]
 func (handler *Handler) Unlike(w http.ResponseWriter, r *http.Request) error {
 	handler.logger.WithFields(logrus.Fields{
 		"request_id": utils.GenReqId(r.RequestURI + r.Method),
@@ -275,6 +399,21 @@ func (handler *Handler) Unlike(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
+// Delete
+//
+//	@Summary		Delete
+//	@Description	Delete playlist
+//	@Tags			playlist
+//	@Security		cookieAuth
+//	@Security		csrfToken
+//	@Security		cookieCsrfToken
+//	@Param			id	path	integer	true	"playlist id"
+//	@Success		204
+//	@Failure		400	{string}	errMsg
+//	@Failure		401	{string}	errMsg
+//	@Failure		403	{string}	errMsg
+//	@Failure		500	{string}	errMsg
+//	@Router			/playlist/{id} [delete]
 func (handler *Handler) Delete(w http.ResponseWriter, r *http.Request) error {
 	handler.logger.WithFields(logrus.Fields{
 		"request_id": utils.GenReqId(r.RequestURI + r.Method),
@@ -294,6 +433,21 @@ func (handler *Handler) Delete(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
+// MakePublic
+//
+//	@Summary		MakePublic
+//	@Description	Make playlist public
+//	@Tags			playlist
+//	@Security		cookieAuth
+//	@Security		csrfToken
+//	@Security		cookieCsrfToken
+//	@Param			id	path	integer	true	"playlist id"
+//	@Success		204
+//	@Failure		400	{string}	errMsg
+//	@Failure		401	{string}	errMsg
+//	@Failure		403	{string}	errMsg
+//	@Failure		500	{string}	errMsg
+//	@Router			/playlist/{id}/make_public [put]
 func (handler *Handler) MakePublic(w http.ResponseWriter, r *http.Request) error {
 	handler.logger.WithFields(logrus.Fields{
 		"request_id": utils.GenReqId(r.RequestURI + r.Method),
@@ -313,6 +467,21 @@ func (handler *Handler) MakePublic(w http.ResponseWriter, r *http.Request) error
 	return nil
 }
 
+// MakePrivate
+//
+//	@Summary		MakePrivate
+//	@Description	Make playlist private
+//	@Tags			playlist
+//	@Security		cookieAuth
+//	@Security		csrfToken
+//	@Security		cookieCsrfToken
+//	@Param			id	path	integer	true	"playlist id"
+//	@Success		204
+//	@Failure		400	{string}	errMsg
+//	@Failure		401	{string}	errMsg
+//	@Failure		403	{string}	errMsg
+//	@Failure		500	{string}	errMsg
+//	@Router			/playlist/{id}/make_private [put]
 func (handler *Handler) MakePrivate(w http.ResponseWriter, r *http.Request) error {
 	handler.logger.WithFields(logrus.Fields{
 		"request_id": utils.GenReqId(r.RequestURI + r.Method),

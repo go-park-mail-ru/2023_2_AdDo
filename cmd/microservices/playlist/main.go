@@ -2,7 +2,7 @@ package main
 
 import (
 	"google.golang.org/grpc"
-	microservices_init "main/cmd/microservices"
+	// microservices_init "main/cmd/microservices"
 	init_db "main/init/postgres_db"
 	log "main/internal/common/logger"
 	proto2 "main/internal/microservices/playlist/proto"
@@ -40,10 +40,10 @@ func main() {
 	server := grpc.NewServer()
 	proto2.RegisterPlaylistServiceServer(server, &playlistManager)
 
-	serviceId := microservices_init.RegisterInConsul(Port, "playlist-api", "playlist", logger)
-	defer func() {
-		microservices_init.UnRegisterInConsul(serviceId, logger)
-	}()
+	// serviceId := microservices_init.RegisterInConsul(Port, "playlist-api", "playlist", logger)
+	// defer func() {
+	// 	microservices_init.UnRegisterInConsul(serviceId, logger)
+	// }()
 
 	logger.Infoln("starting server at " + strconv.Itoa(Port))
 	err = server.Serve(lis)

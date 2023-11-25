@@ -32,13 +32,14 @@ func NewHandler(userUseCase user_domain.UseCase, sessionUseCase session.UseCase,
 
 // SignUp
 //
-//	@Description	register user
+//	@Summary		SignUp
+//	@Description	Register user
 //	@Tags			user
 //	@Security		csrfToken
 //	@Security		cookieCsrfToken
 //	@Accept			json
 //	@Param			userData	body	user_domain.User	true	"User data"
-//	@Success		200
+//	@Success		204
 //	@Failure		400	{string}	errMsg
 //	@Failure		403	{string}	errMsg
 //	@Failure		409	{string}	errMsg
@@ -79,13 +80,14 @@ func (handler *UserHandler) SignUp(w http.ResponseWriter, r *http.Request) error
 
 // Login
 //
-//	@Description	login user
+//	@Summary		Login
+//	@Description	Login user
 //	@Tags			user
 //	@Security		csrfToken
 //	@Security		cookieCsrfToken
 //	@Accept			json
 //	@Param			userCrds	body	user_domain.UserCredentials	true	"User email and password"
-//	@Success		200
+//	@Success		204
 //	@Failure		400	{string}	errMsg
 //	@Failure		403	{string}	errMsg
 //	@Failure		500	{string}	errMsg
@@ -120,7 +122,8 @@ func (handler *UserHandler) Login(w http.ResponseWriter, r *http.Request) error 
 
 // Auth
 //
-//	@Description	check user's authentication by cookie and set csrf-token
+//	@Summary		Auth
+//	@Description	Check user's authentication by cookie and set csrf-token
 //	@Tags			user
 //	@Security		cookieAuth
 //	@Success		200
@@ -154,7 +157,8 @@ func (handler *UserHandler) Auth(w http.ResponseWriter, r *http.Request) error {
 
 // LogOut
 //
-//	@Description	logout user
+//	@Summary		LogOut
+//	@Description	Logout user
 //	@Tags			user
 //	@Security		cookieAuth
 //	@Security		csrfToken
@@ -191,7 +195,8 @@ func (handler *UserHandler) LogOut(w http.ResponseWriter, r *http.Request) error
 
 // Me
 //
-//	@Description	get user info
+//	@Summary		Me
+//	@Description	Get user info
 //	@Tags			user
 //	@Produce		json
 //	@Security		cookieAuth
@@ -229,17 +234,19 @@ func (handler *UserHandler) Me(w http.ResponseWriter, r *http.Request) error {
 
 // UploadAvatar
 //
-// @Description	Upload user images
-// @Tags		user
-// @Param		Avatar	formData	file		true	"User images"
-// @Security	cookieAuth
-// @Security	csrfToken
-// @Security	cookieCsrfToken
-// @Success		200	{object}	user_domain.UploadAvatarResponse
-// @Failure		400	{string}	errMsg
-// @Failure		401	{string}	errMsg
-// @Failure		500	{string}	errMsg
-// @Router		/upload_avatar [post]
+//	@Summary		UploadAvatar
+//	@Description	Upload user images
+//	@Tags			user
+//	@Param			Avatar	formData	file	true	"User images"
+//	@Security		cookieAuth
+//	@Security		csrfToken
+//	@Security		cookieCsrfToken
+//	@Success		200	{object}	user_domain.UploadAvatarResponse
+//	@Failure		400	{string}	errMsg
+//	@Failure		401	{string}	errMsg
+//	@Failure		403	{string}	errMsg
+//	@Failure		500	{string}	errMsg
+//	@Router			/upload_avatar [post]
 func (handler *UserHandler) UploadAvatar(w http.ResponseWriter, r *http.Request) error {
 	handler.logger.WithFields(logrus.Fields{
 		"request_id": utils.GenReqId(r.RequestURI + r.Method),
@@ -280,16 +287,18 @@ func (handler *UserHandler) UploadAvatar(w http.ResponseWriter, r *http.Request)
 
 // RemoveAvatar
 //
-// @Description	Remove user images
-// @Tags		user
-// @Security	cookieAuth
-// @Security	csrfToken
-// @Security	cookieCsrfToken
-// @Success		204
-// @Failure		401	{string}	errMsg
-// @Failure		409	{string}	errMsg
-// @Failure		500	{string}	errMsg
-// @Router		/remove_avatar [post]
+//	@Summary		RemoveAvatar
+//	@Description	Remove user images
+//	@Tags			user
+//	@Security		cookieAuth
+//	@Security		csrfToken
+//	@Security		cookieCsrfToken
+//	@Success		204
+//	@Failure		401	{string}	errMsg
+//	@Failure		403	{string}	errMsg
+//	@Failure		409	{string}	errMsg
+//	@Failure		500	{string}	errMsg
+//	@Router			/remove_avatar [post]
 func (handler *UserHandler) RemoveAvatar(w http.ResponseWriter, r *http.Request) error {
 	sessionId, err := response.GetCookie(r)
 	if err != nil {
@@ -311,20 +320,22 @@ func (handler *UserHandler) RemoveAvatar(w http.ResponseWriter, r *http.Request)
 
 // UpdateUserInfo
 //
-//	@Description	updateUserInfo
+//	@Summary		UpdateUserInfo
+//	@Description	Update user info
 //	@Tags			user
+//	@Security		cookieAuth
 //	@Security		csrfToken
 //	@Security		cookieCsrfToken
 //	@Accept			json
 //	@Param			userData	body	user_domain.User	true	"User data"
-//	@Success		200
+//	@Success		204
 //	@Failure		400	{string}	errMsg
+//	@Failure		401	{string}	errMsg
 //	@Failure		403	{string}	errMsg
 //	@Failure		404	{string}	errMsg
 //	@Failure		500	{string}	errMsg
-//	@Header			204	{string}	Set-Cookie	"Set JSESSIONID in Cookie"
-//	@Router			/sign_up [post]
-
+//	@Header			204	{string}
+//	@Router			/update_info [put]
 func (handler *UserHandler) UpdateUserInfo(w http.ResponseWriter, r *http.Request) error {
 	handler.logger.WithFields(logrus.Fields{
 		"request_id": utils.GenReqId(r.RequestURI + r.Method),

@@ -54,14 +54,69 @@ definitions:
           $ref: '#/definitions/track.Response'
         type: array
     type: object
-  track.Response:
+  playlist.Response:
     properties:
-      Content:
-        example: TrackContent
+      AuthorId:
+        example: sdfa-asdf-adsf
+        type: string
+      AuthorName:
+        example: username
         type: string
       Id:
         example: 1
         type: integer
+      IsYours:
+        example: true
+        type: boolean
+      Name:
+        example: PlaylistName
+        type: string
+      Preview:
+        example: PlaylistPreview
+        type: string
+      tracks:
+        items:
+          $ref: '#/definitions/track.Response'
+        type: array
+    type: object
+  response.IsLiked:
+    properties:
+      IsLiked:
+        type: boolean
+    type: object
+  track.Id:
+    properties:
+      Id:
+        example: 1
+        type: integer
+    type: object
+  track.LikedTracks:
+    properties:
+      Tracks:
+        items:
+          $ref: '#/definitions/track.Response'
+        type: array
+    type: object
+  track.Response:
+    properties:
+      ArtistId:
+        example: 1
+        type: integer
+      ArtistName:
+        example: ArtiName
+        type: string
+      Content:
+        example: TrackContent
+        type: string
+      Duration:
+        example: "1:20"
+        type: string
+      Id:
+        example: 1
+        type: integer
+      IsLiked:
+        example: false
+        type: boolean
       Name:
         example: TrackName
         type: string
@@ -78,7 +133,7 @@ definitions:
   user_domain.User:
     properties:
       Avatar:
-        example: http://test/image/1.jpg,http://test/image/2.jpg
+        example: http://test/images/1.jpg,http://test/images/2.jpg
         type: string
       BirthDate:
         example: "2000-01-01"
@@ -118,7 +173,7 @@ info:
 paths:
   /album/{id}:
     get:
-      description: return album info with all tracks
+      description: Return album info with all tracks
       parameters:
       - description: album id
         in: path
@@ -140,11 +195,119 @@ paths:
           description: Internal Server Error
           schema:
             type: string
+      summary: AlbumTracks
+      tags:
+      - album
+  /album/{id}/is_like:
+    get:
+      description: Check if album is liked
+      parameters:
+      - description: album id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.IsLiked'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - cookieAuth: []
+      summary: IsLike
+      tags:
+      - album
+  /album/{id}/like:
+    post:
+      description: Like album
+      parameters:
+      - description: album id
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "403":
+          description: Forbidden
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - cookieAuth: []
+      - csrfToken: []
+      - cookieCsrfToken: []
+      summary: Like
+      tags:
+      - album
+  /album/{id}/unlike:
+    delete:
+      description: Unlike album
+      parameters:
+      - description: album id
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "403":
+          description: Forbidden
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - cookieAuth: []
+      - csrfToken: []
+      - cookieCsrfToken: []
+      summary: Unlike
       tags:
       - album
   /artist/{id}:
     get:
-      description: return artist info
+      description: Return artist info
       parameters:
       - description: artist id
         in: path
@@ -162,25 +325,130 @@ paths:
           description: Bad Request
           schema:
             type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
         "500":
           description: Internal Server Error
           schema:
             type: string
+      summary: ArtistInfo
+      tags:
+      - artist
+  /artist/{id}/is_like:
+    get:
+      description: Check if artist is liked
+      parameters:
+      - description: artist id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.IsLiked'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - cookieAuth: []
+      summary: IsLike
+      tags:
+      - artist
+  /artist/{id}/like:
+    post:
+      description: Like artist
+      parameters:
+      - description: artist id
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "403":
+          description: Forbidden
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+      security:
+      - cookieAuth: []
+      - csrfToken: []
+      - cookieCsrfToken: []
+      summary: Like
+      tags:
+      - artist
+  /artist/{id}/unlike:
+    delete:
+      description: Unlike artist
+      parameters:
+      - description: artist id
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "403":
+          description: Forbidden
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+      security:
+      - cookieAuth: []
+      - csrfToken: []
+      - cookieCsrfToken: []
+      summary: Unlike
       tags:
       - artist
   /auth:
     get:
-      description: check user's authentication by cookie and set csrf-token
+      description: Check user's authentication by cookie and set csrf-token
       responses:
         "200":
           description: OK
-          headers:
-            Set-Cookie:
-              description: Set X-Csrf-Token in Cookie
-              type: string
-            X-Csrf-Token:
-              description: Set X-Csrf-Token in header
-              type: string
         "401":
           description: Unauthorized
           headers:
@@ -198,11 +466,39 @@ paths:
             type: string
       security:
       - cookieAuth: []
+      summary: Auth
       tags:
       - user
+  /collection/tracks:
+    get:
+      description: Get user tracks
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/track.LikedTracks'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - cookieAuth: []
+      summary: GetUserTracks
+      tags:
+      - track
   /feed:
     get:
-      description: return all albums
+      description: Return all albums
       produces:
       - application/json
       responses:
@@ -216,51 +512,14 @@ paths:
           description: Internal Server Error
           schema:
             type: string
+      summary: Feed
       tags:
       - album
-  /like:
-    post:
-      consumes:
-      - application/json
-      description: like track
-      parameters:
-      - description: track id
-        in: body
-        name: trackId
-        required: true
-        schema:
-          type: integer
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/track.Response'
-        "400":
-          description: Bad Request
-          schema:
-            type: string
-        "401":
-          description: Unauthorized
-          schema:
-            type: string
-        "403":
-          description: Forbidden
-          schema:
-            type: string
-        "500":
-          description: Internal Server Error
-          schema:
-            type: string
-      security:
-      - csrfToken: []
-      - cookieCsrfToken: []
-      tags:
-      - track
   /listen:
     post:
       consumes:
       - application/json
-      description: listen track
+      description: Listen track
       parameters:
       - description: track id
         in: body
@@ -269,8 +528,8 @@ paths:
         schema:
           type: integer
       responses:
-        "200":
-          description: OK
+        "204":
+          description: No Content
         "400":
           description: Bad Request
           schema:
@@ -286,13 +545,14 @@ paths:
       security:
       - csrfToken: []
       - cookieCsrfToken: []
+      summary: Listen
       tags:
       - track
   /login:
     post:
       consumes:
       - application/json
-      description: login user
+      description: Login user
       parameters:
       - description: User email and password
         in: body
@@ -301,8 +561,8 @@ paths:
         schema:
           $ref: '#/definitions/user_domain.UserCredentials'
       responses:
-        "200":
-          description: OK
+        "204":
+          description: No Content
           headers:
             Set-Cookie:
               description: Set JSESSIONID in Cookie
@@ -322,14 +582,15 @@ paths:
       security:
       - csrfToken: []
       - cookieCsrfToken: []
+      summary: Login
       tags:
       - user
   /logout:
     post:
-      description: logout user
+      description: Logout user
       responses:
-        "200":
-          description: OK
+        "204":
+          description: No Content
         "401":
           description: Unauthorized
           schema:
@@ -346,11 +607,12 @@ paths:
       - cookieAuth: []
       - csrfToken: []
       - cookieCsrfToken: []
+      summary: LogOut
       tags:
       - user
   /me:
     get:
-      description: get user info
+      description: Get user info
       produces:
       - application/json
       responses:
@@ -374,11 +636,12 @@ paths:
       - cookieAuth: []
       - csrfToken: []
       - cookieCsrfToken: []
+      summary: Me
       tags:
       - user
   /most_liked:
     get:
-      description: return albums sorted by likes count
+      description: Return albums sorted by likes count
       produces:
       - application/json
       responses:
@@ -392,11 +655,12 @@ paths:
           description: Internal Server Error
           schema:
             type: string
+      summary: MostLiked
       tags:
       - album
   /new:
     get:
-      description: return new albums
+      description: Return new albums
       produces:
       - application/json
       responses:
@@ -410,11 +674,419 @@ paths:
           description: Internal Server Error
           schema:
             type: string
+      summary: New
       tags:
       - album
+  /playlist:
+    post:
+      description: Create playlist
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/playlist.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "403":
+          description: Forbidden
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - cookieAuth: []
+      - csrfToken: []
+      - cookieCsrfToken: []
+      summary: Create
+      tags:
+      - playlist
+  /playlist/{id}:
+    delete:
+      description: Delete playlist
+      parameters:
+      - description: playlist id
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "403":
+          description: Forbidden
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - cookieAuth: []
+      - csrfToken: []
+      - cookieCsrfToken: []
+      summary: Delete
+      tags:
+      - playlist
+    get:
+      description: Return playlist info and tracks
+      parameters:
+      - description: playlist id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/artist.Response'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "403":
+          description: Forbidden
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - cookieAuth: []
+      summary: Get
+      tags:
+      - playlist
+  /playlist/{id}/add_track:
+    post:
+      consumes:
+      - application/json
+      description: Add track to playlist
+      parameters:
+      - description: playlist id
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: track id
+        in: body
+        name: trackId
+        required: true
+        schema:
+          $ref: '#/definitions/track.Id'
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "403":
+          description: Forbidden
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - cookieAuth: []
+      summary: AddTrack
+      tags:
+      - playlist
+  /playlist/{id}/is_like:
+    get:
+      description: Check if playlist is liked
+      parameters:
+      - description: playlist id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.IsLiked'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "403":
+          description: Forbidden
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - cookieAuth: []
+      summary: IsLike
+      tags:
+      - playlist
+  /playlist/{id}/like:
+    post:
+      description: Like playlist
+      parameters:
+      - description: playlist id
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "403":
+          description: Forbidden
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - cookieAuth: []
+      - csrfToken: []
+      - cookieCsrfToken: []
+      summary: Like
+      tags:
+      - playlist
+  /playlist/{id}/make_private:
+    put:
+      description: Make playlist private
+      parameters:
+      - description: playlist id
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "403":
+          description: Forbidden
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - cookieAuth: []
+      - csrfToken: []
+      - cookieCsrfToken: []
+      summary: MakePrivate
+      tags:
+      - playlist
+  /playlist/{id}/make_public:
+    put:
+      description: Make playlist public
+      parameters:
+      - description: playlist id
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "403":
+          description: Forbidden
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - cookieAuth: []
+      - csrfToken: []
+      - cookieCsrfToken: []
+      summary: MakePublic
+      tags:
+      - playlist
+  /playlist/{id}/remove_track:
+    delete:
+      consumes:
+      - application/json
+      description: Remove track from playlist
+      parameters:
+      - description: playlist id
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: track id
+        in: body
+        name: trackId
+        required: true
+        schema:
+          $ref: '#/definitions/track.Id'
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "403":
+          description: Forbidden
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - cookieAuth: []
+      summary: RemoveTrack
+      tags:
+      - playlist
+  /playlist/{id}/unlike:
+    delete:
+      description: Unlike playlist
+      parameters:
+      - description: playlist id
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "403":
+          description: Forbidden
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - cookieAuth: []
+      - csrfToken: []
+      - cookieCsrfToken: []
+      summary: Unlike
+      tags:
+      - playlist
+  /playlist/{id}/update_preview:
+    post:
+      description: Update playlist preview
+      parameters:
+      - description: playlist id
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: preview image
+        in: formData
+        name: image
+        required: true
+        type: file
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "403":
+          description: Forbidden
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - cookieAuth: []
+      - csrfToken: []
+      - cookieCsrfToken: []
+      summary: UpdatePreview
+      tags:
+      - playlist
   /popular:
     get:
-      description: return albums sorted by listen count
+      description: Return albums sorted by listen count
       produces:
       - application/json
       responses:
@@ -428,16 +1100,21 @@ paths:
           description: Internal Server Error
           schema:
             type: string
+      summary: Popular
       tags:
       - album
   /remove_avatar:
     post:
       description: Remove user images
       responses:
-        "200":
-          description: OK
+        "204":
+          description: No Content
         "401":
           description: Unauthorized
+          schema:
+            type: string
+        "403":
+          description: Forbidden
           schema:
             type: string
         "409":
@@ -452,13 +1129,14 @@ paths:
       - cookieAuth: []
       - csrfToken: []
       - cookieCsrfToken: []
+      summary: RemoveAvatar
       tags:
       - user
   /sign_up:
     post:
       consumes:
       - application/json
-      description: register user
+      description: Register user
       parameters:
       - description: User data
         in: body
@@ -467,8 +1145,8 @@ paths:
         schema:
           $ref: '#/definitions/user_domain.User'
       responses:
-        "200":
-          description: OK
+        "204":
+          description: No Content
           headers:
             Set-Cookie:
               description: Set JSESSIONID in Cookie
@@ -492,6 +1170,156 @@ paths:
       security:
       - csrfToken: []
       - cookieCsrfToken: []
+      summary: SignUp
+      tags:
+      - user
+  /track/{id}/is_like:
+    get:
+      description: Check if track is liked
+      parameters:
+      - description: track id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.IsLiked'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - cookieAuth: []
+      summary: IsLike
+      tags:
+      - track
+  /track/{id}/like:
+    post:
+      description: Like track
+      parameters:
+      - description: track id
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "403":
+          description: Forbidden
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - cookieAuth: []
+      - csrfToken: []
+      - cookieCsrfToken: []
+      summary: Like
+      tags:
+      - track
+  /track/{id}/unlike:
+    delete:
+      description: Unlike track
+      parameters:
+      - description: track id
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "403":
+          description: Forbidden
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - cookieAuth: []
+      - csrfToken: []
+      - cookieCsrfToken: []
+      summary: Unlike
+      tags:
+      - track
+  /update_info:
+    put:
+      consumes:
+      - application/json
+      description: Update user info
+      parameters:
+      - description: User data
+        in: body
+        name: userData
+        required: true
+        schema:
+          $ref: '#/definitions/user_domain.User'
+      responses:
+        "204":
+          description: No Content
+          headers:
+            Set-Cookie:
+              description: Set JSESSIONID in Cookie
+              type: string
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "403":
+          description: Forbidden
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - cookieAuth: []
+      - csrfToken: []
+      - cookieCsrfToken: []
+      summary: UpdateUserInfo
       tags:
       - user
   /upload_avatar:
@@ -516,6 +1344,10 @@ paths:
           description: Unauthorized
           schema:
             type: string
+        "403":
+          description: Forbidden
+          schema:
+            type: string
         "500":
           description: Internal Server Error
           schema:
@@ -524,6 +1356,7 @@ paths:
       - cookieAuth: []
       - csrfToken: []
       - cookieCsrfToken: []
+      summary: UploadAvatar
       tags:
       - user
 securityDefinitions:
