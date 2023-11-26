@@ -2,7 +2,7 @@ package main
 
 import (
 	"google.golang.org/grpc"
-	microservices_init "main/cmd/microservices"
+	// microservices_init "main/cmd/microservices"
 	init_db "main/init/postgres_db"
 	log "main/internal/common/logger"
 	"main/internal/microservices/track/proto"
@@ -42,10 +42,10 @@ func main() {
 	server := grpc.NewServer()
 	proto.RegisterTrackServiceServer(server, &trackManager)
 
-	serviceId := microservices_init.RegisterInConsul(Port, "track-api", "track", logger)
-	defer func() {
-		microservices_init.UnRegisterInConsul(serviceId, logger)
-	}()
+	// serviceId := microservices_init.RegisterInConsul(Port, "track-api", "track", logger)
+	// defer func() {
+	// 	microservices_init.UnRegisterInConsul(serviceId, logger)
+	// }()
 
 	logger.Infoln("starting server at " + strconv.Itoa(Port))
 	err = server.Serve(lis)
