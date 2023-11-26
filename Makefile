@@ -2,6 +2,9 @@
 		integration-test
 		mocks-gen
 		mocks-clean
+		kuber-deploy
+		build-images
+		remove-images
 
 # Запуск юнит-тестов в файл
 unit-test:
@@ -16,8 +19,22 @@ mocks-gen:
 mocks-clean:
 	$(CURDIR)/scripts/mocks-clean.sh
 
+# билдит базовый образ и образы микросервисов с тегом latest
+build-images:
+	$(CURDIR)/scripts/docker-base-build.sh
+	$(CURDIR)/scripts/docker-services-build.sh
+
+# удаляет все образы репозитория registry.musicon.space с тегом latest
+remove-images:
+	$(CURDIR)/scripts/docker-remove-images.sh
+
 # запуск интеграционных тестов
 integration-test:
 	$(CURDIR)/scripts/docker-base-build.sh
 	$(CURDIR)/scripts/docker-services-build.sh test
 	$(CURDIR)/scripts/integration-test.sh
+
+# паблиш локальных обарзов и деплой в кубер микросервисов
+kuber-deploy:
+	$(CURDIR)/scripts/docker-publish.sh
+	$(CURDIR)/scripts/kuber-deploy.sh
