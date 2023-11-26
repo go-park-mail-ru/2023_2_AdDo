@@ -83,7 +83,7 @@ create table if not exists artist_genre (
     artist_id int not null,
     genre_id int not null,
     foreign key (artist_id) references artist (id) on delete cascade ,
-    foreign key (genre_id) references track (id) on delete cascade,
+    foreign key (genre_id) references genre (id) on delete cascade,
     constraint unique_artist_genre UNIQUE (artist_id, genre_id)
 );
 
@@ -91,8 +91,8 @@ create table if not exists album_genre (
     id       serial primary key,
     album_id int not null,
     genre_id int not null,
-    foreign key (album_id) references artist (id) on delete cascade ,
-    foreign key (genre_id) references track (id) on delete cascade,
+    foreign key (album_id) references album (id) on delete cascade ,
+    foreign key (genre_id) references genre (id) on delete cascade,
     constraint unique_album_genre UNIQUE (album_id, genre_id)
 );
 
@@ -100,8 +100,8 @@ create table if not exists track_genre (
     id       serial primary key,
     track_id int not null,
     genre_id int not null,
-    foreign key (track_id) references artist (id) on delete cascade ,
-    foreign key (genre_id) references track (id) on delete cascade,
+    foreign key (track_id) references track (id) on delete cascade ,
+    foreign key (genre_id) references genre (id) on delete cascade,
     constraint unique_track_genre UNIQUE (track_id, genre_id)
 );
 
@@ -150,4 +150,11 @@ create table if not exists profile_playlist (
     constraint unique_profile_playlist UNIQUE (profile_id, playlist_id)
 );
 
-create table if not exists
+create table if not exists artist_album (
+                                            id         serial primary key,
+                                            artist_id int not null,
+                                            foreign key (artist_id) references artist (id) on delete cascade ,
+                                            album_id int not null,
+                                            foreign key (album_id) references album (id) on delete cascade,
+                                            constraint unique_artist_album UNIQUE (artist_id, album_id)
+);

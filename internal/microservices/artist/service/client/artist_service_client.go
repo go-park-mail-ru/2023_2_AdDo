@@ -5,6 +5,7 @@ import (
 	"github.com/sirupsen/logrus"
 	album_proto "main/internal/microservices/album/proto"
 	proto "main/internal/microservices/artist/proto"
+	grpc_playlist "main/internal/microservices/playlist/service/client"
 	grpc_track "main/internal/microservices/track/service/client"
 	"main/internal/pkg/album"
 	"main/internal/pkg/artist"
@@ -49,6 +50,31 @@ func DeserializeArtist(in *proto.Artist) artist.Response {
 	}
 }
 
+func DeserializeArtistBase(in *proto.ArtistBase) artist.Base {
+	return artist.Base{
+		Id:     in.GetId(),
+		Name:   in.GetName(),
+		Avatar: in.GetAvatar(),
+	}
+}
+
+func DeserializeArtistsBase(in *proto.ArtistsBase) []artist.Base {
+	result := make([]artist.Base, 0)
+	for _, base := range in.GetArtists() {
+		result = append(result, DeserializeArtistBase(base))
+	}
+	return result
+}
+
+func DeserializeSearchResponse(in *proto.SearchResponse) artist.SearchResponse {
+	return artist.SearchResponse{
+		Artists:   DeserializeArtistsBase(in.GetArtists()),
+		Albums:    DeserializeAlbumsBase(in.GetAlbums()),
+		Playlists: grpc_playlist.DeserializePlaylistsBase(in.GetPlaylists()),
+		Tracks:    grpc_track.DeserializeTracks(in.GetTracks()),
+	}
+}
+
 func (c *Client) GetArtistInfo(artistId uint64) (artist.Response, error) {
 	c.logger.Infoln("Client for artist micros")
 
@@ -89,4 +115,14 @@ func (c *Client) Unlike(userId string, artistId uint64) error {
 	}
 
 	return nil
+}
+
+func (c *Client) FullSearch(query string) (artist.SearchResponse, error) {
+	c.logger.Infoln("Client for artist micros Full Search")
+
+	result, err := c.artistManager.FullSearch(context.Background(), &proto.Query{Query: query})
+	if err != nil {
+		return artist.SearchResponse{}, err
+	}
+	return DeserializeSearchResponse(result), nil
 }

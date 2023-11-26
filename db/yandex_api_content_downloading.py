@@ -6,7 +6,7 @@ client = Client("y0_AgAAAAAbRHgFAAG8XgAAAADyWaE2jVlJZBQTS2e2hxPG-7ELnuOHHhY").in
 
 MAX_ARTIST_BATCH = 6000
 
-MINIO_PATH = '/home/dmitry'
+MINIO_PATH = '/data/minio'
 
 
 def form_request(start):

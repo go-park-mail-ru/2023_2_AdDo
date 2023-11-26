@@ -33,6 +33,8 @@ services:
     extends:
       file: ../common-services.yml
       service: service-db-postgres
+    ports:
+      - "5432:5432" # redundant
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U musicon" ]
       interval: 10s

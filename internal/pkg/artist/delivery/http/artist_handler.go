@@ -208,3 +208,25 @@ func (handler *ArtistHandler) Unlike(w http.ResponseWriter, r *http.Request) err
 	w.WriteHeader(http.StatusNoContent)
 	return nil
 }
+
+func (handler *ArtistHandler) FullSearch(w http.ResponseWriter, r *http.Request) error {
+	handler.logger.WithFields(logrus.Fields{
+		"request_id": utils.GenReqId(r.RequestURI + r.Method),
+	}).Infoln("Artist delivery Full Search entered")
+
+	params := r.URL.Query()
+	query := params.Get("query")
+	handler.logger.Infoln("Got query from uri", query)
+
+	result, err := handler.ArtistUseCase.FullSearch(query)
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusNotFound, Err: err}
+	}
+	handler.logger.Infoln("got response from useCase")
+
+	if err = response.RenderJSON(w, result); err != nil {
+		return common_handler.StatusError{Code: http.StatusNotFound, Err: err}
+	}
+
+	return nil
+}
