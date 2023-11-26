@@ -30,7 +30,7 @@ track_genre_comma_flag = False
 
 data_artist.write(f'INSERT INTO artist ( name, avatar ) VALUES\n')
 data_album.write(f'INSERT INTO album ( name, preview, release_date, year ) VALUES\n')
-data_track.write(f'INSERT INTO track ( name, preview, duration, content, lyrics, duration ) VALUES\n')
+data_track.write(f'INSERT INTO track ( name, preview, content, lyrics, duration ) VALUES\n')
 
 data_artist_album.write(f'INSERT INTO artist_album ( artist_id, album_id ) VALUES\n')
 data_artist_track.write(f'INSERT INTO artist_track ( artist_id, track_id ) VALUES\n')
@@ -63,7 +63,7 @@ def add_artist_genre_record(artist_name, genres):
         else:
             add_file_del(data_artist_genre)
         data_artist_genre.write(
-            f'( ( SELECT id FROM artist WHERE name = \'{artist_name}\' ), ( SELECT id FROM genre WHERE name = \'{genre}\' ) )')
+            f'( ( SELECT id FROM artist WHERE name = \'{artist_name}\' limit 1), ( SELECT id FROM genre WHERE name = \'{genre}\' ) )')
 
 
 def add_album_genre_record(album_name, genre):
@@ -73,7 +73,7 @@ def add_album_genre_record(album_name, genre):
     else:
         add_file_del(data_album_genre)
     data_album_genre.write(
-        f'( ( SELECT id FROM album WHERE name = \'{album_name}\' ), ( SELECT id FROM genre WHERE name = \'{genre}\' ) )')
+        f'( ( SELECT id FROM album WHERE name = \'{album_name}\' limit 1), ( SELECT id FROM genre WHERE name = \'{genre}\' ) )')
 
 
 def add_track_genre_record(track_title, genre):
@@ -83,7 +83,7 @@ def add_track_genre_record(track_title, genre):
     else:
         add_file_del(data_track_genre)
     data_track_genre.write(
-        f'( ( SELECT id FROM track WHERE name = \'{track_title}\' ), ( SELECT id FROM genre WHERE name = \'{genre}\' ) )')
+        f'( ( SELECT id FROM track WHERE name = \'{track_title}\' limit 1), ( SELECT id FROM genre WHERE name = \'{genre}\' ) )')
 
 
 def add_album_artist_record(album_name, artist_name):
@@ -93,7 +93,7 @@ def add_album_artist_record(album_name, artist_name):
     else:
         add_file_del(data_artist_album)
     data_artist_album.write(
-        f'( ( SELECT id FROM artist WHERE name = \'{artist_name}\' ), ( SELECT id FROM album WHERE name = \'{album_name}\' ) )')
+        f'( ( SELECT id FROM artist WHERE name = \'{artist_name}\' ), ( SELECT id FROM album WHERE name = \'{album_name}\' limit 1 ) )')
 
 
 def add_genre_record(genres):
@@ -139,7 +139,7 @@ def add_track_album_record(track_title, album_title):
     else:
         add_file_del(data_album_track)
     data_album_track.write(
-        f'( ( SELECT id FROM album WHERE name = \'{album_title}\' ), ( SELECT id FROM track WHERE name = \'{track_title}\' ) )')
+        f'( ( SELECT id FROM album WHERE name = \'{album_title}\' limit 1), ( SELECT id FROM track WHERE name = \'{track_title}\' limit 1 ) )')
 
 
 def add_track_artist_record(track_title, artist_name):
@@ -149,7 +149,7 @@ def add_track_artist_record(track_title, artist_name):
     else:
         add_file_del(data_artist_track)
     data_artist_track.write(
-        f'( ( SELECT id FROM artist WHERE name = \'{artist_name}\' ), ( SELECT id FROM track WHERE name = \'{track_title}\' ) )')
+        f'( ( SELECT id FROM artist WHERE name = \'{artist_name}\' ), ( SELECT id FROM track WHERE name = \'{track_title}\' limit 1 ) )')
 
 
 for i in range(1, 6000, MAX_ARTIST_BATCH):
@@ -198,13 +198,13 @@ data_artist.write('\n;')
 data_album.write('\n;')
 data_track.write('\n;')
 
-data_artist_album.write('\n;')
-data_artist_track.write('\n;')
-data_album_track.write('\n;')
+data_artist_album.write(' on conflict do nothing \n;')
+data_artist_track.write(' on conflict do nothing \n;')
+data_album_track.write(' on conflict do nothing \n;')
 
-data_artist_genre.write('\n;')
-data_album_genre.write('\n;')
-data_track_genre.write('\n;')
+data_artist_genre.write(' on conflict do nothing \n;')
+data_album_genre.write(' on conflict do nothing \n;')
+data_track_genre.write(' on conflict do nothing \n;')
 
 data_artist.close()
 data_album.close()

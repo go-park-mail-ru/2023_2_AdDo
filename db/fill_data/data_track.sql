@@ -1,4 +1,4 @@
-INSERT INTO track ( name, preview, duration, content, lyrics, duration ) VALUES
+INSERT INTO track ( name, preview, content, lyrics, duration ) VALUES
 ( 'Gospel', '/images/tracks/Eminem/Gospel.webp', '/audio/Eminem/Gospel/Gospel.mp3', '', 210.02 ),
 ( 'Last One Standing', '/images/tracks/Eminem/Last_One_Standing.webp', '/audio/Eminem/Last_One_Standing/Last_One_Standing.mp3', '', 258.67 ),
 ( 'Venom', '/images/tracks/Eminem/Last_One_Standing.webp', '/audio/Eminem/Last_One_Standing/Venom.mp3', '', 261.6 ),

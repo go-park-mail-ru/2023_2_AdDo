@@ -78,7 +78,7 @@ func (p *Postgres) GetByTrackId(trackId uint64) ([]artist.Base, error) {
 func (p *Postgres) Search(text string) ([]artist.Base, error) {
 	p.logger.Infoln("Artist Repo Search entered")
 
-	query := "select artist.id, artist.name, artist.avatar from artist join artist_track on artist.id = artist_track.artist_id where to_tsvector('russian', artist.name) @@ to_tsquery('russian', $1)"
+	query := "select artist.id, artist.name, artist.avatar from artist where to_tsvector('russian', artist.name) @@ to_tsquery('russian', $1)"
 	return p.getWithQuery(context.Background(), query, text)
 }
 
@@ -87,7 +87,7 @@ func (p *Postgres) GetByAlbumId(albumId uint64) (artist.Base, error) {
 
 	var result artist.Base
 
-	query := "select artist.id, artist.name, avatar from artist join album on artist.id = album.artist_id where album.id = $1"
+	query := "select artist.id, artist.name, artist.avatar from artist join artist_album on artist.id = artist_album.artist_id where artist_album.album_id = $1"
 	if err := p.Pool.QueryRow(context.Background(), query, albumId).Scan(&result.Id, &result.Name, &result.Avatar); err != nil {
 		p.logger.WithFields(logrus.Fields{
 			"err":      err,

@@ -3,14 +3,37 @@ syntax = "proto3";
 option go_package = "/artist";
 import "album.proto";
 import "track.proto";
+import "playlist.proto";
 import "google/protobuf/empty.proto";
 
-// protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative -I../proto -I../../track/proto -I../../album/proto artist.proto
+//protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative  -I../proto -I../../track/proto -I../../album/proto -I../../session/proto -I../../playlist/proto -I../../image/proto artist.proto
 service ArtistService {
   rpc GetArtistInfo(ArtistId) returns(Artist) {}
   rpc Like (ArtistToUserId) returns (google.protobuf.Empty) {}
   rpc IsLike (ArtistToUserId) returns (IsLikedArtist) {}
   rpc Unlike (ArtistToUserId) returns (google.protobuf.Empty) {}
+  rpc FullSearch (Query) returns (SearchResponse) {}
+}
+
+message ArtistBase {
+  uint64 Id = 1;
+  string Name = 2;
+  string Avatar = 3;
+}
+
+message ArtistsBase {
+  repeated ArtistBase Artists = 1;
+}
+
+message SearchResponse {
+  TracksResponse Tracks = 1;
+  AlbumsBase Albums = 2;
+  PlaylistsBase Playlists = 3;
+  ArtistsBase Artists = 4;
+}
+
+message Query {
+  string query = 1;
 }
 
 message IsLikedArtist {
