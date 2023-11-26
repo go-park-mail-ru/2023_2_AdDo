@@ -5,6 +5,7 @@ import (
 	router_init "main/init/router"
 	csrf "main/internal/common/get_csrf"
 	log "main/internal/common/logger"
+	"main/internal/common/middleware/metrics"
 	modify_playlist "main/internal/common/middleware/playlist_middleware/modify"
 	read_playlist "main/internal/common/middleware/playlist_middleware/read"
 	proto2 "main/internal/microservices/album/proto"
@@ -26,12 +27,15 @@ import (
 	playlist_delivery "main/internal/pkg/playlist/delivery/http"
 	track_delivery "main/internal/pkg/track/delivery/http"
 	user_delivery "main/internal/pkg/user/delivery/http"
+
 	"net/http"
+
+	"google.golang.org/grpc/credentials/insecure"
 
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
+	"github.com/prometheus/client_golang/prometheus"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 )
 
 const EnvPostgresQueryName = "DATABASE_URL"
@@ -98,6 +102,9 @@ func main() {
 	corsMiddleware := middleware.NewCors()
 	csrfMiddleware := middleware.NewCSRF()
 
+	prometheusRegistry := prometheus.NewRegistry()
+	metricsMiddleware := metrics.NewMiddleware(metrics.NewHandlers(), metrics.NewMetrics(prometheusRegistry))
+
 	routerConfig := router_init.Config{
 		Routes: []router_init.Route{
 			router_init.NewRoute("/get_csrf", csrf.GetCSRF, http.MethodGet),
@@ -133,8 +140,9 @@ func main() {
 		},
 		Prefix: "/api/v1",
 		Middlewares: []mux.MiddlewareFunc{
-			csrfMiddleware, corsMiddleware,
+			csrfMiddleware, corsMiddleware, metricsMiddleware.Collecting,
 		},
+		PrometheusRegistry: prometheusRegistry,
 
 		SubRouterConfigs: []router_init.Config{
 			router_init.Config{
