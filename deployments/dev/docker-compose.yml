@@ -64,10 +64,10 @@ services:
       node-exporter:
         condition: service_started
 
-  consul:
-    image: consul:1.15
-    ports:
-      - "8500:8500"
+  # consul:
+  #   image: consul:1.15
+  #   ports:
+  #     - "8500:8500"
 
   common-service-waiter:
     image: alpine
@@ -80,8 +80,8 @@ services:
         condition: service_healthy
       create_buckets:
         condition: service_completed_successfully
-      consul:
-        condition: service_started
+      # consul:
+      #   condition: service_started
     command: "ls"
 
   user:
