@@ -94,8 +94,8 @@ func (p Postgres) GetByLikeCount(limit uint32) ([]album.Base, error) {
 
 func (p Postgres) Search(text string) ([]album.Base, error) {
 	p.logger.Infoln("Album Repo Search entered")
-	query := "select album.id, name, preview from album where to_tsvector('russian', album.name) @@ to_tsquery('russian', $1) limit $2"
-	return p.getWithQuery(context.Background(), query, text, album.LimitForMainPage)
+	query := "select album.id, name, preview from album where to_tsvector('russian', album.name) @@ plainto_tsquery('russian', $1) or lower(album.name) like lower($2) limit $3"
+	return p.getWithQuery(context.Background(), query, text, "%"+text+"%", album.LimitForMainPage)
 }
 
 func (p Postgres) Get(albumId uint64) (album.Base, error) {
