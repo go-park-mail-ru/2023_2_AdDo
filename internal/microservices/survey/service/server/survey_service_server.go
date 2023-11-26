@@ -30,7 +30,7 @@ func DeserializeAnswers(in []*survey_proto.Uint64ToString) map[uint64]string {
 }
 
 func SerializeUint64ToString(in map[uint64]string) []*survey_proto.Uint64ToString {
-	answers := make([]*survey_proto.Uint64ToString, len(in))
+	answers := make([]*survey_proto.Uint64ToString, 0)
 	for questionId, answerText := range in {
 		answers = append(answers, &survey_proto.Uint64ToString{
 			Key:   uint64(questionId),
@@ -41,7 +41,7 @@ func SerializeUint64ToString(in map[uint64]string) []*survey_proto.Uint64ToStrin
 }
 
 func SerializeStringToUint64(in map[string]uint64) []*survey_proto.StringToUint64 {
-	answers := make([]*survey_proto.StringToUint64, len(in))
+	answers := make([]*survey_proto.StringToUint64, 0)
 	for answerText, questionId := range in {
 		answers = append(answers, &survey_proto.StringToUint64{
 			Key:   answerText,

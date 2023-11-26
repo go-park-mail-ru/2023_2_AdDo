@@ -17,7 +17,7 @@ func NewClient(client survey_proto.SurveyServiceClient) Client {
 }
 
 func SerializeUint64ToString(in map[uint64]string) []*survey_proto.Uint64ToString {
-	answers := make([]*survey_proto.Uint64ToString, len(in))
+	answers := make([]*survey_proto.Uint64ToString, 0)
 	for questionId, answerText := range in {
 		answers = append(answers, &survey_proto.Uint64ToString{
 			Key:   uint64(questionId),
@@ -28,7 +28,7 @@ func SerializeUint64ToString(in map[uint64]string) []*survey_proto.Uint64ToStrin
 }
 
 func DeserializeAnswers(in []*survey_proto.Uint64ToString) map[uint64]string {
-	result := make(map[uint64]string, len(in))
+	result := make(map[uint64]string)
 	for _, pair := range in {
 		result[pair.GetKey()] = pair.GetValue()
 	}
@@ -36,7 +36,7 @@ func DeserializeAnswers(in []*survey_proto.Uint64ToString) map[uint64]string {
 }
 
 func DeserializeStringToUint64(in []*survey_proto.StringToUint64) map[string]uint64 {
-	result := make(map[string]uint64, len(in))
+	result := make(map[string]uint64)
 	for _, pair := range in {
 		result[pair.Key] = pair.Value
 	}

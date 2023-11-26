@@ -56,7 +56,10 @@ func (p *Postgres) IsUserSubmitSurvey(userId string, surveyId uint64) (bool, err
 func (p *Postgres) GetSurveyStats(surveyId uint64) (survey.StatResponse, error) {
 	p.logger.Infoln("Survey Repo Get entered")
 
-	result := survey.StatResponse{Id: surveyId}
+	result := survey.StatResponse{
+		Id: surveyId,
+		QuestionToAverage: make(map[string]uint64),
+	}
 	query := `select question.title, avg(answer) as average_rating from survey
 				inner join answer  on survey.id = answer.survey_id
 				inner join question  on answer.question_id = question.id
@@ -90,7 +93,8 @@ func (p *Postgres) GetSurveyStats(surveyId uint64) (survey.StatResponse, error) 
 func (p *Postgres) Get(id uint64) (survey.Response, error) {
 	p.logger.Infoln("Survey Repo Get entered")
 
-	var result survey.Response
+	var result survey.Response 
+	result.QuestionIdToText = make(map[uint64]string)
 	query := `select question_id, question.title from survey
     join survey_question on survey_question.survey_id = survey.id
     join question on survey_question.question_id = question.id
