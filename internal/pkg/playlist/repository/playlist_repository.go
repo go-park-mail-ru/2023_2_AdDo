@@ -311,7 +311,6 @@ func (p *Postgres) MakePrivate(ctx context.Context, playlistId uint64) error {
 
 func (p *Postgres) Search(ctx context.Context, text string) ([]playlist.Base, error) {
 	p.logger.Infoln("Playlist Repo Search entered")
-
-	query := "select id, name, creator_id, preview from playlist where to_tsvector('russian', playlist.name) @@ to_tsquery('russian', $1)"
-	return p.getWithQuery(ctx, query, text)
+	query := "select id, name, creator_id, preview from playlist where to_tsvector('russian', playlist.name) @@ plainto_tsquery('russian', $1) or lower(playlist.name) like lower($2)"
+	return p.getWithQuery(ctx, query, text, "%"+text+"%")
 }

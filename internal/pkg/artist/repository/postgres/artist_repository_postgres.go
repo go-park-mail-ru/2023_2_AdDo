@@ -77,9 +77,8 @@ func (p *Postgres) GetByTrackId(trackId uint64) ([]artist.Base, error) {
 
 func (p *Postgres) Search(text string) ([]artist.Base, error) {
 	p.logger.Infoln("Artist Repo Search entered")
-
-	query := "select artist.id, artist.name, artist.avatar from artist where to_tsvector('russian', artist.name) @@ to_tsquery('russian', $1)"
-	return p.getWithQuery(context.Background(), query, text)
+	query := "select artist.id, artist.name, artist.avatar from artist where to_tsvector('russian', artist.name) @@ plainto_tsquery('russian', $1) or lower(artist.name) like lower($2)"
+	return p.getWithQuery(context.Background(), query, text, "%"+text+"%")
 }
 
 func (p *Postgres) GetByAlbumId(albumId uint64) (artist.Base, error) {
