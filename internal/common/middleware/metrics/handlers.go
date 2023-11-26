@@ -1,4 +1,4 @@
-package prometheus
+package metrics
 
 import (
 	"strings"
@@ -13,29 +13,29 @@ const (
 	unknownHandler  = "unknown"
 )
 
-type handlersMap struct {
-	m map[string]string
+type handlers struct {
+	pathToHandler map[string]string
 }
 
-func (h *handlersMap) insert(pathPrefixs []string, handlerName string) {
+func (h *handlers) insert(pathPrefixs []string, handlerName string) {
 	for _, prefix := range pathPrefixs {
-		h.m[prefix] = handlerName
+		h.pathToHandler[prefix] = handlerName
 	}
 }
 
-func (h *handlersMap) getHandler(prefix string) string {
+func (h *handlers) getHandler(prefix string) string {
 	if end := strings.Index(prefix[1:], "/"); end != -1 {
 		prefix = prefix[:end+1]
 	}
-	if handler, ok := h.m[prefix]; ok {
+	if handler, ok := h.pathToHandler[prefix]; ok {
 		return handler
 	}
 	return unknownHandler
 }
 
-func NewHandlersMap() handlersMap {
-	handlers := handlersMap{}
-	handlers.m = make(map[string]string)
+func NewHandlers() handlers {
+	handlers := handlers{}
+	handlers.pathToHandler = make(map[string]string)
 	userPathPrefix := []string{
 		"/sign_up",
 		"/login",

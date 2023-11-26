@@ -3,9 +3,7 @@ package router_init
 import (
 	_ "main/api/openapi"
 	common_handler "main/internal/common/handler"
-	"main/internal/common/metrics"
 	"main/internal/common/middleware/common"
-	prom "main/internal/common/middleware/prometheus"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -58,21 +56,17 @@ func NewRoute(p string, h func(w http.ResponseWriter, r *http.Request) error, m 
 }
 
 type Config struct {
-	Routes           []Route
-	Prefix           string
-	Middlewares      []mux.MiddlewareFunc
-	SubRouterConfigs []Config
+	Routes             []Route
+	Prefix             string
+	Middlewares        []mux.MiddlewareFunc
+	SubRouterConfigs   []Config
+	PrometheusRegistry *prometheus.Registry
 }
 
 func New(config Config, logger *logrus.Logger) http.Handler {
 	router := mux.NewRouter()
 	router.PathPrefix("/swagger").Handler(httpSwagger.WrapHandler)
-
-	reg := prometheus.NewRegistry()
-	metrics := metrics.New(reg)
-	handlersMap := prom.NewHandlersMap()
-	// router.PathPrefix("/metrics").Handler(promhttp.Handler())
-	router.PathPrefix("/metrics").Handler(promhttp.HandlerFor(reg, promhttp.HandlerOpts{Registry: reg}))
+	router.PathPrefix("/metrics").Handler(promhttp.HandlerFor(config.PrometheusRegistry, promhttp.HandlerOpts{Registry: config.PrometheusRegistry}))
 
 	for _, route := range config.Routes {
 		router.Handle(config.Prefix+route.Path, common_handler.Handler{H: route.Handler}).Methods(route.Method)
@@ -90,7 +84,6 @@ func New(config Config, logger *logrus.Logger) http.Handler {
 	router.Use(config.Middlewares...)
 
 	routerWithMiddleware := common.Logging(router, logger)
-	routerWithMiddleware = prom.CollectMetrics(routerWithMiddleware, metrics, handlersMap)
 	routerWithMiddleware = common.PanicRecovery(routerWithMiddleware, logger)
 
 	return routerWithMiddleware

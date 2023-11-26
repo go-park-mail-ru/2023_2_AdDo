@@ -5,14 +5,14 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promauto"
 )
 
-type Metrics struct {
+type metrics struct {
 	TotalRequests  *prometheus.CounterVec
 	HttpDuration   *prometheus.HistogramVec
 }
 
-func New(reg prometheus.Registerer) Metrics {
+func NewMetrics(reg prometheus.Registerer) metrics {
 	const namePrefix = "musicon_"
-	m := Metrics{
+	m := metrics{
 		TotalRequests: prometheus.NewCounterVec(
 			prometheus.CounterOpts{
 				Name: namePrefix + "requests_total",
@@ -28,7 +28,6 @@ func New(reg prometheus.Registerer) Metrics {
 			[]string{"path", "method", "code", "handler"},
 		),
 	}
-	reg.MustRegister(m.TotalRequests)
-	reg.MustRegister(m.HttpDuration)
+	reg.MustRegister(m.TotalRequests, m.HttpDuration)
 	return m
 }
