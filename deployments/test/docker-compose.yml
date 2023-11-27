@@ -34,21 +34,16 @@ services:
     image: redis
 
   service-db-postgres:
-    restart: always
-    image: postgres:14
-    volumes:
-      -  ../../db/migrations/db_schema.sql:/docker-entrypoint-initdb.d/migration_1.sql
-      -  ../../db/fill_data/data_filling.sql:/docker-entrypoint-initdb.d/migration_2.sql
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-
-  # consul:
-  #   image: consul:1.15
-  #   ports:
-  #     - "8500:8500"
-
+    extends:
+      file: ../common-services.yml
+      service: service-db-postgres
+    ports:
+      - "5432:5432" # redundant
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U musicon" ]
+      interval: 10s
+      retries: 3
+      timeout: 5s
 
   common-service-waiter:
     image: alpine
@@ -61,8 +56,6 @@ services:
         condition: service_started
       create_buckets:
         condition: service_completed_successfully
-      # consul:
-        # condition: service_started
 
   user:
     image: registry.musicon.space/user:test

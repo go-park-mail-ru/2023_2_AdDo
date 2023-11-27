@@ -69,7 +69,7 @@ func TestArtistRepository(t *testing.T) {
 		profileTable := pgxmock.NewRows([]string{"id", "name", "avatar"}).
 			AddRow(expectedArtists[0].Id, expectedArtists[0].Name, expectedArtists[0].Avatar)
 
-		query := "select artist.id, artist.name, avatar from artist join album on artist.id = album.artist_id where album.id = ?"
+		query := "select artist.id, artist.name, artist.avatar from artist join artist_album on artist.id = artist_album.artist_id where artist_album.album_id = ?"
 
 		mock.ExpectQuery(query).WithArgs(albumId).WillReturnRows(profileTable)
 

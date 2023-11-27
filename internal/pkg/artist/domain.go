@@ -2,6 +2,7 @@ package artist
 
 import (
 	"main/internal/pkg/album"
+	"main/internal/pkg/playlist"
 	"main/internal/pkg/track"
 )
 
@@ -19,11 +20,19 @@ type Response struct {
 	Tracks []track.Response `json:"Tracks"`
 }
 
+type SearchResponse struct {
+	Playlists []playlist.Base  `json:"Playlists"`
+	Albums    []album.Base     `json:"Albums"`
+	Tracks    []track.Response `json:"Tracks"`
+	Artists   []Base           `json:"Artists"`
+}
+
 type UseCase interface {
 	GetArtistInfo(artistId uint64) (Response, error)
 	Like(userId string, artistId uint64) error
 	IsLike(userId string, artistId uint64) (bool, error)
 	Unlike(userId string, artistId uint64) error
+	FullSearch(text string) (SearchResponse, error)
 }
 
 type Repository interface {
@@ -34,4 +43,5 @@ type Repository interface {
 	CreateLike(userId string, artistId uint64) error
 	CheckLike(userId string, artistId uint64) (bool, error)
 	DeleteLike(userId string, artistId uint64) error
+	Search(text string) ([]Base, error)
 }

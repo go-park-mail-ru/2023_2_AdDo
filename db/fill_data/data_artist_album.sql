@@ -1,0 +1,22 @@
+INSERT INTO artist_album ( artist_id, album_id ) VALUES
+( ( SELECT id FROM artist WHERE name = 'Eminem' ), ( SELECT id FROM album WHERE name = 'Gospel' limit 1 ) ),
+( ( SELECT id FROM artist WHERE name = 'Eminem' ), ( SELECT id FROM album WHERE name = 'Last One Standing' limit 1 ) ),
+( ( SELECT id FROM artist WHERE name = 'Eminem' ), ( SELECT id FROM album WHERE name = 'Killer' limit 1 ) ),
+( ( SELECT id FROM artist WHERE name = 'Eminem' ), ( SELECT id FROM album WHERE name = 'Music To Be Murdered By - Side B' limit 1 ) ),
+( ( SELECT id FROM artist WHERE name = 'Eminem' ), ( SELECT id FROM album WHERE name = 'The Adventures Of Moon Man & Slim Shady' limit 1 ) ),
+( ( SELECT id FROM artist WHERE name = 'Eminem' ), ( SELECT id FROM album WHERE name = 'Music To Be Murdered By' limit 1 ) ),
+( ( SELECT id FROM artist WHERE name = 'Eminem' ), ( SELECT id FROM album WHERE name = 'Bang' limit 1 ) ),
+( ( SELECT id FROM artist WHERE name = 'Eminem' ), ( SELECT id FROM album WHERE name = 'Killshot' limit 1 ) ),
+( ( SELECT id FROM artist WHERE name = 'Eminem' ), ( SELECT id FROM album WHERE name = 'Kamikaze' limit 1 ) ),
+( ( SELECT id FROM artist WHERE name = 'Eminem' ), ( SELECT id FROM album WHERE name = 'Nowhere Fast' limit 1 ) ),
+( ( SELECT id FROM artist WHERE name = 'Eminem' ), ( SELECT id FROM album WHERE name = 'Chloraseptic' limit 1 ) ),
+( ( SELECT id FROM artist WHERE name = 'Eminem' ), ( SELECT id FROM album WHERE name = 'Revival' limit 1 ) ),
+( ( SELECT id FROM artist WHERE name = 'Eminem' ), ( SELECT id FROM album WHERE name = 'Campaign Speech' limit 1 ) ),
+( ( SELECT id FROM artist WHERE name = 'Eminem' ), ( SELECT id FROM album WHERE name = 'Detroit Vs. Everybody' limit 1 ) ),
+( ( SELECT id FROM artist WHERE name = 'Eminem' ), ( SELECT id FROM album WHERE name = 'Twerk Dat Pop That (feat. Eminem & Royce da 5''9")' limit 1 ) ),
+( ( SELECT id FROM artist WHERE name = 'Eminem' ), ( SELECT id FROM album WHERE name = 'Twerk Dat Pop That (Clean) [feat. Eminem & Royce da 5''9"]' limit 1 ) ),
+( ( SELECT id FROM artist WHERE name = 'Eminem' ), ( SELECT id FROM album WHERE name = 'The Marshall Mathers LP2' limit 1 ) ),
+( ( SELECT id FROM artist WHERE name = 'Eminem' ), ( SELECT id FROM album WHERE name = 'My Life' limit 1 ) ),
+( ( SELECT id FROM artist WHERE name = 'Eminem' ), ( SELECT id FROM album WHERE name = 'I Need A Doctor' limit 1 ) ),
+( ( SELECT id FROM artist WHERE name = 'Eminem' ), ( SELECT id FROM album WHERE name = 'Recovery' limit 1 ) ) on conflict do nothing 
+;
