@@ -7,7 +7,7 @@ if [ ! -d "test/mocks" ]; then
     exit 0
 fi
 
-sudo rm -r test/mocks
+rm -r test/mocks
 if [ $? -ne 0 ]; then
     echo "Error remove dir /test/mocks"
     exit 1

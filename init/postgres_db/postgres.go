@@ -10,7 +10,7 @@ import (
 
 func InitPostgres(env string) (*pgxpool.Pool, error) {
 	psqlInfo := os.Getenv(env)
-	log.Printf(psqlInfo)
+	log.Print(psqlInfo)
 
 	conn, err := pgxpool.New(context.Background(), os.Getenv(env))
 	if err != nil {
