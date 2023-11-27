@@ -159,3 +159,14 @@ func (db *Postgres) AddListen(trackId uint64) error {
 
 	return nil
 }
+
+func (db *Postgres) Search(text string) ([]track.Response, error) {
+	db.logger.Infoln("TrackRepo AddListen entered")
+
+	query := `select track.id, track.name, preview, content, duration, artist.id, artist.name from track 
+      			join artist_track on track.id = artist_track.track_id 
+    			join artist on artist.id = artist_track.artist_id 
+			    where to_tsvector('russian', track.name) @@ plainto_tsquery('russian', $1 ) or lower(track.name) like lower($2) `
+
+	return db.getWithQuery(context.Background(), query, text, "%"+text+"%")
+}

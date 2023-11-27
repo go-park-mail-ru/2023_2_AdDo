@@ -136,6 +136,7 @@ func main() {
 			router_init.NewRoute("/artist/{id}/is_like", artistHandler.IsLike, http.MethodGet),
 			router_init.NewRoute("/artist/{id}/unlike", artistHandler.Unlike, http.MethodDelete),
 			router_init.NewRoute("/artist/{id}", artistHandler.ArtistInfo, http.MethodGet),
+			router_init.NewRoute("/search", artistHandler.FullSearch, http.MethodGet),
 			router_init.NewRoute("/playlist", playlistHandler.Create, http.MethodPost),
 		},
 		Prefix: "/api/v1",

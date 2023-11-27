@@ -40,6 +40,7 @@ type Repository interface {
 	CheckLike(userId string, trackId uint64) (bool, error)
 	DeleteLike(userId string, trackId uint64) error
 	AddListen(trackId uint64) error
+	Search(text string) ([]Response, error)
 }
 
 var (

@@ -9,6 +9,7 @@ import (
 	grpc_artist_server "main/internal/microservices/artist/service/server"
 	album_repository "main/internal/pkg/album/repository/postgres"
 	artist_repository "main/internal/pkg/artist/repository/postgres"
+	playlist_repository "main/internal/pkg/playlist/repository"
 	track_repository "main/internal/pkg/track/repository/postgresql"
 	"net"
 	"strconv"
@@ -36,8 +37,9 @@ func main() {
 	trackRepository := track_repository.NewPostgres(pool, logger)
 	albumRepository := album_repository.NewPostgres(pool, logger)
 	artistRepository := artist_repository.NewPostgres(pool, logger)
+	playlistRepository := playlist_repository.NewPostgres(pool, logger)
 
-	artistManager := grpc_artist_server.NewArtistManager(&artistRepository, trackRepository, albumRepository, logger)
+	artistManager := grpc_artist_server.NewArtistManager(&playlistRepository, &artistRepository, trackRepository, albumRepository, logger)
 
 	server := grpc.NewServer()
 	artist.RegisterArtistServiceServer(server, &artistManager)
