@@ -7,7 +7,6 @@ import (
 	"main/internal/common/handler"
 	"main/internal/common/response"
 	"main/internal/common/utils"
-	"main/internal/pkg/album"
 	"main/internal/pkg/session"
 	"main/internal/pkg/track"
 	"net/http"
@@ -16,7 +15,6 @@ import (
 
 type TrackHandler struct {
 	trackUseCase   track.UseCase
-	albumUseCase   album.UseCase
 	sessionUseCase session.UseCase
 	logger         *logrus.Logger
 }

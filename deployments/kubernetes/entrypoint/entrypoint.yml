@@ -1,0 +1,26 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: entrypoint-deploy
+  labels:
+    app: entrypoint-svc
+  namespace: musicon
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: entrypoint-svc
+  template:
+    metadata:
+      labels:
+        app: entrypoint-svc
+      namespace: musicon
+    spec:
+      imagePullSecrets:
+        - name: regcred
+      containers:
+      - name: entrypoint
+        image: registry.musicon.space/entrypoint
+        imagePullPolicy: Always
+        command: ["/entrypoint"]

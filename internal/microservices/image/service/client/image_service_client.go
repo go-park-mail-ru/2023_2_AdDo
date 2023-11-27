@@ -20,6 +20,9 @@ func (c *Client) UploadAvatar(src io.Reader, size int64) (string, error) {
 	c.logger.Infoln("Image client UploadAvatar entered")
 
 	data, err := io.ReadAll(src)
+	if err != nil {
+		c.logger.Errorln(err.Error())
+	}
 	result, err := c.imageManager.UploadAvatar(context.Background(), &image_proto.Image{
 		Data: data,
 		Size: uint64(size),
@@ -36,6 +39,9 @@ func (c *Client) UploadPlaylistImage(src io.Reader, size int64) (string, error) 
 	c.logger.Infoln("Image client UploadPlaylistImage entered")
 
 	data, err := io.ReadAll(src)
+	if err != nil {
+		c.logger.Errorln(err.Error())
+	}
 	result, err := c.imageManager.UploadPlaylistImage(context.Background(), &image_proto.Image{
 		Data: data,
 		Size: uint64(size),

@@ -1,3 +1,5 @@
+#!/bin/bash
+
 for dockerfile in build/package/micros/*/Dockerfile; do
     image_name=registry.musicon.space/$(basename $(dirname $dockerfile)):test
     docker build -t $image_name -f $dockerfile .
