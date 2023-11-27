@@ -4,38 +4,38 @@ kind: Service
 metadata:
   name: images
   labels:
-    app: image-svc
+    app: images-svc
   namespace: musicon
 spec:
   clusterIP: None
   ports:
   - port: 8087
-    name: image
+    name: images
   selector:
-    app: image-svc
+    app: images-svc
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: image-deploy
+  name: images-deploy
   labels:
-    app: image-svc
+    app: images-svc
   namespace: musicon
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: image-svc
+      app: images-svc
   template:
     metadata:
       labels:
-        app: image-svc
+        app: images-svc
       namespace: musicon
     spec:
       imagePullSecrets:
         - name: regcred
       containers:
-      - name: image
+      - name: images
         image: registry.musicon.space/images
         imagePullPolicy: Always
         command: ["/images"]
