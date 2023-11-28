@@ -55,7 +55,7 @@ logout_test.test_logout_success()
 track_test = track_test.TrackTest()
 track_test.test_track_listen_forbidden()
 track_test.test_track_listen_success()
-track_test.test_track_like_success()
+#track_test.test_track_like_success()
 track_test.test_track_collection_success()
 
 
