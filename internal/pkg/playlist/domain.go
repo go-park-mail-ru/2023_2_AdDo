@@ -2,6 +2,8 @@ package playlist
 
 import (
 	"context"
+	"github.com/asaskevich/govalidator"
+	xssvalidator "github.com/infiniteloopcloud/xss-validator"
 	"io"
 	"main/internal/pkg/track"
 )
@@ -27,9 +29,27 @@ type Response struct {
 	Tracks     []track.Response
 }
 
+type Name struct {
+	Name string `valid:"length(1|30), required, printableascii" json:"Name" example:"PlaylistName"`
+}
+
 type ToTrackId struct {
 	PlaylistId uint64 `json:"PlaylistId" example:"1"`
 	TrackId    uint64 `json:"TrackId" example:"1"`
+}
+
+func (u *Name) Validate() error {
+	_, err := govalidator.ValidateStruct(u)
+	if err != nil {
+		return err
+	}
+
+	err = xssvalidator.Validate(u.Name, xssvalidator.DefaultRules...)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 type UseCase interface {
@@ -48,6 +68,7 @@ type UseCase interface {
 	HasReadAccess(playlistId uint64) (bool, error)
 	MakePrivate(playlistId uint64) error
 	MakePublic(playlistId uint64) error
+	UpdateName(playlistId uint64, newName string) error
 }
 
 type Repository interface {
@@ -67,4 +88,5 @@ type Repository interface {
 	MakePublic(ctx context.Context, playlistId uint64) error
 	MakePrivate(ctx context.Context, playlistId uint64) error
 	Search(ctx context.Context, text string) ([]Base, error)
+	UpdateName(ctx context.Context, playlistId uint64, title string) error
 }

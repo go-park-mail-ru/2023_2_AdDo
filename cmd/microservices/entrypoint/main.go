@@ -123,6 +123,8 @@ func main() {
 			router_init.NewRoute("/track/{id}/is_like", trackHandler.IsLike, http.MethodGet),
 			router_init.NewRoute("/track/{id}/unlike", trackHandler.Unlike, http.MethodDelete),
 			router_init.NewRoute("/collection/tracks", trackHandler.GetUserTracks, http.MethodGet),
+			router_init.NewRoute("/collection/albums", albumHandler.CollectionAlbum, http.MethodGet),
+			router_init.NewRoute("/collection/artists", artistHandler.CollectionArtist, http.MethodGet),
 
 			router_init.NewRoute("/feed", albumHandler.Feed, http.MethodGet),
 			router_init.NewRoute("/new", albumHandler.New, http.MethodGet),
@@ -169,6 +171,7 @@ func main() {
 					router_init.NewRoute("/playlist/{id}/make_private", playlistHandler.MakePrivate, http.MethodPut),
 					router_init.NewRoute("/playlist/{id}/make_public", playlistHandler.MakePublic, http.MethodPut),
 					router_init.NewRoute("/playlist/{id}/update_preview", playlistHandler.UpdatePreview, http.MethodPost),
+					router_init.NewRoute("/playlist/{id}/update_name", playlistHandler.UpdateName, http.MethodPost),
 				},
 				Prefix: "",
 				Middlewares: []mux.MiddlewareFunc{

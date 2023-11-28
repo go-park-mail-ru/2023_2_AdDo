@@ -5,6 +5,7 @@ import (
 	google_proto "github.com/golang/protobuf/ptypes/empty"
 	"github.com/sirupsen/logrus"
 	album_proto "main/internal/microservices/album/proto"
+	session_proto "main/internal/microservices/session/proto"
 	track_proto "main/internal/microservices/track/proto"
 	grpc_track_server "main/internal/microservices/track/service/server"
 	"main/internal/pkg/album"
@@ -133,6 +134,18 @@ func (am *AlbumManager) GetMostLiked(ctx context.Context, status *google_proto.E
 	am.logger.Infoln("Got album")
 
 	return am.formResponse(albums)
+}
+
+func (am *AlbumManager) GetByUserId(ctx context.Context, id *session_proto.UserId) (*album_proto.AlbumsBase, error) {
+	am.logger.Infoln("Album Micros GetByUserId entered")
+
+	albums, err := am.repoAlbum.GetByUserId(id.GetUserId())
+	if err != nil {
+		return nil, err
+	}
+	am.logger.Infoln("Got albums by user id")
+
+	return SerializeAlbumsBase(albums), nil
 }
 
 func (am *AlbumManager) GetPopular(ctx context.Context, status *google_proto.Empty) (*album_proto.AlbumsResponse, error) {

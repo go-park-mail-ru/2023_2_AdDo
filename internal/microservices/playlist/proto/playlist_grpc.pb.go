@@ -37,6 +37,7 @@ const (
 	PlaylistService_HasReadAccess_FullMethodName    = "/PlaylistService/HasReadAccess"
 	PlaylistService_MakePrivate_FullMethodName      = "/PlaylistService/MakePrivate"
 	PlaylistService_MakePublic_FullMethodName       = "/PlaylistService/MakePublic"
+	PlaylistService_UpdateName_FullMethodName       = "/PlaylistService/UpdateName"
 )
 
 // PlaylistServiceClient is the client API for PlaylistService service.
@@ -58,6 +59,7 @@ type PlaylistServiceClient interface {
 	HasReadAccess(ctx context.Context, in *PlaylistId, opts ...grpc.CallOption) (*HasAccess, error)
 	MakePrivate(ctx context.Context, in *PlaylistId, opts ...grpc.CallOption) (*empty.Empty, error)
 	MakePublic(ctx context.Context, in *PlaylistId, opts ...grpc.CallOption) (*empty.Empty, error)
+	UpdateName(ctx context.Context, in *PlaylistIdToNewTitle, opts ...grpc.CallOption) (*empty.Empty, error)
 }
 
 type playlistServiceClient struct {
@@ -203,6 +205,15 @@ func (c *playlistServiceClient) MakePublic(ctx context.Context, in *PlaylistId, 
 	return out, nil
 }
 
+func (c *playlistServiceClient) UpdateName(ctx context.Context, in *PlaylistIdToNewTitle, opts ...grpc.CallOption) (*empty.Empty, error) {
+	out := new(empty.Empty)
+	err := c.cc.Invoke(ctx, PlaylistService_UpdateName_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // PlaylistServiceServer is the server API for PlaylistService service.
 // All implementations must embed UnimplementedPlaylistServiceServer
 // for forward compatibility
@@ -222,6 +233,7 @@ type PlaylistServiceServer interface {
 	HasReadAccess(context.Context, *PlaylistId) (*HasAccess, error)
 	MakePrivate(context.Context, *PlaylistId) (*empty.Empty, error)
 	MakePublic(context.Context, *PlaylistId) (*empty.Empty, error)
+	UpdateName(context.Context, *PlaylistIdToNewTitle) (*empty.Empty, error)
 	mustEmbedUnimplementedPlaylistServiceServer()
 }
 
@@ -273,6 +285,9 @@ func (UnimplementedPlaylistServiceServer) MakePrivate(context.Context, *Playlist
 }
 func (UnimplementedPlaylistServiceServer) MakePublic(context.Context, *PlaylistId) (*empty.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method MakePublic not implemented")
+}
+func (UnimplementedPlaylistServiceServer) UpdateName(context.Context, *PlaylistIdToNewTitle) (*empty.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateName not implemented")
 }
 func (UnimplementedPlaylistServiceServer) mustEmbedUnimplementedPlaylistServiceServer() {}
 
@@ -557,6 +572,24 @@ func _PlaylistService_MakePublic_Handler(srv interface{}, ctx context.Context, d
 	return interceptor(ctx, in, info, handler)
 }
 
+func _PlaylistService_UpdateName_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PlaylistIdToNewTitle)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlaylistServiceServer).UpdateName(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PlaylistService_UpdateName_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlaylistServiceServer).UpdateName(ctx, req.(*PlaylistIdToNewTitle))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // PlaylistService_ServiceDesc is the grpc.ServiceDesc for PlaylistService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -623,6 +656,10 @@ var PlaylistService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "MakePublic",
 			Handler:    _PlaylistService_MakePublic_Handler,
+		},
+		{
+			MethodName: "UpdateName",
+			Handler:    _PlaylistService_UpdateName_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -129,6 +129,19 @@ func (c *Client) UpdatePreview(playlistId uint64, src io.Reader, size int64) err
 	return nil
 }
 
+func (c *Client) UpdateName(playlistId uint64, title string) error {
+	c.logger.Infoln("Playlist client  Update Name entered")
+
+	if _, err := c.playlistManager.UpdateName(context.Background(), &playlist_proto.PlaylistIdToNewTitle{
+		PlaylistId: playlistId,
+		Title:      title,
+	}); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (c *Client) RemovePreview(playlistId uint64) error {
 	c.logger.Infoln("Playlist client  entered")
 

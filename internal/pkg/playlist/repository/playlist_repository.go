@@ -155,6 +155,22 @@ func (p *Postgres) UpdateImage(ctx context.Context, playlistId uint64, image str
 	return nil
 }
 
+func (p *Postgres) UpdateName(ctx context.Context, playlistId uint64, title string) error {
+	p.logger.Infoln("Playlist Repo UpdateName entered")
+
+	query := "update playlist set name = $1 where id = $2"
+	if _, err := p.Pool.Exec(ctx, query, title, playlistId); err != nil {
+		p.logger.WithFields(logrus.Fields{
+			"error":       err,
+			"playlist id": playlistId,
+			"query":       query,
+		}).Errorln("error while updating title into playlist")
+		return err
+	}
+
+	return nil
+}
+
 func (p *Postgres) RemovePreviewPath(ctx context.Context, playlistId uint64) (string, error) {
 	p.logger.Infoln("Playlist Repo UpdateImage entered")
 

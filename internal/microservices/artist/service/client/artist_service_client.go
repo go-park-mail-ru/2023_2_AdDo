@@ -6,6 +6,7 @@ import (
 	album_proto "main/internal/microservices/album/proto"
 	proto "main/internal/microservices/artist/proto"
 	grpc_playlist "main/internal/microservices/playlist/service/client"
+	session_proto "main/internal/microservices/session/proto"
 	grpc_track "main/internal/microservices/track/service/client"
 	"main/internal/pkg/album"
 	"main/internal/pkg/artist"
@@ -125,4 +126,15 @@ func (c *Client) FullSearch(query string) (artist.SearchResponse, error) {
 		return artist.SearchResponse{}, err
 	}
 	return DeserializeSearchResponse(result), nil
+}
+
+func (c *Client) GetUserArtists(userId string) (artist.LikedArtists, error) {
+	c.logger.Infoln("Client for artist micros GetUserArtists")
+
+	result, err := c.artistManager.CollectionArtist(context.Background(), &session_proto.UserId{UserId: userId})
+	if err != nil {
+		return artist.LikedArtists{}, err
+	}
+
+	return artist.LikedArtists{Artists: DeserializeArtistsBase(result)}, nil
 }

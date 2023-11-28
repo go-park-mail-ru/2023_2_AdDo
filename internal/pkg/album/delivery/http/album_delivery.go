@@ -348,3 +348,31 @@ func (handler *AlbumHandler) Unlike(w http.ResponseWriter, r *http.Request) erro
 	w.WriteHeader(http.StatusNoContent)
 	return nil
 }
+
+func (handler *AlbumHandler) CollectionAlbum(w http.ResponseWriter, r *http.Request) error {
+	handler.logger.WithFields(logrus.Fields{
+		"request_id": utils.GenReqId(r.RequestURI + r.Method),
+	}).Infoln("Artist delivery Collection Artist entered")
+
+	sessionId, err := response.GetCookie(r)
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusUnauthorized, Err: err}
+	}
+	handler.logger.Infoln("got cookie")
+
+	userId, err := handler.sessionUseCase.GetUserId(sessionId)
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusUnauthorized, Err: err}
+	}
+	handler.logger.Infoln("got user id by session id")
+
+	result, err := handler.albumUseCase.GetUserAlbums(userId)
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusUnauthorized, Err: err}
+	}
+
+	if err = response.RenderJSON(w, result); err != nil {
+		return common_handler.StatusError{Code: http.StatusNotFound, Err: err}
+	}
+	return nil
+}

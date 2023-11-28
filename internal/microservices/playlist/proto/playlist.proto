@@ -23,6 +23,12 @@ service PlaylistService {
   rpc HasReadAccess (PlaylistId) returns (HasAccess) {}
   rpc MakePrivate (PlaylistId) returns (google.protobuf.Empty) {}
   rpc MakePublic (PlaylistId) returns (google.protobuf.Empty) {}
+  rpc UpdateName (PlaylistIdToNewTitle) returns (google.protobuf.Empty) {}
+}
+
+message PlaylistIdToNewTitle {
+  uint64 playlistId = 1;
+  string title = 2;
 }
 
 message IsLikedPlaylist {
