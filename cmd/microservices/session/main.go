@@ -36,11 +36,6 @@ func main() {
 	server := grpc.NewServer()
 	session.RegisterSessionServiceServer(server, &sessionManager)
 
-	// serviceId := microservices_init.RegisterInConsul(Port, "session-api", "session", logger)
-	// defer func() {
-	// 	microservices_init.UnRegisterInConsul(serviceId, logger)
-	// }()
-
 	logger.Infoln("starting server at " + strconv.Itoa(Port))
 	err = server.Serve(lis)
 	if err != nil {

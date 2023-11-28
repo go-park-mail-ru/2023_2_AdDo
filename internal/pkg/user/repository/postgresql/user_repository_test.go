@@ -170,7 +170,6 @@ func TestUserRepository_UpdateAvatarPath(t *testing.T) {
 	if err := mock.ExpectationsWereMet(); err != nil {
 		t.Errorf("Unfulfilled expectations: %v", err)
 	}
-
 }
 
 //func TestUserRepository_RemoveAvatarPath(t *testing.T) {

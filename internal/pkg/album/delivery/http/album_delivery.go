@@ -193,7 +193,7 @@ func (handler *AlbumHandler) AlbumWithRequiredTrack(w http.ResponseWriter, r *ht
 	return nil
 }
 
-func (handler *AlbumHandler) handleQuery(albums []album.Response, w http.ResponseWriter, r *http.Request) error {
+func (handler *AlbumHandler) handleQuery(albums []album.Response, w http.ResponseWriter, _ *http.Request) error {
 	handler.logger.Infoln("handle query entered")
 
 	if err := response.RenderJSON(w, albums); err != nil {

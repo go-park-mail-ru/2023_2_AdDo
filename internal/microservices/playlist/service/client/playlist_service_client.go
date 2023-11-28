@@ -93,7 +93,7 @@ func (c *Client) GetUserPlaylists(userId string) ([]playlist.Base, error) {
 func (c *Client) CollectionPlaylists(userId string) ([]playlist.Base, error) {
 	c.logger.Infoln("Playlist client Collection Playlists entered")
 
-	result, err := c.playlistManager.GetUserPlaylists(context.Background(), &session_proto.UserId{UserId: userId})
+	result, err := c.playlistManager.PlaylistCollections(context.Background(), &session_proto.UserId{UserId: userId})
 	if err != nil {
 		return nil, err
 	}

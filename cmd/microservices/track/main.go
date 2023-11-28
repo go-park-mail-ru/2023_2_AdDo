@@ -42,11 +42,6 @@ func main() {
 	server := grpc.NewServer()
 	proto.RegisterTrackServiceServer(server, &trackManager)
 
-	// serviceId := microservices_init.RegisterInConsul(Port, "track-api", "track", logger)
-	// defer func() {
-	// 	microservices_init.UnRegisterInConsul(serviceId, logger)
-	// }()
-
 	logger.Infoln("starting server at " + strconv.Itoa(Port))
 	err = server.Serve(lis)
 	if err != nil {

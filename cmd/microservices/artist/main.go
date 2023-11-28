@@ -44,11 +44,6 @@ func main() {
 	server := grpc.NewServer()
 	artist.RegisterArtistServiceServer(server, &artistManager)
 
-	// serviceId := microservices_init.RegisterInConsul(Port, "artist-api", "artist", logger)
-	// defer func() {
-	// 	microservices_init.UnRegisterInConsul(serviceId, logger)
-	// }()
-
 	logger.Infoln("starting server at " + strconv.Itoa(Port))
 	err = server.Serve(lis)
 	if err != nil {

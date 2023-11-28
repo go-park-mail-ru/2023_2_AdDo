@@ -40,11 +40,6 @@ func main() {
 	server := grpc.NewServer()
 	proto2.RegisterPlaylistServiceServer(server, &playlistManager)
 
-	// serviceId := microservices_init.RegisterInConsul(Port, "playlist-api", "playlist", logger)
-	// defer func() {
-	// 	microservices_init.UnRegisterInConsul(serviceId, logger)
-	// }()
-
 	logger.Infoln("starting server at " + strconv.Itoa(Port))
 	err = server.Serve(lis)
 	if err != nil {

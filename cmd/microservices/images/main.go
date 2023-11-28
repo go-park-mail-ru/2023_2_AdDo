@@ -36,11 +36,6 @@ func main() {
 	server := grpc.NewServer()
 	image_proto.RegisterImageServiceServer(server, &imageManager)
 
-	// serviceId := microservices_init.RegisterInConsul(Port, "images-api", "images", logger)
-	// defer func() {
-	// 	microservices_init.UnRegisterInConsul(serviceId, logger)
-	// }()
-
 	logger.Infoln("starting server at " + strconv.Itoa(Port))
 	err = server.Serve(lis)
 	if err != nil {
