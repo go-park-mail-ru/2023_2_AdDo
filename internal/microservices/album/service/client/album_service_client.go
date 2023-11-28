@@ -5,6 +5,7 @@ import (
 	google_proto "github.com/golang/protobuf/ptypes/empty"
 	"github.com/sirupsen/logrus"
 	"main/internal/microservices/album/proto"
+	track_proto "main/internal/microservices/track/proto"
 	grpc_track "main/internal/microservices/track/service/client"
 	"main/internal/pkg/album"
 )
@@ -90,6 +91,17 @@ func (c *Client) GetAlbum(albumId uint64) (album.Response, error) {
 	}
 
 	return DeserializeAlbum(result), nil
+}
+
+func (c *Client) GetAlbumsByTrack(trackId uint64) ([]album.Response, error) {
+	c.logger.Infoln("Client to Album Micros GetAlbumsByTrack entered")
+
+	result, err := c.albumManager.GetAlbumsByTrack(context.Background(), &track_proto.TrackId{TrackId: trackId})
+	if err != nil {
+		return nil, err
+	}
+
+	return DeserializeAlbumsResponse(result), nil
 }
 
 func (c *Client) Like(userId string, albumId uint64) error {
