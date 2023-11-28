@@ -20,6 +20,10 @@ type Response struct {
 	Tracks []track.Response `json:"Tracks"`
 }
 
+type LikedArtists struct {
+	Artists []Base `json:"Artists"`
+}
+
 type SearchResponse struct {
 	Playlists []playlist.Base  `json:"Playlists"`
 	Albums    []album.Base     `json:"Albums"`
@@ -33,10 +37,10 @@ type UseCase interface {
 	IsLike(userId string, artistId uint64) (bool, error)
 	Unlike(userId string, artistId uint64) error
 	FullSearch(text string) (SearchResponse, error)
+	GetUserArtists(userId string) (LikedArtists, error)
 }
 
 type Repository interface {
-	//GetTracks(artistId uint64) ([]track.Response, error)
 	GetByTrackId(trackId uint64) ([]Base, error)
 	GetByAlbumId(albumId uint64) (Base, error)
 	Get(artistId uint64) (Base, error)
@@ -44,4 +48,5 @@ type Repository interface {
 	CheckLike(userId string, artistId uint64) (bool, error)
 	DeleteLike(userId string, artistId uint64) error
 	Search(text string) ([]Base, error)
+	GetByUserId(userId string) ([]Base, error)
 }

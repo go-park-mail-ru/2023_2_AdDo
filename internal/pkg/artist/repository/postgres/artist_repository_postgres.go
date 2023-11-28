@@ -100,6 +100,13 @@ func (p *Postgres) GetByAlbumId(albumId uint64) (artist.Base, error) {
 	return result, nil
 }
 
+func (p *Postgres) GetByUserId(userId string) ([]artist.Base, error) {
+	p.logger.Infoln("Artist Repo Get By User Id entered")
+
+	query := "select artist.id, artist.name, artist.avatar from artist join profile_artist on artist.id = profile_artist.artist_id where profile_artist.profile_id = $1"
+	return p.getWithQuery(context.Background(), query, userId)
+}
+
 func (p *Postgres) CreateLike(userId string, artistId uint64) error {
 	p.logger.Infoln("Artist Repo CreateLike entered")
 

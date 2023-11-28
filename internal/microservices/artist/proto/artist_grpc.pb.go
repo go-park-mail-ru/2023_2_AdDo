@@ -12,6 +12,7 @@ import (
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
+	proto "main/internal/microservices/session/proto"
 )
 
 // This is a compile-time assertion to ensure that this generated file
@@ -20,11 +21,12 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	ArtistService_GetArtistInfo_FullMethodName = "/ArtistService/GetArtistInfo"
-	ArtistService_Like_FullMethodName          = "/ArtistService/Like"
-	ArtistService_IsLike_FullMethodName        = "/ArtistService/IsLike"
-	ArtistService_Unlike_FullMethodName        = "/ArtistService/Unlike"
-	ArtistService_FullSearch_FullMethodName    = "/ArtistService/FullSearch"
+	ArtistService_GetArtistInfo_FullMethodName    = "/ArtistService/GetArtistInfo"
+	ArtistService_Like_FullMethodName             = "/ArtistService/Like"
+	ArtistService_IsLike_FullMethodName           = "/ArtistService/IsLike"
+	ArtistService_Unlike_FullMethodName           = "/ArtistService/Unlike"
+	ArtistService_FullSearch_FullMethodName       = "/ArtistService/FullSearch"
+	ArtistService_CollectionArtist_FullMethodName = "/ArtistService/CollectionArtist"
 )
 
 // ArtistServiceClient is the client API for ArtistService service.
@@ -36,6 +38,7 @@ type ArtistServiceClient interface {
 	IsLike(ctx context.Context, in *ArtistToUserId, opts ...grpc.CallOption) (*IsLikedArtist, error)
 	Unlike(ctx context.Context, in *ArtistToUserId, opts ...grpc.CallOption) (*empty.Empty, error)
 	FullSearch(ctx context.Context, in *Query, opts ...grpc.CallOption) (*SearchResponse, error)
+	CollectionArtist(ctx context.Context, in *proto.UserId, opts ...grpc.CallOption) (*ArtistsBase, error)
 }
 
 type artistServiceClient struct {
@@ -91,6 +94,15 @@ func (c *artistServiceClient) FullSearch(ctx context.Context, in *Query, opts ..
 	return out, nil
 }
 
+func (c *artistServiceClient) CollectionArtist(ctx context.Context, in *proto.UserId, opts ...grpc.CallOption) (*ArtistsBase, error) {
+	out := new(ArtistsBase)
+	err := c.cc.Invoke(ctx, ArtistService_CollectionArtist_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ArtistServiceServer is the server API for ArtistService service.
 // All implementations must embed UnimplementedArtistServiceServer
 // for forward compatibility
@@ -100,6 +112,7 @@ type ArtistServiceServer interface {
 	IsLike(context.Context, *ArtistToUserId) (*IsLikedArtist, error)
 	Unlike(context.Context, *ArtistToUserId) (*empty.Empty, error)
 	FullSearch(context.Context, *Query) (*SearchResponse, error)
+	CollectionArtist(context.Context, *proto.UserId) (*ArtistsBase, error)
 	mustEmbedUnimplementedArtistServiceServer()
 }
 
@@ -121,6 +134,9 @@ func (UnimplementedArtistServiceServer) Unlike(context.Context, *ArtistToUserId)
 }
 func (UnimplementedArtistServiceServer) FullSearch(context.Context, *Query) (*SearchResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method FullSearch not implemented")
+}
+func (UnimplementedArtistServiceServer) CollectionArtist(context.Context, *proto.UserId) (*ArtistsBase, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CollectionArtist not implemented")
 }
 func (UnimplementedArtistServiceServer) mustEmbedUnimplementedArtistServiceServer() {}
 
@@ -225,6 +241,24 @@ func _ArtistService_FullSearch_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ArtistService_CollectionArtist_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(proto.UserId)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ArtistServiceServer).CollectionArtist(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ArtistService_CollectionArtist_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ArtistServiceServer).CollectionArtist(ctx, req.(*proto.UserId))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // ArtistService_ServiceDesc is the grpc.ServiceDesc for ArtistService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -251,6 +285,10 @@ var ArtistService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "FullSearch",
 			Handler:    _ArtistService_FullSearch_Handler,
+		},
+		{
+			MethodName: "CollectionArtist",
+			Handler:    _ArtistService_CollectionArtist_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
