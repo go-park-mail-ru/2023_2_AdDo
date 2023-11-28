@@ -192,7 +192,7 @@ func TestAlbumTracks(t *testing.T) {
 	})
 }
 
-func TestAlbumsWithRequiredTrack(t *testing.T) {
+func TestAlbumWithRequiredTrack(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -214,27 +214,25 @@ func TestAlbumsWithRequiredTrack(t *testing.T) {
 		req = mux.SetURLVars(req, map[string]string{"id": "1"})
 		w := httptest.NewRecorder()
 
-		expectedAlbums := []album.Response{
-			{
-				Id:         1,
-				Name:       "Album 1",
-				Preview:    "Preview 1",
-				ArtistId:   1,
-				ArtistName: "Artist 1",
-				Tracks:     []track.Response{},
-			},
+		expectedAlbum := album.Response{
+			Id:         1,
+			Name:       "Album 1",
+			Preview:    "Preview 1",
+			ArtistId:   1,
+			ArtistName: "Artist 1",
+			Tracks:     []track.Response{},
 		}
 
-		mockAlbumUseCase.EXPECT().GetAlbumsByTrack(trackId).Return(expectedAlbums, nil)
-		err := handler.AlbumsWithRequiredTrack(w, req)
+		mockAlbumUseCase.EXPECT().GetAlbumByTrack(trackId).Return(expectedAlbum, nil)
+		err := handler.AlbumWithRequiredTrack(w, req)
 
 		assert.Nil(t, err)
 		assert.Equal(t, http.StatusOK, w.Code)
 
-		var receivedAlbums []album.Response
-		err = json.NewDecoder(w.Body).Decode(&receivedAlbums)
+		var receivedAlbum album.Response
+		err = json.NewDecoder(w.Body).Decode(&receivedAlbum)
 		assert.Nil(t, err)
-		assert.Equal(t, expectedAlbums, receivedAlbums)
+		assert.Equal(t, expectedAlbum, receivedAlbum)
 	})
 }
 

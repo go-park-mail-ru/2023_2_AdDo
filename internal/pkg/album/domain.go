@@ -31,7 +31,7 @@ type UseCase interface {
 	GetPopular() ([]Response, error)
 	GetNew() ([]Response, error)
 	GetAlbum(albumId uint64) (Response, error)
-	GetAlbumsByTrack(trackId uint64) ([]Response, error)
+	GetAlbumByTrack(trackId uint64) (Response, error)
 	Like(userId string, albumId uint64) error
 	IsLike(userId string, albumId uint64) (bool, error)
 	Unlike(userId string, albumId uint64) error

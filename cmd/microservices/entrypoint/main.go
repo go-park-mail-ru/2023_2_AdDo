@@ -118,7 +118,7 @@ func main() {
 			router_init.NewRoute("/logout", userHandler.LogOut, http.MethodPost),
 
 			router_init.NewRoute("/listen", trackHandler.Listen, http.MethodPost),
-			router_init.NewRoute("/track/{id}", albumHandler.AlbumsWithRequiredTrack, http.MethodGet),
+			router_init.NewRoute("/track/{id}", albumHandler.AlbumWithRequiredTrack, http.MethodGet),
 			router_init.NewRoute("/track/{id}/like", trackHandler.Like, http.MethodPost),
 			router_init.NewRoute("/track/{id}/is_like", trackHandler.IsLike, http.MethodGet),
 			router_init.NewRoute("/track/{id}/unlike", trackHandler.Unlike, http.MethodDelete),
