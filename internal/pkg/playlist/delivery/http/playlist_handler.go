@@ -253,6 +253,22 @@ func (handler *Handler) UpdatePreview(w http.ResponseWriter, r *http.Request) er
 	return nil
 }
 
+// UpdateName
+//
+//	@Summary		UpdateName
+//	@Description	Update playlist name
+//	@Tags			playlist
+//	@Security		cookieAuth
+//	@Security		csrfToken
+//	@Security		cookieCsrfToken
+//	@Param			id		path	integer			true	"playlist id"
+//	@Param			name	body	playlist.Name	true	"playlist name"
+//	@Success		204
+//	@Failure		400	{string}	errMsg
+//	@Failure		401	{string}	errMsg
+//	@Failure		403	{string}	errMsg
+//	@Failure		500	{string}	errMsg
+//	@Router			/playlist/{id}/update_name [post]
 func (handler *Handler) UpdateName(w http.ResponseWriter, r *http.Request) error {
 	handler.logger.WithFields(logrus.Fields{
 		"request_id": utils.GenReqId(r.RequestURI + r.Method),
