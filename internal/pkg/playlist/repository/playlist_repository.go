@@ -106,6 +106,13 @@ func (p *Postgres) GetByCreatorId(ctx context.Context, userId string) ([]playlis
 	return p.getWithQuery(ctx, query, userId)
 }
 
+func (p *Postgres) GetByUserId(ctx context.Context, userId string) ([]playlist.Base, error) {
+	p.logger.Infoln("Playlist Repo GetByCreatorId entered")
+
+	query := "select playlist.id, name, creator_id, preview from playlist join profile_playlist on playlist.id = profile_playlist.playlist_id where profile_id = $1"
+	return p.getWithQuery(ctx, query, userId)
+}
+
 func (p *Postgres) AddTrack(ctx context.Context, playlistId, trackId uint64) error {
 	p.logger.Infoln("Playlist Repo AddTrack entered")
 

@@ -125,6 +125,7 @@ func main() {
 			router_init.NewRoute("/collection/tracks", trackHandler.GetUserTracks, http.MethodGet),
 			router_init.NewRoute("/collection/albums", albumHandler.CollectionAlbum, http.MethodGet),
 			router_init.NewRoute("/collection/artists", artistHandler.CollectionArtist, http.MethodGet),
+			router_init.NewRoute("/collection/playlists", playlistHandler.CollectionPlaylist, http.MethodGet),
 
 			router_init.NewRoute("/feed", albumHandler.Feed, http.MethodGet),
 			router_init.NewRoute("/new", albumHandler.New, http.MethodGet),
@@ -141,6 +142,7 @@ func main() {
 			router_init.NewRoute("/artist/{id}", artistHandler.ArtistInfo, http.MethodGet),
 			router_init.NewRoute("/search", artistHandler.FullSearch, http.MethodGet),
 			router_init.NewRoute("/playlist", playlistHandler.Create, http.MethodPost),
+			router_init.NewRoute("/my_playlists", playlistHandler.UserPlaylists, http.MethodGet),
 		},
 		Prefix: "/api/v1",
 		Middlewares: []mux.MiddlewareFunc{

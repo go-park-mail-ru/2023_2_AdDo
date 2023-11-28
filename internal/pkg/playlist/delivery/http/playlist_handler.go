@@ -530,3 +530,63 @@ func (handler *Handler) MakePrivate(w http.ResponseWriter, r *http.Request) erro
 	w.WriteHeader(http.StatusNoContent)
 	return nil
 }
+
+func (handler *Handler) CollectionPlaylist(w http.ResponseWriter, r *http.Request) error {
+	handler.logger.WithFields(logrus.Fields{
+		"request_id": utils.GenReqId(r.RequestURI + r.Method),
+	}).Infoln("Collection Playlists Handler entered")
+
+	sessionId, err := response.GetCookie(r)
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusUnauthorized, Err: err}
+	}
+	handler.logger.Infoln("got user cookie")
+
+	userId, err := handler.sessionUseCase.GetUserId(sessionId)
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusUnauthorized, Err: err}
+	}
+	handler.logger.Infoln("got user id by cookie")
+
+	result, err := handler.playlistUseCase.CollectionPlaylists(userId)
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
+	}
+
+	if err = response.RenderJSON(w, result); err != nil {
+		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
+	}
+	handler.logger.Infoln("response  formed")
+
+	return nil
+}
+
+func (handler *Handler) UserPlaylists(w http.ResponseWriter, r *http.Request) error {
+	handler.logger.WithFields(logrus.Fields{
+		"request_id": utils.GenReqId(r.RequestURI + r.Method),
+	}).Infoln("User Playlists Handler entered")
+
+	sessionId, err := response.GetCookie(r)
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusUnauthorized, Err: err}
+	}
+	handler.logger.Infoln("got user cookie")
+
+	userId, err := handler.sessionUseCase.GetUserId(sessionId)
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusUnauthorized, Err: err}
+	}
+	handler.logger.Infoln("got user id by cookie")
+
+	result, err := handler.playlistUseCase.GetUserPlaylists(userId)
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
+	}
+
+	if err = response.RenderJSON(w, result); err != nil {
+		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
+	}
+	handler.logger.Infoln("response  formed")
+
+	return nil
+}

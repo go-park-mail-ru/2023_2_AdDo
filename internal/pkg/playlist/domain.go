@@ -56,6 +56,7 @@ type UseCase interface {
 	Create(pl Base) (Response, error)
 	Get(userId string, playlistId uint64) (Response, error)
 	GetUserPlaylists(userId string) ([]Base, error)
+	CollectionPlaylists(userId string) ([]Base, error)
 	AddTrack(playlistId, trackId uint64) error
 	Like(userId string, playlistId uint64) error
 	IsLike(userId string, playlistId uint64) (bool, error)
@@ -75,6 +76,7 @@ type Repository interface {
 	Create(ctx context.Context, pl Base) (Response, error)
 	Get(ctx context.Context, playlistId uint64) (Base, error)
 	GetByCreatorId(ctx context.Context, userId string) ([]Base, error)
+	GetByUserId(ctx context.Context, userId string) ([]Base, error)
 	AddTrack(ctx context.Context, playlistId, trackId uint64) error
 	RemoveTrack(ctx context.Context, playlistId, trackId uint64) error
 	UpdateImage(ctx context.Context, playlistId uint64, image string) error
