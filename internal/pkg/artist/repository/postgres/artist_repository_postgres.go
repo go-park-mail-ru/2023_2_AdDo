@@ -38,7 +38,7 @@ func (p *Postgres) Get(artistId uint64) (artist.Base, error) {
 	return result, nil
 }
 
-func (p *Postgres) getWithQuery(ctx context.Context, query string, args ...any) ([]artist.Base, error) {
+func (p *Postgres) getWithQuery(_ context.Context, query string, args ...any) ([]artist.Base, error) {
 	p.logger.Infoln("Artist Repo getWithQuery entered")
 
 	result := make([]artist.Base, 0)

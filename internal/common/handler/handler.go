@@ -30,22 +30,15 @@ type Handler struct {
 }
 
 func (h Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-
 	if err := h.H(w, r); err != nil {
 		var e Error
 		switch {
 		case errors.As(err, &e):
 			w.WriteHeader(e.Status())
-			_, err = io.WriteString(w, fmt.Sprintf("{ \"status\": %d, \"err\": \"%s\" }\n", e.Status(), e.Error()))
-			if err != nil {
-				fmt.Println(err.Error())
-			}
+			_, _ = io.WriteString(w, fmt.Sprintf("{ \"status\": %d, \"err\": \"%s\" }\n", e.Status(), e.Error()))
 		default:
 			w.WriteHeader(http.StatusInternalServerError)
-			_, err = io.WriteString(w, fmt.Sprintf("{ \"status\": %d, \"err\": \"%s\" }\n", http.StatusInternalServerError, e.Error()))
-			if err != nil {
-				fmt.Println(err.Error())
-			}
+			_, _ = io.WriteString(w, fmt.Sprintf("{ \"status\": %d, \"err\": \"%s\" }\n", http.StatusInternalServerError, e.Error()))
 		}
 	}
 }

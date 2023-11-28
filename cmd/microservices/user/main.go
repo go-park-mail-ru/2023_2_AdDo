@@ -45,11 +45,6 @@ func main() {
 	server := grpc.NewServer()
 	user_proto.RegisterUserServiceServer(server, userManager)
 
-	// serviceId := microservices_init.RegisterInConsul(Port, "user-api", "user", logger)
-	// defer func() {
-	// 	microservices_init.UnRegisterInConsul(serviceId, logger)
-	// }()
-
 	logger.Infoln("starting server at " + strconv.Itoa(Port))
 	err = server.Serve(lis)
 	if err != nil {

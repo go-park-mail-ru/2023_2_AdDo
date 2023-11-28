@@ -44,7 +44,6 @@ func PanicRecovery(next http.Handler, logger *logrus.Logger) http.Handler {
 				if err != nil {
 					logger.Errorln(err.Error())
 				}
-				
 			}
 		}(w, request)
 

@@ -42,7 +42,5 @@ func InitMinio() (*minio.Client, error) {
 		}
 	}
 
-	fmt.Println("Minio successful connected!")
-
 	return mn, nil
 }

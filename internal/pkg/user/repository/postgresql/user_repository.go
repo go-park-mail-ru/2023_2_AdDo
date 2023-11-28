@@ -7,6 +7,7 @@ import (
 	postgres "main/internal/common/pgxiface"
 	"main/internal/common/utils"
 	user_domain "main/internal/pkg/user"
+	"time"
 )
 
 type Postgres struct {
@@ -53,7 +54,7 @@ func (db *Postgres) GetById(id string) (user_domain.User, error) {
 	}
 	db.logger.Infoln("Getting user completed")
 
-	user.BirthDate = dt.Time.Format("2006-01-02")
+	user.BirthDate = dt.Time.Format(time.DateOnly)
 	user.Avatar = avatar.String
 	db.logger.Infoln("birthday and images formatted")
 

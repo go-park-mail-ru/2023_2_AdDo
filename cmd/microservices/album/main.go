@@ -41,11 +41,6 @@ func main() {
 	server := grpc.NewServer()
 	proto2.RegisterAlbumServiceServer(server, &albumManager)
 
-	// serviceId := microservices_init.RegisterInConsul(Port, "album-api", "album", logger)
-	// defer func() {
-	// 	microservices_init.UnRegisterInConsul(serviceId, logger)
-	// }()
-
 	logger.Infoln("starting server at " + strconv.Itoa(Port))
 	if err = server.Serve(lis); err != nil {
 		logger.Fatalln("terminated ERROR!!!")

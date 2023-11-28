@@ -2,7 +2,6 @@ package image_repository
 
 import (
 	"context"
-	"fmt"
 	minio_init "main/init/minio"
 	avatar_domain "main/internal/pkg/image"
 	"path/filepath"
@@ -42,7 +41,6 @@ func (mn Minio) create(avatar avatar_domain.Base, bucketName string) (string, er
 }
 
 func (mn Minio) Remove(path string) error {
-	fmt.Println(filepath.Base(filepath.Dir(path)))
 	return mn.client.RemoveObject(
 		context.Background(),
 		filepath.Base(filepath.Dir(path)),

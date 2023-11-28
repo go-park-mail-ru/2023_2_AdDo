@@ -6,7 +6,7 @@ import (
 	"strconv"
 )
 
-func RegisterInConsul(Port int, serviceName, serviceHost string, logger *logrus.Logger) string {
+func RegisterInConsul(port int, serviceName, serviceHost string, logger *logrus.Logger) string {
 	config := consulapi.DefaultConfig()
 	config.Address = "consul:8500"
 	consul, err := consulapi.NewClient(config)
@@ -14,15 +14,13 @@ func RegisterInConsul(Port int, serviceName, serviceHost string, logger *logrus.
 		logger.Fatalf("error while creating consul client %s", err.Error())
 	}
 
-	serviceID := "API_" + serviceHost + strconv.Itoa(Port)
+	serviceID := "API_" + serviceHost + strconv.Itoa(port)
 
 	err = consul.Agent().ServiceRegister(&consulapi.AgentServiceRegistration{
-		ID:   serviceID,
-		Name: serviceName,
-		//Name:    "session-api",
-		Port:    Port,
+		ID:      serviceID,
+		Name:    serviceName,
+		Port:    port,
 		Address: serviceHost,
-		//Address: "127.0.0.1",
 	})
 	if err != nil {
 		logger.Fatalln("cant add service to consul", err)
