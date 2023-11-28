@@ -93,15 +93,15 @@ func (c *Client) GetAlbum(albumId uint64) (album.Response, error) {
 	return DeserializeAlbum(result), nil
 }
 
-func (c *Client) GetAlbumsByTrack(trackId uint64) ([]album.Response, error) {
-	c.logger.Infoln("Client to Album Micros GetAlbumsByTrack entered")
+func (c *Client) GetAlbumByTrack(trackId uint64) (album.Response, error) {
+	c.logger.Infoln("Client to Album Micros GetAlbumByTrack entered")
 
-	result, err := c.albumManager.GetAlbumsByTrack(context.Background(), &track_proto.TrackId{TrackId: trackId})
+	result, err := c.albumManager.GetAlbumByTrack(context.Background(), &track_proto.TrackId{TrackId: trackId})
 	if err != nil {
-		return nil, err
+		return album.Response{}, err
 	}
 
-	return DeserializeAlbumsResponse(result), nil
+	return DeserializeAlbum(result), nil
 }
 
 func (c *Client) Like(userId string, albumId uint64) error {

@@ -29,7 +29,7 @@ type AlbumServiceClient interface {
 	GetPopular(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*AlbumsResponse, error)
 	GetNew(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*AlbumsResponse, error)
 	GetAlbum(ctx context.Context, in *AlbumId, opts ...grpc.CallOption) (*AlbumResponse, error)
-	GetAlbumsByTrack(ctx context.Context, in *proto.TrackId, opts ...grpc.CallOption) (*AlbumsResponse, error)
+	GetAlbumByTrack(ctx context.Context, in *proto.TrackId, opts ...grpc.CallOption) (*AlbumResponse, error)
 	Like(ctx context.Context, in *AlbumToUserId, opts ...grpc.CallOption) (*empty.Empty, error)
 	IsLike(ctx context.Context, in *AlbumToUserId, opts ...grpc.CallOption) (*IsLikedAlbum, error)
 	Unlike(ctx context.Context, in *AlbumToUserId, opts ...grpc.CallOption) (*empty.Empty, error)
@@ -88,9 +88,9 @@ func (c *albumServiceClient) GetAlbum(ctx context.Context, in *AlbumId, opts ...
 	return out, nil
 }
 
-func (c *albumServiceClient) GetAlbumsByTrack(ctx context.Context, in *proto.TrackId, opts ...grpc.CallOption) (*AlbumsResponse, error) {
-	out := new(AlbumsResponse)
-	err := c.cc.Invoke(ctx, "/AlbumService/GetAlbumsByTrack", in, out, opts...)
+func (c *albumServiceClient) GetAlbumByTrack(ctx context.Context, in *proto.TrackId, opts ...grpc.CallOption) (*AlbumResponse, error) {
+	out := new(AlbumResponse)
+	err := c.cc.Invoke(ctx, "/AlbumService/GetAlbumByTrack", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -133,7 +133,7 @@ type AlbumServiceServer interface {
 	GetPopular(context.Context, *empty.Empty) (*AlbumsResponse, error)
 	GetNew(context.Context, *empty.Empty) (*AlbumsResponse, error)
 	GetAlbum(context.Context, *AlbumId) (*AlbumResponse, error)
-	GetAlbumsByTrack(context.Context, *proto.TrackId) (*AlbumsResponse, error)
+	GetAlbumByTrack(context.Context, *proto.TrackId) (*AlbumResponse, error)
 	Like(context.Context, *AlbumToUserId) (*empty.Empty, error)
 	IsLike(context.Context, *AlbumToUserId) (*IsLikedAlbum, error)
 	Unlike(context.Context, *AlbumToUserId) (*empty.Empty, error)
@@ -159,8 +159,8 @@ func (UnimplementedAlbumServiceServer) GetNew(context.Context, *empty.Empty) (*A
 func (UnimplementedAlbumServiceServer) GetAlbum(context.Context, *AlbumId) (*AlbumResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetAlbum not implemented")
 }
-func (UnimplementedAlbumServiceServer) GetAlbumsByTrack(context.Context, *proto.TrackId) (*AlbumsResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetAlbumsByTrack not implemented")
+func (UnimplementedAlbumServiceServer) GetAlbumByTrack(context.Context, *proto.TrackId) (*AlbumResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetAlbumByTrack not implemented")
 }
 func (UnimplementedAlbumServiceServer) Like(context.Context, *AlbumToUserId) (*empty.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Like not implemented")
@@ -274,20 +274,20 @@ func _AlbumService_GetAlbum_Handler(srv interface{}, ctx context.Context, dec fu
 	return interceptor(ctx, in, info, handler)
 }
 
-func _AlbumService_GetAlbumsByTrack_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _AlbumService_GetAlbumByTrack_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(proto.TrackId)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(AlbumServiceServer).GetAlbumsByTrack(ctx, in)
+		return srv.(AlbumServiceServer).GetAlbumByTrack(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/AlbumService/GetAlbumsByTrack",
+		FullMethod: "/AlbumService/GetAlbumByTrack",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AlbumServiceServer).GetAlbumsByTrack(ctx, req.(*proto.TrackId))
+		return srv.(AlbumServiceServer).GetAlbumByTrack(ctx, req.(*proto.TrackId))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -374,8 +374,8 @@ var AlbumService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _AlbumService_GetAlbum_Handler,
 		},
 		{
-			MethodName: "GetAlbumsByTrack",
-			Handler:    _AlbumService_GetAlbumsByTrack_Handler,
+			MethodName: "GetAlbumByTrack",
+			Handler:    _AlbumService_GetAlbumByTrack_Handler,
 		},
 		{
 			MethodName: "Like",
