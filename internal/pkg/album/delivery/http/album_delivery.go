@@ -157,21 +157,21 @@ func (handler *AlbumHandler) AlbumTracks(w http.ResponseWriter, r *http.Request)
 	return nil
 }
 
-// AlbumsWithRequiredTrack
+// AlbumWithRequiredTrack
 //
-//	@Summary		AlbumsWithRequiredTrack
-//	@Description	Return albums that contain required track
+//	@Summary		AlbumWithRequiredTrack
+//	@Description	Return album that contain required track
 //	@Tags			album
 //	@Produce		json
 //	@Param			id	path		integer	true	"track id"
-//	@Success		200	{array}		album.Response
+//	@Success		200	{object}	album.Response
 //	@Failure		400	{string}	errMsg
 //	@Failure		500	{string}	errMsg
 //	@Router			/track/{id} [get]
-func (handler *AlbumHandler) AlbumsWithRequiredTrack(w http.ResponseWriter, r *http.Request) error {
+func (handler *AlbumHandler) AlbumWithRequiredTrack(w http.ResponseWriter, r *http.Request) error {
 	handler.logger.WithFields(logrus.Fields{
 		"request_id": utils.GenReqId(r.RequestURI + r.Method),
-	}).Infoln("AlbumsWithRequiredTrack Handler entered")
+	}).Infoln("AlbumWithRequiredTrack Handler entered")
 
 	trackId, err := strconv.Atoi(mux.Vars(r)["id"])
 	if err != nil {
@@ -179,7 +179,7 @@ func (handler *AlbumHandler) AlbumsWithRequiredTrack(w http.ResponseWriter, r *h
 	}
 	handler.logger.Infoln("got id from query var")
 
-	result, err := handler.albumUseCase.GetAlbumsByTrack(uint64(trackId))
+	result, err := handler.albumUseCase.GetAlbumByTrack(uint64(trackId))
 	if err != nil {
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}
