@@ -13,6 +13,7 @@ import (
 	session_mock "main/test/mocks/session"
 	"net/http"
 	"net/http/httptest"
+	"strconv"
 	"testing"
 	"time"
 
@@ -22,7 +23,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestCreateAndGet(t *testing.T) {
+func TestActionsOnPlaylist(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -36,10 +37,11 @@ func TestCreateAndGet(t *testing.T) {
 	}
 
 	const (
-		sessionId            = "sessionID"
-		userId               = "qwer-qwer-qwer"
-		playlistId           = "100"
-		playlistIdInt uint64 = 100
+		sessionId           = "sessionID"
+		userId              = "4dfe819e-3112-4e3d-900e-6ea9db5c41fe"
+		playlistId   uint64 = 5
+		playlistName        = "Playlist"
+		trackId      uint64 = 10
 	)
 
 	cookie := http.Cookie{
@@ -52,36 +54,36 @@ func TestCreateAndGet(t *testing.T) {
 
 	t.Run("Create", func(t *testing.T) {
 		playlistBase := playlist.Base{
-			// Id:       playlistIdInt,
-			// Name:     "Playlist",
 			AuthorId: userId,
-			// Preview:  "preview",
 		}
-		// playlistResponse := playlist.Response{
-		// 	Id:       playlistIdInt,
-		// 	Name:     "Playlist",
-		// 	AuthorId: userId,
-		// 	Preview:  "preview",
-		// }
-		playlistResponse := playlist.Response{}
-		requestBody, err := json.Marshal(playlistBase)
-		assert.Nil(t, err)
 
-		req := httptest.NewRequest(http.MethodPost, "/playlist", bytes.NewBuffer(requestBody))
+		playlistResponse := playlist.Response{
+			Id:       playlistId,
+			Name:     "Новый плейлист",
+			AuthorId: userId,
+			Preview:  "",
+		}
+
+		req := httptest.NewRequest(http.MethodPost, "/playlist", nil)
 		req.AddCookie(&cookie)
 		w := httptest.NewRecorder()
 
 		mockSessionUseCase.EXPECT().GetUserId(sessionId).Return(userId, nil)
 		mockPlaylistUseCase.EXPECT().Create(playlistBase).Return(playlistResponse, nil)
 
-		err = handler.Create(w, req)
+		err := handler.Create(w, req)
 		assert.Nil(t, err)
 		assert.Equal(t, http.StatusOK, w.Code)
+
+		var receivedPlaylist playlist.Response
+		err = json.NewDecoder(w.Body).Decode(&receivedPlaylist)
+		assert.Nil(t, err)
+		assert.Equal(t, receivedPlaylist, playlistResponse)
 	})
 
 	t.Run("Get", func(t *testing.T) {
 		playlistResponse := playlist.Response{
-			Id:       playlistIdInt,
+			Id:       playlistId,
 			Name:     "Playlist",
 			AuthorId: userId,
 			Preview:  "preview",
@@ -89,13 +91,13 @@ func TestCreateAndGet(t *testing.T) {
 			Tracks:   make([]track.Response, 0),
 		}
 
-		req := httptest.NewRequest(http.MethodPost, "/playlist", nil)
-		req = mux.SetURLVars(req, map[string]string{"id": playlistId})
+		req := httptest.NewRequest(http.MethodGet, "/playlist", nil)
+		req = mux.SetURLVars(req, map[string]string{"id": strconv.FormatUint(playlistId, 10)})
 		req.AddCookie(&cookie)
 		w := httptest.NewRecorder()
 
 		mockSessionUseCase.EXPECT().GetUserId(sessionId).Return(userId, nil)
-		mockPlaylistUseCase.EXPECT().Get(userId, playlistIdInt).Return(playlistResponse, nil)
+		mockPlaylistUseCase.EXPECT().Get(userId, playlistId).Return(playlistResponse, nil)
 
 		err := handler.Get(w, req)
 		assert.Nil(t, err)
@@ -104,6 +106,84 @@ func TestCreateAndGet(t *testing.T) {
 		err = json.NewDecoder(w.Body).Decode(&received)
 		assert.Nil(t, err)
 		assert.Equal(t, playlistResponse, received)
+	})
+
+	requestBody, err := json.Marshal(track.Id{Id: trackId})
+	assert.Nil(t, err)
+
+	t.Run("AddTrack", func(t *testing.T) {
+		req := httptest.NewRequest(http.MethodPost, "/playlist/add_track", bytes.NewBuffer(requestBody))
+		req = mux.SetURLVars(req, map[string]string{"id": strconv.FormatUint(playlistId, 10)})
+		w := httptest.NewRecorder()
+
+		mockPlaylistUseCase.EXPECT().AddTrack(playlistId, trackId).Return(nil)
+
+		err = handler.AddTrack(w, req)
+		assert.Nil(t, err)
+		assert.Equal(t, http.StatusNoContent, w.Code)
+	})
+
+	t.Run("RemoveTrack", func(t *testing.T) {
+		req := httptest.NewRequest(http.MethodDelete, "/playlist/remove_track", bytes.NewBuffer(requestBody))
+		req = mux.SetURLVars(req, map[string]string{"id": strconv.FormatUint(playlistId, 10)})
+		w := httptest.NewRecorder()
+
+		mockPlaylistUseCase.EXPECT().RemoveTrack(playlistId, trackId).Return(nil)
+
+		err = handler.RemoveTrack(w, req)
+		assert.Nil(t, err)
+		assert.Equal(t, http.StatusNoContent, w.Code)
+	})
+
+	t.Run("UpdateName", func(t *testing.T) {
+		requestBody, err = json.Marshal(playlist.Name{Name: playlistName})
+		assert.Nil(t, err)
+
+		req := httptest.NewRequest(http.MethodPost, "/playlist/update_name", bytes.NewBuffer(requestBody))
+		req = mux.SetURLVars(req, map[string]string{"id": strconv.FormatUint(playlistId, 10)})
+		w := httptest.NewRecorder()
+
+		mockPlaylistUseCase.EXPECT().UpdateName(playlistId, playlistName).Return(nil)
+
+		err = handler.UpdateName(w, req)
+		assert.Nil(t, err)
+		assert.Equal(t, http.StatusNoContent, w.Code)
+	})
+
+	t.Run("Delete", func(t *testing.T) {
+		req := httptest.NewRequest(http.MethodDelete, "/playlist", nil)
+		req = mux.SetURLVars(req, map[string]string{"id": strconv.FormatUint(playlistId, 10)})
+		w := httptest.NewRecorder()
+
+		mockPlaylistUseCase.EXPECT().DeleteById(playlistId).Return(nil)
+
+		err = handler.Delete(w, req)
+		assert.Nil(t, err)
+		assert.Equal(t, http.StatusNoContent, w.Code)
+	})
+
+	t.Run("MakePublic", func(t *testing.T) {
+		req := httptest.NewRequest(http.MethodPut, "/playlist/make_public", nil)
+		req = mux.SetURLVars(req, map[string]string{"id": strconv.FormatUint(playlistId, 10)})
+		w := httptest.NewRecorder()
+
+		mockPlaylistUseCase.EXPECT().MakePublic(playlistId).Return(nil)
+
+		err = handler.MakePublic(w, req)
+		assert.Nil(t, err)
+		assert.Equal(t, http.StatusNoContent, w.Code)
+	})
+
+	t.Run("MakePrivate", func(t *testing.T) {
+		req := httptest.NewRequest(http.MethodPut, "/playlist/make_private", nil)
+		req = mux.SetURLVars(req, map[string]string{"id": strconv.FormatUint(playlistId, 10)})
+		w := httptest.NewRecorder()
+
+		mockPlaylistUseCase.EXPECT().MakePrivate(playlistId).Return(nil)
+
+		err = handler.MakePrivate(w, req)
+		assert.Nil(t, err)
+		assert.Equal(t, http.StatusNoContent, w.Code)
 	})
 }
 
@@ -121,11 +201,10 @@ func TestLike(t *testing.T) {
 	}
 
 	const (
-		playlistId           = "1"
-		playlistIdInt uint64 = 1
-		sessionId            = "sessionID"
-		userId               = "qwer-qwer-qwer"
-		isLiked              = true
+		playlistId uint64 = 1
+		sessionId         = "sessionID"
+		userId            = "4dfe819e-3112-4e3d-900e-6ea9db5c41fe"
+		isLiked           = true
 	)
 
 	cookie := http.Cookie{
@@ -145,7 +224,7 @@ func TestLike(t *testing.T) {
 
 	t.Run("Like GetCookieError", func(t *testing.T) {
 		req := httptest.NewRequest(http.MethodPost, "/playlist/like", nil)
-		req = mux.SetURLVars(req, map[string]string{"id": playlistId})
+		req = mux.SetURLVars(req, map[string]string{"id": strconv.FormatUint(playlistId, 10)})
 		w := httptest.NewRecorder()
 
 		err := handler.Like(w, req)
@@ -154,12 +233,12 @@ func TestLike(t *testing.T) {
 
 	t.Run("Like Success", func(t *testing.T) {
 		req := httptest.NewRequest(http.MethodPost, "/playlist/like", nil)
-		req = mux.SetURLVars(req, map[string]string{"id": playlistId})
+		req = mux.SetURLVars(req, map[string]string{"id": strconv.FormatUint(playlistId, 10)})
 		req.AddCookie(&cookie)
 		w := httptest.NewRecorder()
 
 		mockSessionUseCase.EXPECT().GetUserId(sessionId).Return(userId, nil)
-		mockPlaylistUseCase.EXPECT().Like(userId, playlistIdInt).Return(nil)
+		mockPlaylistUseCase.EXPECT().Like(userId, playlistId).Return(nil)
 
 		err := handler.Like(w, req)
 		assert.Nil(t, err)
@@ -168,7 +247,7 @@ func TestLike(t *testing.T) {
 
 	t.Run("IsLike GetUserIdByCookieError", func(t *testing.T) {
 		req := httptest.NewRequest(http.MethodPost, "/playlist/is_like", nil)
-		req = mux.SetURLVars(req, map[string]string{"id": playlistId})
+		req = mux.SetURLVars(req, map[string]string{"id": strconv.FormatUint(playlistId, 10)})
 		req.AddCookie(&cookie)
 		w := httptest.NewRecorder()
 
@@ -180,12 +259,12 @@ func TestLike(t *testing.T) {
 
 	t.Run("IsLike LikeCheckError", func(t *testing.T) {
 		req := httptest.NewRequest(http.MethodPost, "/playlist/is_like", nil)
-		req = mux.SetURLVars(req, map[string]string{"id": playlistId})
+		req = mux.SetURLVars(req, map[string]string{"id": strconv.FormatUint(playlistId, 10)})
 		req.AddCookie(&cookie)
 		w := httptest.NewRecorder()
 
 		mockSessionUseCase.EXPECT().GetUserId(sessionId).Return(userId, nil)
-		mockPlaylistUseCase.EXPECT().IsLike(userId, playlistIdInt).Return(false, errors.New("error while checking like"))
+		mockPlaylistUseCase.EXPECT().IsLike(userId, playlistId).Return(false, errors.New("error while checking like"))
 
 		err := handler.IsLike(w, req)
 		assert.Equal(t, http.StatusNotFound, err.(common_handler.StatusError).Code)
@@ -193,12 +272,12 @@ func TestLike(t *testing.T) {
 
 	t.Run("IsLike Success", func(t *testing.T) {
 		req := httptest.NewRequest(http.MethodPost, "/playlist/is_like", nil)
-		req = mux.SetURLVars(req, map[string]string{"id": playlistId})
+		req = mux.SetURLVars(req, map[string]string{"id": strconv.FormatUint(playlistId, 10)})
 		req.AddCookie(&cookie)
 		w := httptest.NewRecorder()
 
 		mockSessionUseCase.EXPECT().GetUserId(sessionId).Return(userId, nil)
-		mockPlaylistUseCase.EXPECT().IsLike(userId, playlistIdInt).Return(isLiked, nil)
+		mockPlaylistUseCase.EXPECT().IsLike(userId, playlistId).Return(isLiked, nil)
 
 		err := handler.IsLike(w, req)
 		assert.Nil(t, err)
@@ -211,12 +290,12 @@ func TestLike(t *testing.T) {
 
 	t.Run("Unlike Success", func(t *testing.T) {
 		req := httptest.NewRequest(http.MethodPost, "/playlist/unlike", nil)
-		req = mux.SetURLVars(req, map[string]string{"id": playlistId})
+		req = mux.SetURLVars(req, map[string]string{"id": strconv.FormatUint(playlistId, 10)})
 		req.AddCookie(&cookie)
 		w := httptest.NewRecorder()
 
 		mockSessionUseCase.EXPECT().GetUserId(sessionId).Return(userId, nil)
-		mockPlaylistUseCase.EXPECT().Unlike(userId, playlistIdInt).Return(nil)
+		mockPlaylistUseCase.EXPECT().Unlike(userId, playlistId).Return(nil)
 
 		err := handler.Unlike(w, req)
 		assert.Nil(t, err)

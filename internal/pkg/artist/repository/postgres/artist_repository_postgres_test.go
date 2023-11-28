@@ -89,6 +89,16 @@ func TestArtistRepository(t *testing.T) {
 		assert.Nil(t, err)
 	})
 
+	t.Run("CheckLike", func(t *testing.T) {
+		mock.ExpectQuery("select count").
+			WithArgs(userId, artistId).
+			WillReturnRows(pgxmock.NewRows([]string{"count(*)"}).AddRow(1))
+
+		isLiked, _ := repo.CheckLike(userId, artistId)
+		assert.True(t, isLiked)
+		assert.NoError(t, err)
+	})
+
 	t.Run("DeleteLike", func(t *testing.T) {
 		mock.ExpectExec("delete from profile_artist").
 			WithArgs(userId, artistId).
