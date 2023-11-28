@@ -77,15 +77,15 @@ func TestTrackRepository_Like(t *testing.T) {
 		assert.Nil(t, err)
 	})
 
-	//t.Run("CheckLike", func(t *testing.T) {
-	//	mock.ExpectQuery("select count(*) from profile_track where profile_id = ? and track_id = ?").
-	//		WithArgs(userId, trackId).
-	//		WillReturnRows(pgxmock.NewRows([]string{"count(*)"}).AddRow(1))
-	//
-	//	isLiked, _ := repo.CheckLike(userId, trackId)
-	//	assert.True(t, isLiked)
-	//	assert.NoError(t, err)
-	//})
+	t.Run("CheckLike", func(t *testing.T) {
+		mock.ExpectQuery("select count").
+			WithArgs(userId, trackId).
+			WillReturnRows(pgxmock.NewRows([]string{"count(*)"}).AddRow(1))
+
+		isLiked, _ := repo.CheckLike(userId, trackId)
+		assert.True(t, isLiked)
+		assert.NoError(t, err)
+	})
 
 	t.Run("DeleteLike", func(t *testing.T) {
 		mock.ExpectExec("delete from profile_track").
