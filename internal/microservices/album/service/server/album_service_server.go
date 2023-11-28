@@ -5,6 +5,7 @@ import (
 	google_proto "github.com/golang/protobuf/ptypes/empty"
 	"github.com/sirupsen/logrus"
 	album_proto "main/internal/microservices/album/proto"
+	track_proto "main/internal/microservices/track/proto"
 	grpc_track_server "main/internal/microservices/track/service/server"
 	"main/internal/pkg/album"
 	"main/internal/pkg/artist"
@@ -96,6 +97,18 @@ func (am *AlbumManager) GetAlbum(ctx context.Context, in *album_proto.AlbumId) (
 	result.Tracks = tracks
 
 	return SerializeAlbum(result), nil
+}
+
+func (am *AlbumManager) GetAlbumsByTrack(ctx context.Context, in *track_proto.TrackId) (*album_proto.AlbumsResponse, error) {
+	am.logger.Infoln("Album Micros GetAlbumsByTrack entered")
+
+	albums, err := am.repoAlbum.GetByTrackId(in.GetTrackId())
+	if err != nil {
+		return nil, err
+	}
+	am.logger.Infoln("Got albums with required track")
+
+	return am.formResponse(albums)
 }
 
 func (am *AlbumManager) GetRandom(ctx context.Context, status *google_proto.Empty) (*album_proto.AlbumsResponse, error) {

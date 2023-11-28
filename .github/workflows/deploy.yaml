@@ -148,9 +148,9 @@ jobs:
         with:
           namespace: musicon
           manifests: |
-            deployments/prod/entrypoint
-            deployments/prod/redis
-            deployments/prod/micros
+            deployments/kubernetes/entrypoint
+            deployments/kubernetes/redis
+            deployments/kubernetes/micros
           images: |
             registry.musicon.space/entrypoint:${{ env.RELEASE_TAG }}
             registry.musicon.space/album:${{ env.RELEASE_TAG }}
