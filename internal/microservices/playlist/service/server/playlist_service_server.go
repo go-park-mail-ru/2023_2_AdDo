@@ -149,6 +149,17 @@ func (pm *PlaylistManager) UpdatePreview(ctx context.Context, in *playlist_proto
 	return &google_proto.Empty{}, nil
 }
 
+func (pm *PlaylistManager) UpdateName(ctx context.Context, in *playlist_proto.PlaylistIdToNewTitle) (*google_proto.Empty, error) {
+	pm.logger.Infoln("Playlist Service Update Name Method entered")
+
+	if err := pm.repoPlaylist.UpdateName(ctx, in.GetPlaylistId(), in.GetTitle()); err != nil {
+		return nil, err
+	}
+	pm.logger.Infoln("Title updated")
+
+	return &google_proto.Empty{}, nil
+}
+
 func (pm *PlaylistManager) RemovePreview(ctx context.Context, in *playlist_proto.PlaylistId) (*image_proto.ImageUrl, error) {
 	pm.logger.Infoln("Playlist Service RemovePreview Method entered")
 

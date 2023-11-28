@@ -253,6 +253,36 @@ func (handler *Handler) UpdatePreview(w http.ResponseWriter, r *http.Request) er
 	return nil
 }
 
+func (handler *Handler) UpdateName(w http.ResponseWriter, r *http.Request) error {
+	handler.logger.WithFields(logrus.Fields{
+		"request_id": utils.GenReqId(r.RequestURI + r.Method),
+	}).Infoln("Playlist Update Name Handler entered")
+
+	playlistId, err := strconv.Atoi(mux.Vars(r)["id"])
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusBadRequest, Err: err}
+	}
+	handler.logger.Infoln("Parsed playlistId from Vars")
+
+	var title playlist.Name
+	if err := json.NewDecoder(r.Body).Decode(&title); err != nil {
+		return common_handler.StatusError{Code: http.StatusBadRequest, Err: err}
+	}
+	handler.logger.Infoln("Got playlist and new title")
+
+	if err := title.Validate(); err != nil {
+		return common_handler.StatusError{Code: http.StatusBadRequest, Err: err}
+	}
+	handler.logger.Infoln("title validated")
+
+	if err = handler.playlistUseCase.UpdateName(uint64(playlistId), title.Name); err != nil {
+		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+	return nil
+}
+
 // Like
 //
 //	@Summary		Like

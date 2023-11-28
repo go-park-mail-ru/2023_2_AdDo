@@ -68,6 +68,12 @@ func (p Postgres) GetByArtistId(artistId uint64) ([]album.Base, error) {
 	return p.getWithQuery(context.Background(), query, artistId)
 }
 
+func (p Postgres) GetByUserId(userId string) ([]album.Base, error) {
+	p.logger.Infoln("Album Repo GetByArtistId entered")
+	query := "select album.id, name, preview from album join profile_album on album.id = profile_album.album_id where profile_id = $1"
+	return p.getWithQuery(context.Background(), query, userId)
+}
+
 func (p Postgres) GetByReleaseDate(limit uint32) ([]album.Base, error) {
 	p.logger.Infoln("Album Repo GetByReleaseDate entered")
 	query := "select id, name, preview from album order by release_date desc limit $1"

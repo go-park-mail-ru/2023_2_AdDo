@@ -3,7 +3,7 @@ package artist_repository
 import (
 	"context"
 	"github.com/sirupsen/logrus"
-	"main/internal/common/pgxiface"
+	postgres "main/internal/common/pgxiface"
 	"main/internal/pkg/artist"
 )
 
@@ -77,7 +77,7 @@ func (p *Postgres) GetByTrackId(trackId uint64) ([]artist.Base, error) {
 
 func (p *Postgres) Search(text string) ([]artist.Base, error) {
 	p.logger.Infoln("Artist Repo Search entered")
-	query := "select artist.id, artist.name, artist.avatar from artist where to_tsvector('russian', artist.name) @@ plainto_tsquery('russian', $1) or lower(artist.name) like lower($2)"
+	query := "select artist.id, artist.name, artist.avatar from artist where to_tsvector('russian', artist.name) @@ plainto_tsquery('russian', $1) or lower(artist.name) like lower($2) limit 10"
 	return p.getWithQuery(context.Background(), query, text, "%"+text+"%")
 }
 
@@ -98,6 +98,13 @@ func (p *Postgres) GetByAlbumId(albumId uint64) (artist.Base, error) {
 	p.logger.Infoln("Got artist by album id")
 
 	return result, nil
+}
+
+func (p *Postgres) GetByUserId(userId string) ([]artist.Base, error) {
+	p.logger.Infoln("Artist Repo Get By User Id entered")
+
+	query := "select artist.id, artist.name, artist.avatar from artist join profile_artist on artist.id = profile_artist.artist_id where profile_artist.profile_id = $1"
+	return p.getWithQuery(context.Background(), query, userId)
 }
 
 func (p *Postgres) CreateLike(userId string, artistId uint64) error {

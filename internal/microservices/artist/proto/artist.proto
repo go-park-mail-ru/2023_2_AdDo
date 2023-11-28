@@ -3,6 +3,7 @@ syntax = "proto3";
 option go_package = "/artist";
 import "album.proto";
 import "track.proto";
+import "session.proto";
 import "playlist.proto";
 import "google/protobuf/empty.proto";
 
@@ -13,6 +14,7 @@ service ArtistService {
   rpc IsLike (ArtistToUserId) returns (IsLikedArtist) {}
   rpc Unlike (ArtistToUserId) returns (google.protobuf.Empty) {}
   rpc FullSearch (Query) returns (SearchResponse) {}
+  rpc CollectionArtist (UserId) returns (ArtistsBase) {}
 }
 
 message ArtistBase {
