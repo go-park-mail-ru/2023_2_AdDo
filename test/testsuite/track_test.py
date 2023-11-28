@@ -19,6 +19,7 @@ class TrackTest(unittest.TestCase):
 
         track_id = 1
         response = requests.get(utils.url + '/track/' + str(track_id) + '/is_like', headers=headers, cookies=cookies)
+        print(response.json)
         self.assertEqual(200, response.status_code)
         self.assertEqual(False, response.json()['IsLiked'])
 
