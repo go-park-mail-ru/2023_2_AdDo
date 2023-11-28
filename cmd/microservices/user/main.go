@@ -2,7 +2,6 @@ package main
 
 import (
 	"google.golang.org/grpc"
-	// microservices_init "main/cmd/microservices"
 	init_db "main/init/postgres_db"
 	init_redis "main/init/redis_db"
 	log "main/internal/common/logger"
