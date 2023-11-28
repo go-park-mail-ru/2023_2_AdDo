@@ -67,48 +67,52 @@ func SerializeAlbumsBase(in []album.Base) *album_proto.AlbumsBase {
 func (am *AlbumManager) GetAlbum(ctx context.Context, in *album_proto.AlbumId) (*album_proto.AlbumResponse, error) {
 	am.logger.Infoln("Album Micros GetAlbum entered")
 
-	var result album.Response
-
 	base, err := am.repoAlbum.Get(in.GetAlbumId())
 	if err != nil {
 		return nil, err
 	}
 	am.logger.Infoln("Got album Base")
 
-	result.Id = base.Id
-	result.Name = base.Name
-	result.Preview = base.Preview
-
-	art, err := am.repoArtist.GetByAlbumId(in.GetAlbumId())
-	if err != nil {
-		return nil, err
-	}
-	am.logger.Infoln("Got Artist by album Id ", art)
-
-	result.ArtistId = art.Id
-	result.ArtistName = art.Name
-
-	tracks, err := am.repoTrack.GetByAlbum(in.AlbumId)
-	if err != nil {
-		return nil, err
-	}
-	am.logger.Infoln("Got tracks by album id ", tracks)
-
-	result.Tracks = tracks
-
-	return SerializeAlbum(result), nil
+	return am.formResponseAlbumWithAllTracks(base)
 }
 
-func (am *AlbumManager) GetAlbumsByTrack(ctx context.Context, in *track_proto.TrackId) (*album_proto.AlbumsResponse, error) {
-	am.logger.Infoln("Album Micros GetAlbumsByTrack entered")
+func (am *AlbumManager) GetAlbumByTrack(ctx context.Context, in *track_proto.TrackId) (*album_proto.AlbumResponse, error) {
+	am.logger.Infoln("Album Micros GetAlbumByTrack entered")
 
-	albums, err := am.repoAlbum.GetByTrackId(in.GetTrackId())
+	albumsBase, err := am.repoAlbum.GetByTrackId(in.GetTrackId())
 	if err != nil {
 		return nil, err
 	}
 	am.logger.Infoln("Got albums with required track")
 
-	return am.formResponse(albums)
+	return am.formResponseAlbumWithAllTracks(albumsBase[0])
+}
+
+func (am *AlbumManager) formResponseAlbumWithAllTracks(albumBase album.Base) (*album_proto.AlbumResponse, error) {
+	var result album.Response
+
+	result.Id = albumBase.Id
+	result.Name = albumBase.Name
+	result.Preview = albumBase.Preview
+
+	art, err := am.repoArtist.GetByAlbumId(albumBase.Id)
+	if err != nil {
+		return nil, err
+	}
+	am.logger.Infoln("Got artist by album id", art)
+
+	result.ArtistId = art.Id
+	result.ArtistName = art.Name
+
+	tracks, err := am.repoTrack.GetByAlbum(albumBase.Id)
+	if err != nil {
+		return nil, err
+	}
+	am.logger.Infoln("Got tracks by album id", tracks)
+
+	result.Tracks = tracks
+
+	return SerializeAlbum(result), nil
 }
 
 func (am *AlbumManager) GetRandom(ctx context.Context, status *google_proto.Empty) (*album_proto.AlbumsResponse, error) {
