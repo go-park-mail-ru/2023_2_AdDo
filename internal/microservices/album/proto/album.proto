@@ -10,6 +10,7 @@ service AlbumService {
   rpc GetPopular (google.protobuf.Empty) returns (AlbumsResponse) {}
   rpc GetNew (google.protobuf.Empty) returns (AlbumsResponse) {}
   rpc GetAlbum (AlbumId) returns (AlbumResponse) {}
+  rpc GetAlbumsByTrack(TrackId) returns (AlbumsResponse) {}
   rpc Like (AlbumToUserId) returns (google.protobuf.Empty) {}
   rpc IsLike (AlbumToUserId) returns (IsLikedAlbum) {}
   rpc Unlike (AlbumToUserId) returns (google.protobuf.Empty) {}
