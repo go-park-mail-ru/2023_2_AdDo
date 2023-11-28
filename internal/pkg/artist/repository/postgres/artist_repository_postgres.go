@@ -3,6 +3,7 @@ package artist_repository
 import (
 	"context"
 	"github.com/sirupsen/logrus"
+	postgres "main/internal/common/pgxiface"
 	"main/internal/pkg/artist"
 )
 
