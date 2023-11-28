@@ -22,3 +22,6 @@ create index if not exists artist_name_eng_gin_idx on artist
 
 create index if not exists playlist_name_eng_gin_idx on playlist
     using gin(to_tsvector('english', playlist.name));
+
+create index if not exists album_name_filling_idx on album (name);
+create index if not exists track_name_filling_idx on track (name);
