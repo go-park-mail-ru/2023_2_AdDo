@@ -116,6 +116,17 @@ func (pm *PlaylistManager) GetUserPlaylists(ctx context.Context, in *session_pro
 	return SerializePlaylistsBase(result), nil
 }
 
+func (pm *PlaylistManager) PlaylistCollections(ctx context.Context, in *session_proto.UserId) (*playlist_proto.PlaylistsBase, error) {
+	pm.logger.Infoln("Playlist Service GetUserPlaylists Method entered")
+
+	result, err := pm.repoPlaylist.GetByUserId(ctx, in.GetUserId())
+	if err != nil {
+		return nil, err
+	}
+
+	return SerializePlaylistsBase(result), nil
+}
+
 func (pm *PlaylistManager) AddTrack(ctx context.Context, in *playlist_proto.PlaylistToTrackId) (*google_proto.Empty, error) {
 	pm.logger.Infoln("Playlist Service AddTrack Method entered")
 

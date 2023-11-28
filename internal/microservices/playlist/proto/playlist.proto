@@ -11,6 +11,7 @@ service PlaylistService {
   rpc Create (PlaylistBase) returns (PlaylistResponse) {}
   rpc Get (PlaylistToUserId) returns (PlaylistResponse) {}
   rpc GetUserPlaylists (UserId) returns (PlaylistsBase) {}
+  rpc PlaylistCollections (UserId) returns (PlaylistsBase) {}
   rpc AddTrack (PlaylistToTrackId) returns (google.protobuf.Empty) {}
   rpc RemoveTrack (PlaylistToTrackId) returns (google.protobuf.Empty) {}
   rpc UpdatePreview (PlaylistIdToImageUrl) returns (google.protobuf.Empty) {}

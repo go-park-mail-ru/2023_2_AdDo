@@ -90,6 +90,17 @@ func (c *Client) GetUserPlaylists(userId string) ([]playlist.Base, error) {
 	return DeserializePlaylistsBase(result), nil
 }
 
+func (c *Client) CollectionPlaylists(userId string) ([]playlist.Base, error) {
+	c.logger.Infoln("Playlist client Collection Playlists entered")
+
+	result, err := c.playlistManager.GetUserPlaylists(context.Background(), &session_proto.UserId{UserId: userId})
+	if err != nil {
+		return nil, err
+	}
+
+	return DeserializePlaylistsBase(result), nil
+}
+
 func (c *Client) AddTrack(playlistId, trackId uint64) error {
 	c.logger.Infoln("Playlist client  entered")
 
