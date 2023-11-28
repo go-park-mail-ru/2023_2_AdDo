@@ -2,8 +2,9 @@ syntax = "proto3";
 
 option go_package = "main/internal/microservices/album/proto";
 import "track.proto";
+import "session.proto";
 import "google/protobuf/empty.proto";
-//   protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative -I../proto -I../../track/proto  album.proto
+//   protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative -I../proto -I../../session/proto -I../../track/proto  album.proto
 service AlbumService {
   rpc GetRandom (google.protobuf.Empty) returns (AlbumsResponse) {}
   rpc GetMostLiked (google.protobuf.Empty) returns (AlbumsResponse) {}
@@ -14,6 +15,7 @@ service AlbumService {
   rpc Like (AlbumToUserId) returns (google.protobuf.Empty) {}
   rpc IsLike (AlbumToUserId) returns (IsLikedAlbum) {}
   rpc Unlike (AlbumToUserId) returns (google.protobuf.Empty) {}
+  rpc GetByUserId (UserId) returns (AlbumsBase) {}
 }
 
 message IsLikedAlbum {

@@ -1,5 +1,6 @@
 from yandex_music import Client
 import yandex_music
+import time
 
 client = Client("y0_AgAAAAAbRHgFAAG8XgAAAADyWaE2jVlJZBQTS2e2hxPG-7ELnuOHHhY").init()
 
@@ -41,7 +42,7 @@ data_artist_genre.write(f'INSERT INTO artist_genre ( artist_id, genre_id ) VALUE
 data_album_genre.write(f'INSERT INTO album_genre ( album_id, genre_id ) VALUES\n')
 data_track_genre.write(f'INSERT INTO track_genre ( track_id, genre_id ) VALUES\n')
 
-MAX_ARTIST_BATCH = 3000
+MAX_ARTIST_BATCH = 50000
 
 
 def form_request(start):
@@ -107,7 +108,8 @@ def add_artist_record(artist_name):
         artist_comma_flag = True
     else:
         add_file_del(data_artist)
-    artist_avatar_url = "/images/artists/" + artist_name.replace(" ", "_") + ".webp"
+    artist_avatar_url = ("/images/artists/" + artist_name + ".webp").replace(' ', '_').replace('\'', '_').replace('\"',
+                                                                                                                  '_')
     data_artist.write(f'( \'{artist_name}\', \'{artist_avatar_url}\' )')
 
 
@@ -117,7 +119,9 @@ def add_album_record(artist_name, title, genre, date, year):
         album_comma_flag = True
     else:
         add_file_del(data_album)
-    album_preview_url = ("/images/tracks/" + artist_name + "/" + title + ".webp").replace(" ", "_")
+    album_preview_url = ("/images/tracks/" + artist_name + "/" + title + ".webp").replace(' ', '_').replace('\'',
+                                                                                                            '_').replace(
+        '\"', '_')
     data_album.write(f'( \'{title}\', \'{album_preview_url}\', \'{date}\', \'{year}\' )')
 
 
@@ -128,7 +132,8 @@ def add_track_record(artist_name, album_title, track_title, text, dur_ms):
     else:
         add_file_del(data_track)
     url = ("/images/tracks/" + artist_name + "/" + album_title + ".webp").replace(" ", "_")
-    track_url = ("/audio/" + artist_name + "/" + album_title + "/" + track_title + ".mp3").replace(" ", "_")
+    track_url = ("/audio/" + artist_name + "/" + album_title + "/" + track_title + ".mp3").replace(' ', '_').replace(
+        '\'', '_').replace('\"', '_')
     data_track.write(f'( \'{track_title}\', \'{url}\', \'{track_url}\', \'{text}\', {dur_ms / 1000} )')
 
 
@@ -152,12 +157,12 @@ def add_track_artist_record(track_title, artist_name):
         f'( ( SELECT id FROM artist WHERE name = \'{artist_name}\' ), ( SELECT id FROM track WHERE name = \'{track_title}\' limit 1 ) )')
 
 
-for i in range(1, 6000, MAX_ARTIST_BATCH):
+for i in range(1, 1000000, MAX_ARTIST_BATCH):
     ids = form_request(i)
     print(f'{i}\n')
     artists = client.artists(ids)
     for artist in artists:
-        if artist.error is None and artist.name is not None and artist.ratings is not None and artist.ratings.month < 100:
+        if artist.error is None and artist.name is not None and artist.ratings is not None and artist.ratings.month < 200:
             artist.name = artist.name.replace("'", "''").replace('"', '\"')
 
             add_artist_record(artist.name)
@@ -183,9 +188,12 @@ for i in range(1, 6000, MAX_ARTIST_BATCH):
                             lyrics = track.get_lyrics('LRC')
                             lyrics_text = lyrics.fetchLyrics()
                         except yandex_music.exceptions.NotFoundError:
-                            print()
+                            print('нет  текста')
                         except yandex_music.exceptions.TimedOutError:
-                            print()
+                            print("таймаут")
+                        except:
+                            time.sleep(2)
+                            print("исключение непонятное")
 
                         lyrics_text = lyrics_text.replace("'", "''").replace('"', '\"')
                         add_track_record(artist.name, album.title, track.title, lyrics_text,
@@ -218,69 +226,3 @@ data_album_track.close()
 data_artist_genre.close()
 data_album_genre.close()
 data_track_genre.close()
-
-# for i in range(23000000, 23000010):
-#     album = client.albums_with_tracks(i)
-#     tracks = []
-#     for i, volume in enumerate(album.volumes):
-#         if len(album.volumes) > 1:
-#             tracks.append(f'💿 Диск {i + 1}')
-#         tracks += volume
-#
-#     text = 'АЛЬБОМ\n'
-#     text += f'{album.title}\n'
-#     text += f"Исполнитель: {', '.join([artist.name for artist in album.artists])}\n"
-#     text += f'{album.year} · {album.genre}\n'
-#
-#     cover = album.cover_uri
-#     if cover:
-#         text += f'Обложка: {cover.replace("%%", "400x400")}\n\n'
-#
-#     text += 'Список треков:'
-#
-#     print(f'{text}\n')
-#
-#     for track in tracks:
-#         if isinstance(track, str):
-#             print(track)
-#         else:
-#             artists = ''
-#             if track.artists:
-#                 artists = ' - ' + ', '.join(artist.name for artist in track.artists)
-#             print(track.title + artists)
-#             print()
-#
-# CHART_ID = 'world'
-
-# chart = client.chart(CHART_ID).chart
-#
-# text = [f'🏆 {chart.title}', chart.description, '', 'Треки:']
-#
-# i = 1
-# for track_short in chart.tracks:
-#     track, chart = track_short.track, track_short.chart
-#     artists = ''
-#     if track.artists:
-#         artists = ' - ' + ', '.join(artist.name for artist in track.artists)
-#
-#     track_text = f'{track.title}{artists}'
-#     info = track.get_download_info(get_direct_links=True)
-#     print(info)
-#
-#     wget.download(info[0]['direct_link'], f'track {i}')
-#     print()
-#     i += 1
-#
-#     if chart.progress == 'down':
-#         track_text = '🔻 ' + track_text
-#     elif chart.progress == 'up':
-#         track_text = '🔺 ' + track_text
-#     elif chart.progress == 'new':
-#         track_text = '🆕 ' + track_text
-#     elif chart.position == 1:
-#         track_text = '👑 ' + track_text
-#
-#     track_text = f'{chart.position} {track_text}'
-#     text.append(track_text)
-#
-# print('\n'.join(text))

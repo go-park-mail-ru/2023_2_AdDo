@@ -7,6 +7,7 @@ import (
 	grpc_album_server "main/internal/microservices/album/service/server"
 	artist_proto "main/internal/microservices/artist/proto"
 	grpc_playlist_server "main/internal/microservices/playlist/service/server"
+	session_proto "main/internal/microservices/session/proto"
 	grpc_track_server "main/internal/microservices/track/service/server"
 	"main/internal/pkg/album"
 	"main/internal/pkg/artist"
@@ -168,4 +169,15 @@ func (am *ArtistManager) FullSearch(ctx context.Context, in *artist_proto.Query)
 		Artists:   artists,
 	}
 	return SerializeSearchResponse(result), nil
+}
+
+func (am *ArtistManager) CollectionArtist(ctx context.Context, in *session_proto.UserId) (*artist_proto.ArtistsBase, error) {
+	am.logger.Infoln("Artist Micros Collection Artist entered")
+
+	artists, err := am.repoArtist.GetByUserId(in.GetUserId())
+	if err != nil {
+		return nil, err
+	}
+
+	return SerializeArtistsBase(artists), nil
 }
