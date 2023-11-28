@@ -17,6 +17,7 @@ import (
 	track_mock "main/test/mocks/track"
 	"net/http"
 	"net/http/httptest"
+	"strconv"
 	"testing"
 	"time"
 )
@@ -166,12 +167,14 @@ func TestAlbumTracks(t *testing.T) {
 	})
 
 	t.Run("Success", func(t *testing.T) {
+		const albumId uint64 = 1
+
 		req := httptest.NewRequest(http.MethodGet, "/album", nil)
-		req = mux.SetURLVars(req, map[string]string{"id": "1"})
+		req = mux.SetURLVars(req, map[string]string{"id": strconv.FormatUint(albumId, 10)})
 		w := httptest.NewRecorder()
 
 		expectedAlbum := album.Response{
-			Id:         1,
+			Id:         albumId,
 			Name:       "Album 1",
 			Preview:    "Preview 1",
 			ArtistId:   1,
@@ -179,7 +182,7 @@ func TestAlbumTracks(t *testing.T) {
 			Tracks:     []track.Response{},
 		}
 
-		mockAlbumUseCase.EXPECT().GetAlbum(uint64(1)).Return(expectedAlbum, nil)
+		mockAlbumUseCase.EXPECT().GetAlbum(albumId).Return(expectedAlbum, nil)
 		err := handler.AlbumTracks(w, req)
 
 		assert.Nil(t, err)
@@ -207,11 +210,11 @@ func TestAlbumWithRequiredTrack(t *testing.T) {
 		logger:         logrus.New(),
 	}
 
-	const trackId uint64 = 1
-
 	t.Run("Success", func(t *testing.T) {
+		const trackId uint64 = 1
+
 		req := httptest.NewRequest(http.MethodGet, "/track", nil)
-		req = mux.SetURLVars(req, map[string]string{"id": "1"})
+		req = mux.SetURLVars(req, map[string]string{"id": strconv.FormatUint(trackId, 10)})
 		w := httptest.NewRecorder()
 
 		expectedAlbum := album.Response{
@@ -236,6 +239,66 @@ func TestAlbumWithRequiredTrack(t *testing.T) {
 	})
 }
 
+func TestCollectionAlbum(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockTrackUseCase := track_mock.NewMockUseCase(ctrl)
+	mockAlbumUseCase := album_mock.NewMockUseCase(ctrl)
+	mockSessionUseCase := session_mock.NewMockUseCase(ctrl)
+
+	handler := &AlbumHandler{
+		trackUseCase:   mockTrackUseCase,
+		albumUseCase:   mockAlbumUseCase,
+		sessionUseCase: mockSessionUseCase,
+		logger:         logrus.New(),
+	}
+
+	const (
+		sessionId = "sessionID"
+		userId    = "cbaea313-cd81-424f-90f6-e6fdf2b93766"
+	)
+
+	cookie := http.Cookie{
+		Name:     session.CookieName,
+		Value:    sessionId,
+		Expires:  time.Now().Add(session.TimeToLiveCookie),
+		Secure:   true,
+		HttpOnly: true,
+	}
+
+	expectedAlbums := album.LikedAlbums{
+		Albums: []album.Base{
+			{
+				Id:      1,
+				Name:    "Album1",
+				Preview: "/path/to/preview1.jpg",
+			},
+			{
+				Id:      2,
+				Name:    "Album2",
+				Preview: "/path/to/preview2.jpg",
+			},
+		},
+	}
+
+	req := httptest.NewRequest(http.MethodGet, "/collection/albums", nil)
+	req.AddCookie(&cookie)
+	w := httptest.NewRecorder()
+
+	mockSessionUseCase.EXPECT().GetUserId(sessionId).Return(userId, nil)
+	mockAlbumUseCase.EXPECT().GetUserAlbums(userId).Return(expectedAlbums, nil)
+
+	err := handler.CollectionAlbum(w, req)
+	assert.Nil(t, err)
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	var receivedAlbums album.LikedAlbums
+	err = json.NewDecoder(w.Body).Decode(&receivedAlbums)
+	assert.Nil(t, err)
+	assert.Equal(t, expectedAlbums, receivedAlbums)
+}
+
 func TestLike(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
@@ -252,11 +315,10 @@ func TestLike(t *testing.T) {
 	}
 
 	const (
-		albumId           = "1"
-		albumIdInt uint64 = 1
-		sessionId         = "sessionID"
-		userId            = "qwer-qwer-qwer"
-		isLiked           = true
+		albumId   uint64 = 1
+		sessionId        = "sessionID"
+		userId           = "cbaea313-cd81-424f-90f6-e6fdf2b93766"
+		isLiked          = true
 	)
 
 	cookie := http.Cookie{
@@ -277,7 +339,7 @@ func TestLike(t *testing.T) {
 
 	t.Run("Like GetCookieError", func(t *testing.T) {
 		req := httptest.NewRequest(http.MethodPost, "/album/like", nil)
-		req = mux.SetURLVars(req, map[string]string{"id": albumId})
+		req = mux.SetURLVars(req, map[string]string{"id": strconv.FormatUint(albumId, 10)})
 		w := httptest.NewRecorder()
 
 		err := handler.Like(w, req)
@@ -286,12 +348,12 @@ func TestLike(t *testing.T) {
 
 	t.Run("Like Success", func(t *testing.T) {
 		req := httptest.NewRequest(http.MethodPost, "/album/like", nil)
-		req = mux.SetURLVars(req, map[string]string{"id": albumId})
+		req = mux.SetURLVars(req, map[string]string{"id": strconv.FormatUint(albumId, 10)})
 		req.AddCookie(&cookie)
 		w := httptest.NewRecorder()
 
 		mockSessionUseCase.EXPECT().GetUserId(sessionId).Return(userId, nil)
-		mockAlbumUseCase.EXPECT().Like(userId, albumIdInt).Return(nil)
+		mockAlbumUseCase.EXPECT().Like(userId, albumId).Return(nil)
 
 		err := handler.Like(w, req)
 		assert.Nil(t, err)
@@ -308,7 +370,7 @@ func TestLike(t *testing.T) {
 
 	t.Run("IsLike GetUserIdByCookieError", func(t *testing.T) {
 		req := httptest.NewRequest(http.MethodPost, "/album/is_like", nil)
-		req = mux.SetURLVars(req, map[string]string{"id": albumId})
+		req = mux.SetURLVars(req, map[string]string{"id": strconv.FormatUint(albumId, 10)})
 		req.AddCookie(&cookie)
 		w := httptest.NewRecorder()
 
@@ -320,12 +382,12 @@ func TestLike(t *testing.T) {
 
 	t.Run("IsLike Success", func(t *testing.T) {
 		req := httptest.NewRequest(http.MethodPost, "/album/is_like", nil)
-		req = mux.SetURLVars(req, map[string]string{"id": albumId})
+		req = mux.SetURLVars(req, map[string]string{"id": strconv.FormatUint(albumId, 10)})
 		req.AddCookie(&cookie)
 		w := httptest.NewRecorder()
 
 		mockSessionUseCase.EXPECT().GetUserId(sessionId).Return(userId, nil)
-		mockAlbumUseCase.EXPECT().IsLike(userId, albumIdInt).Return(isLiked, nil)
+		mockAlbumUseCase.EXPECT().IsLike(userId, albumId).Return(isLiked, nil)
 
 		err := handler.IsLike(w, req)
 		assert.Nil(t, err)
@@ -338,12 +400,12 @@ func TestLike(t *testing.T) {
 
 	t.Run("Unlike Success", func(t *testing.T) {
 		req := httptest.NewRequest(http.MethodPost, "/album/unlike", nil)
-		req = mux.SetURLVars(req, map[string]string{"id": albumId})
+		req = mux.SetURLVars(req, map[string]string{"id": strconv.FormatUint(albumId, 10)})
 		req.AddCookie(&cookie)
 		w := httptest.NewRecorder()
 
 		mockSessionUseCase.EXPECT().GetUserId(sessionId).Return(userId, nil)
-		mockAlbumUseCase.EXPECT().Unlike(userId, albumIdInt).Return(nil)
+		mockAlbumUseCase.EXPECT().Unlike(userId, albumId).Return(nil)
 
 		err := handler.Unlike(w, req)
 		assert.Nil(t, err)
