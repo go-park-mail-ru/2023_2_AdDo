@@ -28,7 +28,7 @@ func (mn Minio) UploadPlaylistImage(avatar avatar_domain.Base) (string, error) {
 func (mn Minio) create(avatar avatar_domain.Base, bucketName string) (string, error) {
 	if _, err := mn.client.PutObject(
 		context.Background(),
-		minio_init.UserAvatarBucketName,
+		bucketName,
 		avatar.Name,
 		avatar.Payload,
 		avatar.PayloadSize,
