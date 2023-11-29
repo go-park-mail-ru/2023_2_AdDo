@@ -1,0 +1,44 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: images
+  labels:
+    app: images-svc
+  namespace: musicon
+spec:
+  clusterIP: None
+  ports:
+  - port: 8087
+    name: images
+  selector:
+    app: images-svc
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: images-deploy
+  labels:
+    app: images-svc
+  namespace: musicon
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: images-svc
+  template:
+    metadata:
+      labels:
+        app: images-svc
+      namespace: musicon
+    spec:
+      imagePullSecrets:
+        - name: regcred
+      containers:
+      - name: images
+        image: registry.musicon.space/images
+        imagePullPolicy: Always
+        command: ["/images"]
+        env:
+        - name: DATABASE_URL
+          value: "postgres://musicon@musicon.space:5433/musicon"

@@ -2,62 +2,63 @@ version: '3.9'
 
 services:
   service-minio:
-    extends:
-      file: ../common-services.yml
-      service: service-minio
+    restart: always
+    image: minio/minio:RELEASE.2023-10-25T06-33-25Z
+    environment:
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
+    command: server --console-address ":9001" /data
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
       interval: 10s
       retries: 3
       timeout: 5s
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ~/minio-data:/data
    
   create_buckets:
-    extends:
-      file: ../common-services.yml
-      service: create_buckets
+    image: minio/mc
     depends_on:
       service-minio:
         condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "
+      /usr/bin/mc alias set musicon http://service-minio:9000 ${MINIO_ACCESS_KEY} ${MINIO_SECRET_KEY};
+      /usr/bin/mc mb --ignore-existing musicon/user-avatar;
+      /usr/bin/mc mb --ignore-existing musicon/playlist-image;
+      /usr/bin/mc anonymous set download musicon/user-avatar;
+      /usr/bin/mc anonymous set download musicon/playlist-image;
+      exit 0;
+      "
 
   service-db-redis:
-    extends:
-      file: ../common-services.yml
-      service: service-db-redis
-    healthcheck:
-      test: [ "CMD", "redis-cli", "ping" ]
-      interval: 10s
-      timeout: 5s
-      retries: 3
+    restart: always
+    image: redis
 
   service-db-postgres:
     extends:
       file: ../common-services.yml
       service: service-db-postgres
+    ports:
+      - "5432:5432" # redundant
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U musicon" ]
       interval: 10s
       retries: 3
       timeout: 5s
 
-  consul:
-    image: consul:1.15
-    ports:
-      - "8500:8500"
-
   common-service-waiter:
     image: alpine
     depends_on:
       service-db-postgres:
-        condition: service_healthy
+        condition: service_started
       service-db-redis:
-        condition: service_healthy
+        condition: service_started
       service-minio:
-        condition: service_healthy
+        condition: service_started
       create_buckets:
         condition: service_completed_successfully
-      consul:
-        condition: service_started
-    command: "ls"
 
   user:
     image: registry.musicon.space/user:test

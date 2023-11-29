@@ -29,12 +29,14 @@ func NewHandler(su session.UseCase, artistUseCase artist.UseCase, logger *logrus
 
 // ArtistInfo
 //
-//	@Description	return artist info
+//	@Summary		ArtistInfo
+//	@Description	Return artist info
 //	@Tags			artist
 //	@Produce		json
 //	@Param			id	path		integer	true	"artist id"
 //	@Success		200	{object}	artist.Response
 //	@Failure		400	{string}	errMsg
+//	@Failure		404	{string}	errMsg
 //	@Failure		500	{string}	errMsg
 //	@Router			/artist/{id} [get]
 func (handler *ArtistHandler) ArtistInfo(w http.ResponseWriter, r *http.Request) error {
@@ -62,6 +64,21 @@ func (handler *ArtistHandler) ArtistInfo(w http.ResponseWriter, r *http.Request)
 	return nil
 }
 
+// Like
+//
+//	@Summary		Like
+//	@Description	Like artist
+//	@Tags			artist
+//	@Security		cookieAuth
+//	@Security		csrfToken
+//	@Security		cookieCsrfToken
+//	@Param			id	path	integer	true	"artist id"
+//	@Success		204
+//	@Failure		400	{string}	errMsg
+//	@Failure		401	{string}	errMsg
+//	@Failure		403	{string}	errMsg
+//	@Failure		404	{string}	errMsg
+//	@Router			/artist/{id}/like [post]
 func (handler *ArtistHandler) Like(w http.ResponseWriter, r *http.Request) error {
 	handler.logger.WithFields(logrus.Fields{
 		"request_id": utils.GenReqId(r.RequestURI + r.Method),
@@ -94,6 +111,20 @@ func (handler *ArtistHandler) Like(w http.ResponseWriter, r *http.Request) error
 	return nil
 }
 
+// IsLike
+//
+//	@Summary		IsLike
+//	@Description	Check if artist is liked
+//	@Tags			artist
+//	@Security		cookieAuth
+//	@Produce		json
+//	@Param			id	path		integer	true	"artist id"
+//	@Success		200	{object}	response.IsLiked
+//	@Failure		400	{string}	errMsg
+//	@Failure		401	{string}	errMsg
+//	@Failure		404	{string}	errMsg
+//	@Failure		500	{string}	errMsg
+//	@Router			/artist/{id}/is_like [get]
 func (handler *ArtistHandler) IsLike(w http.ResponseWriter, r *http.Request) error {
 	handler.logger.WithFields(logrus.Fields{
 		"request_id": utils.GenReqId(r.RequestURI + r.Method),
@@ -131,6 +162,21 @@ func (handler *ArtistHandler) IsLike(w http.ResponseWriter, r *http.Request) err
 	return nil
 }
 
+// Unlike
+//
+//	@Summary		Unlike
+//	@Description	Unlike artist
+//	@Tags			artist
+//	@Security		cookieAuth
+//	@Security		csrfToken
+//	@Security		cookieCsrfToken
+//	@Param			id	path	integer	true	"artist id"
+//	@Success		204
+//	@Failure		400	{string}	errMsg
+//	@Failure		401	{string}	errMsg
+//	@Failure		403	{string}	errMsg
+//	@Failure		404	{string}	errMsg
+//	@Router			/artist/{id}/unlike [delete]
 func (handler *ArtistHandler) Unlike(w http.ResponseWriter, r *http.Request) error {
 	handler.logger.WithFields(logrus.Fields{
 		"request_id": utils.GenReqId(r.RequestURI + r.Method),
@@ -160,5 +206,55 @@ func (handler *ArtistHandler) Unlike(w http.ResponseWriter, r *http.Request) err
 	handler.logger.Infoln("Like deleted")
 
 	w.WriteHeader(http.StatusNoContent)
+	return nil
+}
+
+func (handler *ArtistHandler) FullSearch(w http.ResponseWriter, r *http.Request) error {
+	handler.logger.WithFields(logrus.Fields{
+		"request_id": utils.GenReqId(r.RequestURI + r.Method),
+	}).Infoln("Artist delivery Full Search entered")
+
+	params := r.URL.Query()
+	query := params.Get("query")
+	handler.logger.Infoln("Got query from uri", query)
+
+	result, err := handler.ArtistUseCase.FullSearch(query)
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusNotFound, Err: err}
+	}
+	handler.logger.Infoln("got response from useCase")
+
+	if err = response.RenderJSON(w, result); err != nil {
+		return common_handler.StatusError{Code: http.StatusNotFound, Err: err}
+	}
+
+	return nil
+}
+
+func (handler *ArtistHandler) CollectionArtist(w http.ResponseWriter, r *http.Request) error {
+	handler.logger.WithFields(logrus.Fields{
+		"request_id": utils.GenReqId(r.RequestURI + r.Method),
+	}).Infoln("Artist delivery Collection Artist entered")
+
+	sessionId, err := response.GetCookie(r)
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusUnauthorized, Err: err}
+	}
+	handler.logger.Infoln("got cookie")
+
+	userId, err := handler.SessionUseCase.GetUserId(sessionId)
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusUnauthorized, Err: err}
+	}
+	handler.logger.Infoln("got user id by session id")
+
+	result, err := handler.ArtistUseCase.GetUserArtists(userId)
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusUnauthorized, Err: err}
+	}
+
+	if err = response.RenderJSON(w, result); err != nil {
+		return common_handler.StatusError{Code: http.StatusNotFound, Err: err}
+	}
 	return nil
 }

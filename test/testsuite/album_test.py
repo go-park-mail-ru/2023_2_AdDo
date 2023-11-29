@@ -16,6 +16,19 @@ class AlbumTest(unittest.TestCase):
         self.assertNotEqual(response.json()['ArtistName'], '')
         self.assertNotEqual(response.json()['Tracks'], None)
 
+    def test_getting_album_with_required_track(self):
+        track_id = 10
+        response = requests.get(utils.url + '/track/' + str(track_id))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.json())
+        self.assertTrue(response.json()['Id'])
+        self.assertTrue(response.json()['Name'])
+        self.assertTrue(response.json()['Preview'])
+        self.assertTrue(response.json()['ArtistId'])
+        self.assertTrue(response.json()['ArtistName'])
+        self.assertTrue(response.json()['Tracks'])
+
     def test_album_like_success(self):
         headers, cookies = utils.init_authorized_user_headers_and_cookies()
 

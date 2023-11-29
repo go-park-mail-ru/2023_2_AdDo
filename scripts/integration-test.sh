@@ -1,15 +1,12 @@
 #!/bin/bash
 
-echo "Preparing environments.."
-docker compose -f deployments/test/docker-compose.yml up -d
-if [ $? -ne 0 ]; then
-    echo "Error creating environment"
-    docker compose -f deployments/test/docker-compose.yml down
+echo "Preparing environment.."
+scripts/docker-services-strat.sh
+if [ $? -ne "0" ]; then
+    echo "Error prepare environment"
     exit 1
 fi
 echo "Preparing successful done"
-
-echo "Running tests with empty database..."
 
 cd test/testsuite && python3 run_test.py
 if [ $? -ne 0 ]; then
@@ -18,10 +15,5 @@ if [ $? -ne 0 ]; then
 fi
 echo "Tests passed"
 
-rm -r __pycache__ && cd ../..
-docker compose -f deployments/test/docker-compose.yml down
-if [ $? -ne 0 ]; then
-    echo "Error delete test environment"
-    exit 1
-fi
+rm -r __pycache__ && cd ../.. && scripts/docker-services-down.sh
 echo "Test enviroment deleted"

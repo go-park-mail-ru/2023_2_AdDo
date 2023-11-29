@@ -2,7 +2,7 @@ package main
 
 import (
 	"google.golang.org/grpc"
-	microservices_init "main/cmd/microservices"
+	// microservices_init "main/cmd/microservices"
 	init_redis "main/init/redis_db"
 	log "main/internal/common/logger"
 	session "main/internal/microservices/session/proto"
@@ -35,11 +35,6 @@ func main() {
 
 	server := grpc.NewServer()
 	session.RegisterSessionServiceServer(server, &sessionManager)
-
-	serviceId := microservices_init.RegisterInConsul(Port, "session-api", "session", logger)
-	defer func() {
-		microservices_init.UnRegisterInConsul(serviceId, logger)
-	}()
 
 	logger.Infoln("starting server at " + strconv.Itoa(Port))
 	err = server.Serve(lis)

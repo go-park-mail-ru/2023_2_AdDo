@@ -2,7 +2,7 @@ package main
 
 import (
 	"google.golang.org/grpc"
-	microservices_init "main/cmd/microservices"
+	// microservices_init "main/cmd/microservices"
 	init_db "main/init/postgres_db"
 	log "main/internal/common/logger"
 	proto2 "main/internal/microservices/album/proto"
@@ -40,11 +40,6 @@ func main() {
 
 	server := grpc.NewServer()
 	proto2.RegisterAlbumServiceServer(server, &albumManager)
-
-	serviceId := microservices_init.RegisterInConsul(Port, "album-api", "album", logger)
-	defer func() {
-		microservices_init.UnRegisterInConsul(serviceId, logger)
-	}()
 
 	logger.Infoln("starting server at " + strconv.Itoa(Port))
 	if err = server.Serve(lis); err != nil {

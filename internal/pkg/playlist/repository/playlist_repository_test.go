@@ -21,6 +21,38 @@ func TestPlaylistRepository(t *testing.T) {
 		logger: logrus.New(),
 	}
 
+	const (
+		playlistId   uint64 = 1
+		playlistName        = "Playlist"
+		trackId      uint64 = 2
+		userId              = "user"
+		imageUrl            = "/path/to/image.png"
+		isPrivate           = true
+	)
+
+	t.Run("Create", func(t *testing.T) {
+		base := playlist.Base{
+			AuthorId: userId,
+		}
+
+		expected := playlist.Response{
+			Id:       playlistId,
+			Name:     "Новый плейлист",
+			AuthorId: userId,
+			Preview:  "",
+		}
+
+		query := "insert into playlist"
+		row := pgxmock.NewRows([]string{"id", "name", "creator_id", "preview"}).
+			AddRow(expected.Id, expected.Name, expected.AuthorId, expected.Preview)
+
+		mock.ExpectQuery(query).WithArgs(base.AuthorId).WillReturnRows(row)
+
+		result, err := repo.Create(context.Background(), base)
+		assert.Nil(t, err)
+		assert.Equal(t, expected, result)
+	})
+
 	playlistsBase := []playlist.Base{
 		{
 			Id:       1,
@@ -29,32 +61,6 @@ func TestPlaylistRepository(t *testing.T) {
 			Preview:  "Preview",
 		},
 	}
-
-	//t.Run("Create Success", func(t *testing.T) {
-	//	mock.ExpectExec("insert into playlist").
-	//		WithArgs(playlistsBase[0].Name, playlistsBase[0].AuthorId).
-	//		WillReturnResult(pgxmock.NewResult("INSERT", 1))
-	//
-	//	_, err = repo.Create(context.Background(), playlistsBase[0])
-	//	assert.Nil(t, err)
-	//})
-	//
-	//t.Run("Create Error", func(t *testing.T) {
-	//	mock.ExpectExec("insert into playlist").
-	//		WithArgs(playlistsBase[0].Name, playlistsBase[0].AuthorId).
-	//		WillReturnError(errors.New("error while execute query"))
-	//
-	//	_, err = repo.Create(context.Background(), playlistsBase[0])
-	//	assert.Equal(t, errors.New("error while execute query"), err)
-	//})
-
-	const (
-		playlistId uint64 = 1
-		trackId    uint64 = 2
-		userId            = "user"
-		imageUrl          = "/path/to/image.png"
-		isPrivate         = true
-	)
 
 	t.Run("Get", func(t *testing.T) {
 		query := "select id, name, creator_id, preview from playlist where id = ?"
@@ -101,6 +107,14 @@ func TestPlaylistRepository(t *testing.T) {
 			WillReturnResult(pgxmock.NewResult("UPDATE", 1))
 
 		err = repo.UpdateImage(context.Background(), playlistId, imageUrl)
+		assert.Nil(t, err)
+	})
+
+	t.Run("UpdateName", func(t *testing.T) {
+		mock.ExpectExec("update playlist").WithArgs(playlistName, playlistId).
+			WillReturnResult(pgxmock.NewResult("UPDATE", 1))
+
+		err = repo.UpdateName(context.Background(), playlistId, playlistName)
 		assert.Nil(t, err)
 	})
 

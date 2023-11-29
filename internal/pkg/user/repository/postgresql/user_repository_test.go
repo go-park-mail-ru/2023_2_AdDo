@@ -9,6 +9,9 @@ import (
 
 func TestUserRepository_Create(t *testing.T) {
 	mock, err := pgxmock.NewPool()
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
 	defer mock.Close()
 
 	repo := Postgres{
@@ -33,6 +36,9 @@ func TestUserRepository_Create(t *testing.T) {
 
 func TestUserRepository_GetById(t *testing.T) {
 	mock, err := pgxmock.NewPool()
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
 	defer mock.Close()
 
 	repo := Postgres{
@@ -69,6 +75,9 @@ func TestUserRepository_GetById(t *testing.T) {
 
 func TestUserRepository_CheckEmailAndPassword(t *testing.T) {
 	mock, err := pgxmock.NewPool()
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
 	defer mock.Close()
 
 	repo := Postgres{
@@ -97,6 +106,9 @@ func TestUserRepository_CheckEmailAndPassword(t *testing.T) {
 
 func TestUserRepository_GetAvatarPath(t *testing.T) {
 	mock, err := pgxmock.NewPool()
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
 	defer mock.Close()
 
 	repo := Postgres{
@@ -131,6 +143,9 @@ func TestUserRepository_GetAvatarPath(t *testing.T) {
 
 func TestUserRepository_UpdateAvatarPath(t *testing.T) {
 	mock, err := pgxmock.NewPool()
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
 	defer mock.Close()
 
 	repo := Postgres{
@@ -155,7 +170,6 @@ func TestUserRepository_UpdateAvatarPath(t *testing.T) {
 	if err := mock.ExpectationsWereMet(); err != nil {
 		t.Errorf("Unfulfilled expectations: %v", err)
 	}
-
 }
 
 //func TestUserRepository_RemoveAvatarPath(t *testing.T) {

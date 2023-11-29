@@ -17,6 +17,7 @@ import (
 	session_mock "main/test/mocks/session"
 	"net/http"
 	"net/http/httptest"
+	"strconv"
 	"testing"
 	"time"
 )
@@ -43,12 +44,14 @@ func TestArtistInfo(t *testing.T) {
 	})
 
 	t.Run("Success", func(t *testing.T) {
+		const artistId uint64 = 1
+
 		req := httptest.NewRequest(http.MethodGet, "/artist", nil)
-		req = mux.SetURLVars(req, map[string]string{"id": "1"})
+		req = mux.SetURLVars(req, map[string]string{"id": strconv.FormatUint(artistId, 10)})
 		w := httptest.NewRecorder()
 
 		expectedArtist := artist.Response{
-			Id:     1,
+			Id:     artistId,
 			Name:   "Artist",
 			Avatar: "Avatar",
 			Albums: []album.Base{
@@ -74,7 +77,7 @@ func TestArtistInfo(t *testing.T) {
 			},
 		}
 
-		mockArtistUseCase.EXPECT().GetArtistInfo(uint64(1)).Return(expectedArtist, nil)
+		mockArtistUseCase.EXPECT().GetArtistInfo(artistId).Return(expectedArtist, nil)
 		err := handler.ArtistInfo(w, req)
 
 		assert.Nil(t, err)
@@ -84,6 +87,68 @@ func TestArtistInfo(t *testing.T) {
 		err = json.NewDecoder(w.Body).Decode(&receivedArtist)
 		assert.Nil(t, err)
 		assert.Equal(t, expectedArtist, receivedArtist)
+	})
+}
+
+func TestCollectionArtist(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockArtistUseCase := artist_mock.NewMockUseCase(ctrl)
+	mockSessionUseCase := session_mock.NewMockUseCase(ctrl)
+
+	handler := &ArtistHandler{
+		ArtistUseCase:  mockArtistUseCase,
+		SessionUseCase: mockSessionUseCase,
+		logger:         logrus.New(),
+	}
+
+	const (
+		sessionId = "sessionID"
+		userId    = "aeefe1e3-0def-41f0-a3c7-91380379c58c"
+	)
+
+	cookie := http.Cookie{
+		Name:     session.CookieName,
+		Value:    sessionId,
+		Expires:  time.Now().Add(session.TimeToLiveCookie),
+		Secure:   true,
+		HttpOnly: true,
+	}
+
+	artists := []artist.Base{
+		{
+			Id:     1,
+			Name:   "Artist1",
+			Avatar: "/path/to/avatar1.jpg",
+		},
+		{
+			Id:     2,
+			Name:   "Artist2",
+			Avatar: "/path/to/avatar2.jpg",
+		},
+	}
+
+	expectedArtists := artist.LikedArtists{
+		Artists: artists,
+	}
+
+	t.Run("CollectionArtist Success", func(t *testing.T) {
+		req := httptest.NewRequest(http.MethodGet, "/collection/artists", nil)
+		req.AddCookie(&cookie)
+		w := httptest.NewRecorder()
+
+		mockSessionUseCase.EXPECT().GetUserId(sessionId).Return(userId, nil)
+		mockArtistUseCase.EXPECT().GetUserArtists(userId).Return(expectedArtists, nil)
+
+		err := handler.CollectionArtist(w, req)
+		assert.Nil(t, err)
+		assert.Equal(t, http.StatusOK, w.Code)
+
+		var receivedArtists artist.LikedArtists
+		err = json.NewDecoder(w.Body).Decode(&receivedArtists)
+		assert.Nil(t, err)
+		assert.Equal(t, expectedArtists, receivedArtists)
 	})
 }
 
@@ -101,11 +166,10 @@ func TestLike(t *testing.T) {
 	}
 
 	const (
-		artistId           = "1"
-		artistIdInt uint64 = 1
-		sessionId          = "sessionID"
-		userId             = "qwer-qwer-qwer"
-		isLiked            = true
+		artistId  uint64 = 1
+		sessionId        = "sessionID"
+		userId           = "aeefe1e3-0def-41f0-a3c7-91380379c58c"
+		isLiked          = true
 	)
 
 	cookie := http.Cookie{
@@ -126,7 +190,7 @@ func TestLike(t *testing.T) {
 
 	t.Run("Like GetCookieError", func(t *testing.T) {
 		req := httptest.NewRequest(http.MethodPost, "/artist/like", nil)
-		req = mux.SetURLVars(req, map[string]string{"id": artistId})
+		req = mux.SetURLVars(req, map[string]string{"id": strconv.FormatUint(artistId, 10)})
 		w := httptest.NewRecorder()
 
 		err := handler.Like(w, req)
@@ -135,12 +199,12 @@ func TestLike(t *testing.T) {
 
 	t.Run("Like Success", func(t *testing.T) {
 		req := httptest.NewRequest(http.MethodPost, "/artist/like", nil)
-		req = mux.SetURLVars(req, map[string]string{"id": artistId})
+		req = mux.SetURLVars(req, map[string]string{"id": strconv.FormatUint(artistId, 10)})
 		req.AddCookie(&cookie)
 		w := httptest.NewRecorder()
 
 		mockSessionUseCase.EXPECT().GetUserId(sessionId).Return(userId, nil)
-		mockArtistUseCase.EXPECT().Like(userId, artistIdInt).Return(nil)
+		mockArtistUseCase.EXPECT().Like(userId, artistId).Return(nil)
 
 		err := handler.Like(w, req)
 		assert.Nil(t, err)
@@ -149,7 +213,7 @@ func TestLike(t *testing.T) {
 
 	t.Run("IsLike GetUserIdByCookieError", func(t *testing.T) {
 		req := httptest.NewRequest(http.MethodPost, "/artist/is_like", nil)
-		req = mux.SetURLVars(req, map[string]string{"id": artistId})
+		req = mux.SetURLVars(req, map[string]string{"id": strconv.FormatUint(artistId, 10)})
 		req.AddCookie(&cookie)
 		w := httptest.NewRecorder()
 
@@ -161,12 +225,12 @@ func TestLike(t *testing.T) {
 
 	t.Run("IsLike LikeCheckError", func(t *testing.T) {
 		req := httptest.NewRequest(http.MethodPost, "/artist/is_like", nil)
-		req = mux.SetURLVars(req, map[string]string{"id": artistId})
+		req = mux.SetURLVars(req, map[string]string{"id": strconv.FormatUint(artistId, 10)})
 		req.AddCookie(&cookie)
 		w := httptest.NewRecorder()
 
 		mockSessionUseCase.EXPECT().GetUserId(sessionId).Return(userId, nil)
-		mockArtistUseCase.EXPECT().IsLike(userId, artistIdInt).Return(false, errors.New("error while checking like"))
+		mockArtistUseCase.EXPECT().IsLike(userId, artistId).Return(false, errors.New("error while checking like"))
 
 		err := handler.IsLike(w, req)
 		assert.Equal(t, http.StatusNotFound, err.(common_handler.StatusError).Code)
@@ -174,12 +238,12 @@ func TestLike(t *testing.T) {
 
 	t.Run("IsLike Success", func(t *testing.T) {
 		req := httptest.NewRequest(http.MethodPost, "/artist/is_like", nil)
-		req = mux.SetURLVars(req, map[string]string{"id": artistId})
+		req = mux.SetURLVars(req, map[string]string{"id": strconv.FormatUint(artistId, 10)})
 		req.AddCookie(&cookie)
 		w := httptest.NewRecorder()
 
 		mockSessionUseCase.EXPECT().GetUserId(sessionId).Return(userId, nil)
-		mockArtistUseCase.EXPECT().IsLike(userId, artistIdInt).Return(isLiked, nil)
+		mockArtistUseCase.EXPECT().IsLike(userId, artistId).Return(isLiked, nil)
 
 		err := handler.IsLike(w, req)
 		assert.Nil(t, err)
@@ -192,12 +256,12 @@ func TestLike(t *testing.T) {
 
 	t.Run("Unlike Success", func(t *testing.T) {
 		req := httptest.NewRequest(http.MethodPost, "/artist/unlike", nil)
-		req = mux.SetURLVars(req, map[string]string{"id": artistId})
+		req = mux.SetURLVars(req, map[string]string{"id": strconv.FormatUint(artistId, 10)})
 		req.AddCookie(&cookie)
 		w := httptest.NewRecorder()
 
 		mockSessionUseCase.EXPECT().GetUserId(sessionId).Return(userId, nil)
-		mockArtistUseCase.EXPECT().Unlike(userId, artistIdInt).Return(nil)
+		mockArtistUseCase.EXPECT().Unlike(userId, artistId).Return(nil)
 
 		err := handler.Unlike(w, req)
 		assert.Nil(t, err)

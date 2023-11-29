@@ -2,7 +2,7 @@ package main
 
 import (
 	"google.golang.org/grpc"
-	microservices_init "main/cmd/microservices"
+	// microservices_init "main/cmd/microservices"
 	init_minio "main/init/minio"
 	log "main/internal/common/logger"
 	image_proto "main/internal/microservices/image/proto"
@@ -35,11 +35,6 @@ func main() {
 
 	server := grpc.NewServer()
 	image_proto.RegisterImageServiceServer(server, &imageManager)
-
-	serviceId := microservices_init.RegisterInConsul(Port, "images-api", "images", logger)
-	defer func() {
-		microservices_init.UnRegisterInConsul(serviceId, logger)
-	}()
 
 	logger.Infoln("starting server at " + strconv.Itoa(Port))
 	err = server.Serve(lis)

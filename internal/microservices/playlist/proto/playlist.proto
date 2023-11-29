@@ -11,6 +11,7 @@ service PlaylistService {
   rpc Create (PlaylistBase) returns (PlaylistResponse) {}
   rpc Get (PlaylistToUserId) returns (PlaylistResponse) {}
   rpc GetUserPlaylists (UserId) returns (PlaylistsBase) {}
+  rpc PlaylistCollections (UserId) returns (PlaylistsBase) {}
   rpc AddTrack (PlaylistToTrackId) returns (google.protobuf.Empty) {}
   rpc RemoveTrack (PlaylistToTrackId) returns (google.protobuf.Empty) {}
   rpc UpdatePreview (PlaylistIdToImageUrl) returns (google.protobuf.Empty) {}
@@ -23,6 +24,12 @@ service PlaylistService {
   rpc HasReadAccess (PlaylistId) returns (HasAccess) {}
   rpc MakePrivate (PlaylistId) returns (google.protobuf.Empty) {}
   rpc MakePublic (PlaylistId) returns (google.protobuf.Empty) {}
+  rpc UpdateName (PlaylistIdToNewTitle) returns (google.protobuf.Empty) {}
+}
+
+message PlaylistIdToNewTitle {
+  uint64 playlistId = 1;
+  string title = 2;
 }
 
 message IsLikedPlaylist {

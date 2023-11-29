@@ -116,6 +116,17 @@ func (pm *PlaylistManager) GetUserPlaylists(ctx context.Context, in *session_pro
 	return SerializePlaylistsBase(result), nil
 }
 
+func (pm *PlaylistManager) PlaylistCollections(ctx context.Context, in *session_proto.UserId) (*playlist_proto.PlaylistsBase, error) {
+	pm.logger.Infoln("Playlist Service GetUserPlaylists Method entered")
+
+	result, err := pm.repoPlaylist.GetByUserId(ctx, in.GetUserId())
+	if err != nil {
+		return nil, err
+	}
+
+	return SerializePlaylistsBase(result), nil
+}
+
 func (pm *PlaylistManager) AddTrack(ctx context.Context, in *playlist_proto.PlaylistToTrackId) (*google_proto.Empty, error) {
 	pm.logger.Infoln("Playlist Service AddTrack Method entered")
 
@@ -145,6 +156,17 @@ func (pm *PlaylistManager) UpdatePreview(ctx context.Context, in *playlist_proto
 		return nil, err
 	}
 	pm.logger.Infoln("Photo Updated")
+
+	return &google_proto.Empty{}, nil
+}
+
+func (pm *PlaylistManager) UpdateName(ctx context.Context, in *playlist_proto.PlaylistIdToNewTitle) (*google_proto.Empty, error) {
+	pm.logger.Infoln("Playlist Service Update Name Method entered")
+
+	if err := pm.repoPlaylist.UpdateName(ctx, in.GetPlaylistId(), in.GetTitle()); err != nil {
+		return nil, err
+	}
+	pm.logger.Infoln("Title updated")
 
 	return &google_proto.Empty{}, nil
 }
@@ -211,7 +233,7 @@ func (pm *PlaylistManager) HasModifyAccess(ctx context.Context, in *playlist_pro
 
 	isCreator, err := pm.repoPlaylist.IsCreator(ctx, in.GetUserId(), in.GetPlaylistId())
 	if err != nil {
-		return &playlist_proto.HasAccess{IsAccess: false}, nil
+		return &playlist_proto.HasAccess{IsAccess: false}, err
 	}
 
 	return &playlist_proto.HasAccess{IsAccess: isCreator}, nil
@@ -222,7 +244,7 @@ func (pm *PlaylistManager) HasReadAccess(ctx context.Context, in *playlist_proto
 
 	isPrivate, err := pm.repoPlaylist.IsPrivate(ctx, in.GetId())
 	if err != nil {
-		return &playlist_proto.HasAccess{IsAccess: false}, nil
+		return &playlist_proto.HasAccess{IsAccess: false}, err
 	}
 
 	return &playlist_proto.HasAccess{IsAccess: !isPrivate}, nil
@@ -232,7 +254,7 @@ func (pm *PlaylistManager) MakePrivate(ctx context.Context, in *playlist_proto.P
 	pm.logger.Infoln("Album Micros MakePrivate entered")
 
 	if err := pm.repoPlaylist.MakePrivate(ctx, in.GetId()); err != nil {
-		return nil, nil
+		return nil, err
 	}
 
 	return &google_proto.Empty{}, nil
@@ -242,7 +264,7 @@ func (pm *PlaylistManager) MakePublic(ctx context.Context, in *playlist_proto.Pl
 	pm.logger.Infoln("Album Micros MakePublic entered")
 
 	if err := pm.repoPlaylist.MakePublic(ctx, in.GetId()); err != nil {
-		return nil, nil
+		return nil, err
 	}
 
 	return &google_proto.Empty{}, nil

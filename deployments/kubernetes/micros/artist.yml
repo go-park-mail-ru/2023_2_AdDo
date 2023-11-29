@@ -1,0 +1,44 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: artist
+  labels:
+    app: artist-svc
+  namespace: musicon
+spec:
+  clusterIP: None
+  ports:
+  - port: 8086
+    name: artist
+  selector:
+    app: artist-svc
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: artist-deploy
+  labels:
+    app: artist-svc
+  namespace: musicon
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: artist-svc
+  template:
+    metadata:
+      labels:
+        app: artist-svc
+      namespace: musicon
+    spec:
+      imagePullSecrets:
+        - name: regcred
+      containers:
+      - name: artist
+        image: registry.musicon.space/artist
+        imagePullPolicy: Always
+        command: ["/artist"]
+        env:
+        - name: DATABASE_URL
+          value: "postgres://musicon@musicon.space:5433/musicon"

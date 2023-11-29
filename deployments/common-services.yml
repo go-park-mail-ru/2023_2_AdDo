@@ -11,8 +11,19 @@ services:
     restart: always
     image: postgres:14
     volumes:
-      - ../db/migrations/db_schema.sql:/docker-entrypoint-initdb.d/migration_1.sql
-      - ../db/fill_data/data_filling.sql:/docker-entrypoint-initdb.d/migration_2.sql
+      - ../db/migrations/db_schema.sql:/docker-entrypoint-initdb.d/migration_a.sql
+      - ../db/fill_data/data_album.sql:/docker-entrypoint-initdb.d/migration_b.sql
+      - ../db/fill_data/data_genre.sql:/docker-entrypoint-initdb.d/migration_c.sql
+      - ../db/fill_data/data_artist.sql:/docker-entrypoint-initdb.d/migration_d.sql
+      - ../db/fill_data/data_track.sql:/docker-entrypoint-initdb.d/migration_e.sql
+      - ../db/fill_data/data_artist_album.sql:/docker-entrypoint-initdb.d/migration_f.sql
+      - ../db/fill_data/data_album_genre.sql:/docker-entrypoint-initdb.d/migration_g.sql
+      - ../db/fill_data/data_album_track.sql:/docker-entrypoint-initdb.d/migration_h.sql
+      - ../db/fill_data/data_artist_genre.sql:/docker-entrypoint-initdb.d/migration_i.sql
+      - ../db/fill_data/data_artist_track.sql:/docker-entrypoint-initdb.d/migration_j.sql
+      - ../db/fill_data/data_track_genre.sql:/docker-entrypoint-initdb.d/migration_k.sql
+      - ../db/migrations/full_search_index.sql:/docker-entrypoint-initdb.d/migration_l.sql
+      - ~/db-data:/var/lib/postgresql/data
       - /etc/localtime:/etc/localtime:ro
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
@@ -24,6 +35,7 @@ services:
     image: minio/minio:RELEASE.2023-10-25T06-33-25Z
     volumes:
       - /etc/localtime:/etc/localtime:ro
+      - ~/minio-data:/data
     environment:
       MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
       MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}

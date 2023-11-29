@@ -63,18 +63,16 @@ func (p *Postgres) Get(ctx context.Context, playlistId uint64) (playlist.Base, e
 	return result, nil
 }
 
-func (p *Postgres) GetByCreatorId(ctx context.Context, userId string) ([]playlist.Base, error) {
-	p.logger.Infoln("Playlist Repo GetByCreatorId entered")
+func (p *Postgres) getWithQuery(ctx context.Context, query string, args ...any) ([]playlist.Base, error) {
+	p.logger.Infoln("Playlist Repo getWithQuery entered")
 
 	var url any
 	result := make([]playlist.Base, 0)
-	query := "select id, name, creator_id, preview from playlist where creator_id = $1"
-	rows, err := p.Pool.Query(ctx, query, userId)
+	rows, err := p.Pool.Query(ctx, query, args...)
 	if err != nil {
 		p.logger.WithFields(logrus.Fields{
-			"query":   query,
-			"err":     err,
-			"user id": userId,
+			"query": query,
+			"err":   err,
 		}).Errorln("error while getting playlists by user id")
 		return nil, err
 	}
@@ -84,9 +82,8 @@ func (p *Postgres) GetByCreatorId(ctx context.Context, userId string) ([]playlis
 		var base playlist.Base
 		if err := rows.Scan(&base.Id, &base.Name, &base.AuthorId, &url); err != nil {
 			p.logger.WithFields(logrus.Fields{
-				"query":   query,
-				"err":     err,
-				"user id": userId,
+				"query": query,
+				"err":   err,
 			}).Errorln("error scanning row")
 			return nil, err
 		}
@@ -100,6 +97,20 @@ func (p *Postgres) GetByCreatorId(ctx context.Context, userId string) ([]playlis
 	p.logger.Infoln("Scanning rows success")
 
 	return result, nil
+}
+
+func (p *Postgres) GetByCreatorId(ctx context.Context, userId string) ([]playlist.Base, error) {
+	p.logger.Infoln("Playlist Repo GetByCreatorId entered")
+
+	query := "select id, name, creator_id, preview from playlist where creator_id = $1"
+	return p.getWithQuery(ctx, query, userId)
+}
+
+func (p *Postgres) GetByUserId(ctx context.Context, userId string) ([]playlist.Base, error) {
+	p.logger.Infoln("Playlist Repo GetByCreatorId entered")
+
+	query := "select playlist.id, name, creator_id, preview from playlist join profile_playlist on playlist.id = profile_playlist.playlist_id where profile_id = $1"
+	return p.getWithQuery(ctx, query, userId)
 }
 
 func (p *Postgres) AddTrack(ctx context.Context, playlistId, trackId uint64) error {
@@ -145,6 +156,22 @@ func (p *Postgres) UpdateImage(ctx context.Context, playlistId uint64, image str
 			"playlist id":     playlistId,
 			"query":           query,
 		}).Errorln("error while updating images into playlist")
+		return err
+	}
+
+	return nil
+}
+
+func (p *Postgres) UpdateName(ctx context.Context, playlistId uint64, title string) error {
+	p.logger.Infoln("Playlist Repo UpdateName entered")
+
+	query := "update playlist set name = $1 where id = $2"
+	if _, err := p.Pool.Exec(ctx, query, title, playlistId); err != nil {
+		p.logger.WithFields(logrus.Fields{
+			"error":       err,
+			"playlist id": playlistId,
+			"query":       query,
+		}).Errorln("error while updating title into playlist")
 		return err
 	}
 
@@ -274,7 +301,7 @@ func (p *Postgres) IsPrivate(ctx context.Context, playlistId uint64) (bool, erro
 }
 
 func (p *Postgres) MakePublic(ctx context.Context, playlistId uint64) error {
-	p.logger.Infoln("Album Repo MakePublic entered")
+	p.logger.Infoln("Playlist Repo MakePublic entered")
 
 	query := "update playlist set is_private = false where id = $1"
 	if _, err := p.Pool.Exec(context.Background(), query, playlistId); err != nil {
@@ -290,7 +317,7 @@ func (p *Postgres) MakePublic(ctx context.Context, playlistId uint64) error {
 }
 
 func (p *Postgres) MakePrivate(ctx context.Context, playlistId uint64) error {
-	p.logger.Infoln("Album Repo MakePrivate entered")
+	p.logger.Infoln("Playlist Repo MakePrivate entered")
 
 	query := "update playlist set is_private = true where id = $1"
 	if _, err := p.Pool.Exec(context.Background(), query, playlistId); err != nil {
@@ -303,4 +330,10 @@ func (p *Postgres) MakePrivate(ctx context.Context, playlistId uint64) error {
 	}
 
 	return nil
+}
+
+func (p *Postgres) Search(ctx context.Context, text string) ([]playlist.Base, error) {
+	p.logger.Infoln("Playlist Repo Search entered")
+	query := "select id, name, creator_id, preview from playlist where to_tsvector('russian', playlist.name) @@ plainto_tsquery('russian', $1) or lower(playlist.name) like lower($2)"
+	return p.getWithQuery(ctx, query, text, "%"+text+"%")
 }

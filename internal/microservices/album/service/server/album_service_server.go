@@ -5,6 +5,8 @@ import (
 	google_proto "github.com/golang/protobuf/ptypes/empty"
 	"github.com/sirupsen/logrus"
 	album_proto "main/internal/microservices/album/proto"
+	session_proto "main/internal/microservices/session/proto"
+	track_proto "main/internal/microservices/track/proto"
 	grpc_track_server "main/internal/microservices/track/service/server"
 	"main/internal/pkg/album"
 	"main/internal/pkg/artist"
@@ -66,32 +68,48 @@ func SerializeAlbumsBase(in []album.Base) *album_proto.AlbumsBase {
 func (am *AlbumManager) GetAlbum(ctx context.Context, in *album_proto.AlbumId) (*album_proto.AlbumResponse, error) {
 	am.logger.Infoln("Album Micros GetAlbum entered")
 
-	var result album.Response
-
 	base, err := am.repoAlbum.Get(in.GetAlbumId())
 	if err != nil {
 		return nil, err
 	}
 	am.logger.Infoln("Got album Base")
 
-	result.Id = base.Id
-	result.Name = base.Name
-	result.Preview = base.Preview
+	return am.formResponseAlbumWithAllTracks(base)
+}
 
-	art, err := am.repoArtist.GetByAlbumId(in.GetAlbumId())
+func (am *AlbumManager) GetAlbumByTrack(ctx context.Context, in *track_proto.TrackId) (*album_proto.AlbumResponse, error) {
+	am.logger.Infoln("Album Micros GetAlbumByTrack entered")
+
+	albumsBase, err := am.repoAlbum.GetByTrackId(in.GetTrackId())
 	if err != nil {
 		return nil, err
 	}
-	am.logger.Infoln("Got Artist by album Id ", art)
+	am.logger.Infoln("Got albums with required track")
+
+	return am.formResponseAlbumWithAllTracks(albumsBase[0])
+}
+
+func (am *AlbumManager) formResponseAlbumWithAllTracks(albumBase album.Base) (*album_proto.AlbumResponse, error) {
+	var result album.Response
+
+	result.Id = albumBase.Id
+	result.Name = albumBase.Name
+	result.Preview = albumBase.Preview
+
+	art, err := am.repoArtist.GetByAlbumId(albumBase.Id)
+	if err != nil {
+		return nil, err
+	}
+	am.logger.Infoln("Got artist by album id", art)
 
 	result.ArtistId = art.Id
 	result.ArtistName = art.Name
 
-	tracks, err := am.repoTrack.GetByAlbum(in.AlbumId)
+	tracks, err := am.repoTrack.GetByAlbum(albumBase.Id)
 	if err != nil {
 		return nil, err
 	}
-	am.logger.Infoln("Got tracks by album id ", tracks)
+	am.logger.Infoln("Got tracks by album id", tracks)
 
 	result.Tracks = tracks
 
@@ -120,6 +138,18 @@ func (am *AlbumManager) GetMostLiked(ctx context.Context, status *google_proto.E
 	am.logger.Infoln("Got album")
 
 	return am.formResponse(albums)
+}
+
+func (am *AlbumManager) GetByUserId(ctx context.Context, id *session_proto.UserId) (*album_proto.AlbumsBase, error) {
+	am.logger.Infoln("Album Micros GetByUserId entered")
+
+	albums, err := am.repoAlbum.GetByUserId(id.GetUserId())
+	if err != nil {
+		return nil, err
+	}
+	am.logger.Infoln("Got albums by user id")
+
+	return SerializeAlbumsBase(albums), nil
 }
 
 func (am *AlbumManager) GetPopular(ctx context.Context, status *google_proto.Empty) (*album_proto.AlbumsResponse, error) {

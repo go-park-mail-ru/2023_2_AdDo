@@ -1,0 +1,208 @@
+version: '3.9'
+
+services:
+  service-minio:
+    extends:
+      file: ../common-services.yml
+      service: service-minio
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 10s
+      retries: 3
+      timeout: 5s
+   
+  create_buckets:
+    extends:
+      file: ../common-services.yml
+      service: create_buckets
+    depends_on:
+      service-minio:
+        condition: service_healthy
+
+  service-db-redis:
+    extends:
+      file: ../common-services.yml
+      service: service-db-redis
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  service-db-postgres:
+    extends:
+      file: ../common-services.yml
+      service: service-db-postgres
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U musicon" ]
+      interval: 10s
+      retries: 3
+      timeout: 5s
+
+  node-exporter:
+    image: prom/node-exporter:latest
+    container_name: node-exporter
+    restart: unless-stopped
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.rootfs=/rootfs'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+    ports:
+      - 9100:9100
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    restart: unless-stopped
+    user: root
+    volumes:
+      - ../../configs/prometheus/prometheus.yml:/etc/prometheus/prometheus.yaml
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yaml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    ports:
+      - 9090:9090
+    depends_on: 
+      - node-exporter
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    user: root
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GF_SECURITY_ADMIN_USER}
+      GF_SECURITY_ADMIN_PASSWORD: ${GF_SECURITY_ADMIN_PASSWORD}
+      GF_USERS_ALLOW_SIGN_UP: false
+    restart: unless-stopped
+    ports:
+      - 3000:3000
+    volumes:
+      - ../../configs/grafana/provisioning:/etc/grafana/provisioning
+      - ../../configs/grafana/dashboards:/var/lib/grafana/dashboards
+    depends_on: 
+      - prometheus
+
+  # consul:
+  #   image: consul:1.15
+  #   ports:
+  #     - "8500:8500"
+
+  common-service-waiter:
+    image: alpine
+    depends_on:
+      service-db-postgres:
+        condition: service_healthy
+      service-db-redis:
+        condition: service_healthy
+      service-minio:
+        condition: service_healthy
+      create_buckets:
+        condition: service_completed_successfully
+      # consul:
+      #   condition: service_started
+    command: "ls"
+
+  user:
+    image: registry.musicon.space/user:dev
+    depends_on:
+      common-service-waiter:
+        condition: service_completed_successfully
+    environment:
+      DATABASE_URL: "${DATABASE_URL}"
+    command: "/user"
+
+  session:
+    image: registry.musicon.space/session:dev
+    depends_on:
+      common-service-waiter:
+        condition: service_completed_successfully
+    environment:
+      DATABASE_URL: "${DATABASE_URL}"
+    command: "/session"
+
+  track:
+    image: registry.musicon.space/track:dev
+    depends_on:
+      common-service-waiter:
+        condition: service_completed_successfully
+    environment:
+      DATABASE_URL: "${DATABASE_URL}"
+    command: "/track"
+
+
+  album:
+    image: registry.musicon.space/album:dev
+    depends_on:
+      common-service-waiter:
+        condition: service_completed_successfully
+    environment:
+      DATABASE_URL: "${DATABASE_URL}"
+    command: "/album"
+
+
+  playlist:
+    image: registry.musicon.space/playlist:dev
+    depends_on:
+      common-service-waiter:
+        condition: service_completed_successfully
+    environment:
+      DATABASE_URL: "${DATABASE_URL}"
+    command: "/playlist"
+
+
+  artist:
+    image: registry.musicon.space/artist:dev
+    depends_on:
+      common-service-waiter:
+        condition: service_completed_successfully
+    environment:
+      DATABASE_URL: "${DATABASE_URL}"
+    command: "/artist"
+
+  images:
+    image: registry.musicon.space/images:dev
+    depends_on:
+      common-service-waiter:
+        condition: service_completed_successfully
+    environment:
+      DATABASE_URL: "${DATABASE_URL}"
+    command: "/images"
+
+  microservice-waiter:
+    image: alpine
+    depends_on:
+      user:
+        condition: service_started
+      session:
+        condition: service_started
+      track:
+        condition: service_started
+      album:
+        condition: service_started
+      playlist:
+        condition: service_started
+      artist:
+        condition: service_started
+      images:
+        condition: service_started
+
+  musicon:
+    image: registry.musicon.space/entrypoint:dev
+    ports:
+      - "8888:8080"
+    depends_on:
+      common-service-waiter:
+        condition: service_completed_successfully
+      microservice-waiter:
+        condition: service_completed_successfully
+    environment:
+      DATABASE_URL: "${DATABASE_URL}"
+    command: "/entrypoint"

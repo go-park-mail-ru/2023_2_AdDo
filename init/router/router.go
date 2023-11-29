@@ -1,13 +1,16 @@
 package router_init
 
 import (
-	"github.com/gorilla/mux"
-	"github.com/sirupsen/logrus"
-	httpSwagger "github.com/swaggo/http-swagger/v2"
 	_ "main/api/openapi"
-	"main/internal/common/handler"
+	common_handler "main/internal/common/handler"
 	"main/internal/common/middleware/common"
 	"net/http"
+
+	"github.com/gorilla/mux"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/sirupsen/logrus"
+	httpSwagger "github.com/swaggo/http-swagger/v2"
 )
 
 //	@title			MusicOn API
@@ -53,15 +56,17 @@ func NewRoute(p string, h func(w http.ResponseWriter, r *http.Request) error, m 
 }
 
 type Config struct {
-	Routes           []Route
-	Prefix           string
-	Middlewares      []mux.MiddlewareFunc
-	SubRouterConfigs []Config
+	Routes             []Route
+	Prefix             string
+	Middlewares        []mux.MiddlewareFunc
+	SubRouterConfigs   []Config
+	PrometheusRegistry *prometheus.Registry
 }
 
 func New(config Config, logger *logrus.Logger) http.Handler {
 	router := mux.NewRouter()
-	router.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
+	router.PathPrefix("/swagger").Handler(httpSwagger.WrapHandler)
+	router.PathPrefix("/metrics").Handler(promhttp.HandlerFor(config.PrometheusRegistry, promhttp.HandlerOpts{Registry: config.PrometheusRegistry}))
 
 	for _, route := range config.Routes {
 		router.Handle(config.Prefix+route.Path, common_handler.Handler{H: route.Handler}).Methods(route.Method)
@@ -83,7 +88,3 @@ func New(config Config, logger *logrus.Logger) http.Handler {
 
 	return routerWithMiddleware
 }
-
-/// TODO написать ручки на все коллекции: треки, артисты, плейлисты и альбомы, все коллекции возвращают имя владельца и его фото, тесты на них
-/// TODO полнотекстовый поиск по артистам, трекам и альбомам среди имен, поиск работает в реальном времени
-/// TODO easyjson для сериализации и десериализации

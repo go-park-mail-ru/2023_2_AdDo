@@ -90,6 +90,17 @@ func (c *Client) GetUserPlaylists(userId string) ([]playlist.Base, error) {
 	return DeserializePlaylistsBase(result), nil
 }
 
+func (c *Client) CollectionPlaylists(userId string) ([]playlist.Base, error) {
+	c.logger.Infoln("Playlist client Collection Playlists entered")
+
+	result, err := c.playlistManager.PlaylistCollections(context.Background(), &session_proto.UserId{UserId: userId})
+	if err != nil {
+		return nil, err
+	}
+
+	return DeserializePlaylistsBase(result), nil
+}
+
 func (c *Client) AddTrack(playlistId, trackId uint64) error {
 	c.logger.Infoln("Playlist client  entered")
 
@@ -122,7 +133,23 @@ func (c *Client) UpdatePreview(playlistId uint64, src io.Reader, size int64) err
 	}
 	c.logger.Infoln("Image Uploaded")
 
-	if _, err = c.playlistManager.UpdatePreview(context.Background(), &playlist_proto.PlaylistIdToImageUrl{Id: playlistId, Url: &image_proto.ImageUrl{Url: url}}); err != nil {
+	if _, err = c.playlistManager.UpdatePreview(context.Background(), &playlist_proto.PlaylistIdToImageUrl{
+		Id:  playlistId,
+		Url: &image_proto.ImageUrl{Url: url},
+	}); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (c *Client) UpdateName(playlistId uint64, title string) error {
+	c.logger.Infoln("Playlist client  Update Name entered")
+
+	if _, err := c.playlistManager.UpdateName(context.Background(), &playlist_proto.PlaylistIdToNewTitle{
+		PlaylistId: playlistId,
+		Title:      title,
+	}); err != nil {
 		return err
 	}
 

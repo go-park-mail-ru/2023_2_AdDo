@@ -21,21 +21,28 @@ type Response struct {
 	Tracks     []track.Response `json:"Tracks"`
 }
 
+type LikedAlbums struct {
+	Albums []Base `json:"Albums"`
+}
+
 type UseCase interface {
 	GetRandom() ([]Response, error)
 	GetMostLiked() ([]Response, error)
 	GetPopular() ([]Response, error)
 	GetNew() ([]Response, error)
 	GetAlbum(albumId uint64) (Response, error)
+	GetAlbumByTrack(trackId uint64) (Response, error)
 	Like(userId string, albumId uint64) error
 	IsLike(userId string, albumId uint64) (bool, error)
 	Unlike(userId string, albumId uint64) error
+	GetUserAlbums(userId string) (LikedAlbums, error)
 }
 
 type Repository interface {
 	Get(albumId uint64) (Base, error)
 	GetByTrackId(trackId uint64) ([]Base, error)
 	GetByArtistId(artistId uint64) ([]Base, error)
+	GetByUserId(userId string) ([]Base, error)
 	GetByLikeCount(limit uint32) ([]Base, error)
 	GetByReleaseDate(limit uint32) ([]Base, error)
 	GetByListenCount(limit uint32) ([]Base, error)
@@ -43,6 +50,7 @@ type Repository interface {
 	CreateLike(userId string, albumId uint64) error
 	CheckLike(userId string, albumId uint64) (bool, error)
 	DeleteLike(userId string, albumId uint64) error
+	Search(text string) ([]Base, error)
 }
 
 const LimitForMainPage = 10

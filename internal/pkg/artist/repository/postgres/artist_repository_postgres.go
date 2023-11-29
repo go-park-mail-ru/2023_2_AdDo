@@ -3,7 +3,7 @@ package artist_repository
 import (
 	"context"
 	"github.com/sirupsen/logrus"
-	"main/internal/common/pgxiface"
+	postgres "main/internal/common/pgxiface"
 	"main/internal/pkg/artist"
 )
 
@@ -38,18 +38,16 @@ func (p *Postgres) Get(artistId uint64) (artist.Base, error) {
 	return result, nil
 }
 
-func (p *Postgres) GetByTrackId(trackId uint64) ([]artist.Base, error) {
-	p.logger.Infoln("Artist Repo GetByTrackId entered")
+func (p *Postgres) getWithQuery(_ context.Context, query string, args ...any) ([]artist.Base, error) {
+	p.logger.Infoln("Artist Repo getWithQuery entered")
 
 	result := make([]artist.Base, 0)
 
-	query := "select artist.id, name, avatar from artist join artist_track on artist.id = artist_track.artist_id where artist_track.track_id = $1"
-	rows, err := p.Pool.Query(context.Background(), query, trackId)
+	rows, err := p.Pool.Query(context.Background(), query, args...)
 	if err != nil {
 		p.logger.WithFields(logrus.Fields{
-			"err":      err,
-			"track id": trackId,
-			"query":    query,
+			"err":   err,
+			"query": query,
 		}).Errorln("Getting an artist by track id query completed with error")
 		return nil, err
 	}
@@ -70,12 +68,25 @@ func (p *Postgres) GetByTrackId(trackId uint64) ([]artist.Base, error) {
 	return result, nil
 }
 
+func (p *Postgres) GetByTrackId(trackId uint64) ([]artist.Base, error) {
+	p.logger.Infoln("Artist Repo GetByTrackId entered")
+
+	query := "select artist.id, name, avatar from artist join artist_track on artist.id = artist_track.artist_id where artist_track.track_id = $1"
+	return p.getWithQuery(context.Background(), query, trackId)
+}
+
+func (p *Postgres) Search(text string) ([]artist.Base, error) {
+	p.logger.Infoln("Artist Repo Search entered")
+	query := "select artist.id, artist.name, artist.avatar from artist where to_tsvector('russian', artist.name) @@ plainto_tsquery('russian', $1) or lower(artist.name) like lower($2) limit 10"
+	return p.getWithQuery(context.Background(), query, text, "%"+text+"%")
+}
+
 func (p *Postgres) GetByAlbumId(albumId uint64) (artist.Base, error) {
 	p.logger.Infoln("Artist Repo GetByAlbumId entered")
 
 	var result artist.Base
 
-	query := "select artist.id, artist.name, avatar from artist join album on artist.id = album.artist_id where album.id = $1"
+	query := "select artist.id, artist.name, artist.avatar from artist join artist_album on artist.id = artist_album.artist_id where artist_album.album_id = $1"
 	if err := p.Pool.QueryRow(context.Background(), query, albumId).Scan(&result.Id, &result.Name, &result.Avatar); err != nil {
 		p.logger.WithFields(logrus.Fields{
 			"err":      err,
@@ -87,6 +98,13 @@ func (p *Postgres) GetByAlbumId(albumId uint64) (artist.Base, error) {
 	p.logger.Infoln("Got artist by album id")
 
 	return result, nil
+}
+
+func (p *Postgres) GetByUserId(userId string) ([]artist.Base, error) {
+	p.logger.Infoln("Artist Repo Get By User Id entered")
+
+	query := "select artist.id, artist.name, artist.avatar from artist join profile_artist on artist.id = profile_artist.artist_id where profile_artist.profile_id = $1"
+	return p.getWithQuery(context.Background(), query, userId)
 }
 
 func (p *Postgres) CreateLike(userId string, artistId uint64) error {

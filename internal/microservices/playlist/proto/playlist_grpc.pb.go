@@ -22,21 +22,23 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	PlaylistService_Create_FullMethodName           = "/PlaylistService/Create"
-	PlaylistService_Get_FullMethodName              = "/PlaylistService/Get"
-	PlaylistService_GetUserPlaylists_FullMethodName = "/PlaylistService/GetUserPlaylists"
-	PlaylistService_AddTrack_FullMethodName         = "/PlaylistService/AddTrack"
-	PlaylistService_RemoveTrack_FullMethodName      = "/PlaylistService/RemoveTrack"
-	PlaylistService_UpdatePreview_FullMethodName    = "/PlaylistService/UpdatePreview"
-	PlaylistService_RemovePreview_FullMethodName    = "/PlaylistService/RemovePreview"
-	PlaylistService_DeleteById_FullMethodName       = "/PlaylistService/DeleteById"
-	PlaylistService_Like_FullMethodName             = "/PlaylistService/Like"
-	PlaylistService_IsLike_FullMethodName           = "/PlaylistService/IsLike"
-	PlaylistService_Unlike_FullMethodName           = "/PlaylistService/Unlike"
-	PlaylistService_HasModifyAccess_FullMethodName  = "/PlaylistService/HasModifyAccess"
-	PlaylistService_HasReadAccess_FullMethodName    = "/PlaylistService/HasReadAccess"
-	PlaylistService_MakePrivate_FullMethodName      = "/PlaylistService/MakePrivate"
-	PlaylistService_MakePublic_FullMethodName       = "/PlaylistService/MakePublic"
+	PlaylistService_Create_FullMethodName              = "/PlaylistService/Create"
+	PlaylistService_Get_FullMethodName                 = "/PlaylistService/Get"
+	PlaylistService_GetUserPlaylists_FullMethodName    = "/PlaylistService/GetUserPlaylists"
+	PlaylistService_PlaylistCollections_FullMethodName = "/PlaylistService/PlaylistCollections"
+	PlaylistService_AddTrack_FullMethodName            = "/PlaylistService/AddTrack"
+	PlaylistService_RemoveTrack_FullMethodName         = "/PlaylistService/RemoveTrack"
+	PlaylistService_UpdatePreview_FullMethodName       = "/PlaylistService/UpdatePreview"
+	PlaylistService_RemovePreview_FullMethodName       = "/PlaylistService/RemovePreview"
+	PlaylistService_DeleteById_FullMethodName          = "/PlaylistService/DeleteById"
+	PlaylistService_Like_FullMethodName                = "/PlaylistService/Like"
+	PlaylistService_IsLike_FullMethodName              = "/PlaylistService/IsLike"
+	PlaylistService_Unlike_FullMethodName              = "/PlaylistService/Unlike"
+	PlaylistService_HasModifyAccess_FullMethodName     = "/PlaylistService/HasModifyAccess"
+	PlaylistService_HasReadAccess_FullMethodName       = "/PlaylistService/HasReadAccess"
+	PlaylistService_MakePrivate_FullMethodName         = "/PlaylistService/MakePrivate"
+	PlaylistService_MakePublic_FullMethodName          = "/PlaylistService/MakePublic"
+	PlaylistService_UpdateName_FullMethodName          = "/PlaylistService/UpdateName"
 )
 
 // PlaylistServiceClient is the client API for PlaylistService service.
@@ -46,6 +48,7 @@ type PlaylistServiceClient interface {
 	Create(ctx context.Context, in *PlaylistBase, opts ...grpc.CallOption) (*PlaylistResponse, error)
 	Get(ctx context.Context, in *PlaylistToUserId, opts ...grpc.CallOption) (*PlaylistResponse, error)
 	GetUserPlaylists(ctx context.Context, in *proto.UserId, opts ...grpc.CallOption) (*PlaylistsBase, error)
+	PlaylistCollections(ctx context.Context, in *proto.UserId, opts ...grpc.CallOption) (*PlaylistsBase, error)
 	AddTrack(ctx context.Context, in *PlaylistToTrackId, opts ...grpc.CallOption) (*empty.Empty, error)
 	RemoveTrack(ctx context.Context, in *PlaylistToTrackId, opts ...grpc.CallOption) (*empty.Empty, error)
 	UpdatePreview(ctx context.Context, in *PlaylistIdToImageUrl, opts ...grpc.CallOption) (*empty.Empty, error)
@@ -58,6 +61,7 @@ type PlaylistServiceClient interface {
 	HasReadAccess(ctx context.Context, in *PlaylistId, opts ...grpc.CallOption) (*HasAccess, error)
 	MakePrivate(ctx context.Context, in *PlaylistId, opts ...grpc.CallOption) (*empty.Empty, error)
 	MakePublic(ctx context.Context, in *PlaylistId, opts ...grpc.CallOption) (*empty.Empty, error)
+	UpdateName(ctx context.Context, in *PlaylistIdToNewTitle, opts ...grpc.CallOption) (*empty.Empty, error)
 }
 
 type playlistServiceClient struct {
@@ -89,6 +93,15 @@ func (c *playlistServiceClient) Get(ctx context.Context, in *PlaylistToUserId, o
 func (c *playlistServiceClient) GetUserPlaylists(ctx context.Context, in *proto.UserId, opts ...grpc.CallOption) (*PlaylistsBase, error) {
 	out := new(PlaylistsBase)
 	err := c.cc.Invoke(ctx, PlaylistService_GetUserPlaylists_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *playlistServiceClient) PlaylistCollections(ctx context.Context, in *proto.UserId, opts ...grpc.CallOption) (*PlaylistsBase, error) {
+	out := new(PlaylistsBase)
+	err := c.cc.Invoke(ctx, PlaylistService_PlaylistCollections_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -203,6 +216,15 @@ func (c *playlistServiceClient) MakePublic(ctx context.Context, in *PlaylistId, 
 	return out, nil
 }
 
+func (c *playlistServiceClient) UpdateName(ctx context.Context, in *PlaylistIdToNewTitle, opts ...grpc.CallOption) (*empty.Empty, error) {
+	out := new(empty.Empty)
+	err := c.cc.Invoke(ctx, PlaylistService_UpdateName_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // PlaylistServiceServer is the server API for PlaylistService service.
 // All implementations must embed UnimplementedPlaylistServiceServer
 // for forward compatibility
@@ -210,6 +232,7 @@ type PlaylistServiceServer interface {
 	Create(context.Context, *PlaylistBase) (*PlaylistResponse, error)
 	Get(context.Context, *PlaylistToUserId) (*PlaylistResponse, error)
 	GetUserPlaylists(context.Context, *proto.UserId) (*PlaylistsBase, error)
+	PlaylistCollections(context.Context, *proto.UserId) (*PlaylistsBase, error)
 	AddTrack(context.Context, *PlaylistToTrackId) (*empty.Empty, error)
 	RemoveTrack(context.Context, *PlaylistToTrackId) (*empty.Empty, error)
 	UpdatePreview(context.Context, *PlaylistIdToImageUrl) (*empty.Empty, error)
@@ -222,6 +245,7 @@ type PlaylistServiceServer interface {
 	HasReadAccess(context.Context, *PlaylistId) (*HasAccess, error)
 	MakePrivate(context.Context, *PlaylistId) (*empty.Empty, error)
 	MakePublic(context.Context, *PlaylistId) (*empty.Empty, error)
+	UpdateName(context.Context, *PlaylistIdToNewTitle) (*empty.Empty, error)
 	mustEmbedUnimplementedPlaylistServiceServer()
 }
 
@@ -237,6 +261,9 @@ func (UnimplementedPlaylistServiceServer) Get(context.Context, *PlaylistToUserId
 }
 func (UnimplementedPlaylistServiceServer) GetUserPlaylists(context.Context, *proto.UserId) (*PlaylistsBase, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetUserPlaylists not implemented")
+}
+func (UnimplementedPlaylistServiceServer) PlaylistCollections(context.Context, *proto.UserId) (*PlaylistsBase, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method PlaylistCollections not implemented")
 }
 func (UnimplementedPlaylistServiceServer) AddTrack(context.Context, *PlaylistToTrackId) (*empty.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AddTrack not implemented")
@@ -273,6 +300,9 @@ func (UnimplementedPlaylistServiceServer) MakePrivate(context.Context, *Playlist
 }
 func (UnimplementedPlaylistServiceServer) MakePublic(context.Context, *PlaylistId) (*empty.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method MakePublic not implemented")
+}
+func (UnimplementedPlaylistServiceServer) UpdateName(context.Context, *PlaylistIdToNewTitle) (*empty.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateName not implemented")
 }
 func (UnimplementedPlaylistServiceServer) mustEmbedUnimplementedPlaylistServiceServer() {}
 
@@ -337,6 +367,24 @@ func _PlaylistService_GetUserPlaylists_Handler(srv interface{}, ctx context.Cont
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(PlaylistServiceServer).GetUserPlaylists(ctx, req.(*proto.UserId))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PlaylistService_PlaylistCollections_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(proto.UserId)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlaylistServiceServer).PlaylistCollections(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PlaylistService_PlaylistCollections_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlaylistServiceServer).PlaylistCollections(ctx, req.(*proto.UserId))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -557,6 +605,24 @@ func _PlaylistService_MakePublic_Handler(srv interface{}, ctx context.Context, d
 	return interceptor(ctx, in, info, handler)
 }
 
+func _PlaylistService_UpdateName_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PlaylistIdToNewTitle)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlaylistServiceServer).UpdateName(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PlaylistService_UpdateName_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlaylistServiceServer).UpdateName(ctx, req.(*PlaylistIdToNewTitle))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // PlaylistService_ServiceDesc is the grpc.ServiceDesc for PlaylistService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -575,6 +641,10 @@ var PlaylistService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetUserPlaylists",
 			Handler:    _PlaylistService_GetUserPlaylists_Handler,
+		},
+		{
+			MethodName: "PlaylistCollections",
+			Handler:    _PlaylistService_PlaylistCollections_Handler,
 		},
 		{
 			MethodName: "AddTrack",
@@ -623,6 +693,10 @@ var PlaylistService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "MakePublic",
 			Handler:    _PlaylistService_MakePublic_Handler,
+		},
+		{
+			MethodName: "UpdateName",
+			Handler:    _PlaylistService_UpdateName_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
