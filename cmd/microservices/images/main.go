@@ -7,6 +7,7 @@ import (
 	log "main/internal/common/logger"
 	image_proto "main/internal/microservices/image/proto"
 	grpc_image_server "main/internal/microservices/image/service/server"
+	image_domain "main/internal/pkg/image"
 	image_repository "main/internal/pkg/image/repository/minio"
 	"net"
 	"strconv"
@@ -33,7 +34,7 @@ func main() {
 
 	imageManager := grpc_image_server.NewImageManager(imageRepository, logger)
 
-	server := grpc.NewServer()
+	server := grpc.NewServer(grpc.MaxRecvMsgSize(image_domain.MaxAvatarSize))
 	image_proto.RegisterImageServiceServer(server, &imageManager)
 
 	logger.Infoln("starting server at " + strconv.Itoa(Port))
