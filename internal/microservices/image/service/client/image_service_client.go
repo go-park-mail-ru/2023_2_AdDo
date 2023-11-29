@@ -2,9 +2,12 @@ package grpc_image
 
 import (
 	"context"
-	"github.com/sirupsen/logrus"
 	"io"
 	image_proto "main/internal/microservices/image/proto"
+
+	image_domain "main/internal/pkg/image"
+
+	"github.com/sirupsen/logrus"
 )
 
 type Client struct {
@@ -18,6 +21,11 @@ func NewClient(pm image_proto.ImageServiceClient, logger *logrus.Logger) Client 
 
 func (c *Client) UploadAvatar(src io.Reader, size int64) (string, error) {
 	c.logger.Infoln("Image client UploadAvatar entered")
+
+	if size > image_domain.MaxAvatarSize {
+		c.logger.Errorln(image_domain.ErrAvatarIsTooLarge.Error())
+		return "", image_domain.ErrAvatarIsTooLarge
+	}
 
 	data, err := io.ReadAll(src)
 	if err != nil {

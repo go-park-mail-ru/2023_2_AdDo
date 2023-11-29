@@ -6,6 +6,8 @@ metadata:
   # annotations:
   #   cert-manager.io/cluster-issuer: letsencrypt
   namespace: musicon
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "16m"
 spec:
   # tls:
   # - hosts:
