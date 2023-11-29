@@ -13,6 +13,9 @@ services:
       interval: 10s
       retries: 3
       timeout: 5s
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ~/minio-data:/data
    
   create_buckets:
     image: minio/mc

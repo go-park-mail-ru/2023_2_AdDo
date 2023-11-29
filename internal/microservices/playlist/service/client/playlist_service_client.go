@@ -133,7 +133,10 @@ func (c *Client) UpdatePreview(playlistId uint64, src io.Reader, size int64) err
 	}
 	c.logger.Infoln("Image Uploaded")
 
-	if _, err = c.playlistManager.UpdatePreview(context.Background(), &playlist_proto.PlaylistIdToImageUrl{Id: playlistId, Url: &image_proto.ImageUrl{Url: url}}); err != nil {
+	if _, err = c.playlistManager.UpdatePreview(context.Background(), &playlist_proto.PlaylistIdToImageUrl{
+		Id:  playlistId,
+		Url: &image_proto.ImageUrl{Url: url},
+	}); err != nil {
 		return err
 	}
 
