@@ -19,7 +19,7 @@ func GetCookie(r *http.Request) (string, error) {
 	return cookie.Value, nil
 }
 
-func RenderJSON(w http.ResponseWriter, v interface{}) error {
+func RenderJSON(w http.ResponseWriter, v any) error {
 	jsonResponse, err := json.Marshal(v)
 	if err != nil {
 		return err
