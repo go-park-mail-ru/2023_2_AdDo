@@ -1,9 +1,5 @@
 package metrics
 
-import (
-	"strings"
-)
-
 const (
 	userHandler     = "user"
 	trackHandler    = "track"
@@ -17,17 +13,14 @@ type handlers struct {
 	pathToHandler map[string]string
 }
 
-func (h *handlers) insert(pathPrefixs []string, handlerName string) {
-	for _, prefix := range pathPrefixs {
-		h.pathToHandler[prefix] = handlerName
+func (h *handlers) insert(paths []string, handlerName string) {
+	for _, path := range paths {
+		h.pathToHandler[path] = handlerName
 	}
 }
 
-func (h *handlers) getHandler(prefix string) string {
-	if end := strings.Index(prefix[1:], "/"); end != -1 {
-		prefix = prefix[:end+1]
-	}
-	if handler, ok := h.pathToHandler[prefix]; ok {
+func (h *handlers) getHandler(path string) string {
+	if handler, ok := h.pathToHandler[path]; ok {
 		return handler
 	}
 	return unknownHandler
@@ -36,7 +29,8 @@ func (h *handlers) getHandler(prefix string) string {
 func NewHandlers() handlers {
 	handlers := handlers{}
 	handlers.pathToHandler = make(map[string]string)
-	userPathPrefix := []string{
+	userPaths := []string{
+		"/get_csrf",
 		"/sign_up",
 		"/login",
 		"/update_info",
@@ -46,26 +40,54 @@ func NewHandlers() handlers {
 		"/me",
 		"/logout",
 	}
-	trackPathPrefix := []string{
+	trackPaths := []string{
 		"/listen",
-		"/collection",
-		"/track",
+		"/track/{id}/like",
+		"/track/{id}/is_like",
+		"/track/{id}/unlike",
+		"/collection/tracks",
 	}
-	albumPathPrefix := []string{
+	albumPaths := []string{
+		"/track/{id}",
+		"/collection/albums",
 		"/feed",
 		"/new",
 		"/most_liked",
 		"/popular",
-		"/album",
+		"/album/{id}/like",
+		"/album/{id}/is_like",
+		"/album/{id}/unlike",
+		"/album/{id}",
 	}
-	playlistPathPrefix := []string{"/playlist"}
-	artistPathPrefix := []string{"/artist"}
+	playlistPaths := []string{
+		"/collection/playlists",
+		"/playlist",
+		"/my_playlists",
+		"/playlist/{id}/like",
+		"/playlist/{id}/is_like",
+		"/playlist/{id}/unlike",
+		"/playlist/{id}",
+		"/playlist/{id}/add_track",
+		"/playlist/{id}/remove_track",
+		"/playlist/{id}/make_private",
+		"/playlist/{id}/make_public",
+		"/playlist/{id}/update_preview",
+		"/playlist/{id}/update_name",
+	}
+	artistPaths := []string{
+		"/collection/artists",
+		"/artist/{id}/like",
+		"/artist/{id}/is_like",
+		"/artist/{id}/unlike",
+		"/artist/{id}",
+		"/search",
+	}
 
-	handlers.insert(albumPathPrefix, albumHandler)
-	handlers.insert(artistPathPrefix, artistHandler)
-	handlers.insert(playlistPathPrefix, playlistHandler)
-	handlers.insert(trackPathPrefix, trackHandler)
-	handlers.insert(userPathPrefix, userHandler)
+	handlers.insert(albumPaths, albumHandler)
+	handlers.insert(artistPaths, artistHandler)
+	handlers.insert(playlistPaths, playlistHandler)
+	handlers.insert(trackPaths, trackHandler)
+	handlers.insert(userPaths, userHandler)
 
 	return handlers
 }
