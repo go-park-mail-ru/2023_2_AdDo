@@ -157,6 +157,7 @@ func main() {
 					router_init.NewRoute("/playlist/{id}/is_like", playlistHandler.IsLike, http.MethodGet),
 					router_init.NewRoute("/playlist/{id}/unlike", playlistHandler.Unlike, http.MethodDelete),
 					router_init.NewRoute("/playlist/{id}", playlistHandler.Get, http.MethodGet),
+					router_init.NewRoute("/playlist/{id}/is_creator", playlistHandler.IsCreator, http.MethodGet),
 				},
 				Prefix: "",
 				Middlewares: []mux.MiddlewareFunc{
