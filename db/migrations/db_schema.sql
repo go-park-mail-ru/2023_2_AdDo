@@ -27,7 +27,7 @@ create table if not exists genre (
 
 create table if not exists playlist (
     id         serial primary key,
-    name       varchar(128) not null default 'Новый плейлист',
+    name       varchar(128) not null default 'New playlist',
     -- Посчитали, что не стоит давать пользователю создавать плейлисты и именами длиннее 128 символов
     creator_id uuid         not null,
     foreign key (creator_id) references profile (id) on delete cascade,
