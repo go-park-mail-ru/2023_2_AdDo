@@ -25,8 +25,8 @@ type Response struct {
 	AuthorId   string `json:"AuthorId" example:"sdfa-asdf-adsf"`
 	AuthorName string `json:"AuthorName" example:"username"`
 	Preview    string `json:"Preview" example:"PlaylistPreview"`
-	IsYours    bool   `json:"IsYours" example:"true"`
-	Tracks     []track.Response
+	//IsYours    bool   `json:"IsYours" example:"true"`
+	Tracks []track.Response
 }
 
 type Name struct {
@@ -36,6 +36,10 @@ type Name struct {
 type ToTrackId struct {
 	PlaylistId uint64 `json:"PlaylistId" example:"1"`
 	TrackId    uint64 `json:"TrackId" example:"1"`
+}
+
+type IsCreator struct {
+	IsCreator bool `json:"IsCreator"`
 }
 
 func (u *Name) Validate() error {
@@ -54,7 +58,8 @@ func (u *Name) Validate() error {
 
 type UseCase interface {
 	Create(pl Base) (Response, error)
-	Get(userId string, playlistId uint64) (Response, error)
+	Get(playlistId uint64) (Response, error)
+	IsCreator(userId string, playlistId uint64) (bool, error)
 	GetUserPlaylists(userId string) ([]Base, error)
 	CollectionPlaylists(userId string) ([]Base, error)
 	AddTrack(playlistId, trackId uint64) error

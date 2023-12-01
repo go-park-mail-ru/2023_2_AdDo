@@ -82,12 +82,10 @@ func (handler *Handler) Create(w http.ResponseWriter, r *http.Request) error {
 //	@Summary		Get
 //	@Description	Return playlist info and tracks
 //	@Tags			playlist
-//	@Security		cookieAuth
 //	@Produce		json
 //	@Param			id	path		integer	true	"playlist id"
-//	@Success		200	{object}	artist.Response
+//	@Success		200	{object}	playlist.Response
 //	@Failure		400	{string}	errMsg
-//	@Failure		401	{string}	errMsg
 //	@Failure		403	{string}	errMsg
 //	@Failure		404	{string}	errMsg
 //	@Failure		500	{string}	errMsg
@@ -96,6 +94,56 @@ func (handler *Handler) Get(w http.ResponseWriter, r *http.Request) error {
 	handler.logger.WithFields(logrus.Fields{
 		"request_id": utils.GenReqId(r.RequestURI + r.Method),
 	}).Infoln("PlaylistGet Handler entered")
+
+	//sessionId, err := response.GetCookie(r)
+	//if err != nil {
+	//	handler.logger.Errorln("error get from cookie", sessionId, err)
+	//	return common_handler.StatusError{Code: http.StatusUnauthorized, Err: err}
+	//}
+	//handler.logger.Infoln("Got Cookie")
+	//
+	//userId, err := handler.sessionUseCase.GetUserId(sessionId)
+	//if err != nil {
+	//	return common_handler.StatusError{Code: http.StatusUnauthorized, Err: err}
+	//}
+	//handler.logger.Infoln("Got user id")
+
+	playlistId, err := strconv.Atoi(mux.Vars(r)["id"])
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusBadRequest, Err: err}
+	}
+	handler.logger.Infoln("Parsed playlistId from Vars")
+
+	result, err := handler.playlistUseCase.Get(uint64(playlistId))
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusNotFound, Err: err}
+	}
+
+	if err = response.RenderJSON(w, result); err != nil {
+		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
+	}
+	return nil
+}
+
+// IsCreator
+//
+//	@Summary		IsCreator
+//	@Description	Check if user is creator of playlist
+//	@Tags			playlist
+//	@Security		cookieAuth
+//	@Produce		json
+//	@Param			id	path		integer	true	"playlist id"
+//	@Success		200	{object}	playlist.IsCreator
+//	@Failure		400	{string}	errMsg
+//	@Failure		401	{string}	errMsg
+//	@Failure		403	{string}	errMsg
+//	@Failure		404	{string}	errMsg
+//	@Failure		500	{string}	errMsg
+//	@Router			/playlist/{id}/is_creator [get]
+func (handler *Handler) IsCreator(w http.ResponseWriter, r *http.Request) error {
+	handler.logger.WithFields(logrus.Fields{
+		"request_id": utils.GenReqId(r.RequestURI + r.Method),
+	}).Infoln("IsCreator Handler entered")
 
 	sessionId, err := response.GetCookie(r)
 	if err != nil {
@@ -116,14 +164,17 @@ func (handler *Handler) Get(w http.ResponseWriter, r *http.Request) error {
 	}
 	handler.logger.Infoln("Parsed playlistId from Vars")
 
-	result, err := handler.playlistUseCase.Get(userId, uint64(playlistId))
+	isCreator, err := handler.playlistUseCase.IsCreator(userId, uint64(playlistId))
 	if err != nil {
 		return common_handler.StatusError{Code: http.StatusNotFound, Err: err}
 	}
+	handler.logger.Infoln("Checked whether the user is creator of playlist")
 
-	if err = response.RenderJSON(w, result); err != nil {
+	if err = response.RenderJSON(w, playlist.IsCreator{IsCreator: isCreator}); err != nil {
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}
+	handler.logger.Infoln("response  formed")
+
 	return nil
 }
 
