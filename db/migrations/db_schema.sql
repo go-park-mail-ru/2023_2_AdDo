@@ -57,7 +57,9 @@ create table if not exists track(
     duration int not null,
     lyrics text,
     -- ссылка на объект в s3 хранилище довольно длинная, порядка пяти сотен символов
-    play_count int not null default 0
+    play_count int not null default 0,
+    valence double precision default 0,
+    arousal double precision default 0
 );
 
 create table if not exists album_track (
