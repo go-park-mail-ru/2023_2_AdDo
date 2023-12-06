@@ -164,3 +164,9 @@ func (db *Postgres) GetUserNameById(userId string) (string, error) {
 
 	return result, nil
 }
+
+func (db *Postgres) GetAllUserIds() ([]string, error) {
+	db.logger.Infoln("UserRepo Get All User Ids entered")
+	/// TODO implement me
+	return nil, nil
+}

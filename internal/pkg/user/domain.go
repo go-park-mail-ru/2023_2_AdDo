@@ -99,6 +99,7 @@ type Repository interface {
 	GetAvatarPath(userId string) (string, error)
 	RemoveAvatarPath(userId string) (string, error)
 	GetUserNameById(userId string) (string, error)
+	GetAllUserIds() ([]string, error)
 }
 
 var (

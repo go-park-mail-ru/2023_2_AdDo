@@ -1,16 +1,22 @@
 package daily_playlist
 
-import "main/internal/pkg/playlist"
+import "main/internal/pkg/track"
+
+type Response struct {
+	Id      uint64
+	OwnerId string
+	Tracks  []track.Response
+}
 
 type Repository interface {
-	GetUserDailyPlaylist(userId string) (playlist.Response, error)
-	SetUserPlaylist(userId string, response playlist.Response) error
+	GetUserDailyPlaylist(userId string) (Response, error)
+	SetUserPlaylist(userId string, response Response) error
 }
 
 type ServiceUseCase interface {
-	GetUserDailyPlaylist(userId string) (playlist.Response, error)
+	GetUserDailyPlaylist(userId string) (Response, error)
 }
 
 type WorkerUseCase interface {
-	Run() error
+	CreateDailyPlaylistForUsers()
 }
