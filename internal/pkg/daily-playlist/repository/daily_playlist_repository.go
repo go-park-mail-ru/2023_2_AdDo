@@ -11,6 +11,13 @@ type Postgres struct {
 	logger *logrus.Logger
 }
 
+func NewPostgres(p postgres.PgxIFace, l *logrus.Logger) Postgres {
+	return Postgres{
+		Pool:   p,
+		logger: l,
+	}
+}
+
 func (p Postgres) GetUserDailyPlaylist(userId string) (daily_playlist.Response, error) {
 	//TODO implement me
 	panic("implement me")
@@ -19,8 +26,4 @@ func (p Postgres) GetUserDailyPlaylist(userId string) (daily_playlist.Response, 
 func (p Postgres) SetUserPlaylist(userId string, response daily_playlist.Response) error {
 	//TODO implement me
 	panic("implement me")
-}
-
-func NewPostgres(pool postgres.PgxIFace, logger *logrus.Logger) *Postgres {
-	return &Postgres{Pool: pool, logger: logger}
 }

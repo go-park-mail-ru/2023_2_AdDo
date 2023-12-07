@@ -20,89 +20,89 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	RecommendationService_GetUserDailyPlaylist_FullMethodName = "/RecommendationService/GetUserDailyPlaylist"
+	DailyPlaylistService_GetUserDailyPlaylist_FullMethodName = "/DailyPlaylistService/GetUserDailyPlaylist"
 )
 
-// RecommendationServiceClient is the client API for RecommendationService service.
+// DailyPlaylistServiceClient is the client API for DailyPlaylistService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type RecommendationServiceClient interface {
+type DailyPlaylistServiceClient interface {
 	GetUserDailyPlaylist(ctx context.Context, in *proto.UserId, opts ...grpc.CallOption) (*DailyPlaylist, error)
 }
 
-type recommendationServiceClient struct {
+type dailyPlaylistServiceClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewRecommendationServiceClient(cc grpc.ClientConnInterface) RecommendationServiceClient {
-	return &recommendationServiceClient{cc}
+func NewDailyPlaylistServiceClient(cc grpc.ClientConnInterface) DailyPlaylistServiceClient {
+	return &dailyPlaylistServiceClient{cc}
 }
 
-func (c *recommendationServiceClient) GetUserDailyPlaylist(ctx context.Context, in *proto.UserId, opts ...grpc.CallOption) (*DailyPlaylist, error) {
+func (c *dailyPlaylistServiceClient) GetUserDailyPlaylist(ctx context.Context, in *proto.UserId, opts ...grpc.CallOption) (*DailyPlaylist, error) {
 	out := new(DailyPlaylist)
-	err := c.cc.Invoke(ctx, RecommendationService_GetUserDailyPlaylist_FullMethodName, in, out, opts...)
+	err := c.cc.Invoke(ctx, DailyPlaylistService_GetUserDailyPlaylist_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// RecommendationServiceServer is the server API for RecommendationService service.
-// All implementations must embed UnimplementedRecommendationServiceServer
+// DailyPlaylistServiceServer is the server API for DailyPlaylistService service.
+// All implementations must embed UnimplementedDailyPlaylistServiceServer
 // for forward compatibility
-type RecommendationServiceServer interface {
+type DailyPlaylistServiceServer interface {
 	GetUserDailyPlaylist(context.Context, *proto.UserId) (*DailyPlaylist, error)
-	mustEmbedUnimplementedRecommendationServiceServer()
+	mustEmbedUnimplementedDailyPlaylistServiceServer()
 }
 
-// UnimplementedRecommendationServiceServer must be embedded to have forward compatible implementations.
-type UnimplementedRecommendationServiceServer struct {
+// UnimplementedDailyPlaylistServiceServer must be embedded to have forward compatible implementations.
+type UnimplementedDailyPlaylistServiceServer struct {
 }
 
-func (UnimplementedRecommendationServiceServer) GetUserDailyPlaylist(context.Context, *proto.UserId) (*DailyPlaylist, error) {
+func (UnimplementedDailyPlaylistServiceServer) GetUserDailyPlaylist(context.Context, *proto.UserId) (*DailyPlaylist, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetUserDailyPlaylist not implemented")
 }
-func (UnimplementedRecommendationServiceServer) mustEmbedUnimplementedRecommendationServiceServer() {}
+func (UnimplementedDailyPlaylistServiceServer) mustEmbedUnimplementedDailyPlaylistServiceServer() {}
 
-// UnsafeRecommendationServiceServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to RecommendationServiceServer will
+// UnsafeDailyPlaylistServiceServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to DailyPlaylistServiceServer will
 // result in compilation errors.
-type UnsafeRecommendationServiceServer interface {
-	mustEmbedUnimplementedRecommendationServiceServer()
+type UnsafeDailyPlaylistServiceServer interface {
+	mustEmbedUnimplementedDailyPlaylistServiceServer()
 }
 
-func RegisterRecommendationServiceServer(s grpc.ServiceRegistrar, srv RecommendationServiceServer) {
-	s.RegisterService(&RecommendationService_ServiceDesc, srv)
+func RegisterDailyPlaylistServiceServer(s grpc.ServiceRegistrar, srv DailyPlaylistServiceServer) {
+	s.RegisterService(&DailyPlaylistService_ServiceDesc, srv)
 }
 
-func _RecommendationService_GetUserDailyPlaylist_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _DailyPlaylistService_GetUserDailyPlaylist_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(proto.UserId)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(RecommendationServiceServer).GetUserDailyPlaylist(ctx, in)
+		return srv.(DailyPlaylistServiceServer).GetUserDailyPlaylist(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: RecommendationService_GetUserDailyPlaylist_FullMethodName,
+		FullMethod: DailyPlaylistService_GetUserDailyPlaylist_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(RecommendationServiceServer).GetUserDailyPlaylist(ctx, req.(*proto.UserId))
+		return srv.(DailyPlaylistServiceServer).GetUserDailyPlaylist(ctx, req.(*proto.UserId))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-// RecommendationService_ServiceDesc is the grpc.ServiceDesc for RecommendationService service.
+// DailyPlaylistService_ServiceDesc is the grpc.ServiceDesc for DailyPlaylistService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
-var RecommendationService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "RecommendationService",
-	HandlerType: (*RecommendationServiceServer)(nil),
+var DailyPlaylistService_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "DailyPlaylistService",
+	HandlerType: (*DailyPlaylistServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
 			MethodName: "GetUserDailyPlaylist",
-			Handler:    _RecommendationService_GetUserDailyPlaylist_Handler,
+			Handler:    _DailyPlaylistService_GetUserDailyPlaylist_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

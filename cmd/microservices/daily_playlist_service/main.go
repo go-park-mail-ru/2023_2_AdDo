@@ -4,12 +4,9 @@ import (
 	"google.golang.org/grpc"
 	init_db "main/init/postgres_db"
 	log "main/internal/common/logger"
-	artist "main/internal/microservices/artist/proto"
-	grpc_artist_server "main/internal/microservices/artist/service/server"
-	album_repository "main/internal/pkg/album/repository/postgres"
-	artist_repository "main/internal/pkg/artist/repository/postgres"
-	playlist_repository "main/internal/pkg/playlist/repository"
-	track_repository "main/internal/pkg/track/repository/postgresql"
+	daily_playlist "main/internal/microservices/daily-playlist/proto"
+	daily_playlist_service_server "main/internal/microservices/daily-playlist/service/server"
+	daily_playlist_repository "main/internal/pkg/daily-playlist/repository"
 	"net"
 	"strconv"
 )
@@ -24,7 +21,7 @@ func main() {
 
 	lis, err := net.Listen("tcp", ":"+strconv.Itoa(Port))
 	if err != nil {
-		logger.Errorln("err while starting artist micros: ", err)
+		logger.Errorln("err while starting daily playlist micros: ", err)
 	}
 
 	pool, err := init_db.InitPostgres(EnvPostgresQueryName)
@@ -32,15 +29,12 @@ func main() {
 		logger.Errorln("error connecting database: ", err)
 	}
 
-	trackRepository := track_repository.NewPostgres(pool, logger)
-	albumRepository := album_repository.NewPostgres(pool, logger)
-	artistRepository := artist_repository.NewPostgres(pool, logger)
-	playlistRepository := playlist_repository.NewPostgres(pool, logger)
+	dailyPlaylistRepo := daily_playlist_repository.NewPostgres(pool, logger)
 
-	dailyPlaylistManager := grpc_artist_server.NewArtistManager(&activityProducer, &playlistRepository, &artistRepository, trackRepository, albumRepository, logger)
+	dailyPlaylistManager := daily_playlist_service_server.NewDailyManager(dailyPlaylistRepo, logger)
 
 	server := grpc.NewServer()
-	artist.RegisterArtistServiceServer(server, &artistManager)
+	daily_playlist.RegisterDailyPlaylistServiceServer(server, &dailyPlaylistManager)
 
 	logger.Infoln("starting server at " + strconv.Itoa(Port))
 	err = server.Serve(lis)
