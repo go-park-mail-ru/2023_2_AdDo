@@ -161,6 +161,16 @@ create table if not exists artist_album (
     constraint unique_artist_album UNIQUE (artist_id, album_id)
 );
 
+create table if not exists track_listen (
+    id serial primary key,
+    profile_id int not null,
+    foreign key (profile_id) references profile(id) on delete cascade,
+    track_id int not null,
+    foreign key (track_id) references track(id) on delete cascade,
+    duration int not null default 0,
+    count int not null default 0
+);
+
 -- create table if not exists recommendation_cluster(
 --      id serial primary key,
 --      centre double precision[] not null default [0]

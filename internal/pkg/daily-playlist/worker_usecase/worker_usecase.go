@@ -2,24 +2,27 @@ package daily_playlist_worker_usecase
 
 import (
 	"github.com/sirupsen/logrus"
-	"main/internal/pkg/candidate"
+	"main/internal/pkg/candidate_domain"
 	daily_playlist "main/internal/pkg/daily-playlist"
+	"main/internal/pkg/recommendation"
 	user_domain "main/internal/pkg/user"
 )
 
 type Default struct {
-	repoUser          user_domain.Repository
-	dailyPlaylistRepo daily_playlist.Repository
-	logger            *logrus.Logger
-	candidateUseCase  candidate.UseCase
+	repoUser              user_domain.Repository
+	dailyPlaylistRepo     daily_playlist.Repository
+	logger                *logrus.Logger
+	candidateUseCase      candidate_domain.UseCase
+	recommendationUseCase recommendation.ServiceUseCase
 }
 
-func NewDefault(ru user_domain.Repository, dpr daily_playlist.Repository, cuc candidate.UseCase, l *logrus.Logger) Default {
+func NewDefault(ruc recommendation.ServiceUseCase, ru user_domain.Repository, dpr daily_playlist.Repository, cuc candidate_domain.UseCase, l *logrus.Logger) Default {
 	return Default{
-		repoUser:          ru,
-		logger:            l,
-		dailyPlaylistRepo: dpr,
-		candidateUseCase:  cuc,
+		repoUser:              ru,
+		logger:                l,
+		dailyPlaylistRepo:     dpr,
+		candidateUseCase:      cuc,
+		recommendationUseCase: ruc,
 	}
 }
 
@@ -49,7 +52,7 @@ func (d *Default) CreateDailyForUser(userId string) (daily_playlist.Response, er
 	}
 	d.logger.Errorln("got candidates for user completed", userId)
 
-	// нейронка классифицирует, какое действие произведет пользователь, лайк, прослушивание или скип
+	// нейронка классифицирует, какое действие произведет пользователь, лайк, прослушивание или скип, она же ранжирует их
 	candidatesAfterClassify, err := d.recommendationUseCase.ClassifyCandidates(userId, candidates)
 	if err != nil {
 		d.logger.Errorln("classify candidates for user finished with error", err, userId, candidates)
@@ -57,11 +60,9 @@ func (d *Default) CreateDailyForUser(userId string) (daily_playlist.Response, er
 	}
 	d.logger.Errorln("classified candidates for user completed", userId)
 
-	// ранжируем по действию, и собираем плейлист
-
 	return daily_playlist.Response{
 		OwnerId: userId,
-		Tracks:  rangedCandidates,
+		Tracks:  candidatesAfterClassify,
 	}, nil
 }
 

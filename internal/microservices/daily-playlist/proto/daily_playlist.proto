@@ -1,15 +1,15 @@
 syntax = "proto3";
 
-option go_package = "/recommendation";
-import "candidate.proto";
+option go_package = "/daily_playlist";
 import "session.proto";
-
+import "track.proto";
 //    protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative  -I../proto -I../../track/proto  -I../../session/proto   -I../../candidate/proto recommendation.proto
 service RecommendationService {
-  rpc ClassifyCandidates(CandidateToUserId) returns(Candidates) {}
+  rpc GetUserDailyPlaylist(UserId) returns(DailyPlaylist) {}
 }
 
-message CandidateToUserId {
-  Candidates Tracks = 1;
-  UserId UserId = 2;
+message DailyPlaylist {
+  uint64 Id = 1;
+  string OwnerId = 2;
+  TracksResponse Tracks = 3;
 }

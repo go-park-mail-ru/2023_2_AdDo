@@ -37,6 +37,8 @@ type Repository interface {
 	GetByAlbum(albumId uint64) ([]Response, error)
 	GetByArtist(artistId uint64) ([]Response, error)
 	CreateLike(userId string, trackId uint64) error
+	CreateListen(userId string, trackId uint64, dur uint32) error
+	CreateSkip(userId string, trackId uint64, dur uint32) error
 	CheckLike(userId string, trackId uint64) (bool, error)
 	DeleteLike(userId string, trackId uint64) error
 	AddListen(trackId uint64) error

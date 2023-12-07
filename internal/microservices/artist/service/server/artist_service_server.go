@@ -9,6 +9,7 @@ import (
 	grpc_playlist_server "main/internal/microservices/playlist/service/server"
 	session_proto "main/internal/microservices/session/proto"
 	grpc_track_server "main/internal/microservices/track/service/server"
+	"main/internal/pkg/activity"
 	"main/internal/pkg/album"
 	"main/internal/pkg/artist"
 	"main/internal/pkg/playlist"
@@ -22,15 +23,17 @@ type ArtistManager struct {
 	repoPlaylist playlist.Repository
 	logger       *logrus.Logger
 	artist_proto.UnimplementedArtistServiceServer
+	queue activity.ProducerRepository
 }
 
-func NewArtistManager(repoPlaylist playlist.Repository, repoArtist artist.Repository, repoTrack track.Repository, repoAlbum album.Repository, logger *logrus.Logger) ArtistManager {
+func NewArtistManager(q activity.ProducerRepository, repoPlaylist playlist.Repository, repoArtist artist.Repository, repoTrack track.Repository, repoAlbum album.Repository, logger *logrus.Logger) ArtistManager {
 	return ArtistManager{
 		repoArtist:   repoArtist,
 		repoTrack:    repoTrack,
 		repoAlbum:    repoAlbum,
 		repoPlaylist: repoPlaylist,
 		logger:       logger,
+		queue:        q,
 	}
 }
 
@@ -112,6 +115,11 @@ func (am *ArtistManager) Like(ctx context.Context, in *artist_proto.ArtistToUser
 		return nil, err
 	}
 	am.logger.Infoln("Like created")
+
+	if err := am.queue.PushLikeArtist(in.GetUserId(), in.GetArtistId()); err != nil {
+		return nil, err
+	}
+	am.logger.Infoln("Like Pushed to queue")
 
 	return &google_proto.Empty{}, nil
 }

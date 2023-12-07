@@ -8,6 +8,7 @@ import (
 	session_proto "main/internal/microservices/session/proto"
 	track_proto "main/internal/microservices/track/proto"
 	grpc_track_server "main/internal/microservices/track/service/server"
+	"main/internal/pkg/activity"
 	"main/internal/pkg/album"
 	"main/internal/pkg/artist"
 	"main/internal/pkg/track"
@@ -19,14 +20,16 @@ type AlbumManager struct {
 	repoAlbum  album.Repository
 	logger     *logrus.Logger
 	album_proto.UnimplementedAlbumServiceServer
+	queue activity.ProducerRepository
 }
 
-func NewAlbumManager(repoTrack track.Repository, repoArtist artist.Repository, repoAlbum album.Repository, logger *logrus.Logger) AlbumManager {
+func NewAlbumManager(q activity.ProducerRepository, repoTrack track.Repository, repoArtist artist.Repository, repoAlbum album.Repository, logger *logrus.Logger) AlbumManager {
 	return AlbumManager{
 		repoTrack:  repoTrack,
 		repoArtist: repoArtist,
 		repoAlbum:  repoAlbum,
 		logger:     logger,
+		queue:      q,
 	}
 }
 
@@ -208,6 +211,11 @@ func (am *AlbumManager) Like(ctx context.Context, in *album_proto.AlbumToUserId)
 		return nil, err
 	}
 	am.logger.Infoln("Like created")
+
+	if err := am.queue.PushLikeAlbum(in.GetUserId(), in.GetAlbumId()); err != nil {
+		return nil, err
+	}
+	am.logger.Infoln("album like added to queue")
 
 	return &google_proto.Empty{}, nil
 }

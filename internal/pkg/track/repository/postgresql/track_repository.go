@@ -13,6 +13,16 @@ type Postgres struct {
 	logger *logrus.Logger
 }
 
+func (db *Postgres) CreateListen(userId string, trackId uint64, dur uint32) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (db *Postgres) CreateSkip(userId string, trackId uint64, dur uint32) error {
+	//TODO implement me
+	panic("implement me")
+}
+
 func NewPostgres(pool postgres.PgxIFace, logger *logrus.Logger) *Postgres {
 	return &Postgres{Pool: pool, logger: logger}
 }

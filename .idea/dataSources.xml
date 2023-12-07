@@ -1,18 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
-    <data-source source="LOCAL" name="musicon@localhost" uuid="a953388b-8b8f-4549-8179-610539382933">
+    <data-source source="LOCAL" name="musicon@82.146.45.164" uuid="fab6083e-0e4d-4d30-a3c8-1ae486c39925">
       <driver-ref>postgresql</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>org.postgresql.Driver</jdbc-driver>
-      <jdbc-url>jdbc:postgresql://localhost:5432/musicon</jdbc-url>
-      <working-dir>$ProjectFileDir$</working-dir>
-    </data-source>
-    <data-source source="LOCAL" name="musicon@82.146.45.164" uuid="5d2df90a-a8d5-404e-88f2-d98bae444ad4">
-      <driver-ref>postgresql</driver-ref>
-      <synchronize>true</synchronize>
-      <jdbc-driver>org.postgresql.Driver</jdbc-driver>
-      <jdbc-url>jdbc:postgresql://82.146.45.164:5432/musicon</jdbc-url>
+      <jdbc-url>jdbc:postgresql://82.146.45.164:5433/musicon</jdbc-url>
+      <jdbc-additional-properties>
+        <property name="com.intellij.clouds.kubernetes.db.enabled" value="false" />
+      </jdbc-additional-properties>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
   </component>

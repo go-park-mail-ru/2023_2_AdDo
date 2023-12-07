@@ -22,6 +22,7 @@ const _ = grpc.SupportPackageIsVersion7
 
 const (
 	TrackService_Listen_FullMethodName             = "/TrackService/Listen"
+	TrackService_Skip_FullMethodName               = "/TrackService/Skip"
 	TrackService_Like_FullMethodName               = "/TrackService/Like"
 	TrackService_IsLike_FullMethodName             = "/TrackService/IsLike"
 	TrackService_Unlike_FullMethodName             = "/TrackService/Unlike"
@@ -32,7 +33,8 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type TrackServiceClient interface {
-	Listen(ctx context.Context, in *TrackId, opts ...grpc.CallOption) (*empty.Empty, error)
+	Listen(ctx context.Context, in *TrackToUserDur, opts ...grpc.CallOption) (*empty.Empty, error)
+	Skip(ctx context.Context, in *TrackToUserDur, opts ...grpc.CallOption) (*empty.Empty, error)
 	Like(ctx context.Context, in *TrackToUserId, opts ...grpc.CallOption) (*empty.Empty, error)
 	IsLike(ctx context.Context, in *TrackToUserId, opts ...grpc.CallOption) (*IsLikedTrack, error)
 	Unlike(ctx context.Context, in *TrackToUserId, opts ...grpc.CallOption) (*empty.Empty, error)
@@ -47,9 +49,18 @@ func NewTrackServiceClient(cc grpc.ClientConnInterface) TrackServiceClient {
 	return &trackServiceClient{cc}
 }
 
-func (c *trackServiceClient) Listen(ctx context.Context, in *TrackId, opts ...grpc.CallOption) (*empty.Empty, error) {
+func (c *trackServiceClient) Listen(ctx context.Context, in *TrackToUserDur, opts ...grpc.CallOption) (*empty.Empty, error) {
 	out := new(empty.Empty)
 	err := c.cc.Invoke(ctx, TrackService_Listen_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *trackServiceClient) Skip(ctx context.Context, in *TrackToUserDur, opts ...grpc.CallOption) (*empty.Empty, error) {
+	out := new(empty.Empty)
+	err := c.cc.Invoke(ctx, TrackService_Skip_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -96,7 +107,8 @@ func (c *trackServiceClient) GetUserLikedTracks(ctx context.Context, in *proto.U
 // All implementations must embed UnimplementedTrackServiceServer
 // for forward compatibility
 type TrackServiceServer interface {
-	Listen(context.Context, *TrackId) (*empty.Empty, error)
+	Listen(context.Context, *TrackToUserDur) (*empty.Empty, error)
+	Skip(context.Context, *TrackToUserDur) (*empty.Empty, error)
 	Like(context.Context, *TrackToUserId) (*empty.Empty, error)
 	IsLike(context.Context, *TrackToUserId) (*IsLikedTrack, error)
 	Unlike(context.Context, *TrackToUserId) (*empty.Empty, error)
@@ -108,8 +120,11 @@ type TrackServiceServer interface {
 type UnimplementedTrackServiceServer struct {
 }
 
-func (UnimplementedTrackServiceServer) Listen(context.Context, *TrackId) (*empty.Empty, error) {
+func (UnimplementedTrackServiceServer) Listen(context.Context, *TrackToUserDur) (*empty.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Listen not implemented")
+}
+func (UnimplementedTrackServiceServer) Skip(context.Context, *TrackToUserDur) (*empty.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Skip not implemented")
 }
 func (UnimplementedTrackServiceServer) Like(context.Context, *TrackToUserId) (*empty.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Like not implemented")
@@ -137,7 +152,7 @@ func RegisterTrackServiceServer(s grpc.ServiceRegistrar, srv TrackServiceServer)
 }
 
 func _TrackService_Listen_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(TrackId)
+	in := new(TrackToUserDur)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -149,7 +164,25 @@ func _TrackService_Listen_Handler(srv interface{}, ctx context.Context, dec func
 		FullMethod: TrackService_Listen_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TrackServiceServer).Listen(ctx, req.(*TrackId))
+		return srv.(TrackServiceServer).Listen(ctx, req.(*TrackToUserDur))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TrackService_Skip_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TrackToUserDur)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TrackServiceServer).Skip(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TrackService_Skip_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TrackServiceServer).Skip(ctx, req.(*TrackToUserDur))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -236,6 +269,10 @@ var TrackService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Listen",
 			Handler:    _TrackService_Listen_Handler,
+		},
+		{
+			MethodName: "Skip",
+			Handler:    _TrackService_Skip_Handler,
 		},
 		{
 			MethodName: "Like",

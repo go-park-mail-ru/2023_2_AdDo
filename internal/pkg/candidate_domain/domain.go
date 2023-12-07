@@ -1,4 +1,4 @@
-package candidate
+package candidate_domain
 
 import (
 	"main/internal/pkg/track"
@@ -6,8 +6,4 @@ import (
 
 type UseCase interface {
 	GetCandidateForUser(userId string) ([]track.Response, error)
-}
-
-type Repository interface {
-	GetSimilarTracksFromCluster() ([]track.Response, error)
 }
