@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-option go_package = "/recommendation";
+option go_package = "main/internal/microservices/recommendation/proto";
 import "candidate.proto";
 import "session.proto";
 

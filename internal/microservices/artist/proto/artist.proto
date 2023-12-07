@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-option go_package = "/artist";
+option go_package = "main/internal/microservices/artist/proto";
 import "album.proto";
 import "track.proto";
 import "session.proto";

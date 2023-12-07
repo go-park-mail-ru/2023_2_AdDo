@@ -125,6 +125,15 @@ create table if not exists profile_track (
     constraint unique_profile_track UNIQUE (profile_id, track_id)
 );
 
+create table if not exists profile_genre (
+     id         serial primary key,
+     profile_id uuid not null,
+     foreign key (profile_id) references profile (id) on delete cascade ,
+     genre_id int not null,
+     foreign key (genre_id) references genre (id) on delete cascade,
+     constraint unique_profile_genre UNIQUE (profile_id, genre_id)
+);
+
 create table if not exists profile_artist (
     id         serial primary key,
     profile_id uuid not null,
@@ -170,19 +179,3 @@ create table if not exists track_listen (
     duration int not null default 0,
     count int not null default 0
 );
-
--- create table if not exists recommendation_cluster(
---      id serial primary key,
---      centre double precision[] not null default [0]
--- );
---
--- create table if not exists track_cluster(
---     id serial primary key,
---     track_id uuid not null,
---     foreign key (track_id) references track (id) on delete cascade ,
---     cluster_id int not null,
---     foreign key (cluster_id) references recommendation_cluster (id) on delete cascade,
---     constraint unique_track_cluster UNIQUE (track_id, cluster_id),
---     onehot_genre_pos int not null,
---     onehot_artist_pos int not null
--- );
