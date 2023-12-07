@@ -6,24 +6,24 @@ import (
 	common_handler "main/internal/common/handler"
 	"main/internal/common/response"
 	"main/internal/common/utils"
-	"main/internal/pkg/recommendation"
 	"main/internal/pkg/session"
+	"main/internal/pkg/wave"
 	"net/http"
 )
 
 type Handler struct {
-	upgrader              websocket.Upgrader
-	logger                *logrus.Logger
-	sessionUseCase        session.UseCase
-	recommendationUseCase recommendation.ServiceUseCase
+	upgrader       websocket.Upgrader
+	logger         *logrus.Logger
+	sessionUseCase session.UseCase
+	waveUseCase    wave.UseCase
 }
 
-func NewHandler(u websocket.Upgrader, su session.UseCase, ru recommendation.ServiceUseCase, l *logrus.Logger) Handler {
+func NewHandler(u websocket.Upgrader, su session.UseCase, ru wave.UseCase, l *logrus.Logger) Handler {
 	return Handler{
-		upgrader:              u,
-		logger:                l,
-		sessionUseCase:        su,
-		recommendationUseCase: ru,
+		upgrader:       u,
+		logger:         l,
+		sessionUseCase: su,
+		waveUseCase:    ru,
 	}
 }
 
@@ -56,7 +56,7 @@ func (h *Handler) MyWave(w http.ResponseWriter, r *http.Request) error {
 
 	// нужна какая-то мапа, чтобы не давать дубликаты в рамках одной волны
 	// нужно понимать, когда пользователь прослушал некоторую часть треков, чтобы отправить ему новые
-	tracks, err := h.recommendationUseCase.GetMyWaveMusic(userId, MyWaveTrackBatch)
+	tracks, err := h.waveUseCase.GetMyWaveMusic(userId, MyWaveTrackBatch)
 	if err != nil {
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}

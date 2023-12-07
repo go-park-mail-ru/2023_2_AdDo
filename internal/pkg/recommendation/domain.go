@@ -2,7 +2,6 @@ package recommendation
 
 import "main/internal/pkg/track"
 
-const MyWaveTrackBatch = 5
 const UserTrackPoolSize = 50
 
 type PoolRepository interface {
@@ -10,13 +9,7 @@ type PoolRepository interface {
 	GetTracksFromUserPool(userId string, count uint32) []track.Response
 }
 
-// UseCase нейронки которая классифицирует треки
+// Юзкейс Нейронки, которую мы кормим кандидатами, она в свою очередь будет классифицировать и ранжировать их
 type ServiceUseCase interface {
-	//GetMyWaveMusic(userId string, count uint32) ([]track.Response, error)
 	ClassifyCandidates(userId string, candidates []track.Response) ([]track.Response, error)
-}
-
-// забыл, что этот делает, видимо activity worker
-type WorkerUseCase interface {
-	Run() error
 }

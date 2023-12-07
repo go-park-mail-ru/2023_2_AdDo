@@ -49,3 +49,8 @@ type ProducerRepository interface {
 	PushListenTrack(userId string, trackId uint64, dur uint32) error
 	PushSkipTrack(userId string, trackId uint64, dur uint32) error
 }
+
+// Worker, который будет делать логику чтения и обработки активности
+type WorkerUseCase interface {
+	Run()
+}
