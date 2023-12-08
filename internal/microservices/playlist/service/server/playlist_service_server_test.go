@@ -43,7 +43,7 @@ func Test_Create(t *testing.T) {
 
 	expected := &playlist_proto.PlaylistResponse{
 		CreatorId: in.CreatorId,
-		Tracks:     grpc_track_server.SerializeTracks([]track.Response{}),
+		Tracks:    grpc_track_server.SerializeTracks([]track.Response{}),
 	}
 
 	deserialized := playlist.Base{
@@ -105,7 +105,6 @@ func Test_Get(t *testing.T) {
 			Name:      "Playlist",
 			Preview:   "Preview",
 			CreatorId: "creatorId",
-			IsYours:   isYours,
 			Tracks: &track_proto.TracksResponse{
 				Tracks: []*track_proto.Track{
 					{
@@ -124,11 +123,10 @@ func Test_Get(t *testing.T) {
 			},
 		}
 
-		in := &playlist_proto.PlaylistToUserId{UserId: userId, PlaylistId: playlistId}
+		in := &playlist_proto.PlaylistId{Id: playlistId}
 
-		mockPlaylistRepo.EXPECT().Get(ctx, in.GetPlaylistId()).Return(basePlaylist, nil)
-		mockTracksRepo.EXPECT().GetByPlaylist(in.GetPlaylistId()).Return(tracks, nil)
-		mockPlaylistRepo.EXPECT().IsCreator(ctx, in.GetUserId(), in.GetPlaylistId()).Return(isYours, nil)
+		mockPlaylistRepo.EXPECT().Get(ctx, in.GetId()).Return(basePlaylist, nil)
+		mockTracksRepo.EXPECT().GetByPlaylist(in.GetId()).Return(tracks, nil)
 
 		result, err := playlistManager.Get(ctx, in)
 		assert.Nil(t, err)

@@ -87,7 +87,6 @@ func TestActionsOnPlaylist(t *testing.T) {
 			Name:     "Playlist",
 			AuthorId: userId,
 			Preview:  "preview",
-			IsYours:  true,
 			Tracks:   make([]track.Response, 0),
 		}
 
@@ -96,8 +95,8 @@ func TestActionsOnPlaylist(t *testing.T) {
 		req.AddCookie(&cookie)
 		w := httptest.NewRecorder()
 
-		mockSessionUseCase.EXPECT().GetUserId(sessionId).Return(userId, nil)
-		mockPlaylistUseCase.EXPECT().Get(userId, playlistId).Return(playlistResponse, nil)
+		mockSessionUseCase.EXPECT().CheckSession(sessionId).Return(true, nil)
+		mockPlaylistUseCase.EXPECT().Get(playlistId).Return(playlistResponse, nil)
 
 		err := handler.Get(w, req)
 		assert.Nil(t, err)
