@@ -22,7 +22,9 @@ create table if not exists artist (
 
 create table if not exists genre (
     id serial primary key,
-    name varchar(128) not null unique
+    name varchar(128) not null unique,
+    ru_name varchar(128),
+    icon_url varchar(1024)
 );
 
 create table if not exists playlist (
