@@ -43,8 +43,7 @@ func SerializePlaylistResponse(in playlist.Response) *playlist_proto.PlaylistRes
 		Preview:     in.Preview,
 		CreatorId:   in.AuthorId,
 		CreatorName: in.AuthorName,
-		//IsYours:     in.IsYours,
-		Tracks: grpc_track_server.SerializeTracks(in.Tracks),
+		Tracks:      grpc_track_server.SerializeTracks(in.Tracks),
 	}
 }
 
@@ -90,18 +89,12 @@ func (pm *PlaylistManager) Get(ctx context.Context, in *playlist_proto.PlaylistI
 		return nil, err
 	}
 
-	//isCreator, err := pm.repoPlaylist.IsCreator(context.Background(), in.GetUserId(), in.GetPlaylistId())
-	//if err != nil {
-	//	return nil, err
-	//}
-
 	return SerializePlaylistResponse(playlist.Response{
 		Id:       result.Id,
 		Name:     result.Name,
 		AuthorId: result.AuthorId,
 		Preview:  result.Preview,
 		Tracks:   tracks,
-		//IsYours:  isCreator,
 	}), nil
 }
 

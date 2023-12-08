@@ -25,8 +25,7 @@ type Response struct {
 	AuthorId   string `json:"AuthorId" example:"sdfa-asdf-adsf"`
 	AuthorName string `json:"AuthorName" example:"username"`
 	Preview    string `json:"Preview" example:"PlaylistPreview"`
-	//IsYours    bool   `json:"IsYours" example:"true"`
-	Tracks []track.Response
+	Tracks     []track.Response
 }
 
 type Name struct {
@@ -39,7 +38,7 @@ type ToTrackId struct {
 }
 
 type IsCreator struct {
-	IsCreator bool `json:"IsCreator"`
+	IsCreator bool `json:"IsCreator" example:"true"`
 }
 
 func (u *Name) Validate() error {

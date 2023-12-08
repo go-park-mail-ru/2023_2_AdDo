@@ -231,6 +231,17 @@ func (handler *ArtistHandler) FullSearch(w http.ResponseWriter, r *http.Request)
 	return nil
 }
 
+// CollectionArtist
+//
+//	@Summary		CollectionArtist
+//	@Description	Return user's artist collection
+//	@Tags			artist
+//	@Produce		json
+//	@Security		cookieAuth
+//	@Success		200	{object}	artist.LikedArtists
+//	@Failure		401	{string}	errMsg
+//	@Failure		404	{string}	errMsg
+//	@Router			/collection/artists [get]
 func (handler *ArtistHandler) CollectionArtist(w http.ResponseWriter, r *http.Request) error {
 	handler.logger.WithFields(logrus.Fields{
 		"request_id": utils.GenReqId(r.RequestURI + r.Method),
