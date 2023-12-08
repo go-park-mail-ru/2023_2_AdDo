@@ -86,6 +86,7 @@ func (handler *Handler) Create(w http.ResponseWriter, r *http.Request) error {
 //	@Param			id	path		integer	true	"playlist id"
 //	@Success		200	{object}	playlist.Response
 //	@Failure		400	{string}	errMsg
+//	@Failure		401	{string}	errMsg
 //	@Failure		403	{string}	errMsg
 //	@Failure		404	{string}	errMsg
 //	@Failure		500	{string}	errMsg
@@ -598,6 +599,17 @@ func (handler *Handler) MakePrivate(w http.ResponseWriter, r *http.Request) erro
 	return nil
 }
 
+// CollectionPlaylist
+//
+//	@Summary		CollectionPlaylist
+//	@Description	Return user's playlist collection
+//	@Tags			playlist
+//	@Produce		json
+//	@Security		cookieAuth
+//	@Success		200	{array}		playlist.Base
+//	@Failure		401	{string}	errMsg
+//	@Failure		500	{string}	errMsg
+//	@Router			/collection/playlists [get]
 func (handler *Handler) CollectionPlaylist(w http.ResponseWriter, r *http.Request) error {
 	handler.logger.WithFields(logrus.Fields{
 		"request_id": utils.GenReqId(r.RequestURI + r.Method),

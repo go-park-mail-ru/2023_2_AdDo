@@ -349,6 +349,17 @@ func (handler *AlbumHandler) Unlike(w http.ResponseWriter, r *http.Request) erro
 	return nil
 }
 
+// CollectionAlbum
+//
+//	@Summary		CollectionAlbum
+//	@Description	Return user's album collection
+//	@Tags			album
+//	@Produce		json
+//	@Security		cookieAuth
+//	@Success		200	{object}	album.LikedAlbums
+//	@Failure		401	{string}	errMsg
+//	@Failure		404	{string}	errMsg
+//	@Router			/collection/albums [get]
 func (handler *AlbumHandler) CollectionAlbum(w http.ResponseWriter, r *http.Request) error {
 	handler.logger.WithFields(logrus.Fields{
 		"request_id": utils.GenReqId(r.RequestURI + r.Method),

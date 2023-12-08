@@ -497,6 +497,120 @@ const docTemplate = `{
                 }
             }
         },
+        "/collection/albums": {
+            "get": {
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "description": "Return user's album collection",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "album"
+                ],
+                "summary": "CollectionAlbum",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/album.LikedAlbums"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/collection/artists": {
+            "get": {
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "description": "Return user's artist collection",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "artist"
+                ],
+                "summary": "CollectionArtist",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/artist.LikedArtists"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/collection/playlists": {
+            "get": {
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "description": "Return user's playlist collection",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "playlist"
+                ],
+                "summary": "CollectionPlaylist",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/playlist.Base"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/collection/tracks": {
             "get": {
                 "security": [
@@ -884,11 +998,6 @@ const docTemplate = `{
         },
         "/playlist/{id}": {
             "get": {
-                "security": [
-                    {
-                        "cookieAuth": []
-                    }
-                ],
                 "description": "Return playlist info and tracks",
                 "produces": [
                     "application/json"
@@ -910,7 +1019,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/artist.Response"
+                            "$ref": "#/definitions/playlist.Response"
                         }
                     },
                     "400": {
@@ -1007,6 +1116,12 @@ const docTemplate = `{
                 "security": [
                     {
                         "cookieAuth": []
+                    },
+                    {
+                        "csrfToken": []
+                    },
+                    {
+                        "cookieCsrfToken": []
                     }
                 ],
                 "description": "Add track to playlist",
@@ -1053,6 +1168,70 @@ const docTemplate = `{
                     },
                     "403": {
                         "description": "Forbidden",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/playlist/{id}/is_creator": {
+            "get": {
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "description": "Check if user is creator of playlist",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "playlist"
+                ],
+                "summary": "IsCreator",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "playlist id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/playlist.IsCreator"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
                         "schema": {
                             "type": "string"
                         }
@@ -1309,6 +1488,12 @@ const docTemplate = `{
                 "security": [
                     {
                         "cookieAuth": []
+                    },
+                    {
+                        "csrfToken": []
+                    },
+                    {
+                        "cookieCsrfToken": []
                     }
                 ],
                 "description": "Remove track from playlist",
@@ -1393,6 +1578,73 @@ const docTemplate = `{
                         "name": "id",
                         "in": "path",
                         "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/playlist/{id}/update_name": {
+            "post": {
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {
+                        "csrfToken": []
+                    },
+                    {
+                        "cookieCsrfToken": []
+                    }
+                ],
+                "description": "Update playlist name",
+                "tags": [
+                    "playlist"
+                ],
+                "summary": "UpdateName",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "playlist id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "playlist name",
+                        "name": "name",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/playlist.Name"
+                        }
                     }
                 ],
                 "responses": {
@@ -1635,6 +1887,47 @@ const docTemplate = `{
                 }
             }
         },
+        "/track/{id}": {
+            "get": {
+                "description": "Return album that contain required track",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "album"
+                ],
+                "summary": "AlbumWithRequiredTrack",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "track id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/album.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/track/{id}/is_like": {
             "get": {
                 "security": [
@@ -1837,13 +2130,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "204": {
-                        "description": "No Content",
-                        "headers": {
-                            "Set-Cookie": {
-                                "type": "string",
-                                "description": "Set JSESSIONID in Cookie"
-                            }
-                        }
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Bad Request",
@@ -1859,12 +2146,6 @@ const docTemplate = `{
                     },
                     "403": {
                         "description": "Forbidden",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
                         "schema": {
                             "type": "string"
                         }
@@ -1958,6 +2239,17 @@ const docTemplate = `{
                 }
             }
         },
+        "album.LikedAlbums": {
+            "type": "object",
+            "properties": {
+                "Albums": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/album.Base"
+                    }
+                }
+            }
+        },
         "album.Response": {
             "type": "object",
             "properties": {
@@ -1985,6 +2277,34 @@ const docTemplate = `{
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/track.Response"
+                    }
+                }
+            }
+        },
+        "artist.Base": {
+            "type": "object",
+            "properties": {
+                "Avatar": {
+                    "type": "string",
+                    "example": "ArtistAvatar"
+                },
+                "Id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "Name": {
+                    "type": "string",
+                    "example": "ArtistName"
+                }
+            }
+        },
+        "artist.LikedArtists": {
+            "type": "object",
+            "properties": {
+                "Artists": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/artist.Base"
                     }
                 }
             }
@@ -2018,6 +2338,44 @@ const docTemplate = `{
                 }
             }
         },
+        "playlist.Base": {
+            "type": "object",
+            "properties": {
+                "AuthorId": {
+                    "type": "string",
+                    "example": "sdfa-asdf-adsf"
+                },
+                "Id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "Name": {
+                    "type": "string",
+                    "example": "PlaylistName"
+                },
+                "Preview": {
+                    "type": "string",
+                    "example": "PlaylistPreview"
+                }
+            }
+        },
+        "playlist.IsCreator": {
+            "type": "object",
+            "properties": {
+                "IsCreator": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "playlist.Name": {
+            "type": "object",
+            "properties": {
+                "Name": {
+                    "type": "string",
+                    "example": "PlaylistName"
+                }
+            }
+        },
         "playlist.Response": {
             "type": "object",
             "properties": {
@@ -2033,10 +2391,6 @@ const docTemplate = `{
                     "type": "integer",
                     "example": 1
                 },
-                "IsYours": {
-                    "type": "boolean",
-                    "example": true
-                },
                 "Name": {
                     "type": "string",
                     "example": "PlaylistName"
@@ -2046,6 +2400,7 @@ const docTemplate = `{
                     "example": "PlaylistPreview"
                 },
                 "tracks": {
+                    "description": "IsYours    bool   ` + "`" + `json:\"IsYours\" example:\"true\"` + "`" + `",
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/track.Response"
