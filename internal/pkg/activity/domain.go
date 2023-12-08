@@ -1,5 +1,11 @@
 package activity
 
+const SkipAction = "SKIP"
+const ListenAction = "LISTEN"
+const LikeAction = "LIKE"
+const RotationAction = "ROTATION"
+const RecentActivityNeedToRecreateTrackPool = 5
+
 type UserLikeTrack struct {
 	UserId  string
 	TrackId uint64
@@ -32,13 +38,19 @@ type UserSkipTrack struct {
 	TrackId   uint64
 }
 
+type UserTrackAction struct {
+	UserId  string
+	TrackId uint64
+	Action  string
+}
+
 type ConsumerRepository interface {
-	PullLikeTrack() (UserLikeTrack, error)
-	PullLikeAlbum() (UserLikeAlbum, error)
-	PullLikeArtist() (UserLikeArtist, error)
-	PullLikeGenre() (UserLikeGenre, error)
-	PullSkipTrack() (UserSkipTrack, error)
-	PullListenTrack() (UserListenTrack, error)
+	PopLikeTrack(out chan<- UserTrackAction)
+	PopLikeAlbum(out chan<- UserTrackAction)
+	PopLikeArtist(out chan<- UserTrackAction)
+	PopLikeGenre(out chan<- UserTrackAction)
+	PopSkipTrack(out chan<- UserTrackAction)
+	PopListenTrack(out chan<- UserTrackAction)
 }
 
 type ProducerRepository interface {
@@ -50,7 +62,12 @@ type ProducerRepository interface {
 	PushSkipTrack(userId string, trackId uint64, dur uint32) error
 }
 
-// Worker, который будет делать логику чтения и обработки активности
+type KeyValueRepository interface {
+	SaveActivityAndCountCheck(action UserTrackAction, count uint8) (bool, error)
+	GetAllRecentActivity(userId string) ([]UserTrackAction, error)
+	CleanLastActivityForUser(userId string) error
+}
+
 type WorkerUseCase interface {
 	Run()
 }

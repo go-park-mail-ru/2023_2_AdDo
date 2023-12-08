@@ -1,4 +1,4 @@
-package candidate_domain
+package candidate
 
 import (
 	"main/internal/pkg/track"

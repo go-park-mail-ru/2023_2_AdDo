@@ -2,7 +2,7 @@ package daily_playlist_worker_usecase
 
 import (
 	"github.com/sirupsen/logrus"
-	"main/internal/pkg/candidate_domain"
+	"main/internal/pkg/candidate"
 	daily_playlist "main/internal/pkg/daily-playlist"
 	"main/internal/pkg/recommendation"
 	user_domain "main/internal/pkg/user"
@@ -12,11 +12,11 @@ type Default struct {
 	repoUser              user_domain.Repository
 	dailyPlaylistRepo     daily_playlist.Repository
 	logger                *logrus.Logger
-	candidateUseCase      candidate_domain.UseCase
+	candidateUseCase      candidate.UseCase
 	recommendationUseCase recommendation.ServiceUseCase
 }
 
-func NewDefault(ruc recommendation.ServiceUseCase, ru user_domain.Repository, dpr daily_playlist.Repository, cuc candidate_domain.UseCase, l *logrus.Logger) Default {
+func NewDefault(ruc recommendation.ServiceUseCase, ru user_domain.Repository, dpr daily_playlist.Repository, cuc candidate.UseCase, l *logrus.Logger) Default {
 	return Default{
 		repoUser:              ru,
 		logger:                l,
