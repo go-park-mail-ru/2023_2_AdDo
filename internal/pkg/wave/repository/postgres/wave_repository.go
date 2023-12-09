@@ -16,7 +16,7 @@ func (p Postgres) SaveTracksToUserPool(userId string, tracks []track.Response) e
 	panic("implement me")
 }
 
-func (p Postgres) GetTracksFromUserPool(userId string, count uint32) []track.Response {
+func (p Postgres) GetTracksFromUserPool(userId string, count uint32) ([]track.Response, error) {
 	//TODO implement me
 	panic("implement me")
 }

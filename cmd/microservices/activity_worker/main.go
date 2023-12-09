@@ -13,7 +13,7 @@ import (
 	"main/internal/pkg/activity/repository/kafka/activity_repository_consumer"
 	activity_repository "main/internal/pkg/activity/repository/memcached"
 	activity_usecase "main/internal/pkg/activity/worker_usecase"
-	"main/internal/pkg/cluster/cluster_repository/in_memory"
+	cluster_repository "main/internal/pkg/cluster/cluster_repository/in_memory"
 	wave_repository "main/internal/pkg/wave/repository/postgres"
 )
 

@@ -56,17 +56,29 @@ func (h *Handler) MyWave(w http.ResponseWriter, r *http.Request) error {
 
 	// нужна какая-то мапа, чтобы не давать дубликаты в рамках одной волны
 	// нужно понимать, когда пользователь прослушал некоторую часть треков, чтобы отправить ему новые
-	tracks, err := h.waveUseCase.GetMyWaveMusic(userId, MyWaveTrackBatch)
-	if err != nil {
-		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
-	}
-	h.logger.Infoln("Track Batch get from service")
+	for {
+		dummy := 0
+		err := conn.ReadJSON(&dummy)
+		if err != nil {
+			return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
+		}
 
-	err = conn.WriteJSON(tracks)
-	if err != nil {
-		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
+		if dummy == 0 {
+			break
+		}
+
+		tracks, err := h.waveUseCase.GetMyWaveMusic(userId, MyWaveTrackBatch)
+		if err != nil {
+			return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
+		}
+		h.logger.Infoln("Track Batch get from service")
+
+		err = conn.WriteJSON(tracks)
+		if err != nil {
+			return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
+		}
+		h.logger.Infoln("Track Batch sent")
 	}
-	h.logger.Infoln("Track Batch sent")
 
 	return nil
 }

@@ -93,7 +93,7 @@ func (s *Worker) Run() {
 }
 
 func (s *Worker) RecreatePool(userId string) error {
-	candidates, err := s.candidateUseCase.GetCandidateForUser(userId)
+	candidates, err := s.candidateUseCase.GetCandidateForWave(userId)
 	if err != nil {
 		s.logger.Errorln("error getting candidates for user", err)
 		return err

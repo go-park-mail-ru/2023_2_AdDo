@@ -5,7 +5,7 @@ import (
 	"main/internal/microservices/candidate/proto"
 	candidate_service_server "main/internal/microservices/candidate/service/server"
 	activity_repository "main/internal/pkg/activity/repository/memcached"
-	cluster_repository "main/internal/pkg/cluster/cluster_repository/in_memory"
+	cluster_repository2 "main/internal/pkg/cluster/cluster_repository/in_memory"
 
 	// microservices_init "main/cmd/microservices"
 	init_db "main/init/postgres_db"
@@ -34,7 +34,7 @@ func main() {
 		logger.Errorln("error connecting database: ", err)
 	}
 
-	clusterRepo, err := cluster_repository.NewInMemory(PathToClusterTracks, logger)
+	clusterRepo, err := cluster_repository2.NewInMemory(PathToClusterTracks, logger)
 	if err != nil {
 		logger.Errorln("error loading cluster tracks dump ", err)
 	}

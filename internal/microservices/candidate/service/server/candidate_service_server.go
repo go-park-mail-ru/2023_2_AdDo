@@ -7,19 +7,19 @@ import (
 	session_proto "main/internal/microservices/session/proto"
 	grpc_track_server "main/internal/microservices/track/service/server"
 	"main/internal/pkg/activity"
-	"main/internal/pkg/cluster"
+	"main/internal/pkg/cluster_domain"
 	"main/internal/pkg/track"
 )
 
 type CandidateManager struct {
 	logger      *logrus.Logger
 	trackRepo   track.Repository
-	clusterRepo cluster.Repository
+	clusterRepo cluster_domain.Repository
 	candidate_proto.UnimplementedCandidateServiceServer
 	recentActivityRepo activity.KeyValueRepository
 }
 
-func NewCandidateManager(ar activity.KeyValueRepository, tr track.Repository, cr cluster.Repository, logger *logrus.Logger) CandidateManager {
+func NewCandidateManager(ar activity.KeyValueRepository, tr track.Repository, cr cluster_domain.Repository, logger *logrus.Logger) CandidateManager {
 	return CandidateManager{
 		logger:             logger,
 		trackRepo:          tr,

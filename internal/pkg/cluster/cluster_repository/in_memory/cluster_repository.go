@@ -4,18 +4,98 @@ import (
 	"encoding/json"
 	"github.com/sirupsen/logrus"
 	"main/internal/pkg/track"
+	"math"
 	"os"
+	"sort"
 )
 
 type InMemory struct {
+	TrackIdToDataIndex   map[uint64][]float64
+	ClusterToDataIndexes map[int][]uint64
+	Centroids            [][]float64
+}
+
+// search nearest tracks flow:
+// 	1. Get for every track id some nearest tracks in loop
+// 	2. Get nearest cluster for track by using euclidian between objectVec and centroids
+//  3. Get all tracks in chosen cluster
+//  4. for every chosen track find euclidian and sort asc
+//  5. Take first N track and return
+//  6. Concat all results for every track and return
+
+func calculateEuclid(obj1, obj2 []float64) float64 {
+	sum := 0.0
+
+	for i := 0; i < len(obj2); i++ {
+		diff := obj1[i] - obj2[i]
+		sum += diff * diff
+	}
+
+	distance := math.Sqrt(sum)
+	return distance
+}
+
+func (in InMemory) getNearestClusterData(objectVec []float64) []uint64 {
+	foundIndex := 0
+	minDistance := math.MaxFloat64
+	for index, centroid := range in.Centroids {
+		if calculateEuclid(objectVec, centroid) < minDistance {
+			foundIndex = index
+		}
+	}
+
+	return in.ClusterToDataIndexes[foundIndex]
+}
+
+type IdDistance struct {
+	Id       uint64
+	Distance float64
+}
+
+func (in InMemory) getNearestTracks(id track.Id, count int) ([]track.Id, error) {
+	trackVec := in.TrackIdToDataIndex[id.Id]
+	tracksIds := in.getNearestClusterData(trackVec)
+
+	vec := make([]IdDistance, 0)
+	for _, trackId := range tracksIds {
+		vec = append(vec, IdDistance{
+			Id:       trackId,
+			Distance: calculateEuclid(trackVec, in.TrackIdToDataIndex[trackId]),
+		})
+	}
+
+	sort.Slice(vec, func(i, j int) bool {
+		return vec[i].Distance < vec[j].Distance
+	})
+
+	result := make([]track.Id, 0)
+	for index, t := range vec {
+		if index >= count {
+			break
+		}
+		result = append(result, track.Id{Id: t.Id})
+	}
+
+	return result, nil
+}
+
+func (in InMemory) GetNearestTracks(ids []track.Id, countPerTrack int) ([]track.Id, error) {
+	result := make([]track.Id, 0)
+	for _, id := range ids {
+		nearestForTrack, err := in.getNearestTracks(id, countPerTrack)
+		if err != nil {
+			return nil, err
+		}
+		result = append(result, nearestForTrack...)
+	}
+
+	return result, nil
+}
+
+type ParseFromFile struct {
 	Data      [][]float64 `json:"data"`
 	Centroids [][]float64 `json:"centroids"`
 	Labels    []int       `json:"labels"`
-}
-
-func (i InMemory) GetNearestTracks(ids []track.Id, countPerTrack int) ([]track.Id, error) {
-	//TODO implement me
-	panic("implement me")
 }
 
 func NewInMemory(pathToDump string, l *logrus.Logger) (InMemory, error) {
@@ -24,14 +104,24 @@ func NewInMemory(pathToDump string, l *logrus.Logger) (InMemory, error) {
 		l.Errorln("error opening file", err, pathToDump)
 		return InMemory{}, err
 	}
-
-	var clusteringData InMemory
-	err = json.Unmarshal(data, &clusteringData)
+	var dataFromFile ParseFromFile
+	err = json.Unmarshal(data, &dataFromFile)
 	if err != nil {
 		l.Errorln("error parsing json", err, pathToDump)
 		return InMemory{}, err
 	}
 	l.Infoln("json parsed successfully")
 
-	return clusteringData, nil
+	var result InMemory
+	result.Centroids = dataFromFile.Centroids
+	for _, row := range dataFromFile.Data {
+		result.TrackIdToDataIndex[uint64(row[len(row)-1])] = row[:len(row)-1]
+	}
+
+	for index, label := range dataFromFile.Labels {
+		result.ClusterToDataIndexes[label] = append(result.ClusterToDataIndexes[label], uint64(dataFromFile.Data[index][len(dataFromFile.Data[index])-1]))
+	}
+	l.Infoln("InMemory clusters formed", result)
+
+	return result, nil
 }

@@ -4,14 +4,14 @@
 // - protoc             v3.12.4
 // source: recommendation.proto
 
-package recommendation
+package proto
 
 import (
-	candidate "/candidate"
 	context "context"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
+	proto "main/internal/microservices/candidate/proto"
 )
 
 // This is a compile-time assertion to ensure that this generated file
@@ -27,7 +27,7 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type RecommendationServiceClient interface {
-	ClassifyCandidates(ctx context.Context, in *CandidateToUserId, opts ...grpc.CallOption) (*candidate.Candidates, error)
+	ClassifyCandidates(ctx context.Context, in *CandidateToUserId, opts ...grpc.CallOption) (*proto.Candidates, error)
 }
 
 type recommendationServiceClient struct {
@@ -38,8 +38,8 @@ func NewRecommendationServiceClient(cc grpc.ClientConnInterface) RecommendationS
 	return &recommendationServiceClient{cc}
 }
 
-func (c *recommendationServiceClient) ClassifyCandidates(ctx context.Context, in *CandidateToUserId, opts ...grpc.CallOption) (*candidate.Candidates, error) {
-	out := new(candidate.Candidates)
+func (c *recommendationServiceClient) ClassifyCandidates(ctx context.Context, in *CandidateToUserId, opts ...grpc.CallOption) (*proto.Candidates, error) {
+	out := new(proto.Candidates)
 	err := c.cc.Invoke(ctx, RecommendationService_ClassifyCandidates_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -51,7 +51,7 @@ func (c *recommendationServiceClient) ClassifyCandidates(ctx context.Context, in
 // All implementations must embed UnimplementedRecommendationServiceServer
 // for forward compatibility
 type RecommendationServiceServer interface {
-	ClassifyCandidates(context.Context, *CandidateToUserId) (*candidate.Candidates, error)
+	ClassifyCandidates(context.Context, *CandidateToUserId) (*proto.Candidates, error)
 	mustEmbedUnimplementedRecommendationServiceServer()
 }
 
@@ -59,7 +59,7 @@ type RecommendationServiceServer interface {
 type UnimplementedRecommendationServiceServer struct {
 }
 
-func (UnimplementedRecommendationServiceServer) ClassifyCandidates(context.Context, *CandidateToUserId) (*candidate.Candidates, error) {
+func (UnimplementedRecommendationServiceServer) ClassifyCandidates(context.Context, *CandidateToUserId) (*proto.Candidates, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ClassifyCandidates not implemented")
 }
 func (UnimplementedRecommendationServiceServer) mustEmbedUnimplementedRecommendationServiceServer() {}
