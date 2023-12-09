@@ -23,7 +23,7 @@ func NewPostgres(pool postgres.PgxIFace, logger *logrus.Logger) Postgres {
 func (p *Postgres) GetGenres() ([]onboarding.GenreBase, error) {
 	p.logger.Infoln("Onboarding repo Get Genres entered")
 
-	query := `select id, ru_name, preview from genre`
+	query := `select id, ru_name, icon_url from genre`
 	result, err := p.Pool.Query(context.Background(), query)
 	if err != nil {
 		p.logger.Errorln("err while getting genres ", err)

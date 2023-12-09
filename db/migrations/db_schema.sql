@@ -22,7 +22,9 @@ create table if not exists artist (
 
 create table if not exists genre (
     id serial primary key,
-    name varchar(128) not null unique
+    name varchar(128) not null unique,
+    ru_name varchar(128) not null unique,
+    icon_url text not null
 );
 
 create table if not exists playlist (
@@ -122,6 +124,7 @@ create table if not exists profile_track (
     foreign key (profile_id) references profile (id) on delete cascade ,
     track_id int not null,
     foreign key (track_id) references track (id) on delete cascade,
+    creating_date timestamptz not null default now(),
     constraint unique_profile_track UNIQUE (profile_id, track_id)
 );
 
@@ -172,10 +175,52 @@ create table if not exists artist_album (
 
 create table if not exists track_listen (
     id serial primary key,
-    profile_id int not null,
+    profile_id uuid not null,
     foreign key (profile_id) references profile(id) on delete cascade,
     track_id int not null,
     foreign key (track_id) references track(id) on delete cascade,
     duration int not null default 0,
-    count int not null default 0
+    count int not null default 0,
+    creating_data timestamptz not null default now(),
+    constraint unique_track_listen UNIQUE (profile_id, track_id)
+);
+
+create table if not exists track_skip (
+    id serial primary key,
+    profile_id uuid not null,
+    foreign key (profile_id) references profile(id) on delete cascade,
+    track_id int not null,
+    foreign key (track_id) references track(id) on delete cascade,
+    duration int not null default 0,
+    count int not null default 0,
+    creating_data timestamptz not null default now(),
+    constraint unique_track_skip UNIQUE (profile_id, track_id)
+);
+
+create table if not exists daily_playlist(
+    id serial primary key,
+    owner_id uuid not null,
+    foreign key (owner_id) references profile (id) on delete cascade
+);
+
+create table if not exists wave(
+     id serial primary key,
+     owner_id uuid not null,
+     foreign key (owner_id) references profile (id) on delete cascade
+);
+
+create table if not exists daily_playlist_track(
+    id serial primary key,
+    track_id int not null,
+    foreign key (track_id) references track(id) on delete cascade,
+    daily_playlist_id int not null,
+    foreign key (daily_playlist_id) references daily_playlist(id) on delete cascade
+);
+
+create table if not exists wave_track(
+   id serial primary key,
+   track_id int not null,
+   foreign key (track_id) references track(id) on delete cascade,
+   wave_id int not null,
+   foreign key (wave_id) references wave(id) on delete cascade
 );

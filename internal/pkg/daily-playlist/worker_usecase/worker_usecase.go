@@ -45,7 +45,7 @@ func (d *Default) CreateDailyForUser(userId string) (daily_playlist.Response, er
 	//	d.logger.Errorln("error getting last user activity", err, userId)
 	//	return daily_playlist.Response{}, err
 	//}
-	candidates, err := d.candidateUseCase.GetCandidateForUser(userId)
+	candidates, err := d.candidateUseCase.GetCandidateForDaily(userId)
 	if err != nil {
 		d.logger.Errorln("got candidates for user finished with error", err, userId, candidates)
 		return daily_playlist.Response{}, err

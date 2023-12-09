@@ -7,6 +7,7 @@ import (
 	daily_playlist "main/internal/microservices/daily-playlist/proto"
 	daily_playlist_service_server "main/internal/microservices/daily-playlist/service/server"
 	daily_playlist_repository "main/internal/pkg/daily-playlist/repository"
+	track_repository "main/internal/pkg/track/repository/postgresql"
 	"net"
 	"strconv"
 )
@@ -30,8 +31,8 @@ func main() {
 	}
 
 	dailyPlaylistRepo := daily_playlist_repository.NewPostgres(pool, logger)
-
-	dailyPlaylistManager := daily_playlist_service_server.NewDailyManager(dailyPlaylistRepo, logger)
+	trackRepo := track_repository.NewPostgres(pool, logger)
+	dailyPlaylistManager := daily_playlist_service_server.NewDailyManager(trackRepo, dailyPlaylistRepo, logger)
 
 	server := grpc.NewServer()
 	daily_playlist.RegisterDailyPlaylistServiceServer(server, &dailyPlaylistManager)

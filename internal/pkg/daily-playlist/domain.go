@@ -9,7 +9,6 @@ type Response struct {
 }
 
 type Repository interface {
-	GetUserDailyPlaylist(userId string) (Response, error)
 	SetUserPlaylist(userId string, response Response) error
 }
 

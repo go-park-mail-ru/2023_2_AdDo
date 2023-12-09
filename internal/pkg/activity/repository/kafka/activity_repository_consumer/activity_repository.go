@@ -27,21 +27,19 @@ func (d *Default) PopLikeTrack(out chan<- activity.UserTrackAction) {
 	defer partitionConsumer.Close()
 
 	for {
-		select {
-		case msg := <-partitionConsumer.Messages():
-			var like activity.UserLikeTrack
-			err := json.Unmarshal(msg.Value, &like)
-			if err != nil {
-				d.logger.Errorln("decoding error", err)
-			}
-
-			out <- activity.UserTrackAction{
-				UserId:  like.UserId,
-				TrackId: like.TrackId,
-				Action:  activity.LikeAction,
-			}
-			d.logger.Infoln("Got messages", string(msg.Key), string(msg.Value))
+		msg := <-partitionConsumer.Messages()
+		var like activity.UserLikeTrack
+		err := json.Unmarshal(msg.Value, &like)
+		if err != nil {
+			d.logger.Errorln("decoding error", err)
 		}
+
+		out <- activity.UserTrackAction{
+			UserId:  like.UserId,
+			TrackId: like.TrackId,
+			Action:  activity.LikeAction,
+		}
+		d.logger.Infoln("Got messages", string(msg.Key), string(msg.Value))
 	}
 }
 
@@ -53,23 +51,21 @@ func (d *Default) PopLikeAlbum(out chan<- activity.UserTrackAction) {
 	defer partitionConsumer.Close()
 
 	for {
-		select {
-		case msg := <-partitionConsumer.Messages():
-			var like activity.UserLikeAlbum
-			err := json.Unmarshal(msg.Value, &like)
-			if err != nil {
-				d.logger.Errorln("decoding error", err)
-			}
-
-			// cluster
-
-			out <- activity.UserTrackAction{
-				UserId:  like.UserId,
-				TrackId: 0,
-				Action:  activity.RotationAction,
-			}
-			d.logger.Infoln("Got messages", string(msg.Value))
+		msg := <-partitionConsumer.Messages()
+		var like activity.UserLikeAlbum
+		err := json.Unmarshal(msg.Value, &like)
+		if err != nil {
+			d.logger.Errorln("decoding error", err)
 		}
+
+		// cluster
+
+		out <- activity.UserTrackAction{
+			UserId:  like.UserId,
+			TrackId: 0,
+			Action:  activity.RotationAction,
+		}
+		d.logger.Infoln("Got messages", string(msg.Value))
 	}
 }
 
@@ -81,23 +77,21 @@ func (d *Default) PopLikeArtist(out chan<- activity.UserTrackAction) {
 	defer partitionConsumer.Close()
 
 	for {
-		select {
-		case msg := <-partitionConsumer.Messages():
-			var like activity.UserLikeArtist
-			err := json.Unmarshal(msg.Value, &like)
-			if err != nil {
-				d.logger.Errorln("decoding error", err)
-			}
-
-			// здесь надо сходить в кластер
-
-			out <- activity.UserTrackAction{
-				UserId:  like.UserId,
-				TrackId: 0,
-				Action:  activity.RotationAction,
-			}
-			d.logger.Infoln("Got messages", string(msg.Value))
+		msg := <-partitionConsumer.Messages()
+		var like activity.UserLikeArtist
+		err := json.Unmarshal(msg.Value, &like)
+		if err != nil {
+			d.logger.Errorln("decoding error", err)
 		}
+
+		// здесь надо сходить в кластер
+
+		out <- activity.UserTrackAction{
+			UserId:  like.UserId,
+			TrackId: 0,
+			Action:  activity.RotationAction,
+		}
+		d.logger.Infoln("Got messages", string(msg.Value))
 	}
 }
 
@@ -109,23 +103,21 @@ func (d *Default) PopLikeGenre(out chan<- activity.UserTrackAction) {
 	defer partitionConsumer.Close()
 
 	for {
-		select {
-		case msg := <-partitionConsumer.Messages():
-			var like activity.UserLikeGenre
-			err := json.Unmarshal(msg.Value, &like)
-			if err != nil {
-				d.logger.Errorln("decoding error", err)
-			}
-
-			// аналогично идем в кластер, только
-
-			out <- activity.UserTrackAction{
-				UserId:  like.UserId,
-				TrackId: 0,
-				Action:  activity.RotationAction,
-			}
-			d.logger.Infoln("Got messages", string(msg.Value))
+		msg := <-partitionConsumer.Messages()
+		var like activity.UserLikeGenre
+		err := json.Unmarshal(msg.Value, &like)
+		if err != nil {
+			d.logger.Errorln("decoding error", err)
 		}
+
+		// аналогично идем в кластер, только
+
+		out <- activity.UserTrackAction{
+			UserId:  like.UserId,
+			TrackId: 0,
+			Action:  activity.RotationAction,
+		}
+		d.logger.Infoln("Got messages", string(msg.Value))
 	}
 }
 
@@ -137,21 +129,19 @@ func (d *Default) PopSkipTrack(out chan<- activity.UserTrackAction) {
 	defer partitionConsumer.Close()
 
 	for {
-		select {
-		case msg := <-partitionConsumer.Messages():
-			var like activity.UserSkipTrack
-			err := json.Unmarshal(msg.Value, &like)
-			if err != nil {
-				d.logger.Errorln("decoding error", err)
-			}
-
-			out <- activity.UserTrackAction{
-				UserId:  like.UserId,
-				TrackId: like.TrackId,
-				Action:  activity.SkipAction,
-			}
-			d.logger.Infoln("Got messages", string(msg.Key), string(msg.Value))
+		msg := <-partitionConsumer.Messages()
+		var like activity.UserSkipTrack
+		err := json.Unmarshal(msg.Value, &like)
+		if err != nil {
+			d.logger.Errorln("decoding error", err)
 		}
+
+		out <- activity.UserTrackAction{
+			UserId:  like.UserId,
+			TrackId: like.TrackId,
+			Action:  activity.SkipAction,
+		}
+		d.logger.Infoln("Got messages", string(msg.Key), string(msg.Value))
 	}
 }
 
@@ -163,20 +153,18 @@ func (d *Default) PopListenTrack(out chan<- activity.UserTrackAction) {
 	defer partitionConsumer.Close()
 
 	for {
-		select {
-		case msg := <-partitionConsumer.Messages():
-			var like activity.UserListenTrack
-			err := json.Unmarshal(msg.Value, &like)
-			if err != nil {
-				d.logger.Errorln("decoding error", err)
-			}
-
-			out <- activity.UserTrackAction{
-				UserId:  like.UserId,
-				TrackId: like.TrackId,
-				Action:  activity.ListenAction,
-			}
-			d.logger.Infoln("Got messages", string(msg.Key), string(msg.Value))
+		msg := <-partitionConsumer.Messages()
+		var like activity.UserListenTrack
+		err := json.Unmarshal(msg.Value, &like)
+		if err != nil {
+			d.logger.Errorln("decoding error", err)
 		}
+
+		out <- activity.UserTrackAction{
+			UserId:  like.UserId,
+			TrackId: like.TrackId,
+			Action:  activity.ListenAction,
+		}
+		d.logger.Infoln("Got messages", string(msg.Key), string(msg.Value))
 	}
 }

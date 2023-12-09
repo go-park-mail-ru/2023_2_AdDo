@@ -112,12 +112,12 @@ func (am *ArtistManager) Like(ctx context.Context, in *artist_proto.ArtistToUser
 	am.logger.Infoln("Artist Micros Like entered")
 
 	if err := am.repoArtist.CreateLike(in.GetUserId(), in.GetArtistId()); err != nil {
-		return nil, err
+		return &google_proto.Empty{}, err
 	}
 	am.logger.Infoln("Like created")
 
 	if err := am.queue.PushLikeArtist(in.GetUserId(), in.GetArtistId()); err != nil {
-		return nil, err
+		return &google_proto.Empty{}, err
 	}
 	am.logger.Infoln("Like Pushed to queue")
 

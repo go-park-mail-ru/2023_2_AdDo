@@ -6,6 +6,7 @@ import (
 	log "main/internal/common/logger"
 	proto2 "main/internal/microservices/wave/proto"
 	grpc_wave_server "main/internal/microservices/wave/service/server"
+	track_repository "main/internal/pkg/track/repository/postgresql"
 	wave_repository "main/internal/pkg/wave/repository/postgres"
 	"net"
 	"strconv"
@@ -29,9 +30,10 @@ func main() {
 		logger.Errorln("error connecting database: ", err)
 	}
 
-	waveRepo := wave_repository.NewPostgres(pool, logger)
+	waveRepo := wave_repository.NewRepo(pool, logger)
+	trackRepo := track_repository.NewPostgres(pool, logger)
 
-	waveManager := grpc_wave_server.NewWaveManager(waveRepo, logger)
+	waveManager := grpc_wave_server.NewWaveManager(trackRepo, waveRepo, logger)
 
 	server := grpc.NewServer()
 	proto2.RegisterWaveServiceServer(server, &waveManager)

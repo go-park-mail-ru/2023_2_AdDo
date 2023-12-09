@@ -8,5 +8,4 @@ type UseCase interface {
 
 type PoolRepository interface {
 	SaveTracksToUserPool(userId string, tracks []track.Response) error
-	GetTracksFromUserPool(userId string, count uint32) ([]track.Response, error)
 }

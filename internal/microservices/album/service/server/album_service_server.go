@@ -208,12 +208,12 @@ func (am *AlbumManager) Like(ctx context.Context, in *album_proto.AlbumToUserId)
 	am.logger.Infoln("Album Micros Like entered")
 
 	if err := am.repoAlbum.CreateLike(in.GetUserId(), in.GetAlbumId()); err != nil {
-		return nil, err
+		return &google_proto.Empty{}, err
 	}
 	am.logger.Infoln("Like created")
 
 	if err := am.queue.PushLikeAlbum(in.GetUserId(), in.GetAlbumId()); err != nil {
-		return nil, err
+		return &google_proto.Empty{}, err
 	}
 	am.logger.Infoln("album like added to queue")
 
@@ -236,7 +236,7 @@ func (am *AlbumManager) Unlike(ctx context.Context, in *album_proto.AlbumToUserI
 	am.logger.Infoln("Album Micros Like entered")
 
 	if err := am.repoAlbum.DeleteLike(in.GetUserId(), in.GetAlbumId()); err != nil {
-		return nil, err
+		return &google_proto.Empty{}, err
 	}
 	am.logger.Infoln("Like created")
 

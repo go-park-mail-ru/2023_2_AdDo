@@ -25,14 +25,17 @@ type Response struct {
 
 type UseCase interface {
 	GetUserLikedTracks(userId string) ([]Response, error)
-	Listen(trackId uint64) error
+	Listen(userId string, trackId uint64, dur uint32) error
 	Like(userId string, trackId uint64) error
 	IsLike(userId string, trackId uint64) (bool, error)
 	Unlike(userId string, trackId uint64) error
 }
 
 type Repository interface {
+	DeleteLastTakenFromWave(userId string, tracks []Response) error
+	GetWaveTracks(userId string, count uint32) ([]Response, error)
 	GetByUser(userId string) ([]Response, error)
+	GetByUserForDailyPlaylist(userId string) ([]Response, error)
 	GetByPlaylist(playlistId uint64) ([]Response, error)
 	GetByAlbum(albumId uint64) ([]Response, error)
 	GetByArtist(artistId uint64) ([]Response, error)

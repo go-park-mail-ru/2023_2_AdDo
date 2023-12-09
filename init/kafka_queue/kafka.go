@@ -9,13 +9,7 @@ func NewDefaultConfig() *sarama.Config {
 }
 
 func NewClient(connParam []string) (sarama.Client, error) {
-	client, err := sarama.NewClient(connParam, NewDefaultConfig())
-	if err != nil {
-		defer client.Close()
-		return nil, err
-	}
-
-	return client, nil
+	return sarama.NewClient(connParam, NewDefaultConfig())
 }
 
 func NewConsumer(connParam []string) (sarama.Consumer, error) {

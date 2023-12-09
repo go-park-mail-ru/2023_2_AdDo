@@ -38,10 +38,10 @@ func DeserializeTracks(in *track_proto.TracksResponse) []track.Response {
 	return result
 }
 
-func (c *Client) Listen(trackId uint64) error {
+func (c *Client) Listen(userId string, trackId uint64, dur uint32) error {
 	c.logger.Infoln("Track Client Listen entered")
 
-	if _, err := c.trackManager.Listen(context.Background(), &track_proto.TrackId{TrackId: trackId}); err != nil {
+	if _, err := c.trackManager.Listen(context.Background(), &track_proto.TrackToUserDur{TrackToUser: &track_proto.TrackToUserId{UserId: userId, TrackId: trackId}, Duration: dur}); err != nil {
 		return err
 	}
 

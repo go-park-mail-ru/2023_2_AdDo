@@ -20,7 +20,6 @@ var loggerSingleton = log.Singleton{}
 var KafkaQueryConnection = []string{"kafka:9092"}
 
 const EnvPostgresQueryName = "DATABASE_URL"
-const PathToClusterTracks = ""
 
 func main() {
 	logger := loggerSingleton.GetLogger()
@@ -35,13 +34,8 @@ func main() {
 		logger.Errorln("error connecting kafka: ", err)
 	}
 
-	//cluster, err := cluster_repository.NewInMemory(PathToClusterTracks, logger)
-	//if err != nil {
-	//	logger.Errorln("error loading cluster tracks dump ", err)
-	//}
-
 	activityConsumer := activity_repository_consumer.NewDefault(kafkaConsumer, logger)
-	wavePoolRepository := wave_repository.NewPostgres(pool, logger)
+	wavePoolRepository := wave_repository.NewRepo(pool, logger)
 	recentActivityRepo := activity_repository.NewMemCached()
 
 	candidateConnection, err := grpc.Dial("candidate:8088", grpc.WithTransportCredentials(insecure.NewCredentials()))
