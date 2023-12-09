@@ -7,7 +7,7 @@ import (
 	session_proto "main/internal/microservices/session/proto"
 	grpc_track_server "main/internal/microservices/track/service/server"
 	"main/internal/pkg/activity"
-	"main/internal/pkg/cluster_domain"
+	"main/internal/pkg/cluster"
 	"main/internal/pkg/track"
 )
 

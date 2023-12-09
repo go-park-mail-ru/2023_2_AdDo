@@ -5,20 +5,17 @@ import (
 	"github.com/IBM/sarama"
 	"github.com/sirupsen/logrus"
 	"main/internal/pkg/activity"
-	"main/internal/pkg/cluster_domain"
 )
 
 type Default struct {
-	logger      *logrus.Logger
-	clusterRepo cluster_domain.Repository
-	queue       sarama.Consumer
+	logger *logrus.Logger
+	queue  sarama.Consumer
 }
 
-func NewDefault(c cluster_domain.Repository, q sarama.Consumer, l *logrus.Logger) Default {
+func NewDefault(q sarama.Consumer, l *logrus.Logger) Default {
 	return Default{
-		logger:      l,
-		queue:       q,
-		clusterRepo: c,
+		logger: l,
+		queue:  q,
 	}
 }
 

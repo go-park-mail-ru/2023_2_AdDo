@@ -11,6 +11,10 @@ type Postgres struct {
 	logger *logrus.Logger
 }
 
+func NewPostgres(pool postgres.PgxIFace, logger *logrus.Logger) *Postgres {
+	return &Postgres{Pool: pool, logger: logger}
+}
+
 func (p Postgres) SaveTracksToUserPool(userId string, tracks []track.Response) error {
 	//TODO implement me
 	panic("implement me")
@@ -19,8 +23,4 @@ func (p Postgres) SaveTracksToUserPool(userId string, tracks []track.Response) e
 func (p Postgres) GetTracksFromUserPool(userId string, count uint32) ([]track.Response, error) {
 	//TODO implement me
 	panic("implement me")
-}
-
-func NewPostgres(pool postgres.PgxIFace, logger *logrus.Logger) *Postgres {
-	return &Postgres{Pool: pool, logger: logger}
 }

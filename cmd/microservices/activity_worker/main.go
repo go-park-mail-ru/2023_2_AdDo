@@ -13,7 +13,6 @@ import (
 	"main/internal/pkg/activity/repository/kafka/activity_repository_consumer"
 	activity_repository "main/internal/pkg/activity/repository/memcached"
 	activity_usecase "main/internal/pkg/activity/worker_usecase"
-	cluster_repository "main/internal/pkg/cluster/cluster_repository/in_memory"
 	wave_repository "main/internal/pkg/wave/repository/postgres"
 )
 
@@ -36,12 +35,12 @@ func main() {
 		logger.Errorln("error connecting kafka: ", err)
 	}
 
-	cluster, err := cluster_repository.NewInMemory(PathToClusterTracks, logger)
-	if err != nil {
-		logger.Errorln("error loading cluster tracks dump ", err)
-	}
+	//cluster, err := cluster_repository.NewInMemory(PathToClusterTracks, logger)
+	//if err != nil {
+	//	logger.Errorln("error loading cluster tracks dump ", err)
+	//}
 
-	activityConsumer := activity_repository_consumer.NewDefault(cluster, kafkaConsumer, logger)
+	activityConsumer := activity_repository_consumer.NewDefault(kafkaConsumer, logger)
 	wavePoolRepository := wave_repository.NewPostgres(pool, logger)
 	recentActivityRepo := activity_repository.NewMemCached()
 
