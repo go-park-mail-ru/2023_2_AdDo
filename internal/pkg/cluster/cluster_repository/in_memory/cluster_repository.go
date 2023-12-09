@@ -1,8 +1,9 @@
-package in_memory
+package cluster_repository
 
 import (
 	"encoding/json"
 	"github.com/sirupsen/logrus"
+	"main/internal/pkg/track"
 	"os"
 )
 
@@ -10,6 +11,11 @@ type InMemory struct {
 	Data      [][]float64 `json:"data"`
 	Centroids [][]float64 `json:"centroids"`
 	Labels    []int       `json:"labels"`
+}
+
+func (i InMemory) GetNearestTracks(ids []track.Id, countPerTrack int) ([]track.Id, error) {
+	//TODO implement me
+	panic("implement me")
 }
 
 func NewInMemory(pathToDump string, l *logrus.Logger) (InMemory, error) {

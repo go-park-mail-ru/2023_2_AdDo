@@ -4,7 +4,7 @@
 // - protoc             v3.12.4
 // source: candidate.proto
 
-package candidate
+package proto
 
 import (
 	context "context"
@@ -20,14 +20,16 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	CandidateService_GetCandidatesForUser_FullMethodName = "/CandidateService/GetCandidatesForUser"
+	CandidateService_GetCandidatesForDailyPlaylist_FullMethodName = "/CandidateService/GetCandidatesForDailyPlaylist"
+	CandidateService_GetCandidatesForWave_FullMethodName          = "/CandidateService/GetCandidatesForWave"
 )
 
 // CandidateServiceClient is the client API for CandidateService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type CandidateServiceClient interface {
-	GetCandidatesForUser(ctx context.Context, in *proto.UserId, opts ...grpc.CallOption) (*Candidates, error)
+	GetCandidatesForDailyPlaylist(ctx context.Context, in *proto.UserId, opts ...grpc.CallOption) (*Candidates, error)
+	GetCandidatesForWave(ctx context.Context, in *proto.UserId, opts ...grpc.CallOption) (*Candidates, error)
 }
 
 type candidateServiceClient struct {
@@ -38,9 +40,18 @@ func NewCandidateServiceClient(cc grpc.ClientConnInterface) CandidateServiceClie
 	return &candidateServiceClient{cc}
 }
 
-func (c *candidateServiceClient) GetCandidatesForUser(ctx context.Context, in *proto.UserId, opts ...grpc.CallOption) (*Candidates, error) {
+func (c *candidateServiceClient) GetCandidatesForDailyPlaylist(ctx context.Context, in *proto.UserId, opts ...grpc.CallOption) (*Candidates, error) {
 	out := new(Candidates)
-	err := c.cc.Invoke(ctx, CandidateService_GetCandidatesForUser_FullMethodName, in, out, opts...)
+	err := c.cc.Invoke(ctx, CandidateService_GetCandidatesForDailyPlaylist_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *candidateServiceClient) GetCandidatesForWave(ctx context.Context, in *proto.UserId, opts ...grpc.CallOption) (*Candidates, error) {
+	out := new(Candidates)
+	err := c.cc.Invoke(ctx, CandidateService_GetCandidatesForWave_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -51,7 +62,8 @@ func (c *candidateServiceClient) GetCandidatesForUser(ctx context.Context, in *p
 // All implementations must embed UnimplementedCandidateServiceServer
 // for forward compatibility
 type CandidateServiceServer interface {
-	GetCandidatesForUser(context.Context, *proto.UserId) (*Candidates, error)
+	GetCandidatesForDailyPlaylist(context.Context, *proto.UserId) (*Candidates, error)
+	GetCandidatesForWave(context.Context, *proto.UserId) (*Candidates, error)
 	mustEmbedUnimplementedCandidateServiceServer()
 }
 
@@ -59,8 +71,11 @@ type CandidateServiceServer interface {
 type UnimplementedCandidateServiceServer struct {
 }
 
-func (UnimplementedCandidateServiceServer) GetCandidatesForUser(context.Context, *proto.UserId) (*Candidates, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetCandidatesForUser not implemented")
+func (UnimplementedCandidateServiceServer) GetCandidatesForDailyPlaylist(context.Context, *proto.UserId) (*Candidates, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetCandidatesForDailyPlaylist not implemented")
+}
+func (UnimplementedCandidateServiceServer) GetCandidatesForWave(context.Context, *proto.UserId) (*Candidates, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetCandidatesForWave not implemented")
 }
 func (UnimplementedCandidateServiceServer) mustEmbedUnimplementedCandidateServiceServer() {}
 
@@ -75,20 +90,38 @@ func RegisterCandidateServiceServer(s grpc.ServiceRegistrar, srv CandidateServic
 	s.RegisterService(&CandidateService_ServiceDesc, srv)
 }
 
-func _CandidateService_GetCandidatesForUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _CandidateService_GetCandidatesForDailyPlaylist_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(proto.UserId)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(CandidateServiceServer).GetCandidatesForUser(ctx, in)
+		return srv.(CandidateServiceServer).GetCandidatesForDailyPlaylist(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: CandidateService_GetCandidatesForUser_FullMethodName,
+		FullMethod: CandidateService_GetCandidatesForDailyPlaylist_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CandidateServiceServer).GetCandidatesForUser(ctx, req.(*proto.UserId))
+		return srv.(CandidateServiceServer).GetCandidatesForDailyPlaylist(ctx, req.(*proto.UserId))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _CandidateService_GetCandidatesForWave_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(proto.UserId)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CandidateServiceServer).GetCandidatesForWave(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: CandidateService_GetCandidatesForWave_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CandidateServiceServer).GetCandidatesForWave(ctx, req.(*proto.UserId))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -101,8 +134,12 @@ var CandidateService_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*CandidateServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "GetCandidatesForUser",
-			Handler:    _CandidateService_GetCandidatesForUser_Handler,
+			MethodName: "GetCandidatesForDailyPlaylist",
+			Handler:    _CandidateService_GetCandidatesForDailyPlaylist_Handler,
+		},
+		{
+			MethodName: "GetCandidatesForWave",
+			Handler:    _CandidateService_GetCandidatesForWave_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

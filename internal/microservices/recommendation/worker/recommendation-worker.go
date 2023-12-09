@@ -1,2 +1,0 @@
-package recommendation_worker
-

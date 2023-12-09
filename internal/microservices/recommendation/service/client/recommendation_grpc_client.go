@@ -3,7 +3,6 @@ package recommendation_service_client
 import (
 	"context"
 	"github.com/sirupsen/logrus"
-	candidate "main/internal/microservices/candidate/proto"
 	proto "main/internal/microservices/recommendation/proto"
 	session_proto "main/internal/microservices/session/proto"
 	grpc_track "main/internal/microservices/track/service/client"
@@ -27,9 +26,7 @@ func (c *Client) ClassifyCandidates(userId string, candidates []track.Response) 
 	c.logger.Infoln("Recommendation Client ClassifyCandidates entered")
 
 	candidatesClassifiedAndRanged, err := c.recommendationManager.ClassifyCandidates(context.Background(), &proto.CandidateToUserId{
-		Candidates: &candidate.Candidates{
-			Candidates: grpc_track_server.SerializeTracks(candidates),
-		},
+		Tracks: grpc_track_server.SerializeTracks(candidates),
 		UserId: &session_proto.UserId{UserId: userId},
 	})
 	if err != nil {

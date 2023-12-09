@@ -13,6 +13,21 @@ type Postgres struct {
 	logger *logrus.Logger
 }
 
+func (db *Postgres) GetHotTracks(userId string, count uint8) ([]track.Id, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (db *Postgres) GetLastDayTracks(userId string) ([]track.Id, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (db *Postgres) GetTracksByIds(ids []track.Id) ([]track.Response, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (db *Postgres) CreateListen(userId string, trackId uint64, dur uint32) error {
 	//TODO implement me
 	panic("implement me")

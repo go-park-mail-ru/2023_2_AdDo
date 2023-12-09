@@ -43,6 +43,9 @@ type Repository interface {
 	DeleteLike(userId string, trackId uint64) error
 	AddListen(trackId uint64) error
 	Search(text string) ([]Response, error)
+	GetHotTracks(userId string, count uint8) ([]Id, error)
+	GetLastDayTracks(userId string) ([]Id, error)
+	GetTracksByIds(ids []Id) ([]Response, error)
 }
 
 var (

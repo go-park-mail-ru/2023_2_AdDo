@@ -5,5 +5,6 @@ import (
 )
 
 type UseCase interface {
-	GetCandidateForUser(userId string) ([]track.Response, error)
+	GetCandidateForDaily(userId string) ([]track.Response, error)
+	GetCandidateForWave(userId string) ([]track.Response, error)
 }
