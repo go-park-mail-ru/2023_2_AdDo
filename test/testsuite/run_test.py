@@ -10,6 +10,7 @@ import me_test
 import update_user_info
 import music_test
 import sign_up_test
+import onboarding_test
 
 auth_test = auth_test.AuthTest()
 auth_test.test_auth_unauthorized()
@@ -79,3 +80,7 @@ music_test.test_popular_success()
 
 playlist_test = playlist_test.PlaylistTest()
 playlist_test.test_playlist_use_case_success()
+
+
+onboarding_test = onboarding_test.OnboardingTest()
+onboarding_test.test_onboarding_success()
