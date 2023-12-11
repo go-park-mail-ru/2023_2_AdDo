@@ -18,7 +18,7 @@ import (
 
 const EnvPostgresQueryName = "DATABASE_URL"
 const Port = 8088
-const PathToClusterTracks = ""
+const PathToClusterTracks = "clustering_data.json"
 
 var loggerSingleton = log.Singleton{}
 

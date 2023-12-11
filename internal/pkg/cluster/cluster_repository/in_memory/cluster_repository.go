@@ -113,7 +113,11 @@ func NewInMemory(pathToDump string, l *logrus.Logger) (InMemory, error) {
 	l.Infoln("json parsed successfully")
 
 	var result InMemory
+
 	result.Centroids = dataFromFile.Centroids
+	result.TrackIdToDataIndex = make(map[uint64][]float64)
+	result.ClusterToDataIndexes = make(map[int][]uint64)
+
 	for _, row := range dataFromFile.Data {
 		result.TrackIdToDataIndex[uint64(row[len(row)-1])] = row[:len(row)-1]
 	}
@@ -121,7 +125,7 @@ func NewInMemory(pathToDump string, l *logrus.Logger) (InMemory, error) {
 	for index, label := range dataFromFile.Labels {
 		result.ClusterToDataIndexes[label] = append(result.ClusterToDataIndexes[label], uint64(dataFromFile.Data[index][len(dataFromFile.Data[index])-1]))
 	}
-	l.Infoln("InMemory clusters formed", result)
+	l.Infoln("InMemory clusters formed", result.Centroids)
 
 	return result, nil
 }
