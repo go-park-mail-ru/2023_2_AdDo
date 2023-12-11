@@ -3,7 +3,7 @@ import requests
 import hashlib
 
 url = 'http://localhost:8888/api/v1'
-
+ws_url = 'ws://localhost:8888/api/v1'
 
 def gen_random_valid_register_data():
     username = names.get_full_name().replace(' ', '').lower()

@@ -1,0 +1,38 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: kafka-service
+spec:
+  selector:
+    app: kafka
+  ports:
+    - protocol: TCP
+      port: 9092
+      targetPort: 9092
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kafka-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kafka
+  template:
+    metadata:
+      labels:
+        app: kafka
+    spec:
+      containers:
+        - name: kafka
+          image: kafka:latest
+          ports:
+            - containerPort: 9092
+          env:
+            - name: KAFKA_ADVERTISED_HOST_NAME
+              value: kafka-service
+            - name: KAFKA_ADVERTISED_PORT
+              value: "9092"
