@@ -38,11 +38,19 @@ func DeserializeTracks(in *track_proto.TracksResponse) []track.Response {
 	return result
 }
 
+const MinTimeToListen = 40
+
 func (c *Client) Listen(userId string, trackId uint64, dur uint32) error {
 	c.logger.Infoln("Track Client Listen entered")
 
-	if _, err := c.trackManager.Listen(context.Background(), &track_proto.TrackToUserDur{TrackToUser: &track_proto.TrackToUserId{UserId: userId, TrackId: trackId}, Duration: dur}); err != nil {
-		return err
+	if dur < MinTimeToListen {
+		if _, err := c.trackManager.Skip(context.Background(), &track_proto.TrackToUserDur{TrackToUser: &track_proto.TrackToUserId{UserId: userId, TrackId: trackId}, Duration: dur}); err != nil {
+			return err
+		}
+	} else {
+		if _, err := c.trackManager.Listen(context.Background(), &track_proto.TrackToUserDur{TrackToUser: &track_proto.TrackToUserId{UserId: userId, TrackId: trackId}, Duration: dur}); err != nil {
+			return err
+		}
 	}
 
 	return nil

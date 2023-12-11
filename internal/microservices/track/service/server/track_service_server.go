@@ -74,7 +74,7 @@ func (tm *TrackManager) Skip(ctx context.Context, in *track_proto.TrackToUserDur
 	if err := tm.repoTrack.CreateSkip(in.GetTrackToUser().GetUserId(), in.GetTrackToUser().GetTrackId(), in.GetDuration()); err != nil {
 		return nil, err
 	}
-	tm.logger.Infoln("created listen track")
+	tm.logger.Infoln("created skip track")
 
 	return &google_proto.Empty{}, nil
 }

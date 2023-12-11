@@ -156,7 +156,7 @@ func main() {
 			router_init.NewRoute("/daily", dailyPlaylistHandler.GetDailyPlaylist, http.MethodGet),
 			router_init.NewRoute("/wave", waveHandler.MyWave, http.MethodGet),
 
-			router_init.NewRoute("/listen", trackHandler.Listen, http.MethodPost),
+			router_init.NewRoute("/listen/{id}", trackHandler.Listen, http.MethodPost),
 			router_init.NewRoute("/track/{id}", albumHandler.AlbumWithRequiredTrack, http.MethodGet),
 			router_init.NewRoute("/track/{id}/like", trackHandler.Like, http.MethodPost),
 			router_init.NewRoute("/track/{id}/is_like", trackHandler.IsLike, http.MethodGet),

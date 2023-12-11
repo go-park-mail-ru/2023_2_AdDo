@@ -27,6 +27,10 @@ func NewHandler(track track.UseCase, session session.UseCase, logger *logrus.Log
 	}
 }
 
+type Duration struct {
+	Duration int
+}
+
 // Listen
 //
 //	@Summary		Listen
@@ -64,13 +68,13 @@ func (handler *TrackHandler) Listen(w http.ResponseWriter, r *http.Request) erro
 	}
 	handler.logger.Infoln("got user id by session id")
 
-	dur := 0
+	dur := Duration{}
 	if err := json.NewDecoder(r.Body).Decode(&dur); err != nil {
 		return common_handler.StatusError{Code: http.StatusBadRequest, Err: err}
 	}
 	handler.logger.Infoln("track id decoded")
 
-	if err := handler.trackUseCase.Listen(userId, uint64(trackId), uint32(dur)); err != nil {
+	if err := handler.trackUseCase.Listen(userId, uint64(trackId), uint32(dur.Duration)); err != nil {
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}
 	handler.logger.Infoln("play incremented")

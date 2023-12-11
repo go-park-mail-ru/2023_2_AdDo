@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/bradfitz/gomemcache/memcache"
 	"google.golang.org/grpc"
 	"main/internal/microservices/candidate/proto"
 	candidate_service_server "main/internal/microservices/candidate/service/server"
@@ -39,7 +40,9 @@ func main() {
 		logger.Errorln("error loading cluster tracks dump ", err)
 	}
 
-	recentActivityRepo := activity_repository.NewMemCached()
+	mc := memcache.New("memcached:11211")
+
+	recentActivityRepo := activity_repository.NewMemCached(mc, logger)
 	trackRepository := track_repository.NewPostgres(pool, logger)
 
 	candidateManager := candidate_service_server.NewCandidateManager(&recentActivityRepo, trackRepository, clusterRepo, logger)

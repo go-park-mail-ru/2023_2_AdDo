@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/bradfitz/gomemcache/memcache"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	init_kafka "main/init/kafka_queue"
@@ -34,9 +35,11 @@ func main() {
 		logger.Errorln("error connecting kafka: ", err)
 	}
 
+	mc := memcache.New("memcached:11211")
+
 	activityConsumer := activity_repository_consumer.NewDefault(kafkaConsumer, logger)
 	wavePoolRepository := wave_repository.NewRepo(pool, logger)
-	recentActivityRepo := activity_repository.NewMemCached()
+	recentActivityRepo := activity_repository.NewMemCached(mc, logger)
 
 	candidateConnection, err := grpc.Dial("candidate:8088", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {

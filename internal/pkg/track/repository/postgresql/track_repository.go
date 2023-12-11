@@ -126,8 +126,9 @@ func (db *Postgres) GetTracksByIds(ids []track.Id) ([]track.Response, error) {
 
 func (db *Postgres) CreateListen(userId string, trackId uint64, dur uint32) error {
 	db.logger.Infoln("create listen track repo entered")
-	query := `insert into track_listen (profile_id, track_id, duration, count, creating_data) values ($1, $2, $3, 1) 
-			    on conflict do update set creating_data = now(), duration = duration + $3, count = count + 1`
+	query := `insert into track_listen (profile_id, track_id, duration, count) values ($1, $2, $3, 1) 
+			    on conflict (profile_id, track_id) do update set creating_data = now(), duration = track_listen.duration + $3, count = track_listen.count + 1
+			    where track_listen.profile_id = $1 and track_listen.track_id = $2`
 	_, err := db.Pool.Exec(context.Background(), query, userId, trackId, dur)
 	if err != nil {
 		db.logger.Infoln("create listen error", err)
@@ -140,8 +141,9 @@ func (db *Postgres) CreateListen(userId string, trackId uint64, dur uint32) erro
 func (db *Postgres) CreateSkip(userId string, trackId uint64, dur uint32) error {
 	db.logger.Infoln("create skip track repo entered")
 
-	query := `insert into track_skip (profile_id, track_id, duration, count, creating_data) values ($1, $2, $3, 1) 
-			    on conflict do update set creating_data = now(), duration = duration + $3, count = count + 1`
+	query := `insert into track_skip (profile_id, track_id, duration, count) values ($1, $2, $3, 1) 
+			    on conflict (profile_id, track_id) do update set creating_data = now(), duration = track_skip.duration + $3, count = track_skip.count + 1 
+			    where track_skip.profile_id = $1 and track_skip.track_id = $2`
 	_, err := db.Pool.Exec(context.Background(), query, userId, trackId, dur)
 	if err != nil {
 		db.logger.Infoln("create skip error", err)
