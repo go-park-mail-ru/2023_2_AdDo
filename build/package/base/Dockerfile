@@ -9,6 +9,7 @@ COPY init init
 COPY internal internal
 COPY cmd cmd
 COPY api api
+COPY db /db
 COPY go.mod go.sum ./
 
 RUN go mod download \
