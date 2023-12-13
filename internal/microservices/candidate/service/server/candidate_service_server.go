@@ -51,7 +51,7 @@ func (cm *CandidateManager) GetCandidatesForDailyPlaylist(ctx context.Context, i
 		return nil, err
 	}
 
-	countPerTrack := (len(hotTracks) + len(lastDayTracks)) / DailyTrackCandidatePoolSize
+	countPerTrack := DailyTrackCandidatePoolSize / (len(hotTracks) + len(lastDayTracks))
 
 	tracksByHot, err := cm.clusterRepo.GetNearestTracks(hotTracks, countPerTrack)
 	if err != nil {
@@ -109,7 +109,7 @@ func (cm *CandidateManager) GetCandidatesForWave(ctx context.Context, id *sessio
 		recentActivityIds = append(recentActivityIds, track.Id{Id: act.TrackId})
 	}
 
-	countPerTrack := (len(hotTracks) + len(recentActivity)) / WaveTrackCandidatePoolSize
+	countPerTrack := WaveTrackCandidatePoolSize / (len(hotTracks) + len(recentActivity))
 
 	tracksByHot, err := cm.clusterRepo.GetNearestTracks(hotTracks, countPerTrack)
 	if err != nil {

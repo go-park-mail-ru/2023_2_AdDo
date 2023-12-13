@@ -172,8 +172,8 @@ services:
       DATABASE_URL: "${DATABASE_URL}"
     command: "/images"
 
-  activity_worker:
-    image: registry.musicon.space/activity_worker:test
+  activity-worker:
+    image: registry.musicon.space/activity-worker:test
     depends_on:
       common-service-waiter:
         condition: service_completed_successfully
@@ -199,8 +199,8 @@ services:
       DATABASE_URL: "${DATABASE_URL}"
     command: "/onboarding"
 
-  daily_playlist_worker:
-    image: registry.musicon.space/daily_playlist_worker:test
+  daily-playlist-worker:
+    image: registry.musicon.space/daily-playlist-worker:test
     depends_on:
       common-service-waiter:
         condition: service_completed_successfully
@@ -208,8 +208,8 @@ services:
       DATABASE_URL: "${DATABASE_URL}"
     command: "/daily_playlist_worker"
 
-  daily_playlist_service:
-    image: registry.musicon.space/daily_playlist_service:test
+  daily-playlist-service:
+    image: registry.musicon.space/daily-playlist-service:test
     depends_on:
       common-service-waiter:
         condition: service_completed_successfully
@@ -252,13 +252,13 @@ services:
         condition: service_started
       images:
         condition: service_started
-      activity_worker:
+      activity-worker:
         condition: service_started
       candidate:
         condition: service_started
-      daily_playlist_service:
+      daily-playlist-service:
         condition: service_started
-      daily_playlist_worker:
+      daily-playlist-worker:
         condition: service_started
       onboarding:
         condition: service_started

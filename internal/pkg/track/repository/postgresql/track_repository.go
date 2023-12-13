@@ -19,13 +19,13 @@ func NewPostgres(pool postgres.PgxIFace, logger *logrus.Logger) *Postgres {
 
 func (db *Postgres) GetRotationTrackForAlbum(id uint64) (uint64, error) {
 	db.logger.Infoln("Get Rotation For album entered")
-	query := `select track.id from track join album_track on track.id = album_track.track_id where album_id = $1 order by track.play_count desc limit 1`
+	query := `select track.id from track join album_track on track.id = album_track.track_id where album_track.album_id = $1 order by track.play_count desc limit 1`
 	return db.getRotation(query, id)
 }
 
 func (db *Postgres) GetRotationTrackForArtist(id uint64) (uint64, error) {
 	db.logger.Infoln("Get Rotation For artist entered")
-	query := `select track.id from track join artist_track on track.id = artist_track.track_id where artist_id = $1 order by track.play_count desc limit 1`
+	query := `select track.id from track join artist_track on track.id = artist_track.track_id where artist_track.artist_id = $1 order by track.play_count desc limit 1`
 	return db.getRotation(query, id)
 }
 

@@ -72,7 +72,7 @@ func (in InMemory) getNearestTracks(id track.Id, count int) ([]track.Id, error) 
 	sort.Slice(vec, func(i, j int) bool {
 		return vec[i].Distance < vec[j].Distance
 	})
-	in.logger.Infoln("sorted cev with dist ", vec)
+	in.logger.Infoln("sorted vec with dist ", vec)
 
 	result := make([]track.Id, 0)
 	for index, t := range vec {
@@ -87,7 +87,7 @@ func (in InMemory) getNearestTracks(id track.Id, count int) ([]track.Id, error) 
 }
 
 func (in InMemory) GetNearestTracks(ids []track.Id, countPerTrack int) ([]track.Id, error) {
-	in.logger.Infoln("Get Nearest tracks entered with", ids)
+	in.logger.Infoln("Get Nearest tracks entered with", ids, "for every track count: ", countPerTrack)
 	result := make([]track.Id, 0)
 	for _, id := range ids {
 		nearestForTrack, err := in.getNearestTracks(id, countPerTrack)
