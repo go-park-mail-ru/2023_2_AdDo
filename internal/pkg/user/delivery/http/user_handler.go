@@ -224,7 +224,7 @@ func (handler *UserHandler) Me(w http.ResponseWriter, r *http.Request) error {
 	}
 	handler.logger.Infoln("Got user info from db successfully")
 
-	if err = response.RenderJSON(w, user); err != nil {
+	if err = response.RenderEasyJSON(w, user); err != nil {
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}
 	handler.logger.Infoln("Response body rendered")
@@ -277,7 +277,7 @@ func (handler *UserHandler) UploadAvatar(w http.ResponseWriter, r *http.Request)
 	}
 	handler.logger.Infoln("images uploaded")
 
-	if err = response.RenderJSON(w, user_domain.UploadAvatarResponse{Url: url}); err != nil {
+	if err = response.RenderEasyJSON(w, user_domain.UploadAvatarResponse{Url: url}); err != nil {
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}
 	handler.logger.Infoln("response formed: ", url)

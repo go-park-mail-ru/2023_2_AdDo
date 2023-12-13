@@ -56,7 +56,7 @@ func (handler *ArtistHandler) ArtistInfo(w http.ResponseWriter, r *http.Request)
 	}
 	handler.logger.Infoln("Got artist from use case")
 
-	if err = response.RenderJSON(w, artistInfo); err != nil {
+	if err = response.RenderEasyJSON(w, artistInfo); err != nil {
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}
 	handler.logger.Infoln("response  formed")
@@ -154,7 +154,7 @@ func (handler *ArtistHandler) IsLike(w http.ResponseWriter, r *http.Request) err
 	}
 	handler.logger.Infoln("User like checked")
 
-	if err = response.RenderJSON(w, response.IsLiked{IsLiked: isLiked}); err != nil {
+	if err = response.RenderEasyJSON(w, response.IsLiked{IsLiked: isLiked}); err != nil {
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}
 	handler.logger.Infoln("response  formed")
@@ -224,7 +224,7 @@ func (handler *ArtistHandler) FullSearch(w http.ResponseWriter, r *http.Request)
 	}
 	handler.logger.Infoln("got response from useCase")
 
-	if err = response.RenderJSON(w, result); err != nil {
+	if err = response.RenderEasyJSON(w, result); err != nil {
 		return common_handler.StatusError{Code: http.StatusNotFound, Err: err}
 	}
 
@@ -264,7 +264,7 @@ func (handler *ArtistHandler) CollectionArtist(w http.ResponseWriter, r *http.Re
 		return common_handler.StatusError{Code: http.StatusUnauthorized, Err: err}
 	}
 
-	if err = response.RenderJSON(w, result); err != nil {
+	if err = response.RenderEasyJSON(w, result); err != nil {
 		return common_handler.StatusError{Code: http.StatusNotFound, Err: err}
 	}
 	return nil

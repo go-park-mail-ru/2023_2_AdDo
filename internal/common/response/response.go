@@ -2,6 +2,7 @@ package response
 
 import (
 	"encoding/json"
+	"github.com/mailru/easyjson"
 	"main/internal/pkg/session"
 	"net/http"
 	"time"
@@ -21,6 +22,17 @@ func GetCookie(r *http.Request) (string, error) {
 
 func RenderJSON(w http.ResponseWriter, v any) error {
 	jsonResponse, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	_, err = w.Write(jsonResponse)
+	return err
+}
+
+func RenderEasyJSON(w http.ResponseWriter, v easyjson.Marshaler) error {
+	jsonResponse, err := easyjson.Marshal(v)
 	if err != nil {
 		return err
 	}

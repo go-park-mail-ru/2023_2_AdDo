@@ -150,7 +150,7 @@ func (handler *TrackHandler) IsLike(w http.ResponseWriter, r *http.Request) erro
 	}
 	handler.logger.Infoln("like for track ", trackId, "checked")
 
-	if err = response.RenderJSON(w, response.IsLiked{IsLiked: isLiked}); err != nil {
+	if err = response.RenderEasyJSON(w, response.IsLiked{IsLiked: isLiked}); err != nil {
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}
 	handler.logger.Infoln("response  formed")
@@ -240,7 +240,7 @@ func (handler *TrackHandler) GetUserTracks(w http.ResponseWriter, r *http.Reques
 	}
 	handler.logger.Infoln("liked tracks for user ", userId, "get")
 
-	if err = response.RenderJSON(w, track.LikedTracks{Tracks: result}); err != nil {
+	if err = response.RenderEasyJSON(w, track.LikedTracks{Tracks: result}); err != nil {
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}
 	handler.logger.Infoln("response  formed")

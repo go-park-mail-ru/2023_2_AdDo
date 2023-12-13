@@ -70,7 +70,7 @@ func (handler *Handler) Create(w http.ResponseWriter, r *http.Request) error {
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}
 
-	if err = response.RenderJSON(w, result); err != nil {
+	if err = response.RenderEasyJSON(w, result); err != nil {
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}
 
@@ -116,7 +116,7 @@ func (handler *Handler) Get(w http.ResponseWriter, r *http.Request) error {
 		return common_handler.StatusError{Code: http.StatusNotFound, Err: err}
 	}
 
-	if err = response.RenderJSON(w, result); err != nil {
+	if err = response.RenderEasyJSON(w, result); err != nil {
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}
 	return nil
@@ -167,7 +167,7 @@ func (handler *Handler) IsCreator(w http.ResponseWriter, r *http.Request) error 
 	}
 	handler.logger.Infoln("Checked whether the user is creator of playlist")
 
-	if err = response.RenderJSON(w, playlist.IsCreator{IsCreator: isCreator}); err != nil {
+	if err = response.RenderEasyJSON(w, playlist.IsCreator{IsCreator: isCreator}); err != nil {
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}
 	handler.logger.Infoln("response  formed")
@@ -438,7 +438,7 @@ func (handler *Handler) IsLike(w http.ResponseWriter, r *http.Request) error {
 	}
 	handler.logger.Infoln("User like checked")
 
-	if err = response.RenderJSON(w, response.IsLiked{IsLiked: isLiked}); err != nil {
+	if err = response.RenderEasyJSON(w, response.IsLiked{IsLiked: isLiked}); err != nil {
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}
 	handler.logger.Infoln("response  formed")

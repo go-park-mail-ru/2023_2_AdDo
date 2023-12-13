@@ -149,7 +149,7 @@ func (handler *AlbumHandler) AlbumTracks(w http.ResponseWriter, r *http.Request)
 	}
 	handler.logger.Infoln("got album by id")
 
-	if err = response.RenderJSON(w, result); err != nil {
+	if err = response.RenderEasyJSON(w, result); err != nil {
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}
 	handler.logger.Infoln("formed response")
@@ -185,7 +185,7 @@ func (handler *AlbumHandler) AlbumWithRequiredTrack(w http.ResponseWriter, r *ht
 	}
 	handler.logger.Infoln("got album with required track by track id")
 
-	if err = response.RenderJSON(w, result); err != nil {
+	if err = response.RenderEasyJSON(w, result); err != nil {
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}
 	handler.logger.Infoln("formed response")
@@ -294,7 +294,7 @@ func (handler *AlbumHandler) IsLike(w http.ResponseWriter, r *http.Request) erro
 	}
 	handler.logger.Infoln("artist like checked")
 
-	if err = response.RenderJSON(w, response.IsLiked{IsLiked: isLiked}); err != nil {
+	if err = response.RenderEasyJSON(w, response.IsLiked{IsLiked: isLiked}); err != nil {
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}
 	handler.logger.Infoln("response  formed")
@@ -382,7 +382,7 @@ func (handler *AlbumHandler) CollectionAlbum(w http.ResponseWriter, r *http.Requ
 		return common_handler.StatusError{Code: http.StatusUnauthorized, Err: err}
 	}
 
-	if err = response.RenderJSON(w, result); err != nil {
+	if err = response.RenderEasyJSON(w, result); err != nil {
 		return common_handler.StatusError{Code: http.StatusNotFound, Err: err}
 	}
 	return nil
