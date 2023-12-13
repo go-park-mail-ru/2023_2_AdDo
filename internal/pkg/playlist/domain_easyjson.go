@@ -137,7 +137,7 @@ func easyjson3e1fa5ecDecodeMainInternalPkgPlaylist1(in *jlexer.Lexer, out *Respo
 				}
 				for !in.IsDelim(']') {
 					var v1 track.Response
-					easyjson3e1fa5ecDecodeMainInternalPkgTrack(in, &v1)
+					(v1).UnmarshalEasyJSON(in)
 					out.Tracks = append(out.Tracks, v1)
 					in.WantComma()
 				}
@@ -193,7 +193,7 @@ func easyjson3e1fa5ecEncodeMainInternalPkgPlaylist1(out *jwriter.Writer, in Resp
 				if v2 > 0 {
 					out.RawByte(',')
 				}
-				easyjson3e1fa5ecEncodeMainInternalPkgTrack(out, v3)
+				(v3).MarshalEasyJSON(out)
 			}
 			out.RawByte(']')
 		}
@@ -224,7 +224,7 @@ func (v *Response) UnmarshalJSON(data []byte) error {
 func (v *Response) UnmarshalEasyJSON(l *jlexer.Lexer) {
 	easyjson3e1fa5ecDecodeMainInternalPkgPlaylist1(l, v)
 }
-func easyjson3e1fa5ecDecodeMainInternalPkgTrack(in *jlexer.Lexer, out *track.Response) {
+func easyjson3e1fa5ecDecodeMainInternalPkgPlaylist2(in *jlexer.Lexer, out *Playlists) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -243,22 +243,29 @@ func easyjson3e1fa5ecDecodeMainInternalPkgTrack(in *jlexer.Lexer, out *track.Res
 			continue
 		}
 		switch key {
-		case "Id":
-			out.Id = uint64(in.Uint64())
-		case "ArtistId":
-			out.ArtistId = uint64(in.Uint64())
-		case "Name":
-			out.Name = string(in.String())
-		case "Preview":
-			out.Preview = string(in.String())
-		case "Content":
-			out.Content = string(in.String())
-		case "ArtistName":
-			out.ArtistName = string(in.String())
-		case "Duration":
-			out.Duration = string(in.String())
-		case "IsLiked":
-			out.IsLiked = bool(in.Bool())
+		case "Playlists":
+			if in.IsNull() {
+				in.Skip()
+				out.Playlists = nil
+			} else {
+				in.Delim('[')
+				if out.Playlists == nil {
+					if !in.IsDelim(']') {
+						out.Playlists = make([]Base, 0, 1)
+					} else {
+						out.Playlists = []Base{}
+					}
+				} else {
+					out.Playlists = (out.Playlists)[:0]
+				}
+				for !in.IsDelim(']') {
+					var v4 Base
+					(v4).UnmarshalEasyJSON(in)
+					out.Playlists = append(out.Playlists, v4)
+					in.WantComma()
+				}
+				in.Delim(']')
+			}
 		default:
 			in.SkipRecursive()
 		}
@@ -269,53 +276,53 @@ func easyjson3e1fa5ecDecodeMainInternalPkgTrack(in *jlexer.Lexer, out *track.Res
 		in.Consumed()
 	}
 }
-func easyjson3e1fa5ecEncodeMainInternalPkgTrack(out *jwriter.Writer, in track.Response) {
+func easyjson3e1fa5ecEncodeMainInternalPkgPlaylist2(out *jwriter.Writer, in Playlists) {
 	out.RawByte('{')
 	first := true
 	_ = first
 	{
-		const prefix string = ",\"Id\":"
+		const prefix string = ",\"Playlists\":"
 		out.RawString(prefix[1:])
-		out.Uint64(uint64(in.Id))
-	}
-	{
-		const prefix string = ",\"ArtistId\":"
-		out.RawString(prefix)
-		out.Uint64(uint64(in.ArtistId))
-	}
-	{
-		const prefix string = ",\"Name\":"
-		out.RawString(prefix)
-		out.String(string(in.Name))
-	}
-	{
-		const prefix string = ",\"Preview\":"
-		out.RawString(prefix)
-		out.String(string(in.Preview))
-	}
-	{
-		const prefix string = ",\"Content\":"
-		out.RawString(prefix)
-		out.String(string(in.Content))
-	}
-	{
-		const prefix string = ",\"ArtistName\":"
-		out.RawString(prefix)
-		out.String(string(in.ArtistName))
-	}
-	{
-		const prefix string = ",\"Duration\":"
-		out.RawString(prefix)
-		out.String(string(in.Duration))
-	}
-	{
-		const prefix string = ",\"IsLiked\":"
-		out.RawString(prefix)
-		out.Bool(bool(in.IsLiked))
+		if in.Playlists == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
+			out.RawString("null")
+		} else {
+			out.RawByte('[')
+			for v5, v6 := range in.Playlists {
+				if v5 > 0 {
+					out.RawByte(',')
+				}
+				(v6).MarshalEasyJSON(out)
+			}
+			out.RawByte(']')
+		}
 	}
 	out.RawByte('}')
 }
-func easyjson3e1fa5ecDecodeMainInternalPkgPlaylist2(in *jlexer.Lexer, out *Name) {
+
+// MarshalJSON supports json.Marshaler interface
+func (v Playlists) MarshalJSON() ([]byte, error) {
+	w := jwriter.Writer{}
+	easyjson3e1fa5ecEncodeMainInternalPkgPlaylist2(&w, v)
+	return w.Buffer.BuildBytes(), w.Error
+}
+
+// MarshalEasyJSON supports easyjson.Marshaler interface
+func (v Playlists) MarshalEasyJSON(w *jwriter.Writer) {
+	easyjson3e1fa5ecEncodeMainInternalPkgPlaylist2(w, v)
+}
+
+// UnmarshalJSON supports json.Unmarshaler interface
+func (v *Playlists) UnmarshalJSON(data []byte) error {
+	r := jlexer.Lexer{Data: data}
+	easyjson3e1fa5ecDecodeMainInternalPkgPlaylist2(&r, v)
+	return r.Error()
+}
+
+// UnmarshalEasyJSON supports easyjson.Unmarshaler interface
+func (v *Playlists) UnmarshalEasyJSON(l *jlexer.Lexer) {
+	easyjson3e1fa5ecDecodeMainInternalPkgPlaylist2(l, v)
+}
+func easyjson3e1fa5ecDecodeMainInternalPkgPlaylist3(in *jlexer.Lexer, out *Name) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -346,7 +353,7 @@ func easyjson3e1fa5ecDecodeMainInternalPkgPlaylist2(in *jlexer.Lexer, out *Name)
 		in.Consumed()
 	}
 }
-func easyjson3e1fa5ecEncodeMainInternalPkgPlaylist2(out *jwriter.Writer, in Name) {
+func easyjson3e1fa5ecEncodeMainInternalPkgPlaylist3(out *jwriter.Writer, in Name) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -361,27 +368,27 @@ func easyjson3e1fa5ecEncodeMainInternalPkgPlaylist2(out *jwriter.Writer, in Name
 // MarshalJSON supports json.Marshaler interface
 func (v Name) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjson3e1fa5ecEncodeMainInternalPkgPlaylist2(&w, v)
+	easyjson3e1fa5ecEncodeMainInternalPkgPlaylist3(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v Name) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjson3e1fa5ecEncodeMainInternalPkgPlaylist2(w, v)
+	easyjson3e1fa5ecEncodeMainInternalPkgPlaylist3(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *Name) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjson3e1fa5ecDecodeMainInternalPkgPlaylist2(&r, v)
+	easyjson3e1fa5ecDecodeMainInternalPkgPlaylist3(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *Name) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjson3e1fa5ecDecodeMainInternalPkgPlaylist2(l, v)
+	easyjson3e1fa5ecDecodeMainInternalPkgPlaylist3(l, v)
 }
-func easyjson3e1fa5ecDecodeMainInternalPkgPlaylist3(in *jlexer.Lexer, out *IsCreator) {
+func easyjson3e1fa5ecDecodeMainInternalPkgPlaylist4(in *jlexer.Lexer, out *IsCreator) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -412,7 +419,7 @@ func easyjson3e1fa5ecDecodeMainInternalPkgPlaylist3(in *jlexer.Lexer, out *IsCre
 		in.Consumed()
 	}
 }
-func easyjson3e1fa5ecEncodeMainInternalPkgPlaylist3(out *jwriter.Writer, in IsCreator) {
+func easyjson3e1fa5ecEncodeMainInternalPkgPlaylist4(out *jwriter.Writer, in IsCreator) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -427,27 +434,27 @@ func easyjson3e1fa5ecEncodeMainInternalPkgPlaylist3(out *jwriter.Writer, in IsCr
 // MarshalJSON supports json.Marshaler interface
 func (v IsCreator) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjson3e1fa5ecEncodeMainInternalPkgPlaylist3(&w, v)
+	easyjson3e1fa5ecEncodeMainInternalPkgPlaylist4(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v IsCreator) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjson3e1fa5ecEncodeMainInternalPkgPlaylist3(w, v)
+	easyjson3e1fa5ecEncodeMainInternalPkgPlaylist4(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *IsCreator) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjson3e1fa5ecDecodeMainInternalPkgPlaylist3(&r, v)
+	easyjson3e1fa5ecDecodeMainInternalPkgPlaylist4(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *IsCreator) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjson3e1fa5ecDecodeMainInternalPkgPlaylist3(l, v)
+	easyjson3e1fa5ecDecodeMainInternalPkgPlaylist4(l, v)
 }
-func easyjson3e1fa5ecDecodeMainInternalPkgPlaylist4(in *jlexer.Lexer, out *Id) {
+func easyjson3e1fa5ecDecodeMainInternalPkgPlaylist5(in *jlexer.Lexer, out *Id) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -478,7 +485,7 @@ func easyjson3e1fa5ecDecodeMainInternalPkgPlaylist4(in *jlexer.Lexer, out *Id) {
 		in.Consumed()
 	}
 }
-func easyjson3e1fa5ecEncodeMainInternalPkgPlaylist4(out *jwriter.Writer, in Id) {
+func easyjson3e1fa5ecEncodeMainInternalPkgPlaylist5(out *jwriter.Writer, in Id) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -493,27 +500,27 @@ func easyjson3e1fa5ecEncodeMainInternalPkgPlaylist4(out *jwriter.Writer, in Id) 
 // MarshalJSON supports json.Marshaler interface
 func (v Id) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjson3e1fa5ecEncodeMainInternalPkgPlaylist4(&w, v)
+	easyjson3e1fa5ecEncodeMainInternalPkgPlaylist5(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v Id) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjson3e1fa5ecEncodeMainInternalPkgPlaylist4(w, v)
+	easyjson3e1fa5ecEncodeMainInternalPkgPlaylist5(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *Id) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjson3e1fa5ecDecodeMainInternalPkgPlaylist4(&r, v)
+	easyjson3e1fa5ecDecodeMainInternalPkgPlaylist5(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *Id) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjson3e1fa5ecDecodeMainInternalPkgPlaylist4(l, v)
+	easyjson3e1fa5ecDecodeMainInternalPkgPlaylist5(l, v)
 }
-func easyjson3e1fa5ecDecodeMainInternalPkgPlaylist5(in *jlexer.Lexer, out *Base) {
+func easyjson3e1fa5ecDecodeMainInternalPkgPlaylist6(in *jlexer.Lexer, out *Base) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -550,7 +557,7 @@ func easyjson3e1fa5ecDecodeMainInternalPkgPlaylist5(in *jlexer.Lexer, out *Base)
 		in.Consumed()
 	}
 }
-func easyjson3e1fa5ecEncodeMainInternalPkgPlaylist5(out *jwriter.Writer, in Base) {
+func easyjson3e1fa5ecEncodeMainInternalPkgPlaylist6(out *jwriter.Writer, in Base) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -580,23 +587,23 @@ func easyjson3e1fa5ecEncodeMainInternalPkgPlaylist5(out *jwriter.Writer, in Base
 // MarshalJSON supports json.Marshaler interface
 func (v Base) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjson3e1fa5ecEncodeMainInternalPkgPlaylist5(&w, v)
+	easyjson3e1fa5ecEncodeMainInternalPkgPlaylist6(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v Base) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjson3e1fa5ecEncodeMainInternalPkgPlaylist5(w, v)
+	easyjson3e1fa5ecEncodeMainInternalPkgPlaylist6(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *Base) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjson3e1fa5ecDecodeMainInternalPkgPlaylist5(&r, v)
+	easyjson3e1fa5ecDecodeMainInternalPkgPlaylist6(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *Base) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjson3e1fa5ecDecodeMainInternalPkgPlaylist5(l, v)
+	easyjson3e1fa5ecDecodeMainInternalPkgPlaylist6(l, v)
 }

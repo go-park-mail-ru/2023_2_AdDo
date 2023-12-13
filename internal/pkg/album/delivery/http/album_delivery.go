@@ -2,6 +2,7 @@ package album_delivery
 
 import (
 	"github.com/gorilla/mux"
+	"github.com/mailru/easyjson"
 	"github.com/sirupsen/logrus"
 	"main/internal/common/handler"
 	"main/internal/common/response"
@@ -149,7 +150,7 @@ func (handler *AlbumHandler) AlbumTracks(w http.ResponseWriter, r *http.Request)
 	}
 	handler.logger.Infoln("got album by id")
 
-	if err = response.RenderEasyJSON(w, result); err != nil {
+	if _, _, err = easyjson.MarshalToHTTPResponseWriter(result, w); err != nil {
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}
 	handler.logger.Infoln("formed response")
@@ -185,7 +186,7 @@ func (handler *AlbumHandler) AlbumWithRequiredTrack(w http.ResponseWriter, r *ht
 	}
 	handler.logger.Infoln("got album with required track by track id")
 
-	if err = response.RenderEasyJSON(w, result); err != nil {
+	if _, _, err = easyjson.MarshalToHTTPResponseWriter(result, w); err != nil {
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}
 	handler.logger.Infoln("formed response")
@@ -196,7 +197,7 @@ func (handler *AlbumHandler) AlbumWithRequiredTrack(w http.ResponseWriter, r *ht
 func (handler *AlbumHandler) handleQuery(albums []album.Response, w http.ResponseWriter, _ *http.Request) error {
 	handler.logger.Infoln("handle query entered")
 
-	if err := response.RenderJSON(w, albums); err != nil {
+	if _, _, err := easyjson.MarshalToHTTPResponseWriter(album.Albums{Albums: albums}, w); err != nil {
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}
 	handler.logger.Infoln("formed response")
@@ -294,7 +295,7 @@ func (handler *AlbumHandler) IsLike(w http.ResponseWriter, r *http.Request) erro
 	}
 	handler.logger.Infoln("artist like checked")
 
-	if err = response.RenderEasyJSON(w, response.IsLiked{IsLiked: isLiked}); err != nil {
+	if _, _, err = easyjson.MarshalToHTTPResponseWriter(response.IsLiked{IsLiked: isLiked}, w); err != nil {
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}
 	handler.logger.Infoln("response  formed")
@@ -382,7 +383,7 @@ func (handler *AlbumHandler) CollectionAlbum(w http.ResponseWriter, r *http.Requ
 		return common_handler.StatusError{Code: http.StatusUnauthorized, Err: err}
 	}
 
-	if err = response.RenderEasyJSON(w, result); err != nil {
+	if _, _, err = easyjson.MarshalToHTTPResponseWriter(result, w); err != nil {
 		return common_handler.StatusError{Code: http.StatusNotFound, Err: err}
 	}
 	return nil

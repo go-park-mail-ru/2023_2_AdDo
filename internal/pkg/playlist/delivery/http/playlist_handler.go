@@ -1,8 +1,8 @@
 package playlist_delivery
 
 import (
-	"encoding/json"
 	"github.com/gorilla/mux"
+	"github.com/mailru/easyjson"
 	"github.com/sirupsen/logrus"
 	common_handler "main/internal/common/handler"
 	"main/internal/common/response"
@@ -60,9 +60,6 @@ func (handler *Handler) Create(w http.ResponseWriter, r *http.Request) error {
 	handler.logger.Infoln("Got user id")
 
 	var base playlist.Base
-	// if err := json.NewDecoder(r.Body).Decode(&base); err != nil {
-	// 	return common_handler.StatusError{Code: http.StatusBadRequest, Err: err}
-	// }
 	base.AuthorId = userId
 
 	result, err := handler.playlistUseCase.Create(base)
@@ -70,7 +67,7 @@ func (handler *Handler) Create(w http.ResponseWriter, r *http.Request) error {
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}
 
-	if err = response.RenderEasyJSON(w, result); err != nil {
+	if _, _, err = easyjson.MarshalToHTTPResponseWriter(result, w); err != nil {
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}
 
@@ -116,7 +113,7 @@ func (handler *Handler) Get(w http.ResponseWriter, r *http.Request) error {
 		return common_handler.StatusError{Code: http.StatusNotFound, Err: err}
 	}
 
-	if err = response.RenderEasyJSON(w, result); err != nil {
+	if _, _, err = easyjson.MarshalToHTTPResponseWriter(result, w); err != nil {
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}
 	return nil
@@ -167,7 +164,7 @@ func (handler *Handler) IsCreator(w http.ResponseWriter, r *http.Request) error 
 	}
 	handler.logger.Infoln("Checked whether the user is creator of playlist")
 
-	if err = response.RenderEasyJSON(w, playlist.IsCreator{IsCreator: isCreator}); err != nil {
+	if _, _, err = easyjson.MarshalToHTTPResponseWriter(playlist.IsCreator{IsCreator: isCreator}, w); err != nil {
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}
 	handler.logger.Infoln("response  formed")
@@ -204,7 +201,7 @@ func (handler *Handler) AddTrack(w http.ResponseWriter, r *http.Request) error {
 	handler.logger.Infoln("Parsed playlistId from Vars")
 
 	var ids track.Id
-	if err := json.NewDecoder(r.Body).Decode(&ids); err != nil {
+	if err = easyjson.UnmarshalFromReader(r.Body, &ids); err != nil {
 		return common_handler.StatusError{Code: http.StatusBadRequest, Err: err}
 	}
 	handler.logger.Infoln("Got playlist and track ids")
@@ -246,7 +243,7 @@ func (handler *Handler) RemoveTrack(w http.ResponseWriter, r *http.Request) erro
 	handler.logger.Infoln("Parsed playlistId from Vars")
 
 	var ids track.Id
-	if err := json.NewDecoder(r.Body).Decode(&ids); err != nil {
+	if err = easyjson.UnmarshalFromReader(r.Body, &ids); err != nil {
 		return common_handler.StatusError{Code: http.StatusBadRequest, Err: err}
 	}
 	handler.logger.Infoln("Got playlist and track ids")
@@ -329,7 +326,7 @@ func (handler *Handler) UpdateName(w http.ResponseWriter, r *http.Request) error
 	handler.logger.Infoln("Parsed playlistId from Vars")
 
 	var title playlist.Name
-	if err := json.NewDecoder(r.Body).Decode(&title); err != nil {
+	if err = easyjson.UnmarshalFromReader(r.Body, &title); err != nil {
 		return common_handler.StatusError{Code: http.StatusBadRequest, Err: err}
 	}
 	handler.logger.Infoln("Got playlist and new title")
@@ -438,7 +435,7 @@ func (handler *Handler) IsLike(w http.ResponseWriter, r *http.Request) error {
 	}
 	handler.logger.Infoln("User like checked")
 
-	if err = response.RenderEasyJSON(w, response.IsLiked{IsLiked: isLiked}); err != nil {
+	if _, _, err = easyjson.MarshalToHTTPResponseWriter(response.IsLiked{IsLiked: isLiked}, w); err != nil {
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}
 	handler.logger.Infoln("response  formed")
@@ -628,7 +625,7 @@ func (handler *Handler) CollectionPlaylist(w http.ResponseWriter, r *http.Reques
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}
 
-	if err = response.RenderJSON(w, result); err != nil {
+	if _, _, err = easyjson.MarshalToHTTPResponseWriter(playlist.Playlists{Playlists: result}, w); err != nil {
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}
 	handler.logger.Infoln("response  formed")
@@ -658,7 +655,7 @@ func (handler *Handler) UserPlaylists(w http.ResponseWriter, r *http.Request) er
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}
 
-	if err = response.RenderJSON(w, result); err != nil {
+	if _, _, err = easyjson.MarshalToHTTPResponseWriter(playlist.Playlists{Playlists: result}, w); err != nil {
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}
 	handler.logger.Infoln("response  formed")
