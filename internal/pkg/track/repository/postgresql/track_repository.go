@@ -17,6 +17,37 @@ func NewPostgres(pool postgres.PgxIFace, logger *logrus.Logger) *Postgres {
 	return &Postgres{Pool: pool, logger: logger}
 }
 
+func (db *Postgres) GetRotationTrackForAlbum(id uint64) (uint64, error) {
+	db.logger.Infoln("Get Rotation For album entered")
+	query := `select track.id from track join album_track on track.id = album_track.track_id where album_id = $1 order by track.play_count desc limit 1`
+	return db.getRotation(query, id)
+}
+
+func (db *Postgres) GetRotationTrackForArtist(id uint64) (uint64, error) {
+	db.logger.Infoln("Get Rotation For artist entered")
+	query := `select track.id from track join artist_track on track.id = artist_track.track_id where artist_id = $1 order by track.play_count desc limit 1`
+	return db.getRotation(query, id)
+}
+
+func (db *Postgres) GetRotationTrackForGenre(id uint64) (uint64, error) {
+	db.logger.Infoln("Get Rotation For genre entered")
+	query := `select track.id from track join track_genre on track.id = track_genre.track_id where track_genre.genre_id = $1 order by track.play_count desc limit 1`
+	return db.getRotation(query, id)
+}
+
+func (db *Postgres) getRotation(query string, args ...any) (uint64, error) {
+	db.logger.Infoln("get Rotation entered")
+
+	result := 0
+	err := db.Pool.QueryRow(context.Background(), query, args...).Scan(&result)
+	if err != nil {
+		db.logger.Errorln("error getting rotation track", err)
+		return 0, err
+	}
+
+	return uint64(result), nil
+}
+
 func (db *Postgres) GetByUserForDailyPlaylist(userId string) ([]track.Response, error) {
 	db.logger.Infoln("TrackRepo Get For Daily entered")
 	query := `select track.id, track.name, preview, content, duration, artist.id, artist.name from track

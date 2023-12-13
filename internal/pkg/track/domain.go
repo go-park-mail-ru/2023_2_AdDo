@@ -32,6 +32,9 @@ type UseCase interface {
 }
 
 type Repository interface {
+	GetRotationTrackForAlbum(id uint64) (uint64, error)
+	GetRotationTrackForGenre(id uint64) (uint64, error)
+	GetRotationTrackForArtist(id uint64) (uint64, error)
 	DeleteLastTakenFromWave(userId string, tracks []Response) error
 	GetWaveTracks(userId string, count uint32) ([]Response, error)
 	GetByUser(userId string) ([]Response, error)

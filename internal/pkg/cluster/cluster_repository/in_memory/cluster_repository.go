@@ -13,6 +13,7 @@ type InMemory struct {
 	TrackIdToDataIndex   map[uint64][]float64
 	ClusterToDataIndexes map[int][]uint64
 	Centroids            [][]float64
+	logger               *logrus.Logger
 }
 
 // search nearest tracks flow:
@@ -36,6 +37,7 @@ func calculateEuclid(obj1, obj2 []float64) float64 {
 }
 
 func (in InMemory) getNearestClusterData(objectVec []float64) []uint64 {
+	in.logger.Infoln("get nearest cluster entered")
 	foundIndex := 0
 	minDistance := math.MaxFloat64
 	for index, centroid := range in.Centroids {
@@ -43,6 +45,7 @@ func (in InMemory) getNearestClusterData(objectVec []float64) []uint64 {
 			foundIndex = index
 		}
 	}
+	in.logger.Infoln("found cluster for our objs", foundIndex)
 
 	return in.ClusterToDataIndexes[foundIndex]
 }
@@ -53,6 +56,8 @@ type IdDistance struct {
 }
 
 func (in InMemory) getNearestTracks(id track.Id, count int) ([]track.Id, error) {
+	in.logger.Infoln("Get Nearest for one track entered with id ", id)
+
 	trackVec := in.TrackIdToDataIndex[id.Id]
 	tracksIds := in.getNearestClusterData(trackVec)
 
@@ -67,6 +72,7 @@ func (in InMemory) getNearestTracks(id track.Id, count int) ([]track.Id, error) 
 	sort.Slice(vec, func(i, j int) bool {
 		return vec[i].Distance < vec[j].Distance
 	})
+	in.logger.Infoln("sorted cev with dist ", vec)
 
 	result := make([]track.Id, 0)
 	for index, t := range vec {
@@ -75,11 +81,13 @@ func (in InMemory) getNearestTracks(id track.Id, count int) ([]track.Id, error) 
 		}
 		result = append(result, track.Id{Id: t.Id})
 	}
+	in.logger.Infoln("final result for one track", result)
 
 	return result, nil
 }
 
 func (in InMemory) GetNearestTracks(ids []track.Id, countPerTrack int) ([]track.Id, error) {
+	in.logger.Infoln("Get Nearest tracks entered with", ids)
 	result := make([]track.Id, 0)
 	for _, id := range ids {
 		nearestForTrack, err := in.getNearestTracks(id, countPerTrack)
@@ -89,6 +97,7 @@ func (in InMemory) GetNearestTracks(ids []track.Id, countPerTrack int) ([]track.
 		result = append(result, nearestForTrack...)
 	}
 
+	in.logger.Infoln("Get Nearest finished with", result)
 	return result, nil
 }
 
@@ -127,5 +136,6 @@ func NewInMemory(pathToDump string, l *logrus.Logger) (InMemory, error) {
 	}
 	l.Infoln("InMemory clusters formed", result.Centroids)
 
+	result.logger = l
 	return result, nil
 }

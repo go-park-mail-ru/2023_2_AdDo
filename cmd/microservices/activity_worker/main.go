@@ -14,6 +14,7 @@ import (
 	"main/internal/pkg/activity/repository/kafka/activity_repository_consumer"
 	activity_repository "main/internal/pkg/activity/repository/memcached"
 	activity_usecase "main/internal/pkg/activity/worker_usecase"
+	track_repository "main/internal/pkg/track/repository/postgresql"
 	wave_repository "main/internal/pkg/wave/repository/postgres"
 )
 
@@ -36,8 +37,9 @@ func main() {
 	}
 
 	mc := memcache.New("memcached:11211")
+	repoTrack := track_repository.NewPostgres(pool, logger)
 
-	activityConsumer := activity_repository_consumer.NewDefault(kafkaConsumer, logger)
+	activityConsumer := activity_repository_consumer.NewDefault(repoTrack, kafkaConsumer, logger)
 	wavePoolRepository := wave_repository.NewRepo(pool, logger)
 	recentActivityRepo := activity_repository.NewMemCached(mc, logger)
 

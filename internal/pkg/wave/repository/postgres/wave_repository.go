@@ -29,7 +29,7 @@ func (p Postgres) deleteOldPool(userId string) error {
 }
 
 func (p Postgres) SaveTracksToUserPool(userId string, tracks []track.Response) error {
-	p.logger.Infoln("Get Tracks From User Pool entered")
+	p.logger.Infoln("Save Tracks To User Pool entered")
 
 	err := p.deleteOldPool(userId)
 	if err != nil {

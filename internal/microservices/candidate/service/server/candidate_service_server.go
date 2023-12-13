@@ -96,11 +96,14 @@ func (cm *CandidateManager) GetCandidatesForWave(ctx context.Context, id *sessio
 	if err != nil {
 		return nil, err
 	}
+	cm.logger.Infoln("Hot Tracks:", hotTracks)
 
 	recentActivity, err := cm.recentActivityRepo.GetAllRecentActivity(id.GetUserId())
 	if err != nil {
 		return nil, err
 	}
+	cm.logger.Infoln("Recent Activities:", recentActivity)
+
 	recentActivityIds := make([]track.Id, 0)
 	for _, act := range recentActivity {
 		recentActivityIds = append(recentActivityIds, track.Id{Id: act.TrackId})
@@ -112,11 +115,13 @@ func (cm *CandidateManager) GetCandidatesForWave(ctx context.Context, id *sessio
 	if err != nil {
 		return nil, err
 	}
+	cm.logger.Infoln("Candidates for Hot tracks:", tracksByHot)
 
 	trackByRecentActivity, err := cm.clusterRepo.GetNearestTracks(recentActivityIds, countPerTrack)
 	if err != nil {
 		return nil, err
 	}
+	cm.logger.Infoln("Candidates for Recent Act:", tracksByHot)
 
 	ids := append(tracksByHot, trackByRecentActivity...)
 	// excluding
