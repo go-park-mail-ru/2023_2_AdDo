@@ -154,7 +154,7 @@ func main() {
 			router_init.NewRoute("/genres", onboardingHandler.GetGenres, http.MethodGet),
 			router_init.NewRoute("/genres", onboardingHandler.SaveGenres, http.MethodPost),
 			router_init.NewRoute("/daily", dailyPlaylistHandler.GetDailyPlaylist, http.MethodGet),
-			router_init.NewRoute("/wave", waveHandler.MyWave, http.MethodGet),
+			//router_init.NewRoute("/wave", waveHandler.MyWave, http.MethodGet),
 
 			router_init.NewRoute("/listen/{id}", trackHandler.Listen, http.MethodPost),
 			router_init.NewRoute("/track/{id}", albumHandler.AlbumWithRequiredTrack, http.MethodGet),
@@ -222,7 +222,7 @@ func main() {
 				SubRouterConfigs: nil,
 			}},
 	}
-	router := router_init.New(routerConfig, logger)
+	router := router_init.New(routerConfig, logger, waveHandler)
 
 	logger.Fatalln(http.ListenAndServe(ServerPort, router))
 }
