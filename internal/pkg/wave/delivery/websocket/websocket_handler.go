@@ -29,10 +29,11 @@ const MyWaveTrackBatch = 5
 
 func (h *Handler) MyWave(w http.ResponseWriter, r *http.Request) {
 	h.logger.Infoln("My Wave handler entered")
+
 	sessionId, err := response.GetCookie(r)
 	if err != nil {
-		h.logger.Errorln("error get from cookie", sessionId, err)
 		w.WriteHeader(401)
+		h.logger.Errorln("error get from cookie", sessionId, err)
 	}
 	h.logger.Infoln("Got Cookie")
 
