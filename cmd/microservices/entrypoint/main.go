@@ -118,7 +118,19 @@ func main() {
 	waveAgent := grpc_wave_client.NewClient(proto5.NewWaveServiceClient(waveConnection), logger)
 	logger.Infoln("Clients to micros initialized")
 
-	ws := websocket.Upgrader{}
+	allowedOrigins := []string{
+		"https://musicon.space",
+	}
+
+	ws := websocket.Upgrader{CheckOrigin: func(r *http.Request) bool {
+		origin := r.Header.Get("Origin")
+		for _, allowedOrigin := range allowedOrigins {
+			if allowedOrigin == origin {
+				return true
+			}
+		}
+		return false
+	}}
 
 	albumHandler := album_delivery.NewHandler(&trackAgent, &albumAgent, &sessionAgent, logger)
 	artistHandler := artist_delivery.NewHandler(&sessionAgent, &artistAgent, logger)

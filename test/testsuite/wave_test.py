@@ -17,7 +17,7 @@ def on_close(ws, qw, qe):
 def on_open(ws):
     print("соединение открыто")
     while True:
-        ws.send([1])
+        ws.send(str(1))
 
 
 if __name__ == "__main__":

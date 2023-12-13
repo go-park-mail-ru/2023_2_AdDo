@@ -4,7 +4,6 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/sirupsen/logrus"
 	"main/internal/common/response"
-	"main/internal/common/utils"
 	"main/internal/pkg/session"
 	"main/internal/pkg/wave"
 	"net/http"
@@ -28,12 +27,8 @@ func NewHandler(u websocket.Upgrader, su session.UseCase, ru wave.UseCase, l *lo
 
 const MyWaveTrackBatch = 5
 
-var upgrader = websocket.Upgrader{} // use default options
 func (h *Handler) MyWave(w http.ResponseWriter, r *http.Request) {
-	h.logger.WithFields(logrus.Fields{
-		"request_id": utils.GenReqId(r.RequestURI + r.Method),
-	}).Infoln("My Wave Handler entered")
-
+	h.logger.Infoln("My Wave handler entered")
 	sessionId, err := response.GetCookie(r)
 	if err != nil {
 		h.logger.Errorln("error get from cookie", sessionId, err)

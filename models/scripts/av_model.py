@@ -19,6 +19,8 @@ audio_dir = 'DEAM_audio/MEMD_audio'
 feature_dir = 'librosa_features'
 
 input_dim = 0
+
+
 def Create_Valence_Model():
     model = Sequential()
 
@@ -63,6 +65,7 @@ def Create_Valence_Model():
 
     return model
 
+
 def Create_Arousal_Model():
     model = Sequential()
 
@@ -104,6 +107,7 @@ def Create_Arousal_Model():
 
     model.add(Dense(1, activation='tanh', name='arousal'))
     return model
+
 
 # for filename in os.listdir(audio_dir):
 #     # Load the audio file
@@ -154,6 +158,7 @@ with open(
         y_arousal_train.append(float(row[3]))
         y_valence_train.append(float(row[1]))
 
+
 def custom_sort(file_path):
     file_name = file_path.split('/')[-1]  # Получаем имя файла из пути
     file_name_without_extension = file_name.split('.')[0]  # Удаляем расширение файла, если есть
@@ -161,6 +166,7 @@ def custom_sort(file_path):
         return int(file_name_without_extension)
     except ValueError:
         return 0
+
 
 file_paths = glob.glob(feature_dir + '/*')
 sorted_file_paths = sorted(file_paths, key=custom_sort)

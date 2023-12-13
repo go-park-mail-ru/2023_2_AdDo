@@ -2,9 +2,11 @@ package playlist
 
 import (
 	"context"
+	"errors"
 	"github.com/asaskevich/govalidator"
 	xssvalidator "github.com/infiniteloopcloud/xss-validator"
 	"io"
+	"main/internal/common/utils"
 	"main/internal/pkg/track"
 )
 
@@ -30,7 +32,7 @@ type Response struct {
 }
 
 type Name struct {
-	Name string `valid:"length(1|30), required, printableascii" json:"Name" example:"PlaylistName"`
+	Name string `valid:"length(1|30), required" json:"Name" example:"PlaylistName"`
 }
 
 type ToTrackId struct {
@@ -46,6 +48,11 @@ func (u *Name) Validate() error {
 	_, err := govalidator.ValidateStruct(u)
 	if err != nil {
 		return err
+	}
+
+	ok := utils.IsRussianLatinDigitUnderscore(u.Name)
+	if !ok {
+		return ErrorInvalidPlaylistName
 	}
 
 	err = xssvalidator.Validate(u.Name, xssvalidator.DefaultRules...)
@@ -97,3 +104,5 @@ type Repository interface {
 	Search(ctx context.Context, text string) ([]Base, error)
 	UpdateName(ctx context.Context, playlistId uint64, title string) error
 }
+
+var ErrorInvalidPlaylistName = errors.New("error validating got playlist name")

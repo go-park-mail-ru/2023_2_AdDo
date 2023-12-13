@@ -364,7 +364,10 @@ func (db *Postgres) Search(text string) ([]track.Response, error) {
 	query := `select track.id, track.name, preview, content, duration, artist.id, artist.name from track 
       			join artist_track on track.id = artist_track.track_id 
     			join artist on artist.id = artist_track.artist_id 
-			    where to_tsvector('russian', track.name) @@ plainto_tsquery('russian', $1 ) or lower(track.name) like lower($2) limit 10`
+			    where to_tsvector('russian', track.name) @@ plainto_tsquery('russian', $1 ) 
+			       or lower(track.name) like lower($2)
+			    	or similarity(track.name, $1) > 0.5
+			    limit 10`
 
 	return db.getWithQuery(context.Background(), query, text, "%"+text+"%")
 }
