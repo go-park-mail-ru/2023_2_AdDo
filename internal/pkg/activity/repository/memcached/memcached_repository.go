@@ -58,6 +58,11 @@ func (m MemCached) GetAllRecentActivity(userId string) ([]activity.UserTrackActi
 	m.logger.Infoln("Get All Recent Activity")
 
 	result, err := m.mcClient.Get(userId)
+	if errors.Is(err, memcache.ErrCacheMiss) {
+		m.logger.Infoln("No Activity for user", userId)
+		return make([]activity.UserTrackAction, 0), nil
+	}
+
 	if err != nil {
 		m.logger.Errorln("Get All Recent Activity error ", err)
 		return nil, err

@@ -240,6 +240,15 @@ func (db *Postgres) GetWaveTracks(userId string, count uint32) ([]track.Response
 	return db.getWithQuery(context.Background(), query, userId, count)
 }
 
+func (db *Postgres) GetRandomTracksForWave(userId string, count uint32) ([]track.Response, error) {
+	db.logger.Infoln("Get Random Tracks Batch entered")
+	query := `select track.id, track.name, preview, content, duration, artist.id, artist.name from track
+				join artist_track on track.id = artist_track.track_id
+    			join artist on artist.id = artist_track.artist_id 
+				order by random() limit $1`
+	return db.getWithQuery(context.Background(), query, count)
+}
+
 func (db *Postgres) DeleteLastTakenFromWave(userId string, tracks []track.Response) error {
 	waveId := 0
 	query := `select id from wave where owner_id = $1`

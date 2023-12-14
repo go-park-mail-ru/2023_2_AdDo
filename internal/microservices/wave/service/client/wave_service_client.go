@@ -24,6 +24,7 @@ func (c *Client) GetMyWaveMusic(userId string, count uint32) ([]track.Response, 
 	})
 	if err != nil {
 		c.logger.Errorln("error while getting wave tracks", err)
+		return make([]track.Response, 0), err
 	}
 
 	return grpc_track.DeserializeTracks(result), nil

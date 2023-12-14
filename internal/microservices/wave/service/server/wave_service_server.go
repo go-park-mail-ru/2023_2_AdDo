@@ -25,8 +25,15 @@ func (wm *WaveManager) GetMyWaveMusic(ctx context.Context, in *proto.UserIdCount
 	wm.logger.Infoln("Wave Micros get my wave music entered")
 
 	tracks, err := wm.trackRepo.GetWaveTracks(in.GetUserId(), in.GetTrackCount())
-	if err != nil {
-		return nil, err
+	if err != nil || len(tracks) == 0 {
+		wm.logger.Errorln("error while getting WAVE tracks", err)
+		randomTracks, err := wm.trackRepo.GetRandomTracksForWave(in.GetUserId(), in.GetTrackCount())
+		if err != nil {
+			wm.logger.Errorln("error while getting RANDOM tracks for wave", err)
+			return nil, err
+		}
+
+		return grpc_track_server.SerializeTracks(randomTracks), nil
 	}
 
 	err = wm.trackRepo.DeleteLastTakenFromWave(in.GetUserId(), tracks)

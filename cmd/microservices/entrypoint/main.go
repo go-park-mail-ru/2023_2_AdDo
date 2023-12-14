@@ -237,8 +237,7 @@ func main() {
 			}},
 	}
 	router := router_init.New(routerConfig, logger, waveHandler)
+	logger.Errorln("test error for deploying check")
 
 	logger.Fatalln(http.ListenAndServe(ServerPort, router))
 }
-
-/// TODO Создать

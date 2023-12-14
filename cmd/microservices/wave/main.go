@@ -41,6 +41,7 @@ func main() {
 	proto2.RegisterWaveServiceServer(server, &waveManager)
 
 	logger.Infoln("starting server at " + strconv.Itoa(Port))
+	logger.Errorln("test error for deploying check")
 	err = server.Serve(lis)
 	if err != nil {
 		logger.Fatalln("terminated ERROR!!!")

@@ -52,6 +52,7 @@ type Repository interface {
 	GetHotTracks(userId string, count uint8) ([]Id, error)
 	GetLastDayTracks(userId string) ([]Id, error)
 	GetTracksByIds(ids []Id) ([]Response, error)
+	GetRandomTracksForWave(userId string, count uint32) ([]Response, error)
 }
 
 var (
