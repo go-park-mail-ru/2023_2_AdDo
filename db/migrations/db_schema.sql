@@ -135,6 +135,7 @@ create table if not exists profile_genre (
      foreign key (profile_id) references profile (id) on delete cascade ,
      genre_id int not null,
      foreign key (genre_id) references genre (id) on delete cascade,
+     creating_date timestamptz not null default now(),
      constraint unique_profile_genre UNIQUE (profile_id, genre_id)
 );
 
@@ -144,6 +145,7 @@ create table if not exists profile_artist (
     foreign key (profile_id) references profile (id) on delete cascade ,
     artist_id int not null,
     foreign key (artist_id) references artist (id) on delete cascade,
+    creating_date timestamptz not null default now(),
     constraint unique_profile_artist UNIQUE (profile_id, artist_id)
 );
 
@@ -153,6 +155,7 @@ create table if not exists profile_album (
     foreign key (profile_id) references profile (id) on delete cascade ,
     album_id int not null,
     foreign key (album_id) references album (id) on delete cascade,
+    creating_date timestamptz not null default now(),
     constraint unique_profile_album UNIQUE (profile_id, album_id)
 );
 
@@ -162,6 +165,7 @@ create table if not exists profile_playlist (
     foreign key (profile_id) references profile (id) on delete cascade ,
     playlist_id int not null,
     foreign key (playlist_id) references playlist (id) on delete cascade,
+    creating_date timestamptz not null default now(),
     constraint unique_profile_playlist UNIQUE (profile_id, playlist_id)
 );
 
