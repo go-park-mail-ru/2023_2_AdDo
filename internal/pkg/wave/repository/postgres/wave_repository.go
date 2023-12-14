@@ -17,7 +17,7 @@ func NewRepo(p postgres.PgxIFace, logger *logrus.Logger) Postgres {
 }
 
 func (p Postgres) deleteOldPool(userId string) error {
-	p.logger.Infoln("Get Tracks From User Pool entered")
+	p.logger.Infoln("Delete Tracks From User Pool entered")
 	query := `delete from wave where owner_id = $1`
 	_, err := p.Pool.Exec(context.Background(), query, userId)
 	if err != nil {

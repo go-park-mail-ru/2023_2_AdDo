@@ -71,7 +71,7 @@ func (p *Postgres) GetArtists() ([]artist.Base, error) {
 func (p *Postgres) SetUserGenres(userId string, genres []onboarding.GenreBase) error {
 	p.logger.Infoln("Onboarding repo Set Genres entered")
 
-	query := `insert into profile_genre (profile_id, genre_id) values ($1, $2)`
+	query := `insert into profile_genre (profile_id, genre_id) values ($1, $2) on conflict (profile_id, genre_id) do nothing `
 	for _, genre := range genres {
 		_, err := p.Pool.Exec(context.Background(), query, userId, genre.Id)
 		if err != nil {
@@ -86,7 +86,7 @@ func (p *Postgres) SetUserGenres(userId string, genres []onboarding.GenreBase) e
 func (p *Postgres) SetUserArtists(userId string, artists []artist.Base) error {
 	p.logger.Infoln("Onboarding repo Set Artists entered")
 
-	query := `insert into profile_artist (profile_id, artist_id) values ($1, $2)`
+	query := `insert into profile_artist (profile_id, artist_id) values ($1, $2) on conflict (profile_id, artist_id) do nothing `
 	for _, a := range artists {
 		_, err := p.Pool.Exec(context.Background(), query, userId, a.Id)
 		if err != nil {

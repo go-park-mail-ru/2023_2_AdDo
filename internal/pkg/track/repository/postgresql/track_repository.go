@@ -236,7 +236,7 @@ func (db *Postgres) GetWaveTracks(userId string, count uint32) ([]track.Response
     			join artist on artist.id = artist_track.artist_id 
 				join wave_track on track.id = wave_track.track_id
 				join wave on wave_track.wave_id = wave.id
-				where owner_id = $1 limit $2`
+				where wave.owner_id = $1 order by random() limit $2`
 	return db.getWithQuery(context.Background(), query, userId, count)
 }
 
@@ -253,7 +253,7 @@ func (db *Postgres) DeleteLastTakenFromWave(userId string, tracks []track.Respon
 	for _, t := range tracks {
 		_, err = db.Pool.Exec(context.Background(), query, waveId, t.Id)
 		if err != nil {
-			db.logger.Errorln("add track to wave", err)
+			db.logger.Errorln("err delete track from wave", err)
 			return err
 		}
 	}

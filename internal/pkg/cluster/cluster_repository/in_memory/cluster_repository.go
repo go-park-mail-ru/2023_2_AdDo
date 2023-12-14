@@ -36,37 +36,49 @@ func calculateEuclid(obj1, obj2 []float64) float64 {
 	return distance
 }
 
-func (in InMemory) getNearestClusterData(objectVec []float64) []uint64 {
-	in.logger.Infoln("get nearest cluster entered")
-	foundIndex := 0
-	minDistance := math.MaxFloat64
-	for index, centroid := range in.Centroids {
-		if calculateEuclid(objectVec, centroid) < minDistance {
-			foundIndex = index
-		}
-	}
-	in.logger.Infoln("found cluster for our objs", foundIndex)
-
-	return in.ClusterToDataIndexes[foundIndex]
-}
-
 type IdDistance struct {
 	Id       uint64
 	Distance float64
 }
 
-func (in InMemory) getNearestTracks(id track.Id, count int) ([]track.Id, error) {
+func (in InMemory) getNearestClusterData(objectVec []float64) []IdDistance {
+	in.logger.Infoln("get nearest cluster entered")
+	centroidsSortedVec := make([]IdDistance, 0)
+	for index, centroid := range in.Centroids {
+		centroidsSortedVec = append(centroidsSortedVec, IdDistance{Id: uint64(index), Distance: calculateEuclid(objectVec, centroid)})
+	}
+
+	sort.Slice(centroidsSortedVec, func(i, j int) bool {
+		return centroidsSortedVec[i].Distance < centroidsSortedVec[j].Distance
+	})
+	in.logger.Infoln("sorted clusters")
+
+	return centroidsSortedVec
+}
+
+func (in InMemory) getNearestTracks(uniqTracks map[uint64]bool, id track.Id, count int) ([]track.Id, error) {
 	in.logger.Infoln("Get Nearest for one track entered with id ", id)
 
 	trackVec := in.TrackIdToDataIndex[id.Id]
-	tracksIds := in.getNearestClusterData(trackVec)
+	sortedClusters := in.getNearestClusterData(trackVec)
 
 	vec := make([]IdDistance, 0)
-	for _, trackId := range tracksIds {
-		vec = append(vec, IdDistance{
-			Id:       trackId,
-			Distance: calculateEuclid(trackVec, in.TrackIdToDataIndex[trackId]),
-		})
+	for _, cluster := range sortedClusters {
+		for _, trackId := range in.ClusterToDataIndexes[int(cluster.Id)] {
+			if len(vec) > 2*count {
+				break
+			}
+
+			if _, ok := uniqTracks[trackId]; ok {
+				continue
+			}
+
+			uniqTracks[trackId] = true
+			vec = append(vec, IdDistance{
+				Id:       trackId,
+				Distance: calculateEuclid(trackVec, in.TrackIdToDataIndex[trackId]),
+			})
+		}
 	}
 
 	sort.Slice(vec, func(i, j int) bool {
@@ -88,9 +100,13 @@ func (in InMemory) getNearestTracks(id track.Id, count int) ([]track.Id, error) 
 
 func (in InMemory) GetNearestTracks(ids []track.Id, countPerTrack int) ([]track.Id, error) {
 	in.logger.Infoln("Get Nearest tracks entered with", ids, "for every track count: ", countPerTrack)
+
+	uniqueTracks := make(map[uint64]bool)
+	in.logger.Infoln("Uniq tracks map created")
+
 	result := make([]track.Id, 0)
 	for _, id := range ids {
-		nearestForTrack, err := in.getNearestTracks(id, countPerTrack)
+		nearestForTrack, err := in.getNearestTracks(uniqueTracks, id, countPerTrack)
 		if err != nil {
 			return nil, err
 		}

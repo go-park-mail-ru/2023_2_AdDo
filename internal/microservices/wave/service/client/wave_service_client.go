@@ -18,8 +18,6 @@ func NewClient(wm proto.WaveServiceClient, logger *logrus.Logger) Client {
 }
 
 func (c *Client) GetMyWaveMusic(userId string, count uint32) ([]track.Response, error) {
-	c.logger.Infoln("Wave client Get My Wave Music entered")
-
 	result, err := c.waveManager.GetMyWaveMusic(context.Background(), &proto.UserIdCount{
 		UserId:     userId,
 		TrackCount: count,

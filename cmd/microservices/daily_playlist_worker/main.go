@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/robfig/cron/v3"
+	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	init_db "main/init/postgres_db"
@@ -21,6 +22,8 @@ const EnvPostgresQueryName = "DATABASE_URL"
 
 func main() {
 	logger := loggerSingleton.GetLogger()
+	logger.SetLevel(logrus.ErrorLevel)
+
 	c := cron.New()
 
 	pool, err := init_db.InitPostgres(EnvPostgresQueryName)

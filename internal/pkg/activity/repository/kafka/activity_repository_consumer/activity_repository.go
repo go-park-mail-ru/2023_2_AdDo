@@ -148,11 +148,6 @@ func (d *Default) PopSkipTrack(out chan<- activity.UserTrackAction) {
 			d.logger.Errorln("decoding error", err)
 		}
 
-		out <- activity.UserTrackAction{
-			UserId:  like.UserId,
-			TrackId: like.TrackId,
-			Action:  activity.SkipAction,
-		}
 		d.logger.Infoln("Got messages", string(msg.Key), string(msg.Value))
 	}
 }

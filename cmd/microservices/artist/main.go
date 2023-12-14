@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	init_kafka "main/init/kafka_queue"
 	"main/internal/pkg/activity/repository/kafka/activity_repository_producer"
@@ -26,6 +27,7 @@ var loggerSingleton = log.Singleton{}
 
 func main() {
 	logger := loggerSingleton.GetLogger()
+	logger.SetLevel(logrus.ErrorLevel)
 
 	lis, err := net.Listen("tcp", ":"+strconv.Itoa(Port))
 	if err != nil {

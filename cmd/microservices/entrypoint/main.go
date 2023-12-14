@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/gorilla/websocket"
+	"github.com/sirupsen/logrus"
 	"main/init/middleware"
 	router_init "main/init/router"
 	csrf "main/internal/common/get_csrf"
@@ -55,6 +56,7 @@ var loggerSingleton = log.Singleton{}
 
 func main() {
 	logger := loggerSingleton.GetLogger()
+	logger.SetLevel(logrus.ErrorLevel)
 
 	userConnection, err := grpc.Dial("user:8081", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {

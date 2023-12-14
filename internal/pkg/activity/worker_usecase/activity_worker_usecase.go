@@ -93,6 +93,13 @@ func (s *Worker) Run() {
 }
 
 func (s *Worker) RecreatePool(userId string) error {
+	defer func(recentActivityRepo activity.KeyValueRepository, userId string) {
+		err := recentActivityRepo.CleanLastActivityForUser(userId)
+		if err != nil {
+			s.logger.Errorln("error cleaning recent activities", err)
+		}
+	}(s.recentActivityRepo, userId)
+
 	candidates, err := s.candidateUseCase.GetCandidateForWave(userId)
 	if err != nil {
 		s.logger.Errorln("error getting candidates for user", err)
@@ -108,12 +115,6 @@ func (s *Worker) RecreatePool(userId string) error {
 	err = s.trackPool.SaveTracksToUserPool(userId, classifiedCandidates)
 	if err != nil {
 		s.logger.Errorln("error while saving new pool", err)
-		return err
-	}
-
-	err = s.recentActivityRepo.CleanLastActivityForUser(userId)
-	if err != nil {
-		s.logger.Errorln("error while cleaning useless activities", err)
 		return err
 	}
 

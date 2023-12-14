@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/bradfitz/gomemcache/memcache"
+	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	init_kafka "main/init/kafka_queue"
@@ -25,6 +26,7 @@ const EnvPostgresQueryName = "DATABASE_URL"
 
 func main() {
 	logger := loggerSingleton.GetLogger()
+	logger.SetLevel(logrus.ErrorLevel)
 
 	pool, err := init_db.InitPostgres(EnvPostgresQueryName)
 	if err != nil {
