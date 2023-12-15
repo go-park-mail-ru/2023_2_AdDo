@@ -28,6 +28,10 @@ type Response struct {
 	Tracks     []track.Response
 }
 
+type Playlists struct {
+	Playlists []Base `json:"Playlists"`
+}
+
 type Name struct {
 	Name string `valid:"length(1|30), required, printableascii" json:"Name" example:"PlaylistName"`
 }

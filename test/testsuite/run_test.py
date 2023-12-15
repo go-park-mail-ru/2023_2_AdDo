@@ -60,9 +60,9 @@ track_test.test_track_collection_success()
 
 
 album_test = album_test.AlbumTest()
-album_test.test_album_get_success()
+album_test.test_getting_album()
 album_test.test_getting_album_with_required_track()
-album_test.test_album_like_success()
+album_test.test_album_like()
 
 
 artist_test = artist_test.ArtistTest()

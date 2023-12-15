@@ -21,6 +21,10 @@ type Response struct {
 	Tracks     []track.Response `json:"Tracks"`
 }
 
+type Albums struct {
+	Albums []Response `json:"Albums"`
+}
+
 type LikedAlbums struct {
 	Albums []Base `json:"Albums"`
 }
