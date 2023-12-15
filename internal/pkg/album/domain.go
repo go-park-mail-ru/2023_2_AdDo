@@ -57,4 +57,4 @@ type Repository interface {
 	Search(text string) ([]Base, error)
 }
 
-const LimitForMainPage = 10
+const LimitForMainPage = 12
