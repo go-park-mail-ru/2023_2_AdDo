@@ -5,7 +5,7 @@ import (
 	"github.com/sirupsen/logrus"
 	proto "main/internal/microservices/candidate/proto"
 	session_proto "main/internal/microservices/session/proto"
-	grpc_track "main/internal/microservices/track/service/client"
+	grpc_track_server "main/internal/microservices/track/service/server"
 	"main/internal/pkg/track"
 )
 
@@ -30,7 +30,7 @@ func (c *Client) GetCandidateForDaily(userId string) ([]track.Response, error) {
 		return nil, err
 	}
 
-	return grpc_track.DeserializeTracks(candidates.GetTracks()), nil
+	return grpc_track_server.DeserializeTracks(candidates.GetTracks()), nil
 }
 
 func (c *Client) GetCandidateForWave(userId string) ([]track.Response, error) {
@@ -42,5 +42,5 @@ func (c *Client) GetCandidateForWave(userId string) ([]track.Response, error) {
 		return nil, err
 	}
 
-	return grpc_track.DeserializeTracks(candidates.GetTracks()), nil
+	return grpc_track_server.DeserializeTracks(candidates.GetTracks()), nil
 }

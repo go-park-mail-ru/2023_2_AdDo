@@ -17,14 +17,16 @@ import (
 type Handler struct {
 	playlistUseCase playlist.UseCase
 	sessionUseCase  session.UseCase
+	trackUseCase    track.UseCase
 	logger          *logrus.Logger
 }
 
-func NewHandler(pu playlist.UseCase, su session.UseCase, logger *logrus.Logger) Handler {
+func NewHandler(pu playlist.UseCase, tu track.UseCase, su session.UseCase, logger *logrus.Logger) Handler {
 	return Handler{
 		playlistUseCase: pu,
 		sessionUseCase:  su,
 		logger:          logger,
+		trackUseCase:    tu,
 	}
 }
 
@@ -107,6 +109,17 @@ func (handler *Handler) Get(w http.ResponseWriter, r *http.Request) error {
 	//	return common_handler.StatusError{Code: http.StatusUnauthorized, Err: err}
 	//}
 	//handler.logger.Infoln("Got user id")
+	sessionId, err := response.GetCookie(r)
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusUnauthorized, Err: err}
+	}
+	handler.logger.Infoln("got cookie")
+
+	userId, err := handler.sessionUseCase.GetUserId(sessionId)
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusUnauthorized, Err: err}
+	}
+	handler.logger.Infoln("got user id by session id")
 
 	playlistId, err := strconv.Atoi(mux.Vars(r)["id"])
 	if err != nil {
@@ -119,9 +132,22 @@ func (handler *Handler) Get(w http.ResponseWriter, r *http.Request) error {
 		return common_handler.StatusError{Code: http.StatusNotFound, Err: err}
 	}
 
+	if userId != "" {
+		labeledTracks, err := handler.trackUseCase.LabelIsLikedTracks(userId, result.Tracks)
+		if err != nil {
+			handler.logger.Errorln("Error Labeling Tracks with IsLiked")
+		}
+		result.Tracks = labeledTracks
+	}
+
 	if err = response.RenderJSON(w, result); err != nil {
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}
+
+	if userId == "" {
+		w.WriteHeader(http.StatusUnauthorized)
+	}
+
 	return nil
 }
 

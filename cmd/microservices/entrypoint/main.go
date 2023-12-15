@@ -135,13 +135,13 @@ func main() {
 	}}
 
 	albumHandler := album_delivery.NewHandler(&trackAgent, &albumAgent, &sessionAgent, logger)
-	artistHandler := artist_delivery.NewHandler(&sessionAgent, &artistAgent, logger)
+	artistHandler := artist_delivery.NewHandler(&sessionAgent, &artistAgent, &trackAgent, logger)
 	userHandler := user_delivery.NewHandler(&userAgent, &sessionAgent, logger)
 	trackHandler := track_delivery.NewHandler(&trackAgent, &sessionAgent, logger)
-	playlistHandler := playlist_delivery.NewHandler(&playlistAgent, &sessionAgent, logger)
+	playlistHandler := playlist_delivery.NewHandler(&playlistAgent, &trackAgent, &sessionAgent, logger)
 	onboardingHandler := onboarding_delivery.NewHandler(&sessionAgent, &onboardingAgent, logger)
 	dailyPlaylistHandler := daily_playlist_delivery.NewHandler(&dailyPlaylistAgent, &sessionAgent, logger)
-	waveHandler := websocket_wave.NewHandler(ws, &sessionAgent, &waveAgent, logger)
+	waveHandler := websocket_wave.NewHandler(ws, &trackAgent, &sessionAgent, &waveAgent, logger)
 	logger.Infoln("Deliveries initialized")
 
 	modifyPlaylistMiddleware := modify_playlist.NewMiddleware(&playlistAgent, &sessionAgent, logger)

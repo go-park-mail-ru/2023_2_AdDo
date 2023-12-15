@@ -21,12 +21,13 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	TrackService_Listen_FullMethodName             = "/TrackService/Listen"
-	TrackService_Skip_FullMethodName               = "/TrackService/Skip"
-	TrackService_Like_FullMethodName               = "/TrackService/Like"
-	TrackService_IsLike_FullMethodName             = "/TrackService/IsLike"
-	TrackService_Unlike_FullMethodName             = "/TrackService/Unlike"
-	TrackService_GetUserLikedTracks_FullMethodName = "/TrackService/GetUserLikedTracks"
+	TrackService_Listen_FullMethodName              = "/TrackService/Listen"
+	TrackService_Skip_FullMethodName                = "/TrackService/Skip"
+	TrackService_Like_FullMethodName                = "/TrackService/Like"
+	TrackService_IsLike_FullMethodName              = "/TrackService/IsLike"
+	TrackService_Unlike_FullMethodName              = "/TrackService/Unlike"
+	TrackService_GetUserLikedTracks_FullMethodName  = "/TrackService/GetUserLikedTracks"
+	TrackService_LabelIsLikedForUser_FullMethodName = "/TrackService/LabelIsLikedForUser"
 )
 
 // TrackServiceClient is the client API for TrackService service.
@@ -39,6 +40,7 @@ type TrackServiceClient interface {
 	IsLike(ctx context.Context, in *TrackToUserId, opts ...grpc.CallOption) (*IsLikedTrack, error)
 	Unlike(ctx context.Context, in *TrackToUserId, opts ...grpc.CallOption) (*empty.Empty, error)
 	GetUserLikedTracks(ctx context.Context, in *proto.UserId, opts ...grpc.CallOption) (*TracksResponse, error)
+	LabelIsLikedForUser(ctx context.Context, in *UserToTracksForLabeling, opts ...grpc.CallOption) (*TracksResponse, error)
 }
 
 type trackServiceClient struct {
@@ -103,6 +105,15 @@ func (c *trackServiceClient) GetUserLikedTracks(ctx context.Context, in *proto.U
 	return out, nil
 }
 
+func (c *trackServiceClient) LabelIsLikedForUser(ctx context.Context, in *UserToTracksForLabeling, opts ...grpc.CallOption) (*TracksResponse, error) {
+	out := new(TracksResponse)
+	err := c.cc.Invoke(ctx, TrackService_LabelIsLikedForUser_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // TrackServiceServer is the server API for TrackService service.
 // All implementations must embed UnimplementedTrackServiceServer
 // for forward compatibility
@@ -113,6 +124,7 @@ type TrackServiceServer interface {
 	IsLike(context.Context, *TrackToUserId) (*IsLikedTrack, error)
 	Unlike(context.Context, *TrackToUserId) (*empty.Empty, error)
 	GetUserLikedTracks(context.Context, *proto.UserId) (*TracksResponse, error)
+	LabelIsLikedForUser(context.Context, *UserToTracksForLabeling) (*TracksResponse, error)
 	mustEmbedUnimplementedTrackServiceServer()
 }
 
@@ -137,6 +149,9 @@ func (UnimplementedTrackServiceServer) Unlike(context.Context, *TrackToUserId) (
 }
 func (UnimplementedTrackServiceServer) GetUserLikedTracks(context.Context, *proto.UserId) (*TracksResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetUserLikedTracks not implemented")
+}
+func (UnimplementedTrackServiceServer) LabelIsLikedForUser(context.Context, *UserToTracksForLabeling) (*TracksResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method LabelIsLikedForUser not implemented")
 }
 func (UnimplementedTrackServiceServer) mustEmbedUnimplementedTrackServiceServer() {}
 
@@ -259,6 +274,24 @@ func _TrackService_GetUserLikedTracks_Handler(srv interface{}, ctx context.Conte
 	return interceptor(ctx, in, info, handler)
 }
 
+func _TrackService_LabelIsLikedForUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UserToTracksForLabeling)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TrackServiceServer).LabelIsLikedForUser(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TrackService_LabelIsLikedForUser_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TrackServiceServer).LabelIsLikedForUser(ctx, req.(*UserToTracksForLabeling))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // TrackService_ServiceDesc is the grpc.ServiceDesc for TrackService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -289,6 +322,10 @@ var TrackService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetUserLikedTracks",
 			Handler:    _TrackService_GetUserLikedTracks_Handler,
+		},
+		{
+			MethodName: "LabelIsLikedForUser",
+			Handler:    _TrackService_LabelIsLikedForUser_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

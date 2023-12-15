@@ -76,13 +76,13 @@ func (p Postgres) GetByUserId(userId string) ([]album.Base, error) {
 
 func (p Postgres) GetByReleaseDate(limit uint32) ([]album.Base, error) {
 	p.logger.Infoln("Album Repo GetByReleaseDate entered")
-	query := "select id, name, preview from album order by release_date desc limit $1"
+	query := "select id, name, preview from album order by year desc limit $1"
 	return p.getWithQuery(context.Background(), query, limit)
 }
 
 func (p Postgres) GetRandom(limit uint32) ([]album.Base, error) {
 	p.logger.Infoln("Album Repo GetRandom entered")
-	query := "select id, name, preview from album limit $1"
+	query := "select id, name, preview from album order by random() limit $1"
 	return p.getWithQuery(context.Background(), query, limit)
 }
 

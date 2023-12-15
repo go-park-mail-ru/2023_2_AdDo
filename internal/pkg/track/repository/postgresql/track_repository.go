@@ -269,6 +269,36 @@ func (db *Postgres) DeleteLastTakenFromWave(userId string, tracks []track.Respon
 	return nil
 }
 
+func (db *Postgres) LabelIsLikedTracks(userId string, tracks []track.Response) ([]track.Response, error) {
+	db.logger.Infoln("TrackRepo Label Is Liked Tracks entered")
+	result := make([]track.Response, 0)
+	for index, t := range tracks {
+		isLiked, err := db.labelOneTrack(userId, t)
+		if err != nil {
+			db.logger.Errorln("error labeling one track", err)
+		}
+		tracks[index].IsLiked = isLiked
+
+		result = append(result, tracks[index])
+	}
+
+	return result, nil
+}
+
+func (db *Postgres) labelOneTrack(userId string, t track.Response) (bool, error) {
+	db.logger.Infoln("TrackRepo Label One Track entered")
+
+	query := `select count(*) from track 
+    inner join profile_track on track.id = profile_track.track_id where profile_track.profile_id = $1`
+	found := 0
+	err := db.Pool.QueryRow(context.Background(), query, userId).Scan(&found)
+	if err != nil {
+		db.logger.Errorln("error getting label from db", err)
+	}
+
+	return found > 0, nil
+}
+
 func (db *Postgres) GetByArtist(artistId uint64) ([]track.Response, error) {
 	db.logger.Infoln("TrackRepo GetByArtist entered")
 	query := `select track.id, track.name, preview, content, duration, artist.id, artist.name from track

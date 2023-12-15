@@ -3,7 +3,7 @@ package grpc_wave_client
 import (
 	"context"
 	"github.com/sirupsen/logrus"
-	grpc_track "main/internal/microservices/track/service/client"
+	grpc_track_server "main/internal/microservices/track/service/server"
 	"main/internal/microservices/wave/proto"
 	"main/internal/pkg/track"
 )
@@ -27,5 +27,5 @@ func (c *Client) GetMyWaveMusic(userId string, count uint32) ([]track.Response, 
 		return make([]track.Response, 0), err
 	}
 
-	return grpc_track.DeserializeTracks(result), nil
+	return grpc_track_server.DeserializeTracks(result), nil
 }

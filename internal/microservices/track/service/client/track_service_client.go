@@ -5,6 +5,7 @@ import (
 	"github.com/sirupsen/logrus"
 	session_proto "main/internal/microservices/session/proto"
 	track_proto "main/internal/microservices/track/proto"
+	grpc_track_server "main/internal/microservices/track/service/server"
 	"main/internal/pkg/track"
 )
 
@@ -15,27 +16,6 @@ type Client struct {
 
 func NewClient(tm track_proto.TrackServiceClient, logger *logrus.Logger) Client {
 	return Client{trackManager: tm, logger: logger}
-}
-
-func DeserializeTrack(in *track_proto.Track) track.Response {
-	return track.Response{
-		Id:         in.GetId(),
-		Name:       in.GetName(),
-		Preview:    in.GetPreview(),
-		Content:    in.GetContent(),
-		ArtistId:   in.GetArtistId(),
-		ArtistName: in.GetArtistName(),
-		Duration:   in.GetDuration(),
-		IsLiked:    in.GetIsLiked(),
-	}
-}
-
-func DeserializeTracks(in *track_proto.TracksResponse) []track.Response {
-	result := make([]track.Response, 0)
-	for _, t := range in.GetTracks() {
-		result = append(result, DeserializeTrack(t))
-	}
-	return result
 }
 
 const MinTimeToListen = 40
@@ -96,5 +76,20 @@ func (c *Client) GetUserLikedTracks(userId string) ([]track.Response, error) {
 		return nil, err
 	}
 
-	return DeserializeTracks(result), nil
+	return grpc_track_server.DeserializeTracks(result), nil
+}
+
+func (c *Client) LabelIsLikedTracks(userId string, tracks []track.Response) ([]track.Response, error) {
+	c.logger.Infoln("Track Client Label Tracks entered")
+
+	result, err := c.trackManager.LabelIsLikedForUser(context.Background(), &track_proto.UserToTracksForLabeling{
+		Tracks: grpc_track_server.SerializeTracks(tracks),
+		UserId: userId,
+	})
+	if err != nil {
+		c.logger.Errorln(err)
+		return nil, err
+	}
+
+	return grpc_track_server.DeserializeTracks(result), nil
 }

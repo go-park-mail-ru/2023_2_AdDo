@@ -7,6 +7,7 @@ import (
 	"main/internal/common/utils"
 	"main/internal/pkg/artist"
 	"main/internal/pkg/session"
+	"main/internal/pkg/track"
 	"net/http"
 	"strconv"
 
@@ -16,13 +17,15 @@ import (
 type ArtistHandler struct {
 	ArtistUseCase  artist.UseCase
 	SessionUseCase session.UseCase
+	TrackUseCase   track.UseCase
 	logger         *logrus.Logger
 }
 
-func NewHandler(su session.UseCase, artistUseCase artist.UseCase, logger *logrus.Logger) ArtistHandler {
+func NewHandler(su session.UseCase, artistUseCase artist.UseCase, tu track.UseCase, logger *logrus.Logger) ArtistHandler {
 	return ArtistHandler{
 		ArtistUseCase:  artistUseCase,
 		SessionUseCase: su,
+		TrackUseCase:   tu,
 		logger:         logger,
 	}
 }
@@ -56,10 +59,34 @@ func (handler *ArtistHandler) ArtistInfo(w http.ResponseWriter, r *http.Request)
 	}
 	handler.logger.Infoln("Got artist from use case")
 
+	sessionId, err := response.GetCookie(r)
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusUnauthorized, Err: err}
+	}
+	handler.logger.Infoln("got cookie")
+
+	userId, err := handler.SessionUseCase.GetUserId(sessionId)
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusUnauthorized, Err: err}
+	}
+	handler.logger.Infoln("got user id by session id")
+
+	if userId != "" {
+		result, err := handler.TrackUseCase.LabelIsLikedTracks(userId, artistInfo.Tracks)
+		if err != nil {
+			handler.logger.Errorln("Error Labeling Tracks with IsLiked")
+		}
+		artistInfo.Tracks = result
+	}
+
 	if err = response.RenderJSON(w, artistInfo); err != nil {
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}
 	handler.logger.Infoln("response  formed")
+
+	if userId == "" {
+		w.WriteHeader(http.StatusUnauthorized)
+	}
 
 	return nil
 }
@@ -224,8 +251,32 @@ func (handler *ArtistHandler) FullSearch(w http.ResponseWriter, r *http.Request)
 	}
 	handler.logger.Infoln("got response from useCase")
 
+	sessionId, err := response.GetCookie(r)
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusUnauthorized, Err: err}
+	}
+	handler.logger.Infoln("got cookie")
+
+	userId, err := handler.SessionUseCase.GetUserId(sessionId)
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusUnauthorized, Err: err}
+	}
+	handler.logger.Infoln("got user id by session id")
+
+	if userId != "" {
+		labeledTracks, err := handler.TrackUseCase.LabelIsLikedTracks(userId, result.Tracks)
+		if err != nil {
+			handler.logger.Errorln("Error Labeling Tracks with IsLiked")
+		}
+		result.Tracks = labeledTracks
+	}
+
 	if err = response.RenderJSON(w, result); err != nil {
 		return common_handler.StatusError{Code: http.StatusNotFound, Err: err}
+	}
+
+	if userId == "" {
+		w.WriteHeader(http.StatusUnauthorized)
 	}
 
 	return nil

@@ -15,14 +15,16 @@ type Handler struct {
 	logger         *logrus.Logger
 	sessionUseCase session.UseCase
 	waveUseCase    wave.UseCase
+	trackUseCase   track.UseCase
 }
 
-func NewHandler(u websocket.Upgrader, su session.UseCase, ru wave.UseCase, l *logrus.Logger) Handler {
+func NewHandler(u websocket.Upgrader, tu track.UseCase, su session.UseCase, ru wave.UseCase, l *logrus.Logger) Handler {
 	return Handler{
 		upgrader:       u,
 		logger:         l,
 		sessionUseCase: su,
 		waveUseCase:    ru,
+		trackUseCase:   tu,
 	}
 }
 
@@ -57,6 +59,7 @@ func (h *Handler) MyWave(w http.ResponseWriter, r *http.Request) {
 	h.logger.Infoln("Websocket connection opened")
 
 	uniqTracks := make(map[uint64]bool)
+
 	for {
 		dummy := 0
 		err := conn.ReadJSON(&dummy)
@@ -78,7 +81,12 @@ func (h *Handler) MyWave(w http.ResponseWriter, r *http.Request) {
 		}
 		h.logger.Errorln("uniq tracks map", uniqTracks)
 
-		err = conn.WriteJSON(tracks)
+		labeledTracks, err := h.trackUseCase.LabelIsLikedTracks(userId, tracks)
+		if err != nil {
+			h.logger.Errorln("Error Labeling Tracks with IsLiked")
+		}
+
+		err = conn.WriteJSON(labeledTracks)
 		if err != nil {
 			h.logger.Errorln("error sending a message", err)
 			w.WriteHeader(500)

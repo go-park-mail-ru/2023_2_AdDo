@@ -5,7 +5,7 @@ import (
 	"github.com/sirupsen/logrus"
 	daily_playlist_proto "main/internal/microservices/daily-playlist/proto"
 	session_proto "main/internal/microservices/session/proto"
-	grpc_track "main/internal/microservices/track/service/client"
+	grpc_track_server "main/internal/microservices/track/service/server"
 	daily_playlist "main/internal/pkg/daily-playlist"
 )
 
@@ -28,5 +28,5 @@ func (c *Client) GetUserDailyPlaylist(userId string) (daily_playlist.Response, e
 
 	return daily_playlist.Response{OwnerId: result.GetOwnerId(),
 		Id:     result.GetId(),
-		Tracks: grpc_track.DeserializeTracks(result.GetTracks())}, nil
+		Tracks: grpc_track_server.DeserializeTracks(result.GetTracks())}, nil
 }

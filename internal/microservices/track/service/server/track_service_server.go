@@ -52,6 +52,27 @@ func SerializeTracks(in []track.Response) *track_proto.TracksResponse {
 	return &track_proto.TracksResponse{Tracks: tracks}
 }
 
+func DeserializeTrack(in *track_proto.Track) track.Response {
+	return track.Response{
+		Id:         in.GetId(),
+		Name:       in.GetName(),
+		Preview:    in.GetPreview(),
+		Content:    in.GetContent(),
+		ArtistId:   in.GetArtistId(),
+		ArtistName: in.GetArtistName(),
+		Duration:   in.GetDuration(),
+		IsLiked:    in.GetIsLiked(),
+	}
+}
+
+func DeserializeTracks(in *track_proto.TracksResponse) []track.Response {
+	result := make([]track.Response, 0)
+	for _, t := range in.GetTracks() {
+		result = append(result, DeserializeTrack(t))
+	}
+	return result
+}
+
 func (tm *TrackManager) Listen(ctx context.Context, in *track_proto.TrackToUserDur) (*google_proto.Empty, error) {
 	tm.logger.Infoln("Track Micros Listen entered")
 
@@ -122,6 +143,18 @@ func (tm *TrackManager) GetUserLikedTracks(ctx context.Context, in *session_prot
 	tm.logger.Infoln("Track Micros GetUserLikedTracks entered")
 
 	result, err := tm.repoTrack.GetByUser(in.GetUserId())
+	if err != nil {
+		tm.logger.Errorln(err)
+		return nil, err
+	}
+
+	return SerializeTracks(result), nil
+}
+
+func (tm *TrackManager) LabelIsLikedForUser(ctx context.Context, in *track_proto.UserToTracksForLabeling) (*track_proto.TracksResponse, error) {
+	tm.logger.Infoln("Track Micros Label Tracks entered")
+
+	result, err := tm.repoTrack.LabelIsLikedTracks(in.GetUserId(), DeserializeTracks(in.GetTracks()))
 	if err != nil {
 		tm.logger.Errorln(err)
 		return nil, err

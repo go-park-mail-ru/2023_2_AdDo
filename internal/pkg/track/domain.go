@@ -24,6 +24,7 @@ type Response struct {
 }
 
 type UseCase interface {
+	LabelIsLikedTracks(userId string, tracks []Response) ([]Response, error)
 	GetUserLikedTracks(userId string) ([]Response, error)
 	Listen(userId string, trackId uint64, dur uint32) error
 	Like(userId string, trackId uint64) error
@@ -32,6 +33,7 @@ type UseCase interface {
 }
 
 type Repository interface {
+	LabelIsLikedTracks(userId string, tracks []Response) ([]Response, error)
 	GetRotationTrackForAlbum(id uint64) (uint64, error)
 	GetRotationTrackForGenre(id uint64) (uint64, error)
 	GetRotationTrackForArtist(id uint64) (uint64, error)

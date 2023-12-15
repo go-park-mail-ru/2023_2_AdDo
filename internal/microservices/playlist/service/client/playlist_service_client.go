@@ -9,7 +9,7 @@ import (
 	playlist_proto "main/internal/microservices/playlist/proto"
 	grpc_playlist_server "main/internal/microservices/playlist/service/server"
 	session_proto "main/internal/microservices/session/proto"
-	grpc_track "main/internal/microservices/track/service/client"
+	grpc_track_server "main/internal/microservices/track/service/server"
 	grpc_user "main/internal/microservices/user/service/client"
 	"main/internal/pkg/playlist"
 )
@@ -33,7 +33,7 @@ func DeserializePlaylistResponse(in *playlist_proto.PlaylistResponse) playlist.R
 		AuthorId:   in.GetCreatorId(),
 		AuthorName: in.GetCreatorName(),
 		Preview:    in.GetPreview(),
-		Tracks:     grpc_track.DeserializeTracks(in.GetTracks()),
+		Tracks:     grpc_track_server.DeserializeTracks(in.GetTracks()),
 	}
 }
 

@@ -6,7 +6,6 @@ import (
 	candidate "main/internal/microservices/candidate/proto"
 	proto "main/internal/microservices/recommendation/proto"
 	session_proto "main/internal/microservices/session/proto"
-	grpc_track "main/internal/microservices/track/service/client"
 	grpc_track_server "main/internal/microservices/track/service/server"
 	"main/internal/pkg/track"
 )
@@ -35,5 +34,5 @@ func (c *Client) ClassifyCandidates(userId string, candidates []track.Response) 
 		return nil, err
 	}
 
-	return grpc_track.DeserializeTracks(candidatesClassifiedAndRanged.GetTracks()), nil
+	return grpc_track_server.DeserializeTracks(candidatesClassifiedAndRanged.GetTracks()), nil
 }

@@ -12,6 +12,12 @@ service TrackService {
   rpc IsLike (TrackToUserId) returns (IsLikedTrack) {}
   rpc Unlike (TrackToUserId) returns (google.protobuf.Empty) {}
   rpc GetUserLikedTracks (UserId) returns (TracksResponse) {}
+  rpc LabelIsLikedForUser (UserToTracksForLabeling) returns (TracksResponse) {}
+}
+
+message UserToTracksForLabeling {
+  TracksResponse tracks = 1;
+  string userId = 2;
 }
 
 message TrackToUserDur {
