@@ -145,3 +145,15 @@ func (c *Client) GetUserName(userId string) (string, error) {
 
 	return result.GetUserName(), nil
 }
+
+func (c *Client) ForgotPassword(email string) error {
+	c.logger.Infoln("user client ForgotPassword entered")
+
+	_, err := c.userClient.ForgotPassword(context.Background(), &user_proto.UserName{UserName: email})
+	if err != nil {
+		return err
+	}
+	c.logger.Infoln("sent reset password message")
+
+	return nil
+}

@@ -16,6 +16,7 @@ service UserService {
   rpc RemoveAvatar(UserId) returns (ImageUrl) {}
   rpc UpdateUserInfo(UserData) returns (google.protobuf.Empty) {}
   rpc GetUserName(UserId) returns (UserName) {}
+  rpc ForgotPassword(UserName) returns (google.protobuf.Empty) {}
 }
 
 message ImageToUser {

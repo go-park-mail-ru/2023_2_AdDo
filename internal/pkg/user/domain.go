@@ -2,9 +2,10 @@ package user_domain
 
 import (
 	"errors"
+	"io"
+
 	"github.com/asaskevich/govalidator"
 	xssvalidator "github.com/infiniteloopcloud/xss-validator"
-	"io"
 )
 
 type UserCredentials struct {
@@ -19,6 +20,10 @@ type User struct {
 	Password  string `valid:"length(6|30), required, printableascii" json:"Password" example:"password"`
 	BirthDate string `valid:"required" json:"BirthDate" example:"2000-01-01"`
 	Avatar    string `valid:"url_optional" json:"Avatar" example:"http://test/images/1.jpg,http://test/images/2.jpg"`
+}
+
+type ForgotPasswordInput struct {
+	Email string `valid:"length(1|30), email, required, printableascii" json:"Email" example:"example@gmail.com"`
 }
 
 func (u *User) ValidateForUpdate() error {
@@ -74,6 +79,15 @@ func (uC *UserCredentials) Validate() error {
 	return nil
 }
 
+func (fpi ForgotPasswordInput) Validate() error {
+	_, err := govalidator.ValidateStruct(fpi)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 type UploadAvatarResponse struct {
 	Url string `json:"AvatarUrl" example:"/user-images/images.png"`
 }
@@ -88,6 +102,7 @@ type UseCase interface {
 	UploadAvatar(userId string, src io.Reader, size int64) (string, error)
 	RemoveAvatar(userId string) error
 	GetUserName(userId string) (string, error)
+	ForgotPassword(email string) (error)
 }
 
 type Repository interface {
@@ -99,6 +114,7 @@ type Repository interface {
 	GetAvatarPath(userId string) (string, error)
 	RemoveAvatarPath(userId string) (string, error)
 	GetUserNameById(userId string) (string, error)
+	CheckEmail(email string) (error)
 }
 
 var (

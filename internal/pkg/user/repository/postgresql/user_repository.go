@@ -61,6 +61,26 @@ func (db *Postgres) GetById(id string) (user_domain.User, error) {
 	return user, nil
 }
 
+func (db *Postgres) CheckEmail(email string) (error) {
+	db.logger.Infoln("UserRepo CheckEmail entered")
+
+	var userId string
+
+	query := "select id from profile where email = $1"
+	if err := db.Pool.QueryRow(context.Background(), query, email).Scan(&userId); err != nil {
+		db.logger.WithFields(logrus.Fields{
+			"err":       err,
+			"user_data": email,
+			"query":     query,
+		}).Errorln("Checking user email failed")
+		return err
+	}
+	db.logger.Infoln("User email checked for user ", email)
+
+	return nil
+}
+
+
 func (db *Postgres) CheckEmailAndPassword(email, password string) (string, error) {
 	db.logger.Infoln("UserRepo CheckEmailAndPassword entered")
 

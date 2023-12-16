@@ -1,15 +1,16 @@
 package user_delivery
 
 import (
-	"github.com/mailru/easyjson"
-	"github.com/sirupsen/logrus"
-	"main/internal/common/handler"
+	common_handler "main/internal/common/handler"
 	"main/internal/common/response"
 	"main/internal/common/utils"
 	"main/internal/pkg/session"
 	user_domain "main/internal/pkg/user"
 	"net/http"
 	"time"
+
+	"github.com/mailru/easyjson"
+	"github.com/sirupsen/logrus"
 
 	"github.com/gorilla/csrf"
 )
@@ -361,6 +362,45 @@ func (handler *UserHandler) UpdateUserInfo(w http.ResponseWriter, r *http.Reques
 	}
 
 	if err = handler.userUseCase.UpdateUserInfo(userId, u); err != nil {
+		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+	return nil
+}
+
+// ForgotPassword
+//
+//	@Summary		ForgotPassword
+//	@Description	Send message to email for forgot password
+//	@Tags			user
+//	@Security		csrfToken
+//	@Security		cookieCsrfToken
+//	@Accept			json
+//	@Param			email	body	user_domain.ForgotPasswordInput		true	"User Email"
+//	@Success		204
+//	@Failure		400	{string}	errMsg
+//	@Failure		401	{string}	errMsg
+//	@Failure		403	{string}	errMsg
+//	@Failure		500	{string}	errMsg
+//	@Router			/auth/forgot_password 	[post]
+func (handler *UserHandler) ForgotPassword(w http.ResponseWriter, r *http.Request) error {
+	handler.logger.WithFields(logrus.Fields{
+		"request_id": utils.GenReqId(r.RequestURI + r.Method),
+	}).Infoln("ForgotPassword Handler entered")
+
+	var email user_domain.ForgotPasswordInput
+	if err := easyjson.UnmarshalFromReader(r.Body, &email); err != nil {
+		return common_handler.StatusError{Code: http.StatusBadRequest, Err: err}
+	}
+	handler.logger.Infoln("Email decoded from request body")
+
+	if err := email.Validate(); err != nil {
+		return common_handler.StatusError{Code: http.StatusBadRequest, Err: err}
+	}
+	handler.logger.Infoln("Email is valid")
+
+	if err := handler.userUseCase.ForgotPassword(email.Email); err != nil {
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}
 
