@@ -289,9 +289,9 @@ func (db *Postgres) labelOneTrack(userId string, t track.Response) (bool, error)
 	db.logger.Infoln("TrackRepo Label One Track entered")
 
 	query := `select count(*) from track 
-    inner join profile_track on track.id = profile_track.track_id where profile_track.profile_id = $1`
+    inner join profile_track on track.id = profile_track.track_id where profile_track.profile_id = $1 and profile_track.track_id = $2`
 	found := 0
-	err := db.Pool.QueryRow(context.Background(), query, userId).Scan(&found)
+	err := db.Pool.QueryRow(context.Background(), query, userId, t.Id).Scan(&found)
 	if err != nil {
 		db.logger.Errorln("error getting label from db", err)
 	}

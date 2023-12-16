@@ -146,21 +146,15 @@ func (handler *AlbumHandler) AlbumTracks(w http.ResponseWriter, r *http.Request)
 
 	result, err := handler.albumUseCase.GetAlbum(uint64(albumId))
 	if err != nil {
-		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
+		return common_handler.StatusError{Code: http.StatusNotFound, Err: err}
 	}
 	handler.logger.Infoln("got album by id")
 
 	sessionId, err := response.GetCookie(r)
-	if err != nil {
-		return common_handler.StatusError{Code: http.StatusUnauthorized, Err: err}
-	}
-	handler.logger.Infoln("got cookie")
-
 	userId, err := handler.sessionUseCase.GetUserId(sessionId)
 	if err != nil {
-		return common_handler.StatusError{Code: http.StatusUnauthorized, Err: err}
+		userId = ""
 	}
-	handler.logger.Infoln("got user id by session id")
 
 	if userId != "" {
 		labeledTracks, err := handler.trackUseCase.LabelIsLikedTracks(userId, result.Tracks)
@@ -211,16 +205,7 @@ func (handler *AlbumHandler) AlbumWithRequiredTrack(w http.ResponseWriter, r *ht
 	handler.logger.Infoln("got album with required track by track id")
 
 	sessionId, err := response.GetCookie(r)
-	if err != nil {
-		return common_handler.StatusError{Code: http.StatusUnauthorized, Err: err}
-	}
-	handler.logger.Infoln("got cookie")
-
 	userId, err := handler.sessionUseCase.GetUserId(sessionId)
-	if err != nil {
-		return common_handler.StatusError{Code: http.StatusUnauthorized, Err: err}
-	}
-	handler.logger.Infoln("got user id by session id")
 
 	if userId != "" {
 		labeledTracks, err := handler.trackUseCase.LabelIsLikedTracks(userId, result.Tracks)

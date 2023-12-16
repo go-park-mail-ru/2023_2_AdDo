@@ -110,16 +110,7 @@ func (handler *Handler) Get(w http.ResponseWriter, r *http.Request) error {
 	//}
 	//handler.logger.Infoln("Got user id")
 	sessionId, err := response.GetCookie(r)
-	if err != nil {
-		return common_handler.StatusError{Code: http.StatusUnauthorized, Err: err}
-	}
-	handler.logger.Infoln("got cookie")
-
 	userId, err := handler.sessionUseCase.GetUserId(sessionId)
-	if err != nil {
-		return common_handler.StatusError{Code: http.StatusUnauthorized, Err: err}
-	}
-	handler.logger.Infoln("got user id by session id")
 
 	playlistId, err := strconv.Atoi(mux.Vars(r)["id"])
 	if err != nil {
