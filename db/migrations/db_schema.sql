@@ -1,4 +1,5 @@
 create extension if not exists "uuid-ossp";
+create extension if not exists pg_trgm;
 
 create table if not exists profile (
     id uuid default uuid_generate_v4() primary key,
@@ -23,8 +24,9 @@ create table if not exists artist (
 create table if not exists genre (
     id serial primary key,
     name varchar(128) not null unique,
-    ru_name varchar(128),
-    icon_url varchar(1024)
+    ru_name varchar(128) not null unique,
+    icon_url text not null
+
 );
 
 create table if not exists playlist (
@@ -59,7 +61,9 @@ create table if not exists track(
     duration int not null,
     lyrics text,
     -- ссылка на объект в s3 хранилище довольно длинная, порядка пяти сотен символов
-    play_count int not null default 0
+    play_count int not null default 0,
+    valence double precision default 0,
+    arousal double precision default 0
 );
 
 create table if not exists album_track (
@@ -122,7 +126,18 @@ create table if not exists profile_track (
     foreign key (profile_id) references profile (id) on delete cascade ,
     track_id int not null,
     foreign key (track_id) references track (id) on delete cascade,
+    creating_date timestamptz not null default now(),
     constraint unique_profile_track UNIQUE (profile_id, track_id)
+);
+
+create table if not exists profile_genre (
+     id         serial primary key,
+     profile_id uuid not null,
+     foreign key (profile_id) references profile (id) on delete cascade ,
+     genre_id int not null,
+     foreign key (genre_id) references genre (id) on delete cascade,
+     creating_date timestamptz not null default now(),
+     constraint unique_profile_genre UNIQUE (profile_id, genre_id)
 );
 
 create table if not exists profile_artist (
@@ -131,6 +146,7 @@ create table if not exists profile_artist (
     foreign key (profile_id) references profile (id) on delete cascade ,
     artist_id int not null,
     foreign key (artist_id) references artist (id) on delete cascade,
+    creating_date timestamptz not null default now(),
     constraint unique_profile_artist UNIQUE (profile_id, artist_id)
 );
 
@@ -140,6 +156,7 @@ create table if not exists profile_album (
     foreign key (profile_id) references profile (id) on delete cascade ,
     album_id int not null,
     foreign key (album_id) references album (id) on delete cascade,
+    creating_date timestamptz not null default now(),
     constraint unique_profile_album UNIQUE (profile_id, album_id)
 );
 
@@ -149,14 +166,67 @@ create table if not exists profile_playlist (
     foreign key (profile_id) references profile (id) on delete cascade ,
     playlist_id int not null,
     foreign key (playlist_id) references playlist (id) on delete cascade,
+    creating_date timestamptz not null default now(),
     constraint unique_profile_playlist UNIQUE (profile_id, playlist_id)
 );
 
 create table if not exists artist_album (
-                                            id         serial primary key,
-                                            artist_id int not null,
-                                            foreign key (artist_id) references artist (id) on delete cascade ,
-                                            album_id int not null,
-                                            foreign key (album_id) references album (id) on delete cascade,
-                                            constraint unique_artist_album UNIQUE (artist_id, album_id)
+    id         serial primary key,
+    artist_id int not null,
+    foreign key (artist_id) references artist (id) on delete cascade ,
+    album_id int not null,
+    foreign key (album_id) references album (id) on delete cascade,
+    constraint unique_artist_album UNIQUE (artist_id, album_id)
+);
+
+create table if not exists track_listen (
+    id serial primary key,
+    profile_id uuid not null,
+    foreign key (profile_id) references profile(id) on delete cascade,
+    track_id int not null,
+    foreign key (track_id) references track(id) on delete cascade,
+    duration int not null default 0,
+    count int not null default 0,
+    creating_data timestamptz not null default now(),
+    constraint unique_track_listen UNIQUE (profile_id, track_id)
+);
+
+create table if not exists track_skip (
+    id serial primary key,
+    profile_id uuid not null,
+    foreign key (profile_id) references profile(id) on delete cascade,
+    track_id int not null,
+    foreign key (track_id) references track(id) on delete cascade,
+    duration int not null default 0,
+    count int not null default 0,
+    creating_data timestamptz not null default now(),
+    constraint unique_track_skip UNIQUE (profile_id, track_id)
+);
+
+create table if not exists daily_playlist(
+    id serial primary key,
+    owner_id uuid not null,
+    foreign key (owner_id) references profile (id) on delete cascade
+);
+
+create table if not exists wave(
+     id serial primary key,
+     owner_id uuid not null,
+     foreign key (owner_id) references profile (id) on delete cascade
+);
+
+create table if not exists daily_playlist_track(
+    id serial primary key,
+    track_id int not null,
+    foreign key (track_id) references track(id) on delete cascade,
+    daily_playlist_id int not null,
+    foreign key (daily_playlist_id) references daily_playlist(id) on delete cascade
+);
+
+create table if not exists wave_track(
+   id serial primary key,
+   track_id int not null,
+   foreign key (track_id) references track(id) on delete cascade,
+   wave_id int not null,
+   foreign key (wave_id) references wave(id) on delete cascade
 );

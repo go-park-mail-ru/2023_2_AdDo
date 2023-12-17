@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+option go_package = "main/internal/microservices/recommendation/proto";
+import "candidate.proto";
+import "session.proto";
+
+//    protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative  -I../proto -I../../track/proto  -I../../session/proto   -I../../candidate/proto recommendation.proto
+service RecommendationService {
+  rpc ClassifyCandidates(CandidateToUserId) returns(Candidates) {}
+}
+
+message CandidateToUserId {
+  Candidates Tracks = 1;
+  UserId UserId = 2;
+}

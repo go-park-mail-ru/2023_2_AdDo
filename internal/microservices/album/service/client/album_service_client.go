@@ -8,7 +8,7 @@ import (
 	grpc_artist "main/internal/microservices/artist/service/client"
 	session_proto "main/internal/microservices/session/proto"
 	track_proto "main/internal/microservices/track/proto"
-	grpc_track "main/internal/microservices/track/service/client"
+	grpc_track_server "main/internal/microservices/track/service/server"
 	"main/internal/pkg/album"
 )
 
@@ -24,7 +24,7 @@ func DeserializeAlbum(in *proto.AlbumResponse) album.Response {
 		Preview:    in.GetPreview(),
 		ArtistId:   in.GetArtistId(),
 		ArtistName: in.GetArtistName(),
-		Tracks:     grpc_track.DeserializeTracks(in.GetTracks()),
+		Tracks:     grpc_track_server.DeserializeTracks(in.GetTracks()),
 	}
 }
 

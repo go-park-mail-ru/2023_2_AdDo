@@ -43,7 +43,7 @@ func SerializePlaylistResponse(in playlist.Response) *playlist_proto.PlaylistRes
 		Preview:     in.Preview,
 		CreatorId:   in.AuthorId,
 		CreatorName: in.AuthorName,
-		Tracks:      grpc_track_server.SerializeTracks(in.Tracks),
+		Tracks: grpc_track_server.SerializeTracks(in.Tracks),
 	}
 }
 

@@ -164,3 +164,26 @@ func (db *Postgres) GetUserNameById(userId string) (string, error) {
 
 	return result, nil
 }
+
+func (db *Postgres) GetAllUserIds() ([]string, error) {
+	db.logger.Infoln("UserRepo Get All User Ids entered")
+	query := `select id from profile`
+	row, err := db.Pool.Query(context.Background(), query)
+	if err != nil {
+		db.logger.Errorln("error getting all users from db", err)
+		return nil, err
+	}
+
+	result := make([]string, 0)
+	for row.Next() {
+		var uId string
+		err := row.Scan(uId)
+		if err != nil {
+			db.logger.Errorln("error getting all users from db", err)
+			return nil, err
+		}
+		result = append(result, uId)
+	}
+
+	return result, nil
+}

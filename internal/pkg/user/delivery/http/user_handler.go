@@ -10,8 +10,6 @@ import (
 	user_domain "main/internal/pkg/user"
 	"net/http"
 	"time"
-
-	"github.com/gorilla/csrf"
 )
 
 type UserHandler struct {
@@ -136,9 +134,6 @@ func (handler *UserHandler) Auth(w http.ResponseWriter, r *http.Request) error {
 	handler.logger.WithFields(logrus.Fields{
 		"request_id": utils.GenReqId(r.RequestURI + r.Method),
 	}).Infoln("Auth Handler entered")
-
-	w.Header().Set(session.XCsrfToken, csrf.Token(r))
-	handler.logger.Infoln("csrf token added to response headers")
 
 	sessionId, err := response.GetCookie(r)
 	if err != nil {

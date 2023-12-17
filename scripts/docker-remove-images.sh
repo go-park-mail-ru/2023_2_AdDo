@@ -8,7 +8,7 @@ fi
 REGISTRY=registry.musicon.space
 for image in $(docker images ${REGISTRY}/*:${IMAGE_TAG} --format "{{.Repository}}:{{.Tag}}"); do
     echo "docker rmi $image"
-    docker rmi $image
+    docker rmi $image -f
     if [ $? -ne "0" ]; then
         echo "Error while publishing $image image"
         exit 1

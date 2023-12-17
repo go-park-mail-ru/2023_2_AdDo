@@ -5,6 +5,7 @@ import (
 	"github.com/asaskevich/govalidator"
 	xssvalidator "github.com/infiniteloopcloud/xss-validator"
 	"io"
+	"main/internal/common/utils"
 )
 
 type UserCredentials struct {
@@ -14,7 +15,7 @@ type UserCredentials struct {
 
 type User struct {
 	Id        string `valid:"-" json:"Id" example:"qwer-werw-we4w"`
-	Username  string `valid:"length(2|30), required, printableascii" json:"Username" example:"john"`
+	Username  string `valid:"length(2|30), required" json:"Username" example:"john"`
 	Email     string `valid:"length(1|30), email, required, printableascii" json:"Email" example:"example@gmail.com"`
 	Password  string `valid:"length(6|30), required, printableascii" json:"Password" example:"password"`
 	BirthDate string `valid:"required" json:"BirthDate" example:"2000-01-01"`
@@ -30,6 +31,11 @@ func (u *User) Validate() error {
 	_, err := govalidator.ValidateStruct(u)
 	if err != nil {
 		return err
+	}
+
+	ok := utils.IsRussianLatinDigitUnderscore(u.Username)
+	if !ok {
+		return ErrorInvalidUsername
 	}
 
 	err = xssvalidator.Validate(u.Email, xssvalidator.DefaultRules...)
@@ -99,10 +105,12 @@ type Repository interface {
 	GetAvatarPath(userId string) (string, error)
 	RemoveAvatarPath(userId string) (string, error)
 	GetUserNameById(userId string) (string, error)
+	GetAllUserIds() ([]string, error)
 }
 
 var (
-	ErrWrongCredentials = errors.New("wrong user credentials")
-	ErrUserAlreadyExist = errors.New("user already exist")
-	ErrUserDoesNotExist = errors.New("user does not exist")
+	ErrorInvalidUsername = errors.New("error validating got username")
+	ErrWrongCredentials  = errors.New("wrong user credentials")
+	ErrUserAlreadyExist  = errors.New("user already exist")
+	ErrUserDoesNotExist  = errors.New("user does not exist")
 )

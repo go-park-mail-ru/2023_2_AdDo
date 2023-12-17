@@ -31,10 +31,9 @@ func GetCookie(r *http.Request) (string, error) {
 
 func SetCookie(w http.ResponseWriter, sessionId string) {
 	http.SetCookie(w, &http.Cookie{
-		Name:    session.CookieName,
-		Value:   sessionId,
-		Expires: time.Now().Add(session.TimeToLiveCookie),
-		///Secure:   true, // сейчас не работает, потому что запрос не https
+		Name:     session.CookieName,
+		Value:    sessionId,
+		Expires:  time.Now().Add(session.TimeToLiveCookie),
 		HttpOnly: true,
 	})
 }

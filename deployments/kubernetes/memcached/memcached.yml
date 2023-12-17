@@ -1,0 +1,50 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: memcached
+  labels:
+    app: memcached
+  namespace: musicon
+spec:
+  clusterIP: None
+  ports:
+    - port: 11211
+      name: memcached
+  selector:
+    app: memcached
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: memcached
+  namespace: musicon
+spec:
+  serviceName: memcached
+  replicas: 1
+  selector:
+    matchLabels:
+      app: memcached
+  template:
+    metadata:
+      labels:
+        app: memcached
+      namespace: musicon
+    spec:
+      containers:
+        - name: memcached
+          image: memcached:latest
+          ports:
+            - containerPort: 11211
+              name: memcached-port
+          volumeMounts:
+            - name: data
+              mountPath: /bitnami/memcached/data
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        resources:
+          requests:
+            storage: 5Gi

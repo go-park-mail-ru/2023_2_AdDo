@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	// microservices_init "main/cmd/microservices"
 	init_db "main/init/postgres_db"
@@ -21,6 +22,7 @@ var loggerSingleton = log.Singleton{}
 
 func main() {
 	logger := loggerSingleton.GetLogger()
+	logger.SetLevel(logrus.ErrorLevel)
 
 	lis, err := net.Listen("tcp", ":"+strconv.Itoa(Port))
 	if err != nil {

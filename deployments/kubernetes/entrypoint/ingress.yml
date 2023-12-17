@@ -8,6 +8,12 @@ metadata:
     nginx.ingress.kubernetes.io/proxy-body-size: "16m"
     cert-manager.io/cluster-issuer: "letsencrypt-prod"
     kubernetes.io/ingress.class: "nginx"
+    # https://stackoverflow.com/questions/53592545/increase-proxy-send-timeout-and-proxy-read-timeout-ingress-nginx
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "7200"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "7200"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "7200"
+
+
 spec:
   tls:
   - hosts:

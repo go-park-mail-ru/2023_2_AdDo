@@ -37,6 +37,7 @@ func PanicRecovery(next http.Handler, logger *logrus.Logger) http.Handler {
 					"request_method": request.Method,
 					"request_header": request.Header,
 					"request_uri":    request.RequestURI,
+					"err":            err,
 				}).Infoln("panic happened")
 
 				w.WriteHeader(http.StatusInternalServerError)
