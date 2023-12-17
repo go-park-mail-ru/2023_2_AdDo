@@ -98,6 +98,62 @@ func (in InMemory) getNearestTracks(uniqTracks map[uint64]bool, id track.Id, cou
 	return result, nil
 }
 
+func (in InMemory) findNearestInSet(tracks []track.Id, skip track.Id, count int) []track.Id {
+	vec := make([]IdDistance, 0)
+	for _, t := range tracks {
+		vec = append(vec, IdDistance{
+			Id:       t.Id,
+			Distance: calculateEuclid(in.TrackIdToDataIndex[t.Id], in.TrackIdToDataIndex[skip.Id]),
+		})
+	}
+	sort.Slice(vec, func(i, j int) bool {
+		return vec[i].Distance < vec[j].Distance
+	})
+
+	result := make([]track.Id, 0)
+	for i := 0; i < count; i++ {
+		result = append(result, track.Id{Id: vec[i].Id})
+	}
+
+	return result
+}
+
+func (in InMemory) eraseVecFromVec(tracks []track.Id, skips []track.Id) []track.Id {
+	redundantElems := make(map[uint64]bool)
+	for _, id := range skips {
+		redundantElems[id.Id] = true
+	}
+
+	result := make([]track.Id, 0)
+	for _, id := range tracks {
+		if _, ok := redundantElems[id.Id]; ok {
+			continue
+		}
+		result = append(result, id)
+	}
+
+	return result
+}
+
+func (in InMemory) FilterSkips(tracks []track.Id, skips []track.Id) []track.Id {
+	in.logger.Infoln("Filter skips entered", tracks, skips)
+
+	if len(skips) == 0 {
+		return tracks
+	}
+
+	skipPerTrack := len(tracks)/2/len(skips) + 1
+	redundant := make([]track.Id, 0)
+	for _, skip := range skips {
+		temp := in.findNearestInSet(tracks, skip, skipPerTrack)
+		redundant = append(redundant, temp...)
+	}
+
+	result := in.eraseVecFromVec(tracks, redundant)
+	in.logger.Infoln("Result", result)
+	return result
+}
+
 func (in InMemory) GetNearestTracks(ids []track.Id, countPerTrack int) ([]track.Id, error) {
 	in.logger.Infoln("Get Nearest tracks entered with", ids, "for every track count: ", countPerTrack)
 
@@ -114,6 +170,7 @@ func (in InMemory) GetNearestTracks(ids []track.Id, countPerTrack int) ([]track.
 	}
 
 	in.logger.Infoln("Get Nearest finished with", result)
+
 	return result, nil
 }
 

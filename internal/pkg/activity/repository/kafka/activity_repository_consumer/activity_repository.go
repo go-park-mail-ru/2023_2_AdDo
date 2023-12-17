@@ -149,6 +149,13 @@ func (d *Default) PopSkipTrack(out chan<- activity.UserTrackAction) {
 		}
 
 		d.logger.Infoln("Got messages", string(msg.Key), string(msg.Value))
+
+		out <- activity.UserTrackAction{
+			UserId:  like.UserId,
+			TrackId: like.TrackId,
+			Action:  activity.SkipAction,
+		}
+		d.logger.Infoln("Got messages", string(msg.Key), string(msg.Value))
 	}
 }
 

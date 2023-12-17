@@ -63,9 +63,9 @@ type ProducerRepository interface {
 }
 
 type KeyValueRepository interface {
-	SaveActivityAndCountCheck(action UserTrackAction, count uint8) (bool, error)
-	GetAllRecentActivity(userId string) ([]UserTrackAction, error)
-	CleanLastActivityForUser(userId string) error
+	SetAndCheck(action UserTrackAction, count uint8) (bool, error)
+	CleanLastAndMerge(userId string) error
+	GetAllActivity(userId string) ([]UserTrackAction, []UserTrackAction, error)
 }
 
 type WorkerUseCase interface {

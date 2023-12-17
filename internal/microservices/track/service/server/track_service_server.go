@@ -86,6 +86,11 @@ func (tm *TrackManager) Listen(ctx context.Context, in *track_proto.TrackToUserD
 	}
 	tm.logger.Infoln("created listen track")
 
+	if err := tm.queue.PushListenTrack(in.GetTrackToUser().GetUserId(), in.GetTrackToUser().GetTrackId(), in.GetDuration()); err != nil {
+		return nil, err
+	}
+	tm.logger.Infoln("pushed skip track")
+
 	return &google_proto.Empty{}, nil
 }
 
@@ -97,6 +102,10 @@ func (tm *TrackManager) Skip(ctx context.Context, in *track_proto.TrackToUserDur
 	}
 	tm.logger.Infoln("created skip track")
 
+	if err := tm.queue.PushSkipTrack(in.GetTrackToUser().GetUserId(), in.GetTrackToUser().GetTrackId(), in.GetDuration()); err != nil {
+		return nil, err
+	}
+	tm.logger.Infoln("pushed skip track")
 	return &google_proto.Empty{}, nil
 }
 

@@ -98,7 +98,7 @@ func (cm *CandidateManager) GetCandidatesForWave(ctx context.Context, id *sessio
 	}
 	cm.logger.Infoln("Hot Tracks:", hotTracks)
 
-	recentActivity, err := cm.recentActivityRepo.GetAllRecentActivity(id.GetUserId())
+	recentActivity, recentSkips, err := cm.recentActivityRepo.GetAllActivity(id.GetUserId())
 	if err != nil {
 		return nil, err
 	}
@@ -107,6 +107,11 @@ func (cm *CandidateManager) GetCandidatesForWave(ctx context.Context, id *sessio
 	recentActivityIds := make([]track.Id, 0)
 	for _, act := range recentActivity {
 		recentActivityIds = append(recentActivityIds, track.Id{Id: act.TrackId})
+	}
+
+	recentSkipsIds := make([]track.Id, 0)
+	for _, act := range recentSkips {
+		recentSkipsIds = append(recentSkipsIds, track.Id{Id: act.TrackId})
 	}
 
 	countPerTrack := WaveTrackCandidatePoolSize / (len(hotTracks) + len(recentActivity))
@@ -124,7 +129,10 @@ func (cm *CandidateManager) GetCandidatesForWave(ctx context.Context, id *sessio
 	cm.logger.Infoln("Candidates for Recent Act:", tracksByHot)
 
 	ids := append(tracksByHot, trackByRecentActivity...)
-	// excluding
+
+	cm.logger.Infoln("skip ids:", recentSkipsIds)
+	ids = cm.clusterRepo.FilterSkips(ids, recentSkipsIds)
+	cm.logger.Infoln("Candidates after filtrating", ids)
 
 	result, err := cm.trackRepo.GetTracksByIds(ids)
 	if err != nil {

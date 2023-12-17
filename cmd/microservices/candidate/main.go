@@ -2,7 +2,6 @@ package main
 
 import (
 	"github.com/bradfitz/gomemcache/memcache"
-	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"main/internal/microservices/candidate/proto"
 	candidate_service_server "main/internal/microservices/candidate/service/server"
@@ -25,7 +24,7 @@ var loggerSingleton = log.Singleton{}
 
 func main() {
 	logger := loggerSingleton.GetLogger()
-	logger.SetLevel(logrus.ErrorLevel)
+	//logger.SetLevel(logrus.ErrorLevel)
 
 	lis, err := net.Listen("tcp", ":"+strconv.Itoa(Port))
 	if err != nil {

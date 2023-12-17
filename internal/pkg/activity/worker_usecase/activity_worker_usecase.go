@@ -62,7 +62,6 @@ func NewWorker(ruc recommendation.ServiceUseCase, cus candidate.UseCase, up wave
 // 3.3 Несет эти треки нейронке, которая ранжирует их аналогично с предыдущим примеров.
 // 4. Сохраняет созданный плейлист в базу, который пользователь впоследствии может запросить.
 
-// Здесь мы держим мапу, в которой лежат активности. Мы прям тут проверяем сколько их у пользователя и в случае чего тригеррим старт переварки пула
 func (s *Worker) Run() {
 	s.logger.Infoln("Activity worker started")
 	actions := make(chan activity.UserTrackAction)
@@ -73,12 +72,12 @@ func (s *Worker) Run() {
 	go s.activityRepo.PopLikeGenre(actions)
 	go s.activityRepo.PopSkipTrack(actions)
 	go s.activityRepo.PopListenTrack(actions)
-	s.logger.Infoln("All worker gorutines initialized")
+	s.logger.Infoln("All worker goroutines initialized")
 
 	for action := range actions {
-		isFull, err := s.recentActivityRepo.SaveActivityAndCountCheck(action, activity.RecentActivityNeedToRecreateTrackPool)
+		isFull, err := s.recentActivityRepo.SetAndCheck(action, activity.RecentActivityNeedToRecreateTrackPool)
 		if err != nil {
-			s.logger.Errorln("error while saving recent activity", err)
+			s.logger.Errorln("error while checking", err)
 		}
 
 		if !isFull {
@@ -87,14 +86,14 @@ func (s *Worker) Run() {
 
 		err = s.RecreatePool(action.UserId)
 		if err != nil {
-			s.logger.Errorln("error while recreating new pool", err)
+			s.logger.Errorln("error while recreating pool", err)
 		}
 	}
 }
 
 func (s *Worker) RecreatePool(userId string) error {
 	defer func(recentActivityRepo activity.KeyValueRepository, userId string) {
-		err := recentActivityRepo.CleanLastActivityForUser(userId)
+		err := recentActivityRepo.CleanLastAndMerge(userId)
 		if err != nil {
 			s.logger.Errorln("error cleaning recent activities", err)
 		}
