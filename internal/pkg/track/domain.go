@@ -24,23 +24,37 @@ type Response struct {
 }
 
 type UseCase interface {
+	LabelIsLikedTracks(userId string, tracks []Response) ([]Response, error)
 	GetUserLikedTracks(userId string) ([]Response, error)
-	Listen(trackId uint64) error
+	Listen(userId string, trackId uint64, dur uint32) error
 	Like(userId string, trackId uint64) error
 	IsLike(userId string, trackId uint64) (bool, error)
 	Unlike(userId string, trackId uint64) error
 }
 
 type Repository interface {
+	LabelIsLikedTracks(userId string, tracks []Response) ([]Response, error)
+	GetRotationTrackForAlbum(id uint64) (uint64, error)
+	GetRotationTrackForGenre(id uint64) (uint64, error)
+	GetRotationTrackForArtist(id uint64) (uint64, error)
+	DeleteLastTakenFromWave(userId string, tracks []Response) error
+	GetWaveTracks(userId string, count uint32) ([]Response, error)
 	GetByUser(userId string) ([]Response, error)
+	GetByUserForDailyPlaylist(userId string) ([]Response, error)
 	GetByPlaylist(playlistId uint64) ([]Response, error)
 	GetByAlbum(albumId uint64) ([]Response, error)
 	GetByArtist(artistId uint64) ([]Response, error)
 	CreateLike(userId string, trackId uint64) error
+	CreateListen(userId string, trackId uint64, dur uint32) error
+	CreateSkip(userId string, trackId uint64, dur uint32) error
 	CheckLike(userId string, trackId uint64) (bool, error)
 	DeleteLike(userId string, trackId uint64) error
 	AddListen(trackId uint64) error
 	Search(text string) ([]Response, error)
+	GetHotTracks(userId string, count uint8) ([]Id, error)
+	GetLastDayTracks(userId string) ([]Id, error)
+	GetTracksByIds(ids []Id) ([]Response, error)
+	GetRandomTracksForWave(userId string, count uint32) ([]Response, error)
 }
 
 var (

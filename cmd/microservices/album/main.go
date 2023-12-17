@@ -1,7 +1,11 @@
 package main
 
 import (
+	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
+	init_kafka "main/init/kafka_queue"
+	"main/internal/pkg/activity/repository/kafka/activity_repository_producer"
+
 	// microservices_init "main/cmd/microservices"
 	init_db "main/init/postgres_db"
 	log "main/internal/common/logger"
@@ -18,9 +22,11 @@ const EnvPostgresQueryName = "DATABASE_URL"
 const Port = 8084
 
 var loggerSingleton = log.Singleton{}
+var KafkaQueryConnection = []string{"kafka:9092"}
 
 func main() {
 	logger := loggerSingleton.GetLogger()
+	logger.SetLevel(logrus.ErrorLevel)
 
 	lis, err := net.Listen("tcp", ":"+strconv.Itoa(Port))
 	if err != nil {
@@ -32,11 +38,17 @@ func main() {
 		logger.Errorln("error connecting database: ", err)
 	}
 
+	kafkaProducerClient, err := init_kafka.NewProducer(KafkaQueryConnection)
+	if err != nil {
+		logger.Errorln("error connecting kafka: ", err)
+	}
+
 	trackRepository := track_repository.NewPostgres(pool, logger)
 	albumRepository := album_repository.NewPostgres(pool, logger)
 	artistRepository := artist_repository.NewPostgres(pool, logger)
+	activityProducer := activity_repository_producer.NewDefault(kafkaProducerClient, logger)
 
-	albumManager := grpc_album_server.NewAlbumManager(trackRepository, &artistRepository, albumRepository, logger)
+	albumManager := grpc_album_server.NewAlbumManager(&activityProducer, trackRepository, &artistRepository, albumRepository, logger)
 
 	server := grpc.NewServer()
 	proto2.RegisterAlbumServiceServer(server, &albumManager)

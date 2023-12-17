@@ -27,6 +27,10 @@ func NewHandler(track track.UseCase, session session.UseCase, logger *logrus.Log
 	}
 }
 
+type Duration struct {
+	Duration int
+}
+
 // Listen
 //
 //	@Summary		Listen
@@ -46,16 +50,34 @@ func (handler *TrackHandler) Listen(w http.ResponseWriter, r *http.Request) erro
 		"request_id": utils.GenReqId(r.RequestURI + r.Method),
 	}).Infoln("Listen Handler entered")
 
-	var trackId track.Id
-	if err := json.NewDecoder(r.Body).Decode(&trackId); err != nil {
+	trackId, err := strconv.Atoi(mux.Vars(r)["id"])
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusBadRequest, Err: err}
+	}
+	handler.logger.Infoln("Parsed trackId from Vars")
+
+	sessionId, err := response.GetCookie(r)
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusUnauthorized, Err: err}
+	}
+	handler.logger.Infoln("got cookie")
+
+	userId, err := handler.sessionUseCase.GetUserId(sessionId)
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusUnauthorized, Err: err}
+	}
+	handler.logger.Infoln("got user id by session id")
+
+	dur := Duration{}
+	if err := json.NewDecoder(r.Body).Decode(&dur); err != nil {
 		return common_handler.StatusError{Code: http.StatusBadRequest, Err: err}
 	}
 	handler.logger.Infoln("track id decoded")
 
-	if err := handler.trackUseCase.Listen(trackId.Id); err != nil {
+	if err := handler.trackUseCase.Listen(userId, uint64(trackId), uint32(dur.Duration)); err != nil {
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}
-	handler.logger.Infoln("play count for track ", trackId, "incremented")
+	handler.logger.Infoln("play incremented")
 
 	w.WriteHeader(http.StatusNoContent)
 	return nil

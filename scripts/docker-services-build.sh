@@ -15,3 +15,9 @@ for dockerfile in build/package/micros/*/Dockerfile; do
         exit 1
     fi
 done
+docker rmi registry.musicon.space/base
+if [ $? -ne "0" ]; then
+    echo "Error remove base image"
+    exit 1
+fi
+

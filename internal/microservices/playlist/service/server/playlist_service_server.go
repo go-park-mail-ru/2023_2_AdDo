@@ -43,8 +43,8 @@ func SerializePlaylistResponse(in playlist.Response) *playlist_proto.PlaylistRes
 		Preview:     in.Preview,
 		CreatorId:   in.AuthorId,
 		CreatorName: in.AuthorName,
-		IsYours:     in.IsYours,
-		Tracks:      grpc_track_server.SerializeTracks(in.Tracks),
+		//IsYours:     in.IsYours,
+		Tracks: grpc_track_server.SerializeTracks(in.Tracks),
 	}
 }
 
@@ -77,23 +77,23 @@ func (pm *PlaylistManager) Create(ctx context.Context, in *playlist_proto.Playli
 	return SerializePlaylistResponse(result), nil
 }
 
-func (pm *PlaylistManager) Get(ctx context.Context, in *playlist_proto.PlaylistToUserId) (*playlist_proto.PlaylistResponse, error) {
+func (pm *PlaylistManager) Get(ctx context.Context, in *playlist_proto.PlaylistId) (*playlist_proto.PlaylistResponse, error) {
 	pm.logger.Infoln("Playlist Service Get Method entered")
 
-	result, err := pm.repoPlaylist.Get(ctx, in.GetPlaylistId())
+	result, err := pm.repoPlaylist.Get(ctx, in.GetId())
 	if err != nil {
 		return nil, err
 	}
 
-	tracks, err := pm.repoTracks.GetByPlaylist(in.GetPlaylistId())
+	tracks, err := pm.repoTracks.GetByPlaylist(in.GetId())
 	if err != nil {
 		return nil, err
 	}
 
-	isCreator, err := pm.repoPlaylist.IsCreator(context.Background(), in.GetUserId(), in.GetPlaylistId())
-	if err != nil {
-		return nil, err
-	}
+	//isCreator, err := pm.repoPlaylist.IsCreator(context.Background(), in.GetUserId(), in.GetPlaylistId())
+	//if err != nil {
+	//	return nil, err
+	//}
 
 	return SerializePlaylistResponse(playlist.Response{
 		Id:       result.Id,
@@ -101,7 +101,7 @@ func (pm *PlaylistManager) Get(ctx context.Context, in *playlist_proto.PlaylistT
 		AuthorId: result.AuthorId,
 		Preview:  result.Preview,
 		Tracks:   tracks,
-		IsYours:  isCreator,
+		//IsYours:  isCreator,
 	}), nil
 }
 

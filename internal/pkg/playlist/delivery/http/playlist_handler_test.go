@@ -87,8 +87,8 @@ func TestActionsOnPlaylist(t *testing.T) {
 			Name:     "Playlist",
 			AuthorId: userId,
 			Preview:  "preview",
-			IsYours:  true,
-			Tracks:   make([]track.Response, 0),
+			//IsYours:  true,
+			Tracks: make([]track.Response, 0),
 		}
 
 		req := httptest.NewRequest(http.MethodGet, "/playlist", nil)
@@ -97,7 +97,7 @@ func TestActionsOnPlaylist(t *testing.T) {
 		w := httptest.NewRecorder()
 
 		mockSessionUseCase.EXPECT().GetUserId(sessionId).Return(userId, nil)
-		mockPlaylistUseCase.EXPECT().Get(userId, playlistId).Return(playlistResponse, nil)
+		mockPlaylistUseCase.EXPECT().Get(playlistId).Return(playlistResponse, nil)
 
 		err := handler.Get(w, req)
 		assert.Nil(t, err)

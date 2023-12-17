@@ -6,11 +6,23 @@ import "google/protobuf/empty.proto";
 import "session.proto";
 // protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative -I../proto  -I../../session/proto   track.proto
 service TrackService {
-  rpc Listen (TrackId) returns (google.protobuf.Empty) {}
+  rpc Listen (TrackToUserDur) returns (google.protobuf.Empty) {}
+  rpc Skip (TrackToUserDur) returns (google.protobuf.Empty) {}
   rpc Like (TrackToUserId) returns (google.protobuf.Empty) {}
   rpc IsLike (TrackToUserId) returns (IsLikedTrack) {}
   rpc Unlike (TrackToUserId) returns (google.protobuf.Empty) {}
   rpc GetUserLikedTracks (UserId) returns (TracksResponse) {}
+  rpc LabelIsLikedForUser (UserToTracksForLabeling) returns (TracksResponse) {}
+}
+
+message UserToTracksForLabeling {
+  TracksResponse tracks = 1;
+  string userId = 2;
+}
+
+message TrackToUserDur {
+  TrackToUserId TrackToUser = 1;
+  uint32 Duration = 2;
 }
 
 message IsLikedTrack {

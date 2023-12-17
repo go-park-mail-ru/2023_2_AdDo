@@ -8,6 +8,7 @@ import (
 	session_proto "main/internal/microservices/session/proto"
 	track_proto "main/internal/microservices/track/proto"
 	grpc_track_server "main/internal/microservices/track/service/server"
+	"main/internal/pkg/activity"
 	"main/internal/pkg/album"
 	"main/internal/pkg/artist"
 	"main/internal/pkg/track"
@@ -19,14 +20,16 @@ type AlbumManager struct {
 	repoAlbum  album.Repository
 	logger     *logrus.Logger
 	album_proto.UnimplementedAlbumServiceServer
+	queue activity.ProducerRepository
 }
 
-func NewAlbumManager(repoTrack track.Repository, repoArtist artist.Repository, repoAlbum album.Repository, logger *logrus.Logger) AlbumManager {
+func NewAlbumManager(q activity.ProducerRepository, repoTrack track.Repository, repoArtist artist.Repository, repoAlbum album.Repository, logger *logrus.Logger) AlbumManager {
 	return AlbumManager{
 		repoTrack:  repoTrack,
 		repoArtist: repoArtist,
 		repoAlbum:  repoAlbum,
 		logger:     logger,
+		queue:      q,
 	}
 }
 
@@ -205,9 +208,14 @@ func (am *AlbumManager) Like(ctx context.Context, in *album_proto.AlbumToUserId)
 	am.logger.Infoln("Album Micros Like entered")
 
 	if err := am.repoAlbum.CreateLike(in.GetUserId(), in.GetAlbumId()); err != nil {
-		return nil, err
+		return &google_proto.Empty{}, err
 	}
 	am.logger.Infoln("Like created")
+
+	if err := am.queue.PushLikeAlbum(in.GetUserId(), in.GetAlbumId()); err != nil {
+		return &google_proto.Empty{}, err
+	}
+	am.logger.Infoln("album like added to queue")
 
 	return &google_proto.Empty{}, nil
 }
@@ -228,7 +236,7 @@ func (am *AlbumManager) Unlike(ctx context.Context, in *album_proto.AlbumToUserI
 	am.logger.Infoln("Album Micros Like entered")
 
 	if err := am.repoAlbum.DeleteLike(in.GetUserId(), in.GetAlbumId()); err != nil {
-		return nil, err
+		return &google_proto.Empty{}, err
 	}
 	am.logger.Infoln("Like created")
 

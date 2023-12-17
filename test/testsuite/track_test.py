@@ -5,13 +5,13 @@ import utils
 
 class TrackTest(unittest.TestCase):
     def test_track_listen_success(self):
-        headers, cookies = utils.get_csrf_headers_and_cookies()
+        headers, cookies = utils.init_authorized_user_headers_and_cookies()
 
-        response = requests.post(utils.url + '/listen', headers=headers, cookies=cookies, json={'Id': 1})
+        response = requests.post(utils.url + '/listen/1', headers=headers, cookies=cookies, json={'Duration': 12})
         self.assertEqual(204, response.status_code)
 
     def test_track_listen_forbidden(self):
-        response = requests.post(utils.url + '/listen', json={'Id': 1})
+        response = requests.post(utils.url + '/listen/1', json={'Duration': 24})
         self.assertEqual(403, response.status_code)
 
     def test_track_like_success(self):

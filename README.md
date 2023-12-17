@@ -16,7 +16,7 @@
 ### Ссылки
 * [Frontend repository](https://github.com/frontend-park-mail-ru/2023_2_AdDo)
 
-* [Deploy](https://musicon.space/)
+* [Deploy](http://82.146.45.164:8081/)
 
 * [Figma](https://www.figma.com/file/zDsdpXpKI2vuSEs6hL1XP1/MusicOn?type=design&node-id=0-1&mode=design&t=JUugOf4GzxkjGkOV-0)
 

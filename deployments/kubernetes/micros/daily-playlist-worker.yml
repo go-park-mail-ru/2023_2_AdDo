@@ -1,0 +1,44 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: daily-playlist-worker
+  labels:
+    app: daily-playlist-worker-svc
+  namespace: musicon
+spec:
+  clusterIP: None
+  ports:
+    - port: 9001
+      name: daily-playlist-worker
+  selector:
+    app: daily-playlist-worker-svc
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: daily-playlist-worker-deploy
+  labels:
+    app: daily-playlist-worker-svc
+  namespace: musicon
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: daily-playlist-worker-svc
+  template:
+    metadata:
+      labels:
+        app: daily-playlist-worker-svc
+      namespace: musicon
+    spec:
+      imagePullSecrets:
+        - name: regcred
+      containers:
+        - name: daily-playlist-worker
+          image: registry.musicon.space/daily-playlist-worker
+          imagePullPolicy: Always
+          command: ["/daily_playlist_worker"]
+          env:
+            - name: DATABASE_URL
+              value: "postgres://musicon@musicon.space:5433/musicon"

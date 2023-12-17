@@ -9,7 +9,7 @@ import (
 	playlist_proto "main/internal/microservices/playlist/proto"
 	grpc_playlist_server "main/internal/microservices/playlist/service/server"
 	session_proto "main/internal/microservices/session/proto"
-	grpc_track "main/internal/microservices/track/service/client"
+	grpc_track_server "main/internal/microservices/track/service/server"
 	grpc_user "main/internal/microservices/user/service/client"
 	"main/internal/pkg/playlist"
 )
@@ -27,13 +27,13 @@ func NewClient(um grpc_user.Client, pm playlist_proto.PlaylistServiceClient, cli
 
 func DeserializePlaylistResponse(in *playlist_proto.PlaylistResponse) playlist.Response {
 	return playlist.Response{
-		Id:         in.GetId(),
-		Name:       in.GetName(),
-		IsYours:    in.GetIsYours(),
+		Id:   in.GetId(),
+		Name: in.GetName(),
+		//IsYours:    in.GetIsYours(),
 		AuthorId:   in.GetCreatorId(),
 		AuthorName: in.GetCreatorName(),
 		Preview:    in.GetPreview(),
-		Tracks:     grpc_track.DeserializeTracks(in.GetTracks()),
+		Tracks:     grpc_track_server.DeserializeTracks(in.GetTracks()),
 	}
 }
 
@@ -62,10 +62,10 @@ func (c *Client) Create(base playlist.Base) (playlist.Response, error) {
 	return DeserializePlaylistResponse(result), nil
 }
 
-func (c *Client) Get(userId string, playlistId uint64) (playlist.Response, error) {
+func (c *Client) Get(playlistId uint64) (playlist.Response, error) {
 	c.logger.Infoln("Playlist client Get entered")
 
-	result, err := c.playlistManager.Get(context.Background(), &playlist_proto.PlaylistToUserId{UserId: userId, PlaylistId: playlistId})
+	result, err := c.playlistManager.Get(context.Background(), &playlist_proto.PlaylistId{Id: playlistId})
 	if err != nil {
 		return playlist.Response{}, err
 	}
@@ -77,6 +77,16 @@ func (c *Client) Get(userId string, playlistId uint64) (playlist.Response, error
 	result.CreatorName = creatorName
 
 	return DeserializePlaylistResponse(result), nil
+}
+
+func (c *Client) IsCreator(userId string, playlistId uint64) (bool, error) {
+	c.logger.Infoln("Playlist client IsCreator entered")
+
+	result, err := c.playlistManager.IsCreator(context.Background(), &playlist_proto.PlaylistToUserId{UserId: userId, PlaylistId: playlistId})
+	if err != nil {
+		return false, err
+	}
+	return result.GetIsCreator(), nil
 }
 
 func (c *Client) GetUserPlaylists(userId string) ([]playlist.Base, error) {

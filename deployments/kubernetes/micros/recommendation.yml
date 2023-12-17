@@ -1,0 +1,44 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: recommendation
+  labels:
+    app: recommendation-svc
+  namespace: musicon
+spec:
+  clusterIP: None
+  ports:
+    - port: 8089
+      name: recommendation
+  selector:
+    app: recommendation-svc
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: recommendation-deploy
+  labels:
+    app: recommendation-svc
+  namespace: musicon
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: recommendation-svc
+  template:
+    metadata:
+      labels:
+        app: recommendation-svc
+      namespace: musicon
+    spec:
+      imagePullSecrets:
+        - name: regcred
+      containers:
+        - name: recommendation
+          image: registry.musicon.space/recommendation
+          imagePullPolicy: Always
+          command: ["/recommendation"]
+          env:
+            - name: DATABASE_URL
+              value: "postgres://musicon@musicon.space:5433/musicon"

@@ -38,6 +38,7 @@ func NewHandler(trackUseCase track.UseCase, albumUseCase album.UseCase, session 
 //	@Success		200	{array}		album.Response
 //	@Failure		500	{string}	errMsg
 //	@Router			/feed [get]
+
 func (handler *AlbumHandler) Feed(w http.ResponseWriter, r *http.Request) error {
 	handler.logger.WithFields(logrus.Fields{
 		"request_id": utils.GenReqId(r.RequestURI + r.Method),
@@ -145,14 +146,32 @@ func (handler *AlbumHandler) AlbumTracks(w http.ResponseWriter, r *http.Request)
 
 	result, err := handler.albumUseCase.GetAlbum(uint64(albumId))
 	if err != nil {
-		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
+		return common_handler.StatusError{Code: http.StatusNotFound, Err: err}
 	}
 	handler.logger.Infoln("got album by id")
+
+	sessionId, err := response.GetCookie(r)
+	userId, err := handler.sessionUseCase.GetUserId(sessionId)
+	if err != nil {
+		userId = ""
+	}
+
+	if userId != "" {
+		labeledTracks, err := handler.trackUseCase.LabelIsLikedTracks(userId, result.Tracks)
+		if err != nil {
+			handler.logger.Errorln("Error Labeling Tracks with IsLiked", err)
+		}
+		result.Tracks = labeledTracks
+	}
 
 	if err = response.RenderJSON(w, result); err != nil {
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}
 	handler.logger.Infoln("formed response")
+
+	if userId == "" {
+		w.WriteHeader(http.StatusUnauthorized)
+	}
 
 	return nil
 }
@@ -185,10 +204,25 @@ func (handler *AlbumHandler) AlbumWithRequiredTrack(w http.ResponseWriter, r *ht
 	}
 	handler.logger.Infoln("got album with required track by track id")
 
+	sessionId, err := response.GetCookie(r)
+	userId, err := handler.sessionUseCase.GetUserId(sessionId)
+
+	if userId != "" {
+		labeledTracks, err := handler.trackUseCase.LabelIsLikedTracks(userId, result.Tracks)
+		if err != nil {
+			handler.logger.Errorln("Error Labeling Tracks with IsLiked")
+		}
+		result.Tracks = labeledTracks
+	}
+
 	if err = response.RenderJSON(w, result); err != nil {
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}
 	handler.logger.Infoln("formed response")
+
+	if userId == "" {
+		w.WriteHeader(http.StatusUnauthorized)
+	}
 
 	return nil
 }
