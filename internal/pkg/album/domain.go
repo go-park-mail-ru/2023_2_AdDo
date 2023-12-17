@@ -21,6 +21,10 @@ type Response struct {
 	Tracks     []track.Response `json:"Tracks"`
 }
 
+type Albums struct {
+	Albums []Response `json:"Albums"`
+}
+
 type LikedAlbums struct {
 	Albums []Base `json:"Albums"`
 }
@@ -53,4 +57,4 @@ type Repository interface {
 	Search(text string) ([]Base, error)
 }
 
-const LimitForMainPage = 10
+const LimitForMainPage = 12

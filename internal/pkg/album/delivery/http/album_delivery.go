@@ -2,6 +2,7 @@ package album_delivery
 
 import (
 	"github.com/gorilla/mux"
+	"github.com/mailru/easyjson"
 	"github.com/sirupsen/logrus"
 	"main/internal/common/handler"
 	"main/internal/common/response"
@@ -164,7 +165,8 @@ func (handler *AlbumHandler) AlbumTracks(w http.ResponseWriter, r *http.Request)
 		result.Tracks = labeledTracks
 	}
 
-	if err = response.RenderJSON(w, result); err != nil {
+
+	if _, _, err = easyjson.MarshalToHTTPResponseWriter(result, w); err != nil {
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}
 	handler.logger.Infoln("formed response")
@@ -215,7 +217,7 @@ func (handler *AlbumHandler) AlbumWithRequiredTrack(w http.ResponseWriter, r *ht
 		result.Tracks = labeledTracks
 	}
 
-	if err = response.RenderJSON(w, result); err != nil {
+	if _, _, err = easyjson.MarshalToHTTPResponseWriter(result, w); err != nil {
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}
 	handler.logger.Infoln("formed response")
@@ -230,7 +232,7 @@ func (handler *AlbumHandler) AlbumWithRequiredTrack(w http.ResponseWriter, r *ht
 func (handler *AlbumHandler) handleQuery(albums []album.Response, w http.ResponseWriter, _ *http.Request) error {
 	handler.logger.Infoln("handle query entered")
 
-	if err := response.RenderJSON(w, albums); err != nil {
+	if _, _, err := easyjson.MarshalToHTTPResponseWriter(album.Albums{Albums: albums}, w); err != nil {
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}
 	handler.logger.Infoln("formed response")
@@ -328,7 +330,7 @@ func (handler *AlbumHandler) IsLike(w http.ResponseWriter, r *http.Request) erro
 	}
 	handler.logger.Infoln("artist like checked")
 
-	if err = response.RenderJSON(w, response.IsLiked{IsLiked: isLiked}); err != nil {
+	if _, _, err = easyjson.MarshalToHTTPResponseWriter(response.IsLiked{IsLiked: isLiked}, w); err != nil {
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}
 	handler.logger.Infoln("response  formed")
@@ -383,6 +385,17 @@ func (handler *AlbumHandler) Unlike(w http.ResponseWriter, r *http.Request) erro
 	return nil
 }
 
+// CollectionAlbum
+//
+//	@Summary		CollectionAlbum
+//	@Description	Return user's album collection
+//	@Tags			album
+//	@Produce		json
+//	@Security		cookieAuth
+//	@Success		200	{object}	album.LikedAlbums
+//	@Failure		401	{string}	errMsg
+//	@Failure		404	{string}	errMsg
+//	@Router			/collection/albums [get]
 func (handler *AlbumHandler) CollectionAlbum(w http.ResponseWriter, r *http.Request) error {
 	handler.logger.WithFields(logrus.Fields{
 		"request_id": utils.GenReqId(r.RequestURI + r.Method),
@@ -405,7 +418,7 @@ func (handler *AlbumHandler) CollectionAlbum(w http.ResponseWriter, r *http.Requ
 		return common_handler.StatusError{Code: http.StatusUnauthorized, Err: err}
 	}
 
-	if err = response.RenderJSON(w, result); err != nil {
+	if _, _, err = easyjson.MarshalToHTTPResponseWriter(result, w); err != nil {
 		return common_handler.StatusError{Code: http.StatusNotFound, Err: err}
 	}
 	return nil

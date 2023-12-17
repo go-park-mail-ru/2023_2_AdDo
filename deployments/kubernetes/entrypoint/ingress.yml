@@ -13,6 +13,7 @@ metadata:
     nginx.ingress.kubernetes.io/proxy-read-timeout: "7200"
     nginx.ingress.kubernetes.io/proxy-send-timeout: "7200"
 
+
 spec:
   tls:
   - hosts:

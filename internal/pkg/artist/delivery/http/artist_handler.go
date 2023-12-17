@@ -1,6 +1,7 @@
 package artist_delivery
 
 import (
+	"github.com/mailru/easyjson"
 	"github.com/sirupsen/logrus"
 	"main/internal/common/handler"
 	"main/internal/common/response"
@@ -59,6 +60,7 @@ func (handler *ArtistHandler) ArtistInfo(w http.ResponseWriter, r *http.Request)
 	}
 	handler.logger.Infoln("Got artist from use case")
 
+
 	sessionId, err := response.GetCookie(r)
 	userId, err := handler.SessionUseCase.GetUserId(sessionId)
 
@@ -70,7 +72,8 @@ func (handler *ArtistHandler) ArtistInfo(w http.ResponseWriter, r *http.Request)
 		artistInfo.Tracks = result
 	}
 
-	if err = response.RenderJSON(w, artistInfo); err != nil {
+	if _, _, err = easyjson.MarshalToHTTPResponseWriter(artistInfo, w); err != nil {
+
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}
 	handler.logger.Infoln("response  formed")
@@ -172,7 +175,7 @@ func (handler *ArtistHandler) IsLike(w http.ResponseWriter, r *http.Request) err
 	}
 	handler.logger.Infoln("User like checked")
 
-	if err = response.RenderJSON(w, response.IsLiked{IsLiked: isLiked}); err != nil {
+	if _, _, err = easyjson.MarshalToHTTPResponseWriter(response.IsLiked{IsLiked: isLiked}, w); err != nil {
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}
 	handler.logger.Infoln("response  formed")
@@ -253,7 +256,7 @@ func (handler *ArtistHandler) FullSearch(w http.ResponseWriter, r *http.Request)
 		result.Tracks = labeledTracks
 	}
 
-	if err = response.RenderJSON(w, result); err != nil {
+	if _, _, err = easyjson.MarshalToHTTPResponseWriter(result, w); err != nil {
 		return common_handler.StatusError{Code: http.StatusNotFound, Err: err}
 	}
 
@@ -264,6 +267,17 @@ func (handler *ArtistHandler) FullSearch(w http.ResponseWriter, r *http.Request)
 	return nil
 }
 
+// CollectionArtist
+//
+//	@Summary		CollectionArtist
+//	@Description	Return user's artist collection
+//	@Tags			artist
+//	@Produce		json
+//	@Security		cookieAuth
+//	@Success		200	{object}	artist.LikedArtists
+//	@Failure		401	{string}	errMsg
+//	@Failure		404	{string}	errMsg
+//	@Router			/collection/artists [get]
 func (handler *ArtistHandler) CollectionArtist(w http.ResponseWriter, r *http.Request) error {
 	handler.logger.WithFields(logrus.Fields{
 		"request_id": utils.GenReqId(r.RequestURI + r.Method),
@@ -286,7 +300,7 @@ func (handler *ArtistHandler) CollectionArtist(w http.ResponseWriter, r *http.Re
 		return common_handler.StatusError{Code: http.StatusUnauthorized, Err: err}
 	}
 
-	if err = response.RenderJSON(w, result); err != nil {
+	if _, _, err = easyjson.MarshalToHTTPResponseWriter(result, w); err != nil {
 		return common_handler.StatusError{Code: http.StatusNotFound, Err: err}
 	}
 	return nil

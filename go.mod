@@ -78,6 +78,19 @@ require (
 	github.com/klauspost/compress v1.17.0 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.5 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
+	github.com/kulti/thelper v0.6.3 // indirect
+	github.com/kunwardeep/paralleltest v1.0.8 // indirect
+	github.com/kyoh86/exportloopref v0.1.11 // indirect
+	github.com/ldez/gomoddirectives v0.2.3 // indirect
+	github.com/ldez/tagliatelle v0.5.0 // indirect
+	github.com/leonklingele/grouper v1.1.1 // indirect
+	github.com/lufeee/execinquery v1.2.1 // indirect
+	github.com/macabu/inamedparam v0.1.2 // indirect
+	github.com/magiconair/properties v1.8.7 // indirect
+	github.com/mailru/easyjson v0.7.7 // indirect
+	github.com/maratori/testableexamples v1.0.0 // indirect
+	github.com/maratori/testpackage v1.1.1 // indirect
+	github.com/matoous/godox v0.0.0-20230222163458-006bad1f9d26 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/matttproud/golang_protobuf_extensions/v2 v2.0.0 // indirect

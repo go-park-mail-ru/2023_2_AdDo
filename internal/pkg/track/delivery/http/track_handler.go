@@ -1,8 +1,8 @@
 package track_delivery
 
 import (
-	"encoding/json"
 	"github.com/gorilla/mux"
+	"github.com/mailru/easyjson"
 	"github.com/sirupsen/logrus"
 	"main/internal/common/handler"
 	"main/internal/common/response"
@@ -70,6 +70,7 @@ func (handler *TrackHandler) Listen(w http.ResponseWriter, r *http.Request) erro
 
 	dur := Duration{}
 	if err := json.NewDecoder(r.Body).Decode(&dur); err != nil {
+
 		return common_handler.StatusError{Code: http.StatusBadRequest, Err: err}
 	}
 	handler.logger.Infoln("track id decoded")
@@ -172,7 +173,7 @@ func (handler *TrackHandler) IsLike(w http.ResponseWriter, r *http.Request) erro
 	}
 	handler.logger.Infoln("like for track ", trackId, "checked")
 
-	if err = response.RenderJSON(w, response.IsLiked{IsLiked: isLiked}); err != nil {
+	if _, _, err = easyjson.MarshalToHTTPResponseWriter(response.IsLiked{IsLiked: isLiked}, w); err != nil {
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}
 	handler.logger.Infoln("response  formed")
@@ -262,7 +263,7 @@ func (handler *TrackHandler) GetUserTracks(w http.ResponseWriter, r *http.Reques
 	}
 	handler.logger.Infoln("liked tracks for user ", userId, "get")
 
-	if err = response.RenderJSON(w, track.LikedTracks{Tracks: result}); err != nil {
+	if _, _, err = easyjson.MarshalToHTTPResponseWriter(track.LikedTracks{Tracks: result}, w); err != nil {
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}
 	handler.logger.Infoln("response  formed")

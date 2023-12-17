@@ -1,7 +1,7 @@
 package user_delivery
 
 import (
-	"encoding/json"
+	"github.com/mailru/easyjson"
 	"github.com/sirupsen/logrus"
 	"main/internal/common/handler"
 	"main/internal/common/response"
@@ -50,7 +50,7 @@ func (handler *UserHandler) SignUp(w http.ResponseWriter, r *http.Request) error
 	}).Infoln("SignUp Handler entered")
 
 	var u user_domain.User
-	if err := json.NewDecoder(r.Body).Decode(&u); err != nil {
+	if err := easyjson.UnmarshalFromReader(r.Body, &u); err != nil {
 		return common_handler.StatusError{Code: http.StatusBadRequest, Err: err}
 	}
 	handler.logger.Infoln("User model decoded from request body")
@@ -97,7 +97,7 @@ func (handler *UserHandler) Login(w http.ResponseWriter, r *http.Request) error 
 	}).Infoln("Login Handler entered")
 
 	var credentials user_domain.UserCredentials
-	if err := json.NewDecoder(r.Body).Decode(&credentials); err != nil {
+	if err := easyjson.UnmarshalFromReader(r.Body, &credentials); err != nil {
 		return common_handler.StatusError{Code: http.StatusBadRequest, Err: err}
 	}
 	handler.logger.Infoln("User credentials parsed from body")
@@ -219,7 +219,7 @@ func (handler *UserHandler) Me(w http.ResponseWriter, r *http.Request) error {
 	}
 	handler.logger.Infoln("Got user info from db successfully")
 
-	if err = response.RenderJSON(w, user); err != nil {
+	if _, _, err = easyjson.MarshalToHTTPResponseWriter(user, w); err != nil {
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}
 	handler.logger.Infoln("Response body rendered")
@@ -272,7 +272,7 @@ func (handler *UserHandler) UploadAvatar(w http.ResponseWriter, r *http.Request)
 	}
 	handler.logger.Infoln("images uploaded")
 
-	if err = response.RenderJSON(w, user_domain.UploadAvatarResponse{Url: url}); err != nil {
+	if _, _, err = easyjson.MarshalToHTTPResponseWriter(user_domain.UploadAvatarResponse{Url: url}, w); err != nil {
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}
 	handler.logger.Infoln("response formed: ", url)
@@ -327,9 +327,7 @@ func (handler *UserHandler) RemoveAvatar(w http.ResponseWriter, r *http.Request)
 //	@Failure		400	{string}	errMsg
 //	@Failure		401	{string}	errMsg
 //	@Failure		403	{string}	errMsg
-//	@Failure		404	{string}	errMsg
 //	@Failure		500	{string}	errMsg
-//	@Header			204	{string}
 //	@Router			/update_info [put]
 func (handler *UserHandler) UpdateUserInfo(w http.ResponseWriter, r *http.Request) error {
 	handler.logger.WithFields(logrus.Fields{
@@ -342,7 +340,7 @@ func (handler *UserHandler) UpdateUserInfo(w http.ResponseWriter, r *http.Reques
 	}
 
 	var u user_domain.User
-	if err := json.NewDecoder(r.Body).Decode(&u); err != nil {
+	if err = easyjson.UnmarshalFromReader(r.Body, &u); err != nil {
 		return common_handler.StatusError{Code: http.StatusBadRequest, Err: err}
 	}
 	handler.logger.Infoln("User model decoded from request body")
