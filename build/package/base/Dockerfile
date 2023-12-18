@@ -20,4 +20,6 @@ RUN go mod download \
     && go build -o bin/playlist cmd/microservices/playlist/main.go \
     && go build -o bin/images cmd/microservices/images/main.go \
     && go build -o bin/album cmd/microservices/album/main.go \
+    && go build -o bin/mailer cmd/microservices/mailer/main.go \
     && go build -o bin/entrypoint cmd/microservices/entrypoint/main.go
+

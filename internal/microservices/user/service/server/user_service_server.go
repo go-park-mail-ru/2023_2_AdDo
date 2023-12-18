@@ -5,9 +5,6 @@ import (
 	image_proto "main/internal/microservices/image/proto"
 	session_proto "main/internal/microservices/session/proto"
 	user_proto "main/internal/microservices/user/proto"
-	domain "main/internal/pkg/mailer"
-	domain_mailer "main/internal/pkg/mailer"
-	mailer_delivery "main/internal/pkg/mailer/delivery/smpt"
 	"main/internal/pkg/session"
 	user_domain "main/internal/pkg/user"
 
@@ -18,16 +15,14 @@ import (
 type UserManager struct {
 	UserRepo user_domain.Repository
 	AuthRepo session.Repository
-	Mailer   mailer_delivery.Mailer
 	Logger   *logrus.Logger
 	user_proto.UnimplementedUserServiceServer
 }
 
-func NewUserManager(userRepo user_domain.Repository, authRepo session.Repository, mailer mailer_delivery.Mailer, logger *logrus.Logger) *UserManager {
+func NewUserManager(userRepo user_domain.Repository, authRepo session.Repository, logger *logrus.Logger) *UserManager {
 	return &UserManager{
 		UserRepo: userRepo,
 		AuthRepo: authRepo,
-		Mailer:   mailer,
 		Logger:   logger,
 	}
 }
@@ -178,11 +173,6 @@ func (us *UserManager) ForgotPassword(ctx context.Context, in *user_proto.UserNa
 		return nil, err
 	}
 	us.Logger.Infoln("email checked")
-
-	if err := us.Mailer.Send(email, domain_mailer.ResetPasswordHtml, domain.EmailData{}); err != nil {
-		return nil, err
-	}
-	us.Logger.Infoln("forgot message was succesfull sent")
 
 	return &google_proto.Empty{}, nil
 }

@@ -13,9 +13,11 @@ import (
 	artist "main/internal/microservices/artist/proto"
 	grpc_artist "main/internal/microservices/artist/service/client"
 	proto4 "main/internal/microservices/image/proto"
+	proto5 "main/internal/microservices/mailer/proto"
 	grpc_image "main/internal/microservices/image/service/client"
 	proto3 "main/internal/microservices/playlist/proto"
 	grpc_playlist "main/internal/microservices/playlist/service/client"
+	grpc_mailer "main/internal/microservices/mailer/service/client"
 	session2 "main/internal/microservices/session/proto"
 	grpc_session "main/internal/microservices/session/service/client"
 	"main/internal/microservices/track/proto"
@@ -81,8 +83,15 @@ func main() {
 		logger.Fatalln("error connecting to images micros ", err)
 	}
 
+	mailerConnection, err := grpc.Dial("mailer:8088", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		logger.Fatalln("error connecting to images micros ", err)
+	}
+
+
+	mailerAgent := grpc_mailer.NewClient(proto5.NewMailerServiceClient(mailerConnection), logger)
 	imageAgent := grpc_image.NewClient(proto4.NewImageServiceClient(imageConnection), logger)
-	userAgent := grpc_user.NewClient(user_client.NewUserServiceClient(userConnection), imageAgent, logger)
+	userAgent := grpc_user.NewClient(user_client.NewUserServiceClient(userConnection), imageAgent, mailerAgent, logger)
 	sessionAgent := grpc_session.NewClient(session2.NewSessionServiceClient(sessionConnection), logger)
 	trackAgent := grpc_track.NewClient(proto.NewTrackServiceClient(trackConnection), logger)
 	albumAgent := grpc_album.NewClient(proto2.NewAlbumServiceClient(albumConnection), logger)

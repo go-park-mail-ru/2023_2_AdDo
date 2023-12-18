@@ -3,10 +3,12 @@ package utils
 import (
 	"bytes"
 	"crypto/md5"
+	"encoding/base64"
 	"encoding/hex"
 	"fmt"
-	"github.com/google/uuid"
 	"io"
+
+	"github.com/google/uuid"
 )
 
 func GetImageName(extension string) string {
@@ -35,4 +37,18 @@ func CastTimeToString(duration int) string {
 	seconds := duration % SecondInMinute
 
 	return fmt.Sprintf("%d:%02d", minutes, seconds)
+}
+
+func Encode(s string) string {
+	data := base64.StdEncoding.EncodeToString([]byte(s))
+	return string(data)
+}
+
+func Decode(s string) (string, error) {
+	data, err := base64.StdEncoding.DecodeString(s)
+	if err != nil {
+		return "", err
+	}
+
+	return string(data), nil
 }

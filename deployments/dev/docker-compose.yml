@@ -176,6 +176,13 @@ services:
       DATABASE_URL: "${DATABASE_URL}"
     command: "/images"
 
+  mailer:
+    image: registry.musicon.space/mailer:dev
+    depends_on:
+      common-service-waiter:
+        condition: service_completed_successfully
+    command: "/mailer"
+
   microservice-waiter:
     image: alpine
     depends_on:

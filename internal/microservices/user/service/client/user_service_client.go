@@ -2,27 +2,31 @@ package grpc_user
 
 import (
 	"context"
-	"github.com/sirupsen/logrus"
 	"io"
 	image_proto "main/internal/microservices/image/proto"
 	grpc_image "main/internal/microservices/image/service/client"
+	grpc_mailer "main/internal/microservices/mailer/service/client"
 	session_proto "main/internal/microservices/session/proto"
 	user_proto "main/internal/microservices/user/proto"
 	grpc_server_user "main/internal/microservices/user/service/server"
 	user_domain "main/internal/pkg/user"
+
+	"github.com/sirupsen/logrus"
 )
 
 type Client struct {
-	userClient  user_proto.UserServiceClient
-	imageClient grpc_image.Client
-	logger      *logrus.Logger
+	userClient   user_proto.UserServiceClient
+	imageClient  grpc_image.Client
+	mailerClient grpc_mailer.Client
+	logger       *logrus.Logger
 }
 
-func NewClient(client user_proto.UserServiceClient, imageClient grpc_image.Client, logger *logrus.Logger) Client {
+func NewClient(client user_proto.UserServiceClient, imageClient grpc_image.Client, mailerClient grpc_mailer.Client, logger *logrus.Logger) Client {
 	return Client{
-		userClient:  client,
-		logger:      logger,
-		imageClient: imageClient,
+		userClient:   client,
+		logger:       logger,
+		imageClient:  imageClient,
+		mailerClient: mailerClient,
 	}
 }
 
@@ -149,8 +153,12 @@ func (c *Client) GetUserName(userId string) (string, error) {
 func (c *Client) ForgotPassword(email string) error {
 	c.logger.Infoln("user client ForgotPassword entered")
 
-	_, err := c.userClient.ForgotPassword(context.Background(), &user_proto.UserName{UserName: email})
-	if err != nil {
+	if _, err := c.userClient.ForgotPassword(context.Background(), &user_proto.UserName{UserName: email}); err != nil {
+		return err
+	}
+	c.logger.Infoln("password was checked")
+
+	if err := c.mailerClient.SendToken(email); err != nil {
 		return err
 	}
 	c.logger.Infoln("sent reset password message")

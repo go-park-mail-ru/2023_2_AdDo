@@ -18,7 +18,7 @@ service UserService {
   rpc GetUserName(UserId) returns (UserName) {}
   rpc ForgotPassword(UserName) returns (google.protobuf.Empty) {}
 }
-
+  
 message ImageToUser {
   ImageUrl url = 1;
   UserId id = 2;

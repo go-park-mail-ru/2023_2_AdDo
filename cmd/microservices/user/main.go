@@ -6,8 +6,6 @@ import (
 	log "main/internal/common/logger"
 	user_proto "main/internal/microservices/user/proto"
 	grpc_server_user "main/internal/microservices/user/service/server"
-	domain "main/internal/pkg/mailer"
-	mailer_delivery "main/internal/pkg/mailer/delivery/smpt"
 	session_repository_redis "main/internal/pkg/session/repository/redis"
 	user_repository "main/internal/pkg/user/repository/postgresql"
 	"net"
@@ -43,10 +41,7 @@ func main() {
 	userRepository := user_repository.NewPostgres(pool, logger)
 	authRepository := session_repository_redis.NewRedis(redis, logger)
 
-	// TODO: add smtp config
-	mailer := mailer_delivery.New(domain.Smtp{}, logger)
-
-	userManager := grpc_server_user.NewUserManager(userRepository, authRepository, mailer, logger)
+	userManager := grpc_server_user.NewUserManager(userRepository, authRepository, logger)
 
 	server := grpc.NewServer()
 	user_proto.RegisterUserServiceServer(server, userManager)
