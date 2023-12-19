@@ -1,6 +1,7 @@
 package track_delivery
 
 import (
+	"encoding/json"
 	"github.com/gorilla/mux"
 	"github.com/mailru/easyjson"
 	"github.com/sirupsen/logrus"
@@ -70,7 +71,6 @@ func (handler *TrackHandler) Listen(w http.ResponseWriter, r *http.Request) erro
 
 	dur := Duration{}
 	if err := json.NewDecoder(r.Body).Decode(&dur); err != nil {
-
 		return common_handler.StatusError{Code: http.StatusBadRequest, Err: err}
 	}
 	handler.logger.Infoln("track id decoded")

@@ -1,11 +1,15 @@
 package onboarding
 
-import artist "main/internal/pkg/artist"
+import "main/internal/pkg/artist"
 
 type GenreBase struct {
 	Id      uint64
 	Name    string
 	Preview string
+}
+
+type Genres struct {
+	Genres []GenreBase
 }
 
 type GenreOnboarding struct {

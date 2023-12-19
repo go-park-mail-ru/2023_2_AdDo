@@ -129,7 +129,7 @@ func TestCollectionArtist(t *testing.T) {
 		},
 	}
 
-	expectedArtists := artist.LikedArtists{
+	expectedArtists := artist.Artists{
 		Artists: artists,
 	}
 
@@ -145,7 +145,7 @@ func TestCollectionArtist(t *testing.T) {
 		assert.Nil(t, err)
 		assert.Equal(t, http.StatusOK, w.Code)
 
-		var receivedArtists artist.LikedArtists
+		var receivedArtists artist.Artists
 		err = json.NewDecoder(w.Body).Decode(&receivedArtists)
 		assert.Nil(t, err)
 		assert.Equal(t, expectedArtists, receivedArtists)
