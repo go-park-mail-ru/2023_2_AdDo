@@ -1,8 +1,6 @@
 package main
 
 import (
-	"github.com/gorilla/websocket"
-	"github.com/sirupsen/logrus"
 	"main/init/middleware"
 	router_init "main/init/router"
 	csrf "main/internal/common/get_csrf"
@@ -18,6 +16,8 @@ import (
 	grpc_daily_playlist "main/internal/microservices/daily-playlist/service/client"
 	proto4 "main/internal/microservices/image/proto"
 	grpc_image "main/internal/microservices/image/service/client"
+	proto6 "main/internal/microservices/mailer/proto"
+	grpc_mailer "main/internal/microservices/mailer/service/client"
 	onboarding "main/internal/microservices/onboarding/proto"
 	onboarding_service_client "main/internal/microservices/onboarding/service/client"
 	proto3 "main/internal/microservices/playlist/proto"
@@ -38,6 +38,9 @@ import (
 	track_delivery "main/internal/pkg/track/delivery/http"
 	user_delivery "main/internal/pkg/user/delivery/http"
 	websocket_wave "main/internal/pkg/wave/delivery/websocket"
+
+	"github.com/gorilla/websocket"
+	"github.com/sirupsen/logrus"
 
 	"net/http"
 
@@ -108,8 +111,14 @@ func main() {
 		logger.Fatalln("error connecting to wave micros ", err)
 	}
 
+	mailerConnection, err := grpc.Dial("mailer:8088", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		logger.Fatalln("error connecting to images micros ", err)
+	}
+
+	mailerAgent := grpc_mailer.NewClient(proto6.NewMailerServiceClient(mailerConnection), logger)
 	imageAgent := grpc_image.NewClient(proto4.NewImageServiceClient(imageConnection), logger)
-	userAgent := grpc_user.NewClient(user_client.NewUserServiceClient(userConnection), imageAgent, logger)
+	userAgent := grpc_user.NewClient(user_client.NewUserServiceClient(userConnection), imageAgent, mailerAgent, logger)
 	sessionAgent := grpc_session.NewClient(session2.NewSessionServiceClient(sessionConnection), logger)
 	trackAgent := grpc_track.NewClient(proto.NewTrackServiceClient(trackConnection), logger)
 	albumAgent := grpc_album.NewClient(proto2.NewAlbumServiceClient(albumConnection), logger)
@@ -161,6 +170,8 @@ func main() {
 			router_init.NewRoute("/upload_avatar", userHandler.UploadAvatar, http.MethodPost),
 			router_init.NewRoute("/remove_avatar", userHandler.RemoveAvatar, http.MethodPost),
 			router_init.NewRoute("/auth", userHandler.Auth, http.MethodGet),
+			router_init.NewRoute("/auth/forgot_pasword", userHandler.ForgotPassword, http.MethodPost),
+			router_init.NewRoute("/auth/reset_password/{reset_token}", userHandler.ResetPassword, http.MethodPost),
 			router_init.NewRoute("/me", userHandler.Me, http.MethodGet),
 			router_init.NewRoute("/logout", userHandler.LogOut, http.MethodPost),
 			router_init.NewRoute("/artists", onboardingHandler.GetArtists, http.MethodGet),

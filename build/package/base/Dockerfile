@@ -21,6 +21,7 @@ RUN go mod download \
     && go build -o bin/playlist cmd/microservices/playlist/main.go \
     && go build -o bin/images cmd/microservices/images/main.go \
     && go build -o bin/album cmd/microservices/album/main.go \
+    && go build -o bin/mailer cmd/microservices/mailer/main.go \
     && go build -o bin/entrypoint cmd/microservices/entrypoint/main.go \
     && go build -o bin/activity_worker cmd/microservices/activity_worker/main.go \
     && go build -o bin/candidate cmd/microservices/candidate/main.go \
@@ -29,3 +30,4 @@ RUN go mod download \
     && go build -o bin/onboarding cmd/microservices/onboarding/main.go \
     && go build -o bin/recommendation cmd/microservices/recommendation/main.go \
     && go build -o bin/wave cmd/microservices/wave/main.go
+

@@ -16,11 +16,21 @@ service UserService {
   rpc RemoveAvatar(UserId) returns (ImageUrl) {}
   rpc UpdateUserInfo(UserData) returns (google.protobuf.Empty) {}
   rpc GetUserName(UserId) returns (UserName) {}
+  rpc CheckEmail(Email) returns (google.protobuf.Empty) {}
+  rpc UpdatePassword(UserCredentials) returns (google.protobuf.Empty) {}
 }
-
+  
 message ImageToUser {
   ImageUrl url = 1;
   UserId id = 2;
+}
+
+message Password {
+  string password = 1;
+}
+
+message Email {
+  string email = 1;
 }
 
 message UserName {

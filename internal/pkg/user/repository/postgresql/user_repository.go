@@ -2,12 +2,13 @@ package user_repository
 
 import (
 	"context"
-	"github.com/jackc/pgx/v5/pgtype"
-	"github.com/sirupsen/logrus"
 	postgres "main/internal/common/pgxiface"
 	"main/internal/common/utils"
 	user_domain "main/internal/pkg/user"
 	"time"
+
+	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/sirupsen/logrus"
 )
 
 type Postgres struct {
@@ -59,6 +60,25 @@ func (db *Postgres) GetById(id string) (user_domain.User, error) {
 	db.logger.Infoln("birthday and images formatted")
 
 	return user, nil
+}
+
+func (db *Postgres) CheckEmailExist(email string) error {
+	db.logger.Infoln("UserRepo CheckEmail entered")
+
+	var userId string
+
+	query := "select id from profile where email = $1"
+	if err := db.Pool.QueryRow(context.Background(), query, email).Scan(&userId); err != nil {
+		db.logger.WithFields(logrus.Fields{
+			"err":       err,
+			"user_data": email,
+			"query":     query,
+		}).Errorln("Checking user email failed")
+		return err
+	}
+	db.logger.Infoln("User email checked for user ", email)
+
+	return nil
 }
 
 func (db *Postgres) CheckEmailAndPassword(email, password string) (string, error) {
@@ -186,4 +206,21 @@ func (db *Postgres) GetAllUserIds() ([]string, error) {
 	}
 
 	return result, nil
+}
+
+func (db *Postgres) UpdatePassword(email, password string) error {
+	db.logger.Infoln("UserRepo UpdatePassword entered")
+
+	query := "update profile set password = $1 where email = $2"
+	if _, err := db.Pool.Exec(context.Background(), query, utils.GetMD5Sum(password), email); err != nil {
+		db.logger.WithFields(logrus.Fields{
+			"err ":   err,
+			"email ": email,
+			"query ": query,
+		}).Errorln("Update user password was failed")
+		return err
+	}
+	db.logger.Infoln("Updated user password")
+
+	return nil
 }

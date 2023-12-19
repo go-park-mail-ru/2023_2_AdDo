@@ -257,3 +257,142 @@ func (v *UploadAvatarResponse) UnmarshalJSON(data []byte) error {
 func (v *UploadAvatarResponse) UnmarshalEasyJSON(l *jlexer.Lexer) {
 	easyjson3e1fa5ecDecodeMainInternalPkgUser2(l, v)
 }
+func easyjson3e1fa5ecDecodeMainInternalPkgUser3(in *jlexer.Lexer, out *ResetPasswordInput) {
+	isTopLevel := in.IsStart()
+	if in.IsNull() {
+		if isTopLevel {
+			in.Consumed()
+		}
+		in.Skip()
+		return
+	}
+	in.Delim('{')
+	for !in.IsDelim('}') {
+		key := in.UnsafeFieldName(false)
+		in.WantColon()
+		if in.IsNull() {
+			in.Skip()
+			in.WantComma()
+			continue
+		}
+		switch key {
+		case "Password":
+			out.Password = string(in.String())
+		case "ConfirmPassword":
+			out.ConfirmPassword = string(in.String())
+		default:
+			in.SkipRecursive()
+		}
+		in.WantComma()
+	}
+	in.Delim('}')
+	if isTopLevel {
+		in.Consumed()
+	}
+}
+func easyjson3e1fa5ecEncodeMainInternalPkgUser3(out *jwriter.Writer, in ResetPasswordInput) {
+	out.RawByte('{')
+	first := true
+	_ = first
+	{
+		const prefix string = ",\"Password\":"
+		out.RawString(prefix[1:])
+		out.String(string(in.Password))
+	}
+	{
+		const prefix string = ",\"ConfirmPassword\":"
+		out.RawString(prefix)
+		out.String(string(in.ConfirmPassword))
+	}
+	out.RawByte('}')
+}
+
+// MarshalJSON supports json.Marshaler interface
+func (v ResetPasswordInput) MarshalJSON() ([]byte, error) {
+	w := jwriter.Writer{}
+	easyjson3e1fa5ecEncodeMainInternalPkgUser3(&w, v)
+	return w.Buffer.BuildBytes(), w.Error
+}
+
+// MarshalEasyJSON supports easyjson.Marshaler interface
+func (v ResetPasswordInput) MarshalEasyJSON(w *jwriter.Writer) {
+	easyjson3e1fa5ecEncodeMainInternalPkgUser3(w, v)
+}
+
+// UnmarshalJSON supports json.Unmarshaler interface
+func (v *ResetPasswordInput) UnmarshalJSON(data []byte) error {
+	r := jlexer.Lexer{Data: data}
+	easyjson3e1fa5ecDecodeMainInternalPkgUser3(&r, v)
+	return r.Error()
+}
+
+// UnmarshalEasyJSON supports easyjson.Unmarshaler interface
+func (v *ResetPasswordInput) UnmarshalEasyJSON(l *jlexer.Lexer) {
+	easyjson3e1fa5ecDecodeMainInternalPkgUser3(l, v)
+}
+func easyjson3e1fa5ecDecodeMainInternalPkgUser4(in *jlexer.Lexer, out *ForgotPasswordInput) {
+	isTopLevel := in.IsStart()
+	if in.IsNull() {
+		if isTopLevel {
+			in.Consumed()
+		}
+		in.Skip()
+		return
+	}
+	in.Delim('{')
+	for !in.IsDelim('}') {
+		key := in.UnsafeFieldName(false)
+		in.WantColon()
+		if in.IsNull() {
+			in.Skip()
+			in.WantComma()
+			continue
+		}
+		switch key {
+		case "Email":
+			out.Email = string(in.String())
+		default:
+			in.SkipRecursive()
+		}
+		in.WantComma()
+	}
+	in.Delim('}')
+	if isTopLevel {
+		in.Consumed()
+	}
+}
+func easyjson3e1fa5ecEncodeMainInternalPkgUser4(out *jwriter.Writer, in ForgotPasswordInput) {
+	out.RawByte('{')
+	first := true
+	_ = first
+	{
+		const prefix string = ",\"Email\":"
+		out.RawString(prefix[1:])
+		out.String(string(in.Email))
+	}
+	out.RawByte('}')
+}
+
+// MarshalJSON supports json.Marshaler interface
+func (v ForgotPasswordInput) MarshalJSON() ([]byte, error) {
+	w := jwriter.Writer{}
+	easyjson3e1fa5ecEncodeMainInternalPkgUser4(&w, v)
+	return w.Buffer.BuildBytes(), w.Error
+}
+
+// MarshalEasyJSON supports easyjson.Marshaler interface
+func (v ForgotPasswordInput) MarshalEasyJSON(w *jwriter.Writer) {
+	easyjson3e1fa5ecEncodeMainInternalPkgUser4(w, v)
+}
+
+// UnmarshalJSON supports json.Unmarshaler interface
+func (v *ForgotPasswordInput) UnmarshalJSON(data []byte) error {
+	r := jlexer.Lexer{Data: data}
+	easyjson3e1fa5ecDecodeMainInternalPkgUser4(&r, v)
+	return r.Error()
+}
+
+// UnmarshalEasyJSON supports easyjson.Unmarshaler interface
+func (v *ForgotPasswordInput) UnmarshalEasyJSON(l *jlexer.Lexer) {
+	easyjson3e1fa5ecDecodeMainInternalPkgUser4(l, v)
+}

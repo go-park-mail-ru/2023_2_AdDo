@@ -22,11 +22,20 @@ mocks-clean:
 # билдит базовый образ и образы микросервисов с тегом latest
 build-images:
 	$(CURDIR)/scripts/docker-base-build.sh
-	$(CURDIR)/scripts/docker-services-build.sh
+	$(CURDIR)/scripts/docker-services-build.sh $(args)
 
 # удаляет все образы репозитория registry.musicon.space с тегом latest
 remove-images:
-	$(CURDIR)/scripts/docker-remove-images.sh
+	$(CURDIR)/scripts/docker-remove-images.sh $(args)
+
+dev-up:
+	$(CURDIR)/scripts/docker-base-build.sh
+	$(CURDIR)/scripts/docker-services-build.sh dev
+	docker compose -f deployments/dev/docker-compose.yml up -d
+
+dev-down:
+	docker compose -f deployments/dev/docker-compose.yml down
+	$(CURDIR)/scripts/docker-remove-images.sh dev
 
 # запуск интеграционных тестов
 integration-test:

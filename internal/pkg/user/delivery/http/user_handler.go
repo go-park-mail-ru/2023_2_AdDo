@@ -1,15 +1,17 @@
 package user_delivery
 
 import (
-	"github.com/mailru/easyjson"
-	"github.com/sirupsen/logrus"
-	"main/internal/common/handler"
+	common_handler "main/internal/common/handler"
 	"main/internal/common/response"
 	"main/internal/common/utils"
 	"main/internal/pkg/session"
 	user_domain "main/internal/pkg/user"
 	"net/http"
 	"time"
+
+	"github.com/mailru/easyjson"
+	"github.com/sirupsen/logrus"
+	"github.com/gorilla/mux"
 )
 
 type UserHandler struct {
@@ -356,6 +358,96 @@ func (handler *UserHandler) UpdateUserInfo(w http.ResponseWriter, r *http.Reques
 	}
 
 	if err = handler.userUseCase.UpdateUserInfo(userId, u); err != nil {
+		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+	return nil
+}
+
+// ForgotPassword
+//
+//	@Summary		ForgotPassword
+//	@Description	Send message to email for forgot password
+//	@Tags			user
+//	@Security		csrfToken
+//	@Security		cookieCsrfToken
+//	@Accept			json
+//	@Param			email	body	user_domain.ForgotPasswordInput		true	"User Email"
+//	@Success		204
+//	@Failure		400	{string}	errMsg
+//	@Failure		401	{string}	errMsg
+//	@Failure		403	{string}	errMsg
+//	@Failure		500	{string}	errMsg
+//	@Router			/auth/forgot_password 	[post]
+func (handler *UserHandler) ForgotPassword(w http.ResponseWriter, r *http.Request) error {
+	handler.logger.WithFields(logrus.Fields{
+		"request_id": utils.GenReqId(r.RequestURI + r.Method),
+	}).Infoln("ForgotPassword Handler entered")
+
+	var email user_domain.ForgotPasswordInput
+	if err := easyjson.UnmarshalFromReader(r.Body, &email); err != nil {
+		return common_handler.StatusError{Code: http.StatusBadRequest, Err: err}
+	}
+	handler.logger.Infoln("Email decoded from request body")
+
+	if err := email.Validate(); err != nil {
+		return common_handler.StatusError{Code: http.StatusBadRequest, Err: err}
+	}
+	handler.logger.Infoln("Email is valid")
+
+	if err := handler.userUseCase.CheckEmailExist(email.Email); err != nil {
+		return common_handler.StatusError{Code: http.StatusBadRequest, Err: err}
+	}
+
+	if err := handler.userUseCase.SendResetToken(email.Email); err != nil {
+		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+	return nil
+}
+
+// ResetPassword
+//
+//	@Summary		ResetPassword
+//	@Description	Reset password
+//	@Tags			user
+//	@Security		csrfToken
+//	@Security		cookieCsrfToken
+//	@Accept			json
+//	@Param			email	body	user_domain.ResetPasswordInput		true	"User New Password"
+//	@Success		204
+//	@Failure		400	{string}	errMsg
+//	@Failure		401	{string}	errMsg
+//	@Failure		403	{string}	errMsg
+//	@Failure		500	{string}	errMsg
+//	@Router			/auth/reset_password/{reset_token} 	[post]
+func (handler *UserHandler) ResetPassword(w http.ResponseWriter, r *http.Request) error {
+	handler.logger.WithFields(logrus.Fields{
+		"request_id": utils.GenReqId(r.RequestURI + r.Method),
+	}).Infoln("ResetPassword Handler entered")
+
+	var passwordsInput user_domain.ResetPasswordInput
+	if err := easyjson.UnmarshalFromReader(r.Body, &passwordsInput); err != nil {
+		return common_handler.StatusError{Code: http.StatusBadRequest, Err: err}
+	}
+	handler.logger.Infoln("Passwords decoded from request body")
+
+	resetToken := mux.Vars(r)["reset_token"]
+	handler.logger.Infoln("Got resetToken from path: " + resetToken)
+
+	if err := passwordsInput.Validate(); err != nil {
+		return common_handler.StatusError{Code: http.StatusBadRequest, Err: err}
+	}
+	handler.logger.Infoln("Passwords is valid")
+
+	email, err := handler.userUseCase.CheckTokenExist(resetToken)
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusBadRequest, Err: err}
+	}
+
+	if err := handler.userUseCase.UpdatePassword(email, passwordsInput.Password); err != nil {
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}
 
