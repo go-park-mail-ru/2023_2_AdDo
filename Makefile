@@ -29,12 +29,13 @@ remove-images:
 	$(CURDIR)/scripts/docker-remove-images.sh $(args)
 
 dev-up:
-	make build-images arg1=dev
+	$(CURDIR)/scripts/docker-base-build.sh
+	$(CURDIR)/scripts/docker-services-build.sh dev
 	docker compose -f deployments/dev/docker-compose.yml up -d
 
 dev-down:
 	docker compose -f deployments/dev/docker-compose.yml down
-	make remove-images arg1=dev
+	$(CURDIR)/scripts/docker-remove-images.sh dev
 
 # запуск интеграционных тестов
 integration-test:
