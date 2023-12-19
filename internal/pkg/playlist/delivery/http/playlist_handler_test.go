@@ -87,17 +87,14 @@ func TestActionsOnPlaylist(t *testing.T) {
 			Name:     "Playlist",
 			AuthorId: userId,
 			Preview:  "preview",
-
 			Tracks:   make([]track.Response, 0),
 		}
 
 		req := httptest.NewRequest(http.MethodGet, "/playlist", nil)
 		req = mux.SetURLVars(req, map[string]string{"id": strconv.FormatUint(playlistId, 10)})
-		req.AddCookie(&cookie)
 		w := httptest.NewRecorder()
 
-
-		mockSessionUseCase.EXPECT().CheckSession(sessionId).Return(true, nil)
+		mockSessionUseCase.EXPECT().GetUserId("").Return("", nil)
 		mockPlaylistUseCase.EXPECT().Get(playlistId).Return(playlistResponse, nil)
 
 		err := handler.Get(w, req)
