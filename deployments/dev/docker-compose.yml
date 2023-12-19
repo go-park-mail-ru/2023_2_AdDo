@@ -174,14 +174,18 @@ services:
         condition: service_completed_successfully
     environment:
       DATABASE_URL: "${DATABASE_URL}"
+      MINIO_API_URL: ${MINIO_API_URL}
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
+      MINIO_USE_SSL: ${MINIO_USE_SSL}
     command: "/images"
 
-  mailer:
-    image: registry.musicon.space/mailer:dev
-    depends_on:
-      common-service-waiter:
-        condition: service_completed_successfully
-    command: "/mailer"
+  # mailer:
+  #   image: registry.musicon.space/mailer:dev
+  #   depends_on:
+  #     common-service-waiter:
+  #       condition: service_completed_successfully
+  #   command: "/mailer"
 
   microservice-waiter:
     image: alpine

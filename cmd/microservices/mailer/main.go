@@ -8,12 +8,21 @@ import (
 	domain "main/internal/pkg/mailer"
 	mailer_repository_redis "main/internal/pkg/mailer/repository/redis"
 	"net"
+	"os"
 	"strconv"
 
 	"google.golang.org/grpc"
 )
 
 const Port = 8088
+
+const (
+	EnvSmtpServerPort     = "SMTP_SERVER_PORT"
+	EnvSmtpServerHost     = "SMTP_SERVER_HOST"
+	EnvSmtpServerUsername = "SMTP_SERVER_USERNAME"
+	EnvSmtpServerPassword = "SMTP_SERVER_PASSWORD"
+	EnvSmtpServerSender   = "SMTP_SERVER_SENDER"
+)
 
 var loggerSingleton = log.Singleton{}
 
@@ -32,8 +41,18 @@ func main() {
 
 	mailerRepo := mailer_repository_redis.NewRedis(redis, logger)
 
-	// TODO: add smtp config
-	smtp := domain.Smtp{}
+	port, err := strconv.Atoi(os.Getenv(EnvSmtpServerPort))
+	if err != nil {
+		logger.Fatalf("error get env var %s: %s", EnvSmtpServerPort, err.Error())
+	}
+
+	smtp := domain.Smtp{
+		Port:     port,
+		Host:     os.Getenv(EnvSmtpServerHost),
+		Username: os.Getenv(EnvSmtpServerUsername),
+		Password: os.Getenv(EnvSmtpServerPassword),
+		Sender:   os.Getenv(EnvSmtpServerSender),
+	}
 
 	mailerManager := grpc_server.NewMailerServer(smtp, mailerRepo, logger)
 
