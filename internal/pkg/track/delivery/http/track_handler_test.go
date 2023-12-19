@@ -34,11 +34,22 @@ func TestListen(t *testing.T) {
 		logger:         logrus.New(),
 	}
 
-	trackId := track.Id{Id: 999}
-	requestBody, err := json.Marshal(trackId)
-	assert.NoError(t, err)
+	const (
+		trackId   uint64 = 1
+		sessionId        = "sessionID"
+		userId           = "4e94ca97-f6b2-4fa4-9509-16fc645e2e37"
+		duration  int    = 40
+	)
 
-	t.Run("DecodeRequestBodyError", func(t *testing.T) {
+	cookie := http.Cookie{
+		Name:     session.CookieName,
+		Value:    sessionId,
+		Expires:  time.Now().Add(session.TimeToLiveCookie),
+		Secure:   true,
+		HttpOnly: true,
+	}
+
+	t.Run("BadRequestError", func(t *testing.T) {
 		req := httptest.NewRequest(http.MethodPost, "/listen", nil)
 		w := httptest.NewRecorder()
 
@@ -48,22 +59,27 @@ func TestListen(t *testing.T) {
 		assert.Equal(t, http.StatusBadRequest, err.(common_handler.StatusError).Code)
 	})
 
-	t.Run("InternalError", func(t *testing.T) {
-		req := httptest.NewRequest(http.MethodPost, "/listen", bytes.NewBuffer(requestBody))
+	t.Run("UnauthorizedError", func(t *testing.T) {
+		req := httptest.NewRequest(http.MethodPost, "/listen", nil)
+		req = mux.SetURLVars(req, map[string]string{"id": strconv.FormatUint(trackId, 10)})
 		w := httptest.NewRecorder()
 
-		mockTrackUseCase.EXPECT().Listen(trackId.Id).Return(errors.New("add listen failed"))
-		err = handler.Listen(w, req)
+		err := handler.Listen(w, req)
 
 		assert.NotNil(t, err)
-		assert.Equal(t, http.StatusInternalServerError, err.(common_handler.StatusError).Code)
+		assert.Equal(t, http.StatusUnauthorized, err.(common_handler.StatusError).Code)
 	})
 
 	t.Run("Success", func(t *testing.T) {
+		requestBody, err := json.Marshal(Duration{Duration: duration})
+
 		req := httptest.NewRequest(http.MethodPost, "/listen", bytes.NewBuffer(requestBody))
+		req = mux.SetURLVars(req, map[string]string{"id": strconv.FormatUint(trackId, 10)})
+		req.AddCookie(&cookie)
 		w := httptest.NewRecorder()
 
-		mockTrackUseCase.EXPECT().Listen(trackId.Id).Return(nil)
+		mockSessionUseCase.EXPECT().GetUserId(sessionId).Return(userId, nil)
+		mockTrackUseCase.EXPECT().Listen(userId, trackId, uint32(duration)).Return(nil)
 		err = handler.Listen(w, req)
 
 		assert.Nil(t, err)

@@ -7,7 +7,9 @@ mockgen -source=internal/pkg/user/domain.go -destination=test/mocks/user/user_mo
 && mockgen -source=internal/pkg/artist/domain.go -destination=test/mocks/artist/artist_mock.go -package=artist_mock \
 && mockgen -source=internal/pkg/album/domain.go -destination=test/mocks/album/album_mock.go -package=album_mock \
 && mockgen -source=internal/pkg/image/domain.go -destination=test/mocks/avatar/avatar_mock.go -package=avatar_mock \
-&& mockgen -source=internal/pkg/playlist/domain.go -destination=test/mocks/playlist/playlist_mock.go -package=playlist_mock
+&& mockgen -source=internal/pkg/playlist/domain.go -destination=test/mocks/playlist/playlist_mock.go -package=playlist_mock \
+&& mockgen -source=internal/pkg/activity/domain.go -destination=test/mocks/activity/activity_mock.go -package=activity_mock
+
 if [ $? -ne "0" ];then
     echo "Generating mocks is failed"
     exit 1

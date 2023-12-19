@@ -27,10 +27,12 @@ func TestArtistInfo(t *testing.T) {
 	defer ctrl.Finish()
 
 	mockArtistUseCase := artist_mock.NewMockUseCase(ctrl)
+	mockSessionUseCase := session_mock.NewMockUseCase(ctrl)
 
 	handler := &ArtistHandler{
-		ArtistUseCase: mockArtistUseCase,
-		logger:        logrus.New(),
+		ArtistUseCase:  mockArtistUseCase,
+		SessionUseCase: mockSessionUseCase,
+		logger:         logrus.New(),
 	}
 
 	t.Run("WrongPathParameter", func(t *testing.T) {
@@ -78,6 +80,8 @@ func TestArtistInfo(t *testing.T) {
 		}
 
 		mockArtistUseCase.EXPECT().GetArtistInfo(artistId).Return(expectedArtist, nil)
+		mockSessionUseCase.EXPECT().GetUserId("").Return("", nil)
+
 		err := handler.ArtistInfo(w, req)
 
 		assert.Nil(t, err)

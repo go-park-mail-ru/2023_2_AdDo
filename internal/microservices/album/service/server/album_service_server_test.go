@@ -11,6 +11,7 @@ import (
 	"main/internal/pkg/album"
 	"main/internal/pkg/artist"
 	"main/internal/pkg/track"
+	activity_mock "main/test/mocks/activity"
 	album_mock "main/test/mocks/album"
 	artist_mock "main/test/mocks/artist"
 	track_mock "main/test/mocks/track"
@@ -185,18 +186,21 @@ func Test_Like(t *testing.T) {
 	mockTrackRepo := track_mock.NewMockRepository(ctrl)
 	mockArtistRepo := artist_mock.NewMockRepository(ctrl)
 	mockAlbumRepo := album_mock.NewMockRepository(ctrl)
+	mockProducerRepo := activity_mock.NewMockProducerRepository(ctrl)
 
 	albumManager := AlbumManager{
 		repoTrack:  mockTrackRepo,
 		repoArtist: mockArtistRepo,
 		repoAlbum:  mockAlbumRepo,
 		logger:     logrus.New(),
+		queue:      mockProducerRepo,
 	}
 
 	in := &proto.AlbumToUserId{UserId: "user", AlbumId: 2}
 
 	t.Run("Like", func(t *testing.T) {
 		mockAlbumRepo.EXPECT().CreateLike(in.GetUserId(), in.GetAlbumId()).Return(nil)
+		mockProducerRepo.EXPECT().PushLikeAlbum(in.GetUserId(), in.GetAlbumId()).Return(nil)
 
 		result, err := albumManager.Like(context.Background(), in)
 		assert.Nil(t, err)
