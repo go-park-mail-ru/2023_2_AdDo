@@ -37,7 +37,7 @@ func (redis *Redis) CreateToken(email string) (string, error) {
 }
 
 func (redis *Redis) CheckToken(resetToken string) (string, error) {
-	redis.logger.Infoln("SessionRepo Get entered")
+	redis.logger.Infoln("CheckToken Get entered")
 
 	// resetToken, err := utils.Decode(passwordResetToken)
 	// if err != nil {
@@ -56,4 +56,19 @@ func (redis *Redis) CheckToken(resetToken string) (string, error) {
 	redis.logger.Infoln("Reset token matched with stored one")
 
 	return email, nil
+}
+
+func (redis *Redis) Delete(resetToken string) error {
+	redis.logger.Infoln("MailerRepo Delete entered")
+
+	if err := redis.database.Del(context.Background(), resetToken).Err(); err != nil {
+		redis.logger.WithFields(logrus.Fields{
+			"err":         err.Error(),
+			"reset token": resetToken,
+		}).Errorln("error while deleting email from redis by reset token. Are you sure you have this reset token in db?")
+		return err
+	}
+	redis.logger.Infoln("Reset token successfully deleted from redis")
+
+	return nil
 }

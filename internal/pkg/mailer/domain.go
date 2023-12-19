@@ -17,7 +17,7 @@ type EmailData struct {
 
 const (
 	ResetPasswordHtmlFile = "reset_password.html"
-	ResetTokenTimeToLive = 10 * time.Minute
+	ResetTokenTimeToLive  = 10 * time.Minute
 )
 
 type UseCase interface {
@@ -28,4 +28,5 @@ type UseCase interface {
 type Repository interface {
 	CreateToken(email string) (string, error)
 	CheckToken(resetToken string) (string, error)
+	Delete(resetToken string) error
 }

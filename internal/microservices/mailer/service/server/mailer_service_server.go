@@ -75,12 +75,18 @@ func (ms MailerServer) SendToken(ctx context.Context, payload *proto.Payload) (*
 func (ms MailerServer) CheckToken(ctx context.Context, resetToken *proto.Payload) (*proto.Payload, error) {
 	ms.logger.Infoln("Mailer Mircos CheckToken entered")
 
-	email, err := ms.redisRepo.CheckToken(resetToken.GetPayload())
+	rt := resetToken.GetPayload()
+
+	email, err := ms.redisRepo.CheckToken(rt)
 	if err != nil {
 		return nil, err
 	}
+	ms.logger.Infoln("Reset token was successfully checked")
 
-	ms.logger.Infoln("Mailer Mircos GetEmail entered")
+	if err := ms.redisRepo.Delete(rt); err != nil {
+		return nil, err
+	}
+	ms.logger.Info("Reset token was successfully deleted")
 
 	return &proto.Payload{Payload: email}, nil
 }
