@@ -62,7 +62,7 @@ func (db *Postgres) GetById(id string) (user_domain.User, error) {
 	return user, nil
 }
 
-func (db *Postgres) CheckEmail(email string) error {
+func (db *Postgres) CheckEmailExist(email string) error {
 	db.logger.Infoln("UserRepo CheckEmail entered")
 
 	var userId string

@@ -150,13 +150,19 @@ func (c *Client) GetUserName(userId string) (string, error) {
 	return result.GetUserName(), nil
 }
 
-func (c *Client) ForgotPassword(email string) error {
-	c.logger.Infoln("user client ForgotPassword entered")
+func (c *Client) CheckEmailExist(email string) error {
+	c.logger.Infoln("user client CheckEmail entered")
 
-	if _, err := c.userClient.ForgotPassword(context.Background(), &user_proto.Email{Email: email}); err != nil {
+	if _, err := c.userClient.CheckEmail(context.Background(), &user_proto.Email{Email: email}); err != nil {
 		return err
 	}
-	c.logger.Infoln("password was checked")
+	c.logger.Infoln("email was checked")
+
+	return nil
+}
+
+func (c *Client) SendResetToken(email string) error {
+	c.logger.Infoln("user client ForgotPassword entered")
 
 	if err := c.mailerClient.SendToken(email); err != nil {
 		return err
@@ -166,14 +172,20 @@ func (c *Client) ForgotPassword(email string) error {
 	return nil
 }
 
-func (c *Client) UpdatePassword(resetToken, password string) error {
-	c.logger.Infoln("user client UpdatePassword entered")
+func (c *Client) CheckTokenExist(resetToken string) (string, error) {
+	c.logger.Infoln("user client CheckToken entered")
 
 	email, err := c.mailerClient.GetEmail(resetToken)
 	if err != nil {
-		return err
+		return "", err
 	}
 	c.logger.Infoln("get email for reset token")
+
+	return email, nil
+}
+
+func (c *Client) UpdatePassword(email, password string) error {
+	c.logger.Infoln("user client UpdatePassword entered")
 
 	if _, err := c.userClient.UpdatePassword(context.Background(), &user_proto.UserCredentials{Email: email, Password: password}); err != nil {
 		return err

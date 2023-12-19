@@ -401,7 +401,11 @@ func (handler *UserHandler) ForgotPassword(w http.ResponseWriter, r *http.Reques
 	}
 	handler.logger.Infoln("Email is valid")
 
-	if err := handler.userUseCase.ForgotPassword(email.Email); err != nil {
+	if err := handler.userUseCase.CheckEmailExist(email.Email); err != nil {
+		return common_handler.StatusError{Code: http.StatusBadRequest, Err: err}
+	}
+
+	if err := handler.userUseCase.SendResetToken(email.Email); err != nil {
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}
 
@@ -443,7 +447,12 @@ func (handler *UserHandler) ResetPassword(w http.ResponseWriter, r *http.Request
 	}
 	handler.logger.Infoln("Passwords is valid")
 
-	if err := handler.userUseCase.UpdatePassword(resetToken, passwordsInput.Password); err != nil {
+	email, err := handler.userUseCase.CheckTokenExist(resetToken)
+	if err != nil {
+		return common_handler.StatusError{Code: http.StatusBadRequest, Err: err}
+	}
+
+	if err := handler.userUseCase.UpdatePassword(email, passwordsInput.Password); err != nil {
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}
 

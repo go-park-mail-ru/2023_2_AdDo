@@ -34,7 +34,7 @@ type UserServiceClient interface {
 	RemoveAvatar(ctx context.Context, in *proto.UserId, opts ...grpc.CallOption) (*proto1.ImageUrl, error)
 	UpdateUserInfo(ctx context.Context, in *UserData, opts ...grpc.CallOption) (*empty.Empty, error)
 	GetUserName(ctx context.Context, in *proto.UserId, opts ...grpc.CallOption) (*UserName, error)
-	ForgotPassword(ctx context.Context, in *Email, opts ...grpc.CallOption) (*empty.Empty, error)
+	CheckEmail(ctx context.Context, in *Email, opts ...grpc.CallOption) (*empty.Empty, error)
 	UpdatePassword(ctx context.Context, in *UserCredentials, opts ...grpc.CallOption) (*empty.Empty, error)
 }
 
@@ -127,9 +127,9 @@ func (c *userServiceClient) GetUserName(ctx context.Context, in *proto.UserId, o
 	return out, nil
 }
 
-func (c *userServiceClient) ForgotPassword(ctx context.Context, in *Email, opts ...grpc.CallOption) (*empty.Empty, error) {
+func (c *userServiceClient) CheckEmail(ctx context.Context, in *Email, opts ...grpc.CallOption) (*empty.Empty, error) {
 	out := new(empty.Empty)
-	err := c.cc.Invoke(ctx, "/UserService/ForgotPassword", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/UserService/CheckEmail", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -158,7 +158,7 @@ type UserServiceServer interface {
 	RemoveAvatar(context.Context, *proto.UserId) (*proto1.ImageUrl, error)
 	UpdateUserInfo(context.Context, *UserData) (*empty.Empty, error)
 	GetUserName(context.Context, *proto.UserId) (*UserName, error)
-	ForgotPassword(context.Context, *Email) (*empty.Empty, error)
+	CheckEmail(context.Context, *Email) (*empty.Empty, error)
 	UpdatePassword(context.Context, *UserCredentials) (*empty.Empty, error)
 	mustEmbedUnimplementedUserServiceServer()
 }
@@ -194,8 +194,8 @@ func (UnimplementedUserServiceServer) UpdateUserInfo(context.Context, *UserData)
 func (UnimplementedUserServiceServer) GetUserName(context.Context, *proto.UserId) (*UserName, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetUserName not implemented")
 }
-func (UnimplementedUserServiceServer) ForgotPassword(context.Context, *Email) (*empty.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ForgotPassword not implemented")
+func (UnimplementedUserServiceServer) CheckEmail(context.Context, *Email) (*empty.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CheckEmail not implemented")
 }
 func (UnimplementedUserServiceServer) UpdatePassword(context.Context, *UserCredentials) (*empty.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdatePassword not implemented")
@@ -375,20 +375,20 @@ func _UserService_GetUserName_Handler(srv interface{}, ctx context.Context, dec 
 	return interceptor(ctx, in, info, handler)
 }
 
-func _UserService_ForgotPassword_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _UserService_CheckEmail_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(Email)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(UserServiceServer).ForgotPassword(ctx, in)
+		return srv.(UserServiceServer).CheckEmail(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/UserService/ForgotPassword",
+		FullMethod: "/UserService/CheckEmail",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UserServiceServer).ForgotPassword(ctx, req.(*Email))
+		return srv.(UserServiceServer).CheckEmail(ctx, req.(*Email))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -455,8 +455,8 @@ var UserService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _UserService_GetUserName_Handler,
 		},
 		{
-			MethodName: "ForgotPassword",
-			Handler:    _UserService_ForgotPassword_Handler,
+			MethodName: "CheckEmail",
+			Handler:    _UserService_CheckEmail_Handler,
 		},
 		{
 			MethodName: "UpdatePassword",

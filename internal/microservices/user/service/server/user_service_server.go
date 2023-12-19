@@ -164,11 +164,11 @@ func (us *UserManager) GetUserName(ctx context.Context, in *session_proto.UserId
 	return &user_proto.UserName{UserName: userName}, nil
 }
 
-func (us *UserManager) ForgotPassword(ctx context.Context, in *user_proto.Email) (*google_proto.Empty, error) {
-	us.Logger.Infoln("User Micros ForgotPassword entered")
+func (us *UserManager) CheckEmail(ctx context.Context, in *user_proto.Email) (*google_proto.Empty, error) {
+	us.Logger.Infoln("User Micros CheckEmail entered")
 
 	email := in.GetEmail()
-	err := us.UserRepo.CheckEmail(email)
+	err := us.UserRepo.CheckEmailExist(email)
 	if err != nil {
 		return nil, err
 	}

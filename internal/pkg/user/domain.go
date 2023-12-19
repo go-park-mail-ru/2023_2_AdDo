@@ -120,8 +120,10 @@ type UseCase interface {
 	UploadAvatar(userId string, src io.Reader, size int64) (string, error)
 	RemoveAvatar(userId string) error
 	GetUserName(userId string) (string, error)
-	ForgotPassword(email string) error
-	UpdatePassword(resetToken, password string) error
+	CheckEmailExist(email string) error
+	CheckTokenExist(resetToken string) (string, error)
+	SendResetToken(email string) error
+	UpdatePassword(email, password string) error
 }
 
 type Repository interface {
@@ -133,7 +135,7 @@ type Repository interface {
 	GetAvatarPath(userId string) (string, error)
 	RemoveAvatarPath(userId string) (string, error)
 	GetUserNameById(userId string) (string, error)
-	CheckEmail(email string) error
+	CheckEmailExist(email string) error
 	UpdatePassword(email, password string) error
 }
 
