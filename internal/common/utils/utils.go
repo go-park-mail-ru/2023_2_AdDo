@@ -3,7 +3,6 @@ package utils
 import (
 	"bytes"
 	"crypto/md5"
-	"encoding/base64"
 	"encoding/hex"
 	"fmt"
 	"io"
@@ -39,16 +38,16 @@ func CastTimeToString(duration int) string {
 	return fmt.Sprintf("%d:%02d", minutes, seconds)
 }
 
-func Encode(s string) string {
-	data := base64.StdEncoding.EncodeToString([]byte(s))
-	return string(data)
-}
-
-func Decode(s string) (string, error) {
-	data, err := base64.StdEncoding.DecodeString(s)
-	if err != nil {
-		return "", err
-	}
-
-	return string(data), nil
-}
+// func Encode(s string) string {
+// 	data := base64.StdEncoding.EncodeToString([]byte(s))
+// 	return string(data)
+// }
+//
+// func Decode(s string) (string, error) {
+// 	data, err := base64.StdEncoding.DecodeString(s)
+// 	if err != nil {
+// 		return "", err
+// 	}
+//
+// 	return string(data), nil
+// }

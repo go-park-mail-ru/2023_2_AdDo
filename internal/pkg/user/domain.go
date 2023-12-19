@@ -26,6 +26,11 @@ type ForgotPasswordInput struct {
 	Email string `valid:"length(1|30), email, required, printableascii" json:"Email" example:"example@gmail.com"`
 }
 
+type ResetPasswordInput struct {
+	Password        string `valid:"length(6|30), required, printableascii" json:"Password" example:"password"`
+	ConfirmPassword string `valid:"length(6|30), required, printableascii" json:"ConfirmPassword" example:"password"`
+}
+
 func (u *User) ValidateForUpdate() error {
 	u.Password = "password"
 	return u.Validate()
@@ -88,6 +93,19 @@ func (fpi ForgotPasswordInput) Validate() error {
 	return nil
 }
 
+func (rpi ResetPasswordInput) Validate() error {
+	_, err := govalidator.ValidateStruct(rpi)
+	if err != nil {
+		return err
+	}
+
+	if rpi.Password != rpi.ConfirmPassword {
+		return ErrPasswordsDoNotMatch
+	}
+
+	return nil
+}
+
 type UploadAvatarResponse struct {
 	Url string `json:"AvatarUrl" example:"/user-images/images.png"`
 }
@@ -102,7 +120,8 @@ type UseCase interface {
 	UploadAvatar(userId string, src io.Reader, size int64) (string, error)
 	RemoveAvatar(userId string) error
 	GetUserName(userId string) (string, error)
-	ForgotPassword(email string) (error)
+	ForgotPassword(email string) error
+	UpdatePassword(resetToken, password string) error
 }
 
 type Repository interface {
@@ -114,11 +133,13 @@ type Repository interface {
 	GetAvatarPath(userId string) (string, error)
 	RemoveAvatarPath(userId string) (string, error)
 	GetUserNameById(userId string) (string, error)
-	CheckEmail(email string) (error)
+	CheckEmail(email string) error
+	UpdatePassword(email, password string) error
 }
 
 var (
-	ErrWrongCredentials = errors.New("wrong user credentials")
-	ErrUserAlreadyExist = errors.New("user already exist")
-	ErrUserDoesNotExist = errors.New("user does not exist")
+	ErrWrongCredentials    = errors.New("wrong user credentials")
+	ErrUserAlreadyExist    = errors.New("user already exist")
+	ErrUserDoesNotExist    = errors.New("user does not exist")
+	ErrPasswordsDoNotMatch = errors.New("passwords do not match")
 )

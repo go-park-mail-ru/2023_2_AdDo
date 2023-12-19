@@ -34,7 +34,8 @@ type UserServiceClient interface {
 	RemoveAvatar(ctx context.Context, in *proto.UserId, opts ...grpc.CallOption) (*proto1.ImageUrl, error)
 	UpdateUserInfo(ctx context.Context, in *UserData, opts ...grpc.CallOption) (*empty.Empty, error)
 	GetUserName(ctx context.Context, in *proto.UserId, opts ...grpc.CallOption) (*UserName, error)
-	ForgotPassword(ctx context.Context, in *UserName, opts ...grpc.CallOption) (*empty.Empty, error)
+	ForgotPassword(ctx context.Context, in *Email, opts ...grpc.CallOption) (*empty.Empty, error)
+	UpdatePassword(ctx context.Context, in *UserCredentials, opts ...grpc.CallOption) (*empty.Empty, error)
 }
 
 type userServiceClient struct {
@@ -126,9 +127,18 @@ func (c *userServiceClient) GetUserName(ctx context.Context, in *proto.UserId, o
 	return out, nil
 }
 
-func (c *userServiceClient) ForgotPassword(ctx context.Context, in *UserName, opts ...grpc.CallOption) (*empty.Empty, error) {
+func (c *userServiceClient) ForgotPassword(ctx context.Context, in *Email, opts ...grpc.CallOption) (*empty.Empty, error) {
 	out := new(empty.Empty)
 	err := c.cc.Invoke(ctx, "/UserService/ForgotPassword", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userServiceClient) UpdatePassword(ctx context.Context, in *UserCredentials, opts ...grpc.CallOption) (*empty.Empty, error) {
+	out := new(empty.Empty)
+	err := c.cc.Invoke(ctx, "/UserService/UpdatePassword", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -148,7 +158,8 @@ type UserServiceServer interface {
 	RemoveAvatar(context.Context, *proto.UserId) (*proto1.ImageUrl, error)
 	UpdateUserInfo(context.Context, *UserData) (*empty.Empty, error)
 	GetUserName(context.Context, *proto.UserId) (*UserName, error)
-	ForgotPassword(context.Context, *UserName) (*empty.Empty, error)
+	ForgotPassword(context.Context, *Email) (*empty.Empty, error)
+	UpdatePassword(context.Context, *UserCredentials) (*empty.Empty, error)
 	mustEmbedUnimplementedUserServiceServer()
 }
 
@@ -183,8 +194,11 @@ func (UnimplementedUserServiceServer) UpdateUserInfo(context.Context, *UserData)
 func (UnimplementedUserServiceServer) GetUserName(context.Context, *proto.UserId) (*UserName, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetUserName not implemented")
 }
-func (UnimplementedUserServiceServer) ForgotPassword(context.Context, *UserName) (*empty.Empty, error) {
+func (UnimplementedUserServiceServer) ForgotPassword(context.Context, *Email) (*empty.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ForgotPassword not implemented")
+}
+func (UnimplementedUserServiceServer) UpdatePassword(context.Context, *UserCredentials) (*empty.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdatePassword not implemented")
 }
 func (UnimplementedUserServiceServer) mustEmbedUnimplementedUserServiceServer() {}
 
@@ -362,7 +376,7 @@ func _UserService_GetUserName_Handler(srv interface{}, ctx context.Context, dec 
 }
 
 func _UserService_ForgotPassword_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UserName)
+	in := new(Email)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -374,7 +388,25 @@ func _UserService_ForgotPassword_Handler(srv interface{}, ctx context.Context, d
 		FullMethod: "/UserService/ForgotPassword",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UserServiceServer).ForgotPassword(ctx, req.(*UserName))
+		return srv.(UserServiceServer).ForgotPassword(ctx, req.(*Email))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UserService_UpdatePassword_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UserCredentials)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).UpdatePassword(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/UserService/UpdatePassword",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).UpdatePassword(ctx, req.(*UserCredentials))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -425,6 +457,10 @@ var UserService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ForgotPassword",
 			Handler:    _UserService_ForgotPassword_Handler,
+		},
+		{
+			MethodName: "UpdatePassword",
+			Handler:    _UserService_UpdatePassword_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

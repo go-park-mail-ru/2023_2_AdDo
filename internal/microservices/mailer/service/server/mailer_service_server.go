@@ -1,7 +1,9 @@
 package server
 
 import (
+	"bytes"
 	"context"
+	"html/template"
 	"main/internal/microservices/mailer/proto"
 	domain "main/internal/pkg/mailer"
 
@@ -10,14 +12,22 @@ import (
 	"gopkg.in/gomail.v2"
 )
 
+const (
+	ResetPasswordSubject = "Восстановление пароля"
+	SiteUrl              = "https://musicon.space/auth/reset_password/"
+)
+
 func NewMailerServer(smpt domain.Smtp, redisRepo domain.Repository, logger *logrus.Logger) MailerServer {
 	dialer := gomail.NewDialer(smpt.Host, smpt.Port, smpt.Username, smpt.Password)
+
+	templates := template.Must(template.ParseGlob("/templates/*"))
 
 	return MailerServer{
 		dialer:    dialer,
 		sender:    smpt.Sender,
 		redisRepo: redisRepo,
 		logger:    logger,
+		tmpl:      templates,
 	}
 }
 
@@ -25,6 +35,7 @@ type MailerServer struct {
 	sender    string
 	dialer    *gomail.Dialer
 	redisRepo domain.Repository
+	tmpl      *template.Template
 	logger    *logrus.Logger
 	proto.UnimplementedMailerServiceServer
 }
@@ -39,15 +50,21 @@ func (ms MailerServer) SendToken(ctx context.Context, payload *proto.Payload) (*
 		return nil, err
 	}
 
+	body := new(bytes.Buffer)
+
+	ms.tmpl.ExecuteTemplate(body, domain.ResetPasswordHtmlFile, domain.EmailData{
+		URL:     SiteUrl + resetToken,
+		Subject: ResetPasswordSubject,
+	})
+
 	msg := gomail.NewMessage()
 	msg.SetHeader("To", recipient)
 	msg.SetHeader("From", ms.sender)
-	msg.SetBody("text/html", "Reset token is "+resetToken)
-	msg.SetHeader("Subject", "Subject")
-	// msg.SetBody("text/plain", plainBody.String())
+	msg.SetBody("text/html", body.String())
+	msg.SetHeader("Subject", ResetPasswordSubject)
 
 	if err := ms.dialer.DialAndSend(msg); err != nil {
-		ms.logger.Errorf("Error send message: %s", err.Error())
+		ms.logger.Errorf("Error send message to %s: %s", recipient, err.Error())
 		return nil, err
 	}
 	ms.logger.Infoln("Message successfull sent")
@@ -55,34 +72,10 @@ func (ms MailerServer) SendToken(ctx context.Context, payload *proto.Payload) (*
 	return &empty.Empty{}, nil
 }
 
-// TODO: include style.html to teplateFile
-// 	tmpl, err := template.New("email").ParseFS(templateFS, "templates/"+templateFile)
-// 	if err != nil {
-// 		return err
-// 	}
-//
-// 	body := new(bytes.Buffer)
-// 	err = tmpl.ExecuteTemplate(body, templateFile, emailData)
-// 	if err != nil {
-// 		return err
-// 	}
-//
-// 	plainBody := new(bytes.Buffer)
-// 	err = tmpl.ExecuteTemplate(plainBody, "plainBody", data)
-// 	if err != nil {
-// 		return err
-// 	}
-//
-// 	htmlBody := new(bytes.Buffer)
-// 	err = tmpl.ExecuteTemplate(htmlBody, "htmlBody", data)
-// 	if err != nil {
-// 		return err
-// 	}
-
 func (ms MailerServer) CheckToken(ctx context.Context, resetToken *proto.Payload) (*proto.Payload, error) {
-	ms.logger.Infoln("Mailer Mircos GetEmail entered")
+	ms.logger.Infoln("Mailer Mircos CheckToken entered")
 
-	email, err := ms.redisRepo.CheckToken(resetToken.Payload)
+	email, err := ms.redisRepo.CheckToken(resetToken.GetPayload())
 	if err != nil {
 		return nil, err
 	}

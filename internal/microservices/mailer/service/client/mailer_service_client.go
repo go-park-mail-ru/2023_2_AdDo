@@ -28,9 +28,9 @@ func (c Client) SendToken(email string) error {
 func (c Client) GetEmail(resetToken string) (string, error) {
 	c.logger.Infoln("Grpc client to MailerService: GetEmail method")
 
-	payload, err := c.mailer.CheckToken(context.Background(), &proto.Payload{Payload: resetToken})
+	email, err := c.mailer.CheckToken(context.Background(), &proto.Payload{Payload: resetToken})
 	if err != nil {
 		return "", err
 	}
-	return payload.GetPayload(), nil
+	return email.GetPayload(), nil
 }

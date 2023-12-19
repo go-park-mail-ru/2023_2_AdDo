@@ -12,3 +12,4 @@ service MailerService {
 message Payload {
   string payload = 1;
 }
+  

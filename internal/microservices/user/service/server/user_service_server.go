@@ -164,15 +164,27 @@ func (us *UserManager) GetUserName(ctx context.Context, in *session_proto.UserId
 	return &user_proto.UserName{UserName: userName}, nil
 }
 
-func (us *UserManager) ForgotPassword(ctx context.Context, in *user_proto.UserName) (*google_proto.Empty, error) {
+func (us *UserManager) ForgotPassword(ctx context.Context, in *user_proto.Email) (*google_proto.Empty, error) {
 	us.Logger.Infoln("User Micros ForgotPassword entered")
 
-	email := in.GetUserName()
+	email := in.GetEmail()
 	err := us.UserRepo.CheckEmail(email)
 	if err != nil {
 		return nil, err
 	}
 	us.Logger.Infoln("email checked")
+
+	return &google_proto.Empty{}, nil
+}
+
+func (us *UserManager) UpdatePassword(ctx context.Context, in *user_proto.UserCredentials) (*google_proto.Empty, error) {
+	us.Logger.Infoln("User Micros UpdatePassword entered")
+
+	err := us.UserRepo.UpdatePassword(in.GetEmail(), in.GetPassword())
+	if err != nil {
+		return nil, err
+	}
+	us.Logger.Infoln("password was updated")
 
 	return &google_proto.Empty{}, nil
 }

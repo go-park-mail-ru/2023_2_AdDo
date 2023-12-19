@@ -12,12 +12,11 @@ type Smtp struct {
 
 type EmailData struct {
 	URL     string
-	Name    string
 	Subject string
 }
 
 const (
-	ResetPasswordHtml    = "reset_password.html"
+	ResetPasswordHtmlFile = "reset_password.html"
 	ResetTokenTimeToLive = 10 * time.Minute
 )
 

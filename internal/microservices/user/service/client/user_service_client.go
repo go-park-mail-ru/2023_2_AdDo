@@ -153,7 +153,7 @@ func (c *Client) GetUserName(userId string) (string, error) {
 func (c *Client) ForgotPassword(email string) error {
 	c.logger.Infoln("user client ForgotPassword entered")
 
-	if _, err := c.userClient.ForgotPassword(context.Background(), &user_proto.UserName{UserName: email}); err != nil {
+	if _, err := c.userClient.ForgotPassword(context.Background(), &user_proto.Email{Email: email}); err != nil {
 		return err
 	}
 	c.logger.Infoln("password was checked")
@@ -162,6 +162,23 @@ func (c *Client) ForgotPassword(email string) error {
 		return err
 	}
 	c.logger.Infoln("sent reset password message")
+
+	return nil
+}
+
+func (c *Client) UpdatePassword(resetToken, password string) error {
+	c.logger.Infoln("user client UpdatePassword entered")
+
+	email, err := c.mailerClient.GetEmail(resetToken)
+	if err != nil {
+		return err
+	}
+	c.logger.Infoln("get email for reset token")
+
+	if _, err := c.userClient.UpdatePassword(context.Background(), &user_proto.UserCredentials{Email: email, Password: password}); err != nil {
+		return err
+	}
+	c.logger.Infoln("password was updated")
 
 	return nil
 }

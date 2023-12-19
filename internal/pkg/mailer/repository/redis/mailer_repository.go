@@ -2,7 +2,6 @@ package mailer_repository_redis
 
 import (
 	"context"
-	"main/internal/common/utils"
 	domain "main/internal/pkg/mailer"
 
 	"github.com/go-redis/redis/v8"
@@ -23,9 +22,9 @@ func (redis *Redis) CreateToken(email string) (string, error) {
 	redis.logger.Infoln("MailerRepo Create entered")
 
 	resetToken := randstr.String(20)
-	passwordResetToken := utils.Encode(resetToken)
+	// passwordResetToken := utils.Encode(resetToken)
 
-	if err := redis.database.Set(context.Background(), passwordResetToken, email, domain.ResetTokenTimeToLive).Err(); err != nil {
+	if err := redis.database.Set(context.Background(), resetToken, email, domain.ResetTokenTimeToLive).Err(); err != nil {
 		redis.logger.WithFields(logrus.Fields{
 			"err":   err.Error(),
 			"email": email,
@@ -34,17 +33,18 @@ func (redis *Redis) CreateToken(email string) (string, error) {
 	}
 	redis.logger.Infoln("New reset token add in redis db")
 
-	return passwordResetToken, nil
+	return resetToken, nil
 }
 
-func (redis *Redis) CheckToken(passwordResetToken string) (string, error) {
+func (redis *Redis) CheckToken(resetToken string) (string, error) {
 	redis.logger.Infoln("SessionRepo Get entered")
 
-	resetToken, err := utils.Decode(passwordResetToken)
-	if err != nil {
-		return "", err
-	}
+	// resetToken, err := utils.Decode(passwordResetToken)
+	// if err != nil {
+	// 	return "", err
+	// }
 
+	redis.logger.Infoln("Checking reset token: " + resetToken)
 	email, err := redis.database.Get(context.Background(), resetToken).Result()
 	if err != nil {
 		redis.logger.WithFields(logrus.Fields{
