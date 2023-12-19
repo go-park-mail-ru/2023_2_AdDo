@@ -56,7 +56,7 @@ func easyjson3e1fa5ecDecodeMainInternalPkgArtist(in *jlexer.Lexer, out *SearchRe
 				}
 				for !in.IsDelim(']') {
 					var v1 playlist.Base
-					easyjson3e1fa5ecDecodeMainInternalPkgPlaylist(in, &v1)
+					(v1).UnmarshalEasyJSON(in)
 					out.Playlists = append(out.Playlists, v1)
 					in.WantComma()
 				}
@@ -102,7 +102,7 @@ func easyjson3e1fa5ecDecodeMainInternalPkgArtist(in *jlexer.Lexer, out *SearchRe
 				}
 				for !in.IsDelim(']') {
 					var v3 track.Response
-					easyjson3e1fa5ecDecodeMainInternalPkgTrack(in, &v3)
+					(v3).UnmarshalEasyJSON(in)
 					out.Tracks = append(out.Tracks, v3)
 					in.WantComma()
 				}
@@ -156,7 +156,7 @@ func easyjson3e1fa5ecEncodeMainInternalPkgArtist(out *jwriter.Writer, in SearchR
 				if v5 > 0 {
 					out.RawByte(',')
 				}
-				easyjson3e1fa5ecEncodeMainInternalPkgPlaylist(out, v6)
+				(v6).MarshalEasyJSON(out)
 			}
 			out.RawByte(']')
 		}
@@ -188,7 +188,7 @@ func easyjson3e1fa5ecEncodeMainInternalPkgArtist(out *jwriter.Writer, in SearchR
 				if v9 > 0 {
 					out.RawByte(',')
 				}
-				easyjson3e1fa5ecEncodeMainInternalPkgTrack(out, v10)
+				(v10).MarshalEasyJSON(out)
 			}
 			out.RawByte(']')
 		}
@@ -234,160 +234,6 @@ func (v *SearchResponse) UnmarshalJSON(data []byte) error {
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *SearchResponse) UnmarshalEasyJSON(l *jlexer.Lexer) {
 	easyjson3e1fa5ecDecodeMainInternalPkgArtist(l, v)
-}
-func easyjson3e1fa5ecDecodeMainInternalPkgTrack(in *jlexer.Lexer, out *track.Response) {
-	isTopLevel := in.IsStart()
-	if in.IsNull() {
-		if isTopLevel {
-			in.Consumed()
-		}
-		in.Skip()
-		return
-	}
-	in.Delim('{')
-	for !in.IsDelim('}') {
-		key := in.UnsafeFieldName(false)
-		in.WantColon()
-		if in.IsNull() {
-			in.Skip()
-			in.WantComma()
-			continue
-		}
-		switch key {
-		case "Id":
-			out.Id = uint64(in.Uint64())
-		case "ArtistId":
-			out.ArtistId = uint64(in.Uint64())
-		case "Name":
-			out.Name = string(in.String())
-		case "Preview":
-			out.Preview = string(in.String())
-		case "Content":
-			out.Content = string(in.String())
-		case "ArtistName":
-			out.ArtistName = string(in.String())
-		case "Duration":
-			out.Duration = string(in.String())
-		case "IsLiked":
-			out.IsLiked = bool(in.Bool())
-		default:
-			in.SkipRecursive()
-		}
-		in.WantComma()
-	}
-	in.Delim('}')
-	if isTopLevel {
-		in.Consumed()
-	}
-}
-func easyjson3e1fa5ecEncodeMainInternalPkgTrack(out *jwriter.Writer, in track.Response) {
-	out.RawByte('{')
-	first := true
-	_ = first
-	{
-		const prefix string = ",\"Id\":"
-		out.RawString(prefix[1:])
-		out.Uint64(uint64(in.Id))
-	}
-	{
-		const prefix string = ",\"ArtistId\":"
-		out.RawString(prefix)
-		out.Uint64(uint64(in.ArtistId))
-	}
-	{
-		const prefix string = ",\"Name\":"
-		out.RawString(prefix)
-		out.String(string(in.Name))
-	}
-	{
-		const prefix string = ",\"Preview\":"
-		out.RawString(prefix)
-		out.String(string(in.Preview))
-	}
-	{
-		const prefix string = ",\"Content\":"
-		out.RawString(prefix)
-		out.String(string(in.Content))
-	}
-	{
-		const prefix string = ",\"ArtistName\":"
-		out.RawString(prefix)
-		out.String(string(in.ArtistName))
-	}
-	{
-		const prefix string = ",\"Duration\":"
-		out.RawString(prefix)
-		out.String(string(in.Duration))
-	}
-	{
-		const prefix string = ",\"IsLiked\":"
-		out.RawString(prefix)
-		out.Bool(bool(in.IsLiked))
-	}
-	out.RawByte('}')
-}
-func easyjson3e1fa5ecDecodeMainInternalPkgPlaylist(in *jlexer.Lexer, out *playlist.Base) {
-	isTopLevel := in.IsStart()
-	if in.IsNull() {
-		if isTopLevel {
-			in.Consumed()
-		}
-		in.Skip()
-		return
-	}
-	in.Delim('{')
-	for !in.IsDelim('}') {
-		key := in.UnsafeFieldName(false)
-		in.WantColon()
-		if in.IsNull() {
-			in.Skip()
-			in.WantComma()
-			continue
-		}
-		switch key {
-		case "Id":
-			out.Id = uint64(in.Uint64())
-		case "Name":
-			out.Name = string(in.String())
-		case "AuthorId":
-			out.AuthorId = string(in.String())
-		case "Preview":
-			out.Preview = string(in.String())
-		default:
-			in.SkipRecursive()
-		}
-		in.WantComma()
-	}
-	in.Delim('}')
-	if isTopLevel {
-		in.Consumed()
-	}
-}
-func easyjson3e1fa5ecEncodeMainInternalPkgPlaylist(out *jwriter.Writer, in playlist.Base) {
-	out.RawByte('{')
-	first := true
-	_ = first
-	{
-		const prefix string = ",\"Id\":"
-		out.RawString(prefix[1:])
-		out.Uint64(uint64(in.Id))
-	}
-	{
-		const prefix string = ",\"Name\":"
-		out.RawString(prefix)
-		out.String(string(in.Name))
-	}
-	{
-		const prefix string = ",\"AuthorId\":"
-		out.RawString(prefix)
-		out.String(string(in.AuthorId))
-	}
-	{
-		const prefix string = ",\"Preview\":"
-		out.RawString(prefix)
-		out.String(string(in.Preview))
-	}
-	out.RawByte('}')
 }
 func easyjson3e1fa5ecDecodeMainInternalPkgArtist1(in *jlexer.Lexer, out *Response) {
 	isTopLevel := in.IsStart()
@@ -454,7 +300,7 @@ func easyjson3e1fa5ecDecodeMainInternalPkgArtist1(in *jlexer.Lexer, out *Respons
 				}
 				for !in.IsDelim(']') {
 					var v14 track.Response
-					easyjson3e1fa5ecDecodeMainInternalPkgTrack(in, &v14)
+					(v14).UnmarshalEasyJSON(in)
 					out.Tracks = append(out.Tracks, v14)
 					in.WantComma()
 				}
@@ -516,7 +362,7 @@ func easyjson3e1fa5ecEncodeMainInternalPkgArtist1(out *jwriter.Writer, in Respon
 				if v17 > 0 {
 					out.RawByte(',')
 				}
-				easyjson3e1fa5ecEncodeMainInternalPkgTrack(out, v18)
+				(v18).MarshalEasyJSON(out)
 			}
 			out.RawByte(']')
 		}
@@ -547,7 +393,87 @@ func (v *Response) UnmarshalJSON(data []byte) error {
 func (v *Response) UnmarshalEasyJSON(l *jlexer.Lexer) {
 	easyjson3e1fa5ecDecodeMainInternalPkgArtist1(l, v)
 }
-func easyjson3e1fa5ecDecodeMainInternalPkgArtist2(in *jlexer.Lexer, out *LikedArtists) {
+func easyjson3e1fa5ecDecodeMainInternalPkgArtist2(in *jlexer.Lexer, out *Base) {
+	isTopLevel := in.IsStart()
+	if in.IsNull() {
+		if isTopLevel {
+			in.Consumed()
+		}
+		in.Skip()
+		return
+	}
+	in.Delim('{')
+	for !in.IsDelim('}') {
+		key := in.UnsafeFieldName(false)
+		in.WantColon()
+		if in.IsNull() {
+			in.Skip()
+			in.WantComma()
+			continue
+		}
+		switch key {
+		case "Id":
+			out.Id = uint64(in.Uint64())
+		case "Name":
+			out.Name = string(in.String())
+		case "Avatar":
+			out.Avatar = string(in.String())
+		default:
+			in.SkipRecursive()
+		}
+		in.WantComma()
+	}
+	in.Delim('}')
+	if isTopLevel {
+		in.Consumed()
+	}
+}
+func easyjson3e1fa5ecEncodeMainInternalPkgArtist2(out *jwriter.Writer, in Base) {
+	out.RawByte('{')
+	first := true
+	_ = first
+	{
+		const prefix string = ",\"Id\":"
+		out.RawString(prefix[1:])
+		out.Uint64(uint64(in.Id))
+	}
+	{
+		const prefix string = ",\"Name\":"
+		out.RawString(prefix)
+		out.String(string(in.Name))
+	}
+	{
+		const prefix string = ",\"Avatar\":"
+		out.RawString(prefix)
+		out.String(string(in.Avatar))
+	}
+	out.RawByte('}')
+}
+
+// MarshalJSON supports json.Marshaler interface
+func (v Base) MarshalJSON() ([]byte, error) {
+	w := jwriter.Writer{}
+	easyjson3e1fa5ecEncodeMainInternalPkgArtist2(&w, v)
+	return w.Buffer.BuildBytes(), w.Error
+}
+
+// MarshalEasyJSON supports easyjson.Marshaler interface
+func (v Base) MarshalEasyJSON(w *jwriter.Writer) {
+	easyjson3e1fa5ecEncodeMainInternalPkgArtist2(w, v)
+}
+
+// UnmarshalJSON supports json.Unmarshaler interface
+func (v *Base) UnmarshalJSON(data []byte) error {
+	r := jlexer.Lexer{Data: data}
+	easyjson3e1fa5ecDecodeMainInternalPkgArtist2(&r, v)
+	return r.Error()
+}
+
+// UnmarshalEasyJSON supports easyjson.Unmarshaler interface
+func (v *Base) UnmarshalEasyJSON(l *jlexer.Lexer) {
+	easyjson3e1fa5ecDecodeMainInternalPkgArtist2(l, v)
+}
+func easyjson3e1fa5ecDecodeMainInternalPkgArtist3(in *jlexer.Lexer, out *Artists) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -599,7 +525,7 @@ func easyjson3e1fa5ecDecodeMainInternalPkgArtist2(in *jlexer.Lexer, out *LikedAr
 		in.Consumed()
 	}
 }
-func easyjson3e1fa5ecEncodeMainInternalPkgArtist2(out *jwriter.Writer, in LikedArtists) {
+func easyjson3e1fa5ecEncodeMainInternalPkgArtist3(out *jwriter.Writer, in Artists) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -623,105 +549,25 @@ func easyjson3e1fa5ecEncodeMainInternalPkgArtist2(out *jwriter.Writer, in LikedA
 }
 
 // MarshalJSON supports json.Marshaler interface
-func (v LikedArtists) MarshalJSON() ([]byte, error) {
-	w := jwriter.Writer{}
-	easyjson3e1fa5ecEncodeMainInternalPkgArtist2(&w, v)
-	return w.Buffer.BuildBytes(), w.Error
-}
-
-// MarshalEasyJSON supports easyjson.Marshaler interface
-func (v LikedArtists) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjson3e1fa5ecEncodeMainInternalPkgArtist2(w, v)
-}
-
-// UnmarshalJSON supports json.Unmarshaler interface
-func (v *LikedArtists) UnmarshalJSON(data []byte) error {
-	r := jlexer.Lexer{Data: data}
-	easyjson3e1fa5ecDecodeMainInternalPkgArtist2(&r, v)
-	return r.Error()
-}
-
-// UnmarshalEasyJSON supports easyjson.Unmarshaler interface
-func (v *LikedArtists) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjson3e1fa5ecDecodeMainInternalPkgArtist2(l, v)
-}
-func easyjson3e1fa5ecDecodeMainInternalPkgArtist3(in *jlexer.Lexer, out *Base) {
-	isTopLevel := in.IsStart()
-	if in.IsNull() {
-		if isTopLevel {
-			in.Consumed()
-		}
-		in.Skip()
-		return
-	}
-	in.Delim('{')
-	for !in.IsDelim('}') {
-		key := in.UnsafeFieldName(false)
-		in.WantColon()
-		if in.IsNull() {
-			in.Skip()
-			in.WantComma()
-			continue
-		}
-		switch key {
-		case "Id":
-			out.Id = uint64(in.Uint64())
-		case "Name":
-			out.Name = string(in.String())
-		case "Avatar":
-			out.Avatar = string(in.String())
-		default:
-			in.SkipRecursive()
-		}
-		in.WantComma()
-	}
-	in.Delim('}')
-	if isTopLevel {
-		in.Consumed()
-	}
-}
-func easyjson3e1fa5ecEncodeMainInternalPkgArtist3(out *jwriter.Writer, in Base) {
-	out.RawByte('{')
-	first := true
-	_ = first
-	{
-		const prefix string = ",\"Id\":"
-		out.RawString(prefix[1:])
-		out.Uint64(uint64(in.Id))
-	}
-	{
-		const prefix string = ",\"Name\":"
-		out.RawString(prefix)
-		out.String(string(in.Name))
-	}
-	{
-		const prefix string = ",\"Avatar\":"
-		out.RawString(prefix)
-		out.String(string(in.Avatar))
-	}
-	out.RawByte('}')
-}
-
-// MarshalJSON supports json.Marshaler interface
-func (v Base) MarshalJSON() ([]byte, error) {
+func (v Artists) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
 	easyjson3e1fa5ecEncodeMainInternalPkgArtist3(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
-func (v Base) MarshalEasyJSON(w *jwriter.Writer) {
+func (v Artists) MarshalEasyJSON(w *jwriter.Writer) {
 	easyjson3e1fa5ecEncodeMainInternalPkgArtist3(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
-func (v *Base) UnmarshalJSON(data []byte) error {
+func (v *Artists) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
 	easyjson3e1fa5ecDecodeMainInternalPkgArtist3(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
-func (v *Base) UnmarshalEasyJSON(l *jlexer.Lexer) {
+func (v *Artists) UnmarshalEasyJSON(l *jlexer.Lexer) {
 	easyjson3e1fa5ecDecodeMainInternalPkgArtist3(l, v)
 }

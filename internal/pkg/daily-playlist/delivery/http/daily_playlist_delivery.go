@@ -1,6 +1,7 @@
 package daily_playlist_delivery
 
 import (
+	"github.com/mailru/easyjson"
 	"github.com/sirupsen/logrus"
 	common_handler "main/internal/common/handler"
 	"main/internal/common/response"
@@ -49,7 +50,7 @@ func (h *Handler) GetDailyPlaylist(w http.ResponseWriter, r *http.Request) error
 	}
 	h.logger.Infoln("Got daily playlist Id")
 
-	err = response.RenderJSON(w, result)
+	_, _, err = easyjson.MarshalToHTTPResponseWriter(result, w)
 	if err != nil {
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}

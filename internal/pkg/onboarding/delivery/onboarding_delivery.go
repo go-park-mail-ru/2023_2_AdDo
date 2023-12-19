@@ -1,10 +1,11 @@
 package onboarding_delivery
 
 import (
-	"encoding/json"
+	"github.com/mailru/easyjson"
 	"github.com/sirupsen/logrus"
 	common_handler "main/internal/common/handler"
 	"main/internal/common/response"
+	"main/internal/pkg/artist"
 	"main/internal/pkg/onboarding"
 	"main/internal/pkg/session"
 	"net/http"
@@ -33,7 +34,7 @@ func (h *Handler) GetGenres(w http.ResponseWriter, r *http.Request) error {
 	}
 	h.logger.Infoln("Got Genres")
 
-	if err = response.RenderJSON(w, result); err != nil {
+	if _, _, err = easyjson.MarshalToHTTPResponseWriter(onboarding.Genres{Genres: result}, w); err != nil {
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}
 	h.logger.Infoln("Genres formed")
@@ -50,7 +51,7 @@ func (h *Handler) GetArtists(w http.ResponseWriter, _ *http.Request) error {
 	}
 	h.logger.Infoln("Got Artists")
 
-	if err = response.RenderJSON(w, result); err != nil {
+	if _, _, err = easyjson.MarshalToHTTPResponseWriter(artist.Artists{Artists: result}, w); err != nil {
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}
 	h.logger.Infoln("Artists formed")
@@ -75,7 +76,7 @@ func (h *Handler) SaveArtists(w http.ResponseWriter, r *http.Request) error {
 	h.logger.Infoln("Got user id")
 
 	var artists onboarding.ArtistOnboarding
-	if err := json.NewDecoder(r.Body).Decode(&artists); err != nil {
+	if err = easyjson.UnmarshalFromReader(r.Body, &artists); err != nil {
 		return common_handler.StatusError{Code: http.StatusBadRequest, Err: err}
 	}
 	h.logger.Infoln("artists decoded")
@@ -107,7 +108,7 @@ func (h *Handler) SaveGenres(w http.ResponseWriter, r *http.Request) error {
 	h.logger.Infoln("Got user id")
 
 	var genres onboarding.GenreOnboarding
-	if err := json.NewDecoder(r.Body).Decode(&genres); err != nil {
+	if err = easyjson.UnmarshalFromReader(r.Body, &genres); err != nil {
 		return common_handler.StatusError{Code: http.StatusBadRequest, Err: err}
 	}
 	h.logger.Infoln("artists decoded")

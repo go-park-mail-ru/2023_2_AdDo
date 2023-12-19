@@ -60,7 +60,6 @@ func (handler *ArtistHandler) ArtistInfo(w http.ResponseWriter, r *http.Request)
 	}
 	handler.logger.Infoln("Got artist from use case")
 
-
 	sessionId, err := response.GetCookie(r)
 	userId, err := handler.SessionUseCase.GetUserId(sessionId)
 
@@ -274,7 +273,7 @@ func (handler *ArtistHandler) FullSearch(w http.ResponseWriter, r *http.Request)
 //	@Tags			artist
 //	@Produce		json
 //	@Security		cookieAuth
-//	@Success		200	{object}	artist.LikedArtists
+//	@Success		200	{object}	artist.Artists
 //	@Failure		401	{string}	errMsg
 //	@Failure		404	{string}	errMsg
 //	@Router			/collection/artists [get]

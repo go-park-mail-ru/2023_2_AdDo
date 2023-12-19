@@ -18,17 +18,6 @@ func GetCookie(r *http.Request) (string, error) {
 	return cookie.Value, nil
 }
 
-//func RenderEasyJSON(w http.ResponseWriter, v easyjson.Marshaler) error {
-//	jsonResponse, err := easyjson.Marshal(v)
-//	if err != nil {
-//		return err
-//	}
-//
-//	w.Header().Set("Content-Type", "application/json")
-//	_, err = w.Write(jsonResponse)
-//	return err
-//}
-
 func SetCookie(w http.ResponseWriter, sessionId string) {
 	http.SetCookie(w, &http.Cookie{
 		Name:     session.CookieName,

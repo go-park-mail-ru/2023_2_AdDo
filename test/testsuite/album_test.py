@@ -15,7 +15,7 @@ class AlbumTest(unittest.TestCase):
 
         album_id = '0'
         response = requests.get(utils.url + '/album/' + str(album_id))
-        self.assertEqual(response.status_code, 500)
+        self.assertEqual(response.status_code, 404)
 
         album_id = 1
         response = requests.get(utils.url + '/album/' + str(album_id))

@@ -128,13 +128,13 @@ func (c *Client) FullSearch(query string) (artist.SearchResponse, error) {
 	return DeserializeSearchResponse(result), nil
 }
 
-func (c *Client) GetUserArtists(userId string) (artist.LikedArtists, error) {
+func (c *Client) GetUserArtists(userId string) (artist.Artists, error) {
 	c.logger.Infoln("Client for artist micros GetUserArtists")
 
 	result, err := c.artistManager.CollectionArtist(context.Background(), &session_proto.UserId{UserId: userId})
 	if err != nil {
-		return artist.LikedArtists{}, err
+		return artist.Artists{}, err
 	}
 
-	return artist.LikedArtists{Artists: DeserializeArtistsBase(result)}, nil
+	return artist.Artists{Artists: DeserializeArtistsBase(result)}, nil
 }
