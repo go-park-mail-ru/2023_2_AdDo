@@ -3,6 +3,8 @@ package minio
 import (
 	"context"
 	"fmt"
+	"os"
+	"strconv"
 
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
@@ -11,17 +13,22 @@ import (
 const (
 	UserAvatarBucketName    = "user-avatar"
 	PlaylistImageBucketName = "playlist-image"
+	EnvMinioApiUrl          = "MINIO_API_URL"
+	EnvAccessKeyID          = "MINIO_ACCESS_KEY"
+	EnvSecretAccessKey      = "MINIO_SECRET_KEY"
+	EnvUseSSL               = "MINIO_USE_SSL"
 )
 
 func InitMinio() (*minio.Client, error) {
-	accessKeyID := "Q3AM3UQ867SPQQA43P2F"
-	secretAccessKey := "tfteSlswRu7BJ86wekitnifILbZam1KYY3TG"
-	useSSL := true
+	useSSL, err := strconv.ParseBool(os.Getenv(EnvUseSSL))
+	if err != nil {
+		return nil, err
+	}
 
-	mn, err := minio.New("api.s3.musicon.space", &minio.Options{
+	mn, err := minio.New(os.Getenv(EnvMinioApiUrl), &minio.Options{
 		Creds: credentials.NewStaticV4(
-			accessKeyID,
-			secretAccessKey,
+			os.Getenv(EnvAccessKeyID),
+			os.Getenv(EnvSecretAccessKey),
 			"",
 		),
 		Secure: useSSL,
