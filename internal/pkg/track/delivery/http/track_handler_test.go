@@ -71,7 +71,7 @@ func TestListen(t *testing.T) {
 	})
 
 	t.Run("Success", func(t *testing.T) {
-		requestBody, err := json.Marshal(Duration{Duration: duration})
+		requestBody, _ := json.Marshal(Duration{Duration: duration})
 
 		req := httptest.NewRequest(http.MethodPost, "/listen", bytes.NewBuffer(requestBody))
 		req = mux.SetURLVars(req, map[string]string{"id": strconv.FormatUint(trackId, 10)})
@@ -80,7 +80,7 @@ func TestListen(t *testing.T) {
 
 		mockSessionUseCase.EXPECT().GetUserId(sessionId).Return(userId, nil)
 		mockTrackUseCase.EXPECT().Listen(userId, trackId, uint32(duration)).Return(nil)
-		err = handler.Listen(w, req)
+		err := handler.Listen(w, req)
 
 		assert.Nil(t, err)
 		assert.Equal(t, http.StatusNoContent, w.Code)

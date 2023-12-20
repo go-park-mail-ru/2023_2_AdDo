@@ -168,5 +168,4 @@ func Test_UserServiceServer(t *testing.T) {
 		_, err := userManager.UpdatePassword(context.Background(), in)
 		assert.Nil(t, err)
 	})
-
 }

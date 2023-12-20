@@ -90,10 +90,10 @@ func (m MemCached) SetTarget(actions []activity.UserTrackAction, userId string, 
 func (m MemCached) SetAndCheck(action activity.UserTrackAction, count uint8) (bool, error) {
 	m.logger.Infoln("Set All Recent Activity")
 
-	result, err := m.GetRecent(action)
+	result, _ := m.GetRecent(action)
 	result = append(result, action)
 
-	err = m.SetRecent(result)
+	err := m.SetRecent(result)
 	if err != nil {
 		m.logger.Errorln("Marshalling data  error ", err)
 		return false, err

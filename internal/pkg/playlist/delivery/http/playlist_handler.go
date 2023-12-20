@@ -94,8 +94,8 @@ func (handler *Handler) Get(w http.ResponseWriter, r *http.Request) error {
 		"request_id": utils.GenReqId(r.RequestURI + r.Method),
 	}).Infoln("PlaylistGet Handler entered")
 
-	sessionId, err := response.GetCookie(r)
-	userId, err := handler.sessionUseCase.GetUserId(sessionId)
+	sessionId, _ := response.GetCookie(r)
+	userId, _ := handler.sessionUseCase.GetUserId(sessionId)
 
 	playlistId, err := strconv.Atoi(mux.Vars(r)["id"])
 	if err != nil {

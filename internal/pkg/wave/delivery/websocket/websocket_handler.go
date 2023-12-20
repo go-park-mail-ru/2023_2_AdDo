@@ -35,7 +35,7 @@ func (h *Handler) MyWave(w http.ResponseWriter, r *http.Request) {
 
 	sessionId, err := response.GetCookie(r)
 	if err != nil {
-		w.WriteHeader(401)
+		w.WriteHeader(http.StatusUnauthorized)
 		h.logger.Errorln("error get from cookie", sessionId, err)
 		return
 	}
@@ -43,7 +43,7 @@ func (h *Handler) MyWave(w http.ResponseWriter, r *http.Request) {
 
 	userId, err := h.sessionUseCase.GetUserId(sessionId)
 	if err != nil {
-		w.WriteHeader(401)
+		w.WriteHeader(http.StatusUnauthorized)
 		h.logger.Errorln("error got user id", err)
 		return
 	}
@@ -52,7 +52,7 @@ func (h *Handler) MyWave(w http.ResponseWriter, r *http.Request) {
 	conn, err := h.upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		h.logger.Errorln("error while upgrading connection to ws", err)
-		w.WriteHeader(400)
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 	defer conn.Close()
@@ -65,7 +65,7 @@ func (h *Handler) MyWave(w http.ResponseWriter, r *http.Request) {
 		err := conn.ReadJSON(&dummy)
 		if err != nil {
 			h.logger.Errorln("error while reading message", err)
-			w.WriteHeader(500)
+			w.WriteHeader(http.StatusInternalServerError)
 		}
 		h.logger.Infoln("Got signal for next batch")
 
@@ -76,7 +76,7 @@ func (h *Handler) MyWave(w http.ResponseWriter, r *http.Request) {
 		tracks, err := h.getNextBatch(userId, uniqTracks)
 		if err != nil {
 			h.logger.Errorln("error getting new batch", err)
-			w.WriteHeader(500)
+			w.WriteHeader(http.StatusNotFound)
 			return
 		}
 		h.logger.Errorln("uniq tracks map", uniqTracks)
@@ -89,13 +89,13 @@ func (h *Handler) MyWave(w http.ResponseWriter, r *http.Request) {
 		err = conn.WriteJSON(labeledTracks)
 		if err != nil {
 			h.logger.Errorln("error sending a message", err)
-			w.WriteHeader(500)
+			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
 		h.logger.Infoln("Track Batch sent")
 	}
 
-	w.WriteHeader(204)
+	w.WriteHeader(http.StatusNoContent)
 }
 
 func deleteDuplicatesFromWave(uniqTracks map[uint64]bool, vec []track.Response) []track.Response {

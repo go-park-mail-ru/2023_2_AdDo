@@ -10,12 +10,8 @@ func NewDefaultConfig() *sarama.Config {
 	return sarama.NewConfig()
 }
 
-func NewClient(connParam []string) (sarama.Client, error) {
-	return sarama.NewClient(connParam, NewDefaultConfig())
-}
-
 func NewConsumer(connParam []string) (sarama.Consumer, error) {
-	client, err := NewClient(connParam)
+	client, err := sarama.NewClient(connParam, NewDefaultConfig())
 	if err != nil {
 		return nil, err
 	}

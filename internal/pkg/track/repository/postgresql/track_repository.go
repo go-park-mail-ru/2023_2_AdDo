@@ -294,6 +294,7 @@ func (db *Postgres) labelOneTrack(userId string, t track.Response) (bool, error)
 	err := db.Pool.QueryRow(context.Background(), query, userId, t.Id).Scan(&found)
 	if err != nil {
 		db.logger.Errorln("error getting label from db", err)
+		return false, err
 	}
 
 	return found > 0, nil

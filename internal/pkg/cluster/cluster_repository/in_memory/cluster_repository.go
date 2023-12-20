@@ -56,7 +56,7 @@ func (in InMemory) getNearestClusterData(objectVec []float64) []IdDistance {
 	return centroidsSortedVec
 }
 
-func (in InMemory) getNearestTracks(uniqTracks map[uint64]bool, id track.Id, count int) ([]track.Id, error) {
+func (in InMemory) getNearestTracks(uniqTracks map[uint64]bool, id track.Id, count int) []track.Id {
 	in.logger.Infoln("Get Nearest for one track entered with id ", id)
 
 	trackVec := in.TrackIdToDataIndex[id.Id]
@@ -95,7 +95,7 @@ func (in InMemory) getNearestTracks(uniqTracks map[uint64]bool, id track.Id, cou
 	}
 	in.logger.Infoln("final result for one track", result)
 
-	return result, nil
+	return result
 }
 
 func (in InMemory) findNearestInSet(tracks []track.Id, skip track.Id, count int) []track.Id {
@@ -162,10 +162,7 @@ func (in InMemory) GetNearestTracks(ids []track.Id, countPerTrack int) ([]track.
 
 	result := make([]track.Id, 0)
 	for _, id := range ids {
-		nearestForTrack, err := in.getNearestTracks(uniqueTracks, id, countPerTrack)
-		if err != nil {
-			return nil, err
-		}
+		nearestForTrack := in.getNearestTracks(uniqueTracks, id, countPerTrack)
 		result = append(result, nearestForTrack...)
 	}
 

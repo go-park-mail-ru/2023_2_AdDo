@@ -60,8 +60,8 @@ func (handler *ArtistHandler) ArtistInfo(w http.ResponseWriter, r *http.Request)
 	}
 	handler.logger.Infoln("Got artist from use case")
 
-	sessionId, err := response.GetCookie(r)
-	userId, err := handler.SessionUseCase.GetUserId(sessionId)
+	sessionId, _ := response.GetCookie(r)
+	userId, _ := handler.SessionUseCase.GetUserId(sessionId)
 
 	if userId != "" {
 		result, err := handler.TrackUseCase.LabelIsLikedTracks(userId, artistInfo.Tracks)
@@ -72,7 +72,6 @@ func (handler *ArtistHandler) ArtistInfo(w http.ResponseWriter, r *http.Request)
 	}
 
 	if _, _, err = easyjson.MarshalToHTTPResponseWriter(artistInfo, w); err != nil {
-
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}
 	handler.logger.Infoln("response  formed")
@@ -244,8 +243,8 @@ func (handler *ArtistHandler) FullSearch(w http.ResponseWriter, r *http.Request)
 	}
 	handler.logger.Infoln("got response from useCase")
 
-	sessionId, err := response.GetCookie(r)
-	userId, err := handler.SessionUseCase.GetUserId(sessionId)
+	sessionId, _ := response.GetCookie(r)
+	userId, _ := handler.SessionUseCase.GetUserId(sessionId)
 
 	if userId != "" {
 		labeledTracks, err := handler.TrackUseCase.LabelIsLikedTracks(userId, result.Tracks)

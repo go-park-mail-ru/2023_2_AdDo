@@ -151,7 +151,7 @@ func (handler *AlbumHandler) AlbumTracks(w http.ResponseWriter, r *http.Request)
 	}
 	handler.logger.Infoln("got album by id")
 
-	sessionId, err := response.GetCookie(r)
+	sessionId, _ := response.GetCookie(r)
 	userId, err := handler.sessionUseCase.GetUserId(sessionId)
 	if err != nil {
 		userId = ""
@@ -164,7 +164,6 @@ func (handler *AlbumHandler) AlbumTracks(w http.ResponseWriter, r *http.Request)
 		}
 		result.Tracks = labeledTracks
 	}
-
 
 	if _, _, err = easyjson.MarshalToHTTPResponseWriter(result, w); err != nil {
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
@@ -206,8 +205,8 @@ func (handler *AlbumHandler) AlbumWithRequiredTrack(w http.ResponseWriter, r *ht
 	}
 	handler.logger.Infoln("got album with required track by track id")
 
-	sessionId, err := response.GetCookie(r)
-	userId, err := handler.sessionUseCase.GetUserId(sessionId)
+	sessionId, _ := response.GetCookie(r)
+	userId, _ := handler.sessionUseCase.GetUserId(sessionId)
 
 	if userId != "" {
 		labeledTracks, err := handler.trackUseCase.LabelIsLikedTracks(userId, result.Tracks)

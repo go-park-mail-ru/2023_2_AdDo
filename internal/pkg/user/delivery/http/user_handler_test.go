@@ -514,7 +514,6 @@ func TestForgotPassword(t *testing.T) {
 		assert.NotNil(t, err)
 		assert.Equal(t, http.StatusInternalServerError, err.(common_handler.StatusError).Code)
 	})
-
 }
 
 func TestResetPassword(t *testing.T) {
@@ -602,5 +601,4 @@ func TestResetPassword(t *testing.T) {
 		assert.NotNil(t, err)
 		assert.Equal(t, http.StatusInternalServerError, err.(common_handler.StatusError).Code)
 	})
-
 }
