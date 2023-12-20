@@ -122,7 +122,7 @@ jobs:
   deploy:
     name: deploy
     # if: github.ref == 'refs/heads/master'
-    if: github.event.pull_request.merged == true
+    # if: github.event.pull_request.merged == true
     needs: publish
     runs-on: ubuntu-latest
     steps:
@@ -150,14 +150,24 @@ jobs:
           manifests: |
             deployments/kubernetes/entrypoint
             deployments/kubernetes/redis
+            deployments/kubernetes/kafka
+            deployments/kubernetes/memcached
             deployments/kubernetes/micros
           images: |
             registry.musicon.space/entrypoint:${{ env.RELEASE_TAG }}
+            registry.musicon.space/activity-worker:${{ env.RELEASE_TAG }}
             registry.musicon.space/album:${{ env.RELEASE_TAG }}
             registry.musicon.space/artist:${{ env.RELEASE_TAG }}
+            registry.musicon.space/candidate:${{ env.RELEASE_TAG }}
+            registry.musicon.space/daily-playlist-service:${{ env.RELEASE_TAG }}
+            registry.musicon.space/daily-playlist-worker:${{ env.RELEASE_TAG }}
             registry.musicon.space/images:${{ env.RELEASE_TAG }}
+            registry.musicon.space/mailer:${{ env.RELEASE_TAG }}
+            registry.musicon.space/onboarding:${{ env.RELEASE_TAG }}
             registry.musicon.space/playlist:${{ env.RELEASE_TAG }}
+            registry.musicon.space/recommendation:${{ env.RELEASE_TAG }}
             registry.musicon.space/session:${{ env.RELEASE_TAG }}
             registry.musicon.space/track:${{ env.RELEASE_TAG }}
             registry.musicon.space/user:${{ env.RELEASE_TAG }}
+            registry.musicon.space/wave:${{ env.RELEASE_TAG }}
           imagepullsecrets: regcred
