@@ -28,7 +28,7 @@ class AlbumTest(unittest.TestCase):
 
         track_id = '-100'
         response = requests.get(utils.url + '/track/' + str(track_id))
-        self.assertEqual(response.status_code, 500)
+        self.assertEqual(response.status_code, 404)
 
         track_id = 10
         response = requests.get(utils.url + '/track/' + str(track_id))
