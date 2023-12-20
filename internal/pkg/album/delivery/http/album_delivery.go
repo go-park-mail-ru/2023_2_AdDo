@@ -201,7 +201,7 @@ func (handler *AlbumHandler) AlbumWithRequiredTrack(w http.ResponseWriter, r *ht
 
 	result, err := handler.albumUseCase.GetAlbumByTrack(uint64(trackId))
 	if err != nil {
-		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
+		return common_handler.StatusError{Code: http.StatusNotFound, Err: err}
 	}
 	handler.logger.Infoln("got album with required track by track id")
 
