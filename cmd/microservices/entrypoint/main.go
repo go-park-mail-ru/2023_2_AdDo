@@ -156,7 +156,7 @@ func main() {
 	modifyPlaylistMiddleware := modify_playlist.NewMiddleware(&playlistAgent, &sessionAgent, logger)
 	readPlaylistMiddleware := read_playlist.NewMiddleware(&playlistAgent, logger)
 	corsMiddleware := middleware.NewCors()
-	csrfMiddleware := middleware.NewCSRF()
+	//csrfMiddleware := middleware.NewCSRF()
 
 	prometheusRegistry := prometheus.NewRegistry()
 	metricsMiddleware := metrics.NewMiddleware(metrics.NewHandlers(), metrics.NewMetrics(prometheusRegistry))
@@ -210,7 +210,7 @@ func main() {
 		},
 		Prefix: "/api/v1",
 		Middlewares: []mux.MiddlewareFunc{
-			csrfMiddleware, corsMiddleware, metricsMiddleware.Collecting,
+			corsMiddleware, metricsMiddleware.Collecting,
 		},
 		PrometheusRegistry: prometheusRegistry,
 

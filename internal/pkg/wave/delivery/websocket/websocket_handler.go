@@ -115,10 +115,10 @@ func (h *Handler) getNextBatch(userId string, uniqTracks map[uint64]bool) ([]tra
 	result := make([]track.Response, 0)
 	mult := 1
 	for len(result) < 5 {
-		tracks, err := h.waveUseCase.GetMyWaveMusic(userId, MyWaveTrackBatch)
+		tracks, err := h.waveUseCase.GetMyWaveMusic(userId, uint32(MyWaveTrackBatch+mult))
 		if err != nil {
 			h.logger.Errorln("error getting new track batch from wave micros", err)
-			return nil, err
+			continue
 		}
 
 		temp := deleteDuplicatesFromWave(uniqTracks, tracks)
