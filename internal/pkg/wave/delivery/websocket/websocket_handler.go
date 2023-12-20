@@ -73,12 +73,7 @@ func (h *Handler) MyWave(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 
-		tracks, err := h.getNextBatch(userId, uniqTracks)
-		if err != nil {
-			h.logger.Errorln("error getting new batch", err)
-			w.WriteHeader(http.StatusNotFound)
-			return
-		}
+		tracks := h.getNextBatch(userId, uniqTracks)
 		h.logger.Errorln("uniq tracks map", uniqTracks)
 
 		labeledTracks, err := h.trackUseCase.LabelIsLikedTracks(userId, tracks)
@@ -111,7 +106,7 @@ func deleteDuplicatesFromWave(uniqTracks map[uint64]bool, vec []track.Response) 
 	return result
 }
 
-func (h *Handler) getNextBatch(userId string, uniqTracks map[uint64]bool) ([]track.Response, error) {
+func (h *Handler) getNextBatch(userId string, uniqTracks map[uint64]bool) []track.Response {
 	result := make([]track.Response, 0)
 	mult := 1
 	for len(result) < 5 {
@@ -127,5 +122,5 @@ func (h *Handler) getNextBatch(userId string, uniqTracks map[uint64]bool) ([]tra
 		mult++
 	}
 
-	return result, nil
+	return result
 }
