@@ -9,7 +9,8 @@ import "image.proto";
 
 service PlaylistService {
   rpc Create (PlaylistBase) returns (PlaylistResponse) {}
-  rpc Get (PlaylistToUserId) returns (PlaylistResponse) {}
+  rpc Get (PlaylistId) returns (PlaylistResponse) {}
+  rpc IsCreator(PlaylistToUserId) returns (IsPlaylistCreator) {}
   rpc GetUserPlaylists (UserId) returns (PlaylistsBase) {}
   rpc PlaylistCollections (UserId) returns (PlaylistsBase) {}
   rpc AddTrack (PlaylistToTrackId) returns (google.protobuf.Empty) {}
@@ -38,6 +39,10 @@ message IsLikedPlaylist {
 
 message HasAccess {
   bool IsAccess = 1;
+}
+
+message IsPlaylistCreator {
+  bool IsCreator = 1;
 }
 
 message PlaylistToUserId {
@@ -72,8 +77,7 @@ message PlaylistResponse {
   string Preview = 3;
   string CreatorName = 4;
   string CreatorId = 6;
-  bool IsYours = 7;
-  TracksResponse Tracks = 8;
+  TracksResponse Tracks = 7;
 }
 
 message PlaylistsResponse {

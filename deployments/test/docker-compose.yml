@@ -48,6 +48,48 @@ services:
       retries: 3
       timeout: 5s
 
+  zookeeper:
+    image: confluentinc/cp-zookeeper:6.2.1
+    hostname: zookeeper
+    container_name: zookeeper
+    ports:
+      - "2181:2181"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+#    healthcheck:
+#      test: echo mntr | nc localhost 2181 | grep -q 'zk_server_state\tleader'
+#      interval: 10s
+#      timeout: 5s
+#      retries: 3
+
+  kafka:
+    image: confluentinc/cp-kafka:6.2.1
+    hostname: kafka
+    container_name: kafka
+    ports:
+      - "9092:9092"
+    depends_on:
+      zookeeper:
+        condition: service_started
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_DELETE_TOPIC_ENABLE: "true"
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+#    healthcheck:
+#      test: kafka-topics --create --topic healthcheck --partitions 1 --replication-factor 1 --bootstrap-server localhost:9092 && kafka-topics --topic healthcheck --delete --bootstrap-server localhost:9092
+#      interval: 5s
+#      timeout: 5s
+#      retries: 3
+
+  memcached:
+    image: memcached
+    ports:
+      - "11211:11211"
+
   common-service-waiter:
     image: alpine
     depends_on:
@@ -59,6 +101,10 @@ services:
         condition: service_started
       create_buckets:
         condition: service_completed_successfully
+      kafka:
+        condition: service_started
+      memcached:
+        condition: service_started
 
   user:
     image: registry.musicon.space/user:test
@@ -124,7 +170,74 @@ services:
         condition: service_completed_successfully
     environment:
       DATABASE_URL: "${DATABASE_URL}"
+      MINIO_API_URL: ${MINIO_API_URL}
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
+      MINIO_USE_SSL: ${MINIO_USE_SSL}
     command: "/images"
+
+  activity-worker:
+    image: registry.musicon.space/activity-worker:test
+    depends_on:
+      common-service-waiter:
+        condition: service_completed_successfully
+    environment:
+      DATABASE_URL: "${DATABASE_URL}"
+    command: "/activity_worker"
+
+  candidate:
+    image: registry.musicon.space/candidate:test
+    depends_on:
+      common-service-waiter:
+        condition: service_completed_successfully
+    environment:
+      DATABASE_URL: "${DATABASE_URL}"
+    command: "/candidate"
+
+  onboarding:
+    image: registry.musicon.space/onboarding:test
+    depends_on:
+      common-service-waiter:
+        condition: service_completed_successfully
+    environment:
+      DATABASE_URL: "${DATABASE_URL}"
+    command: "/onboarding"
+
+  daily-playlist-worker:
+    image: registry.musicon.space/daily-playlist-worker:test
+    depends_on:
+      common-service-waiter:
+        condition: service_completed_successfully
+    environment:
+      DATABASE_URL: "${DATABASE_URL}"
+    command: "/daily_playlist_worker"
+
+  daily-playlist-service:
+    image: registry.musicon.space/daily-playlist-service:test
+    depends_on:
+      common-service-waiter:
+        condition: service_completed_successfully
+    environment:
+      DATABASE_URL: "${DATABASE_URL}"
+    command: "/daily_playlist_service"
+
+  recommendation:
+    image: registry.musicon.space/recommendation:test
+    depends_on:
+      common-service-waiter:
+        condition: service_completed_successfully
+    environment:
+      DATABASE_URL: "${DATABASE_URL}"
+    command: "/recommendation"
+
+  wave:
+    image: registry.musicon.space/wave:test
+    depends_on:
+      common-service-waiter:
+        condition: service_completed_successfully
+    environment:
+      DATABASE_URL: "${DATABASE_URL}"
+    command: "/wave"
 
   microservice-waiter:
     image: alpine
@@ -142,6 +255,20 @@ services:
       artist:
         condition: service_started
       images:
+        condition: service_started
+      activity-worker:
+        condition: service_started
+      candidate:
+        condition: service_started
+      daily-playlist-service:
+        condition: service_started
+      daily-playlist-worker:
+        condition: service_started
+      onboarding:
+        condition: service_started
+      recommendation:
+        condition: service_started
+      wave:
         condition: service_started
 
   musicon:

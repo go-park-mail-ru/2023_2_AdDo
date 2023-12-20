@@ -17,6 +17,173 @@ func NewPostgres(pool postgres.PgxIFace, logger *logrus.Logger) *Postgres {
 	return &Postgres{Pool: pool, logger: logger}
 }
 
+func (db *Postgres) GetRotationTrackForAlbum(id uint64) (uint64, error) {
+	db.logger.Infoln("Get Rotation For album entered")
+	query := `select track.id from track join album_track on track.id = album_track.track_id where album_track.album_id = $1 order by track.play_count desc limit 1`
+	return db.getRotation(query, id)
+}
+
+func (db *Postgres) GetRotationTrackForArtist(id uint64) (uint64, error) {
+	db.logger.Infoln("Get Rotation For artist entered")
+	query := `select track.id from track join artist_track on track.id = artist_track.track_id where artist_track.artist_id = $1 order by track.play_count desc limit 1`
+	return db.getRotation(query, id)
+}
+
+func (db *Postgres) GetRotationTrackForGenre(id uint64) (uint64, error) {
+	db.logger.Infoln("Get Rotation For genre entered")
+	query := `select track.id from track join track_genre on track.id = track_genre.track_id where track_genre.genre_id = $1 order by track.play_count desc limit 1`
+	return db.getRotation(query, id)
+}
+
+func (db *Postgres) getRotation(query string, args ...any) (uint64, error) {
+	db.logger.Infoln("get Rotation entered")
+
+	result := 0
+	err := db.Pool.QueryRow(context.Background(), query, args...).Scan(&result)
+	if err != nil {
+		db.logger.Errorln("error getting rotation track", err)
+		return 0, err
+	}
+
+	return uint64(result), nil
+}
+
+func (db *Postgres) GetByUserForDailyPlaylist(userId string) ([]track.Response, error) {
+	db.logger.Infoln("TrackRepo Get For Daily entered")
+	query := `select track.id, track.name, preview, content, duration, artist.id, artist.name from track
+				join artist_track on track.id = artist_track.track_id
+    			join artist on artist.id = artist_track.artist_id 
+				join daily_playlist_track on track.id = daily_playlist_track.track_id
+				join daily_playlist on daily_playlist_track.daily_playlist_id = daily_playlist.id
+				where daily_playlist.owner_id = $1`
+	return db.getWithQuery(context.Background(), query, userId)
+}
+
+func (db *Postgres) GetHotTracks(userId string, count uint8) ([]track.Id, error) {
+	db.logger.Infoln("TrackRepo Get Hot Tracks entered")
+	query := `select track.id from track inner join track_listen on track.id = track_listen.track_id inner join profile_track on track.id = profile_track.track_id
+				where profile_track.profile_id = $1 order by track_listen.duration desc limit $2`
+
+	rows, err := db.Pool.Query(context.Background(), query, userId, count)
+	if err != nil {
+		db.logger.Errorln("error getting hot tracks", err)
+		return nil, err
+	}
+
+	result := make([]track.Id, 0)
+	for rows.Next() {
+		var id track.Id
+
+		err := rows.Scan(&id.Id)
+		if err != nil {
+			db.logger.Errorln("error scanning hot tracks", err)
+			return nil, err
+		}
+
+		result = append(result, id)
+	}
+
+	return result, nil
+}
+
+func (db *Postgres) GetLastDayTracks(userId string) ([]track.Id, error) {
+	db.logger.Infoln("TrackRepo Get Last Day Tracks entered")
+	query := `select track.id from track inner join track_listen on track.id = track_listen.track_id 
+				where track_listen.profile_id = $1 and creating_data between (now() - interval '1 day') and now() and track_listen.duration > 0.5 * track.duration`
+
+	rows, err := db.Pool.Query(context.Background(), query, userId)
+	if err != nil {
+		db.logger.Errorln("error getting hot tracks", err)
+		return nil, err
+	}
+
+	result := make([]track.Id, 0)
+	for rows.Next() {
+		var id track.Id
+
+		err := rows.Scan(&id.Id)
+		if err != nil {
+			db.logger.Errorln("error scanning hot tracks", err)
+			return nil, err
+		}
+
+		result = append(result, id)
+	}
+
+	query = `select track.id from track inner join profile_track on track.id = profile_track.track_id
+				where profile_track.profile_id = $1 and creating_date between (now() - interval '1 day') and now()`
+
+	rows, err = db.Pool.Query(context.Background(), query, userId)
+	if err != nil {
+		db.logger.Errorln("error getting hot tracks", err)
+		return nil, err
+	}
+
+	for rows.Next() {
+		var id track.Id
+
+		err := rows.Scan(&id.Id)
+		if err != nil {
+			db.logger.Errorln("error scanning hot tracks", err)
+			return nil, err
+		}
+
+		result = append(result, id)
+	}
+
+	return result, nil
+}
+
+func (db *Postgres) GetTracksByIds(ids []track.Id) ([]track.Response, error) {
+	db.logger.Infoln("Get Tracks by Ids track repo entered")
+
+	query := `select track.id, track.name, preview, content, duration, artist.id, artist.name from track
+				join artist_track on track.id = artist_track.track_id
+    			join artist on artist.id = artist_track.artist_id 
+				where track_id = $1`
+	result := make([]track.Response, 0)
+	for _, id := range ids {
+		tracks, err := db.getWithQuery(context.Background(), query, id.Id)
+		if err != nil {
+			db.logger.Infoln("error getting full track by id")
+			return nil, err
+		}
+
+		result = append(result, tracks...)
+	}
+
+	return result, nil
+}
+
+func (db *Postgres) CreateListen(userId string, trackId uint64, dur uint32) error {
+	db.logger.Infoln("create listen track repo entered")
+	query := `insert into track_listen (profile_id, track_id, duration, count) values ($1, $2, $3, 1) 
+			    on conflict (profile_id, track_id) do update set creating_data = now(), duration = track_listen.duration + $3, count = track_listen.count + 1
+			    where track_listen.profile_id = $1 and track_listen.track_id = $2`
+	_, err := db.Pool.Exec(context.Background(), query, userId, trackId, dur)
+	if err != nil {
+		db.logger.Infoln("create listen error", err)
+		return err
+	}
+
+	return nil
+}
+
+func (db *Postgres) CreateSkip(userId string, trackId uint64, dur uint32) error {
+	db.logger.Infoln("create skip track repo entered")
+
+	query := `insert into track_skip (profile_id, track_id, duration, count) values ($1, $2, $3, 1) 
+			    on conflict (profile_id, track_id) do update set creating_data = now(), duration = track_skip.duration + $3, count = track_skip.count + 1 
+			    where track_skip.profile_id = $1 and track_skip.track_id = $2`
+	_, err := db.Pool.Exec(context.Background(), query, userId, trackId, dur)
+	if err != nil {
+		db.logger.Infoln("create skip error", err)
+		return err
+	}
+
+	return nil
+}
+
 func (db *Postgres) getWithQuery(ctx context.Context, query string, args ...any) ([]track.Response, error) {
 	db.logger.Infoln("TrackRepo GetByAlbum entered")
 
@@ -60,6 +227,77 @@ func (db *Postgres) GetByAlbum(albumId uint64) ([]track.Response, error) {
     			join artist on artist.id = artist_track.artist_id 
 			   	where album_track.album_id = $1`
 	return db.getWithQuery(context.Background(), query, albumId)
+}
+
+func (db *Postgres) GetWaveTracks(userId string, count uint32) ([]track.Response, error) {
+	db.logger.Infoln("Get Tracks From User Pool entered")
+	query := `select track.id, track.name, preview, content, duration, artist.id, artist.name from track
+				join artist_track on track.id = artist_track.track_id
+    			join artist on artist.id = artist_track.artist_id 
+				join wave_track on track.id = wave_track.track_id
+				join wave on wave_track.wave_id = wave.id
+				where wave.owner_id = $1 order by random() limit $2`
+	return db.getWithQuery(context.Background(), query, userId, count)
+}
+
+func (db *Postgres) GetRandomTracksForWave(userId string, count uint32) ([]track.Response, error) {
+	db.logger.Infoln("Get Random Tracks Batch entered")
+	query := `select track.id, track.name, preview, content, duration, artist.id, artist.name from track
+				join artist_track on track.id = artist_track.track_id
+    			join artist on artist.id = artist_track.artist_id 
+				order by random() limit $1`
+	return db.getWithQuery(context.Background(), query, count)
+}
+
+func (db *Postgres) DeleteLastTakenFromWave(userId string, tracks []track.Response) error {
+	waveId := 0
+	query := `select id from wave where owner_id = $1`
+	err := db.Pool.QueryRow(context.Background(), query, userId).Scan(&waveId)
+	if err != nil {
+		db.logger.Errorln("select wave error", err)
+		return err
+	}
+
+	query = `delete from wave_track where id = $1 and track_id = $2`
+	for _, t := range tracks {
+		_, err = db.Pool.Exec(context.Background(), query, waveId, t.Id)
+		if err != nil {
+			db.logger.Errorln("err delete track from wave", err)
+			return err
+		}
+	}
+	return nil
+}
+
+func (db *Postgres) LabelIsLikedTracks(userId string, tracks []track.Response) ([]track.Response, error) {
+	db.logger.Infoln("TrackRepo Label Is Liked Tracks entered")
+	result := make([]track.Response, 0)
+	for index, t := range tracks {
+		isLiked, err := db.labelOneTrack(userId, t)
+		if err != nil {
+			db.logger.Errorln("error labeling one track", err)
+		}
+		tracks[index].IsLiked = isLiked
+
+		result = append(result, tracks[index])
+	}
+
+	return result, nil
+}
+
+func (db *Postgres) labelOneTrack(userId string, t track.Response) (bool, error) {
+	db.logger.Infoln("TrackRepo Label One Track entered")
+
+	query := `select count(*) from track 
+    inner join profile_track on track.id = profile_track.track_id where profile_track.profile_id = $1 and profile_track.track_id = $2`
+	found := 0
+	err := db.Pool.QueryRow(context.Background(), query, userId, t.Id).Scan(&found)
+	if err != nil {
+		db.logger.Errorln("error getting label from db", err)
+		return false, err
+	}
+
+	return found > 0, nil
 }
 
 func (db *Postgres) GetByArtist(artistId uint64) ([]track.Response, error) {
@@ -166,7 +404,10 @@ func (db *Postgres) Search(text string) ([]track.Response, error) {
 	query := `select track.id, track.name, preview, content, duration, artist.id, artist.name from track 
       			join artist_track on track.id = artist_track.track_id 
     			join artist on artist.id = artist_track.artist_id 
-			    where to_tsvector('russian', track.name) @@ plainto_tsquery('russian', $1 ) or lower(track.name) like lower($2) limit 10`
+			    where to_tsvector('russian', track.name) @@ plainto_tsquery('russian', $1 ) 
+			       or lower(track.name) like lower($2)
+			    	or similarity(track.name, $1) > 0.5
+			    limit 10`
 
 	return db.getWithQuery(context.Background(), query, text, "%"+text+"%")
 }

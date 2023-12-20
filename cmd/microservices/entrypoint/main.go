@@ -12,8 +12,14 @@ import (
 	grpc_album "main/internal/microservices/album/service/client"
 	artist "main/internal/microservices/artist/proto"
 	grpc_artist "main/internal/microservices/artist/service/client"
+	daily_playlist "main/internal/microservices/daily-playlist/proto"
+	grpc_daily_playlist "main/internal/microservices/daily-playlist/service/client"
 	proto4 "main/internal/microservices/image/proto"
 	grpc_image "main/internal/microservices/image/service/client"
+	proto6 "main/internal/microservices/mailer/proto"
+	grpc_mailer "main/internal/microservices/mailer/service/client"
+	onboarding "main/internal/microservices/onboarding/proto"
+	onboarding_service_client "main/internal/microservices/onboarding/service/client"
 	proto3 "main/internal/microservices/playlist/proto"
 	grpc_playlist "main/internal/microservices/playlist/service/client"
 	session2 "main/internal/microservices/session/proto"
@@ -22,11 +28,19 @@ import (
 	grpc_track "main/internal/microservices/track/service/client"
 	user_client "main/internal/microservices/user/proto"
 	grpc_user "main/internal/microservices/user/service/client"
+	proto5 "main/internal/microservices/wave/proto"
+	grpc_wave_client "main/internal/microservices/wave/service/client"
 	album_delivery "main/internal/pkg/album/delivery/http"
 	artist_delivery "main/internal/pkg/artist/delivery/http"
+	daily_playlist_delivery "main/internal/pkg/daily-playlist/delivery/http"
+	onboarding_delivery "main/internal/pkg/onboarding/delivery"
 	playlist_delivery "main/internal/pkg/playlist/delivery/http"
 	track_delivery "main/internal/pkg/track/delivery/http"
 	user_delivery "main/internal/pkg/user/delivery/http"
+	websocket_wave "main/internal/pkg/wave/delivery/websocket"
+
+	"github.com/gorilla/websocket"
+	"github.com/sirupsen/logrus"
 
 	"net/http"
 
@@ -45,6 +59,7 @@ var loggerSingleton = log.Singleton{}
 
 func main() {
 	logger := loggerSingleton.GetLogger()
+	logger.SetLevel(logrus.ErrorLevel)
 
 	userConnection, err := grpc.Dial("user:8081", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
@@ -81,26 +96,67 @@ func main() {
 		logger.Fatalln("error connecting to images micros ", err)
 	}
 
+	dailyPlaylistConnection, err := grpc.Dial("daily-playlist:8090", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		logger.Fatalln("error connecting to daily playlist micros ", err)
+	}
+
+	onboardingConnection, err := grpc.Dial("onboarding:8091", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		logger.Fatalln("error connecting to onboarding micros ", err)
+	}
+
+	waveConnection, err := grpc.Dial("wave:8092", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		logger.Fatalln("error connecting to wave micros ", err)
+	}
+
+	mailerConnection, err := grpc.Dial("mailer:8088", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		logger.Fatalln("error connecting to images micros ", err)
+	}
+
+	mailerAgent := grpc_mailer.NewClient(proto6.NewMailerServiceClient(mailerConnection), logger)
 	imageAgent := grpc_image.NewClient(proto4.NewImageServiceClient(imageConnection), logger)
-	userAgent := grpc_user.NewClient(user_client.NewUserServiceClient(userConnection), imageAgent, logger)
+	userAgent := grpc_user.NewClient(user_client.NewUserServiceClient(userConnection), imageAgent, mailerAgent, logger)
 	sessionAgent := grpc_session.NewClient(session2.NewSessionServiceClient(sessionConnection), logger)
 	trackAgent := grpc_track.NewClient(proto.NewTrackServiceClient(trackConnection), logger)
 	albumAgent := grpc_album.NewClient(proto2.NewAlbumServiceClient(albumConnection), logger)
 	playlistAgent := grpc_playlist.NewClient(userAgent, proto3.NewPlaylistServiceClient(playlistConnection), imageAgent, logger)
 	artistAgent := grpc_artist.NewClient(artist.NewArtistServiceClient(artistConnection), logger)
+	onboardingAgent := onboarding_service_client.NewClient(onboarding.NewOnboardingServiceClient(onboardingConnection), logger)
+	dailyPlaylistAgent := grpc_daily_playlist.NewClient(daily_playlist.NewDailyPlaylistServiceClient(dailyPlaylistConnection), logger)
+	waveAgent := grpc_wave_client.NewClient(proto5.NewWaveServiceClient(waveConnection), logger)
 	logger.Infoln("Clients to micros initialized")
 
+	allowedOrigins := []string{
+		"https://musicon.space",
+	}
+
+	ws := websocket.Upgrader{CheckOrigin: func(r *http.Request) bool {
+		origin := r.Header.Get("Origin")
+		for _, allowedOrigin := range allowedOrigins {
+			if allowedOrigin == origin {
+				return true
+			}
+		}
+		return false
+	}}
+
 	albumHandler := album_delivery.NewHandler(&trackAgent, &albumAgent, &sessionAgent, logger)
-	artistHandler := artist_delivery.NewHandler(&sessionAgent, &artistAgent, logger)
+	artistHandler := artist_delivery.NewHandler(&sessionAgent, &artistAgent, &trackAgent, logger)
 	userHandler := user_delivery.NewHandler(&userAgent, &sessionAgent, logger)
 	trackHandler := track_delivery.NewHandler(&trackAgent, &sessionAgent, logger)
-	playlistHandler := playlist_delivery.NewHandler(&playlistAgent, &sessionAgent, logger)
+	playlistHandler := playlist_delivery.NewHandler(&playlistAgent, &trackAgent, &sessionAgent, logger)
+	onboardingHandler := onboarding_delivery.NewHandler(&sessionAgent, &onboardingAgent, logger)
+	dailyPlaylistHandler := daily_playlist_delivery.NewHandler(&dailyPlaylistAgent, &sessionAgent, logger)
+	waveHandler := websocket_wave.NewHandler(ws, &trackAgent, &sessionAgent, &waveAgent, logger)
 	logger.Infoln("Deliveries initialized")
 
 	modifyPlaylistMiddleware := modify_playlist.NewMiddleware(&playlistAgent, &sessionAgent, logger)
 	readPlaylistMiddleware := read_playlist.NewMiddleware(&playlistAgent, logger)
 	corsMiddleware := middleware.NewCors()
-	csrfMiddleware := middleware.NewCSRF()
+	//csrfMiddleware := middleware.NewCSRF()
 
 	prometheusRegistry := prometheus.NewRegistry()
 	metricsMiddleware := metrics.NewMiddleware(metrics.NewHandlers(), metrics.NewMetrics(prometheusRegistry))
@@ -114,10 +170,18 @@ func main() {
 			router_init.NewRoute("/upload_avatar", userHandler.UploadAvatar, http.MethodPost),
 			router_init.NewRoute("/remove_avatar", userHandler.RemoveAvatar, http.MethodPost),
 			router_init.NewRoute("/auth", userHandler.Auth, http.MethodGet),
+			router_init.NewRoute("/auth/forgot_pasword", userHandler.ForgotPassword, http.MethodPost),
+			router_init.NewRoute("/auth/reset_password/{reset_token}", userHandler.ResetPassword, http.MethodPost),
 			router_init.NewRoute("/me", userHandler.Me, http.MethodGet),
 			router_init.NewRoute("/logout", userHandler.LogOut, http.MethodPost),
+			router_init.NewRoute("/artists", onboardingHandler.GetArtists, http.MethodGet),
+			router_init.NewRoute("/artists", onboardingHandler.SaveArtists, http.MethodPost),
+			router_init.NewRoute("/genres", onboardingHandler.GetGenres, http.MethodGet),
+			router_init.NewRoute("/genres", onboardingHandler.SaveGenres, http.MethodPost),
+			router_init.NewRoute("/daily", dailyPlaylistHandler.GetDailyPlaylist, http.MethodGet),
+			//router_init.NewRoute("/wave", waveHandler.MyWave, http.MethodGet),
 
-			router_init.NewRoute("/listen", trackHandler.Listen, http.MethodPost),
+			router_init.NewRoute("/listen/{id}", trackHandler.Listen, http.MethodPost),
 			router_init.NewRoute("/track/{id}", albumHandler.AlbumWithRequiredTrack, http.MethodGet),
 			router_init.NewRoute("/track/{id}/like", trackHandler.Like, http.MethodPost),
 			router_init.NewRoute("/track/{id}/is_like", trackHandler.IsLike, http.MethodGet),
@@ -146,7 +210,7 @@ func main() {
 		},
 		Prefix: "/api/v1",
 		Middlewares: []mux.MiddlewareFunc{
-			csrfMiddleware, corsMiddleware, metricsMiddleware.Collecting,
+			corsMiddleware, metricsMiddleware.Collecting,
 		},
 		PrometheusRegistry: prometheusRegistry,
 
@@ -157,6 +221,7 @@ func main() {
 					router_init.NewRoute("/playlist/{id}/is_like", playlistHandler.IsLike, http.MethodGet),
 					router_init.NewRoute("/playlist/{id}/unlike", playlistHandler.Unlike, http.MethodDelete),
 					router_init.NewRoute("/playlist/{id}", playlistHandler.Get, http.MethodGet),
+					router_init.NewRoute("/playlist/{id}/is_creator", playlistHandler.IsCreator, http.MethodGet),
 				},
 				Prefix: "",
 				Middlewares: []mux.MiddlewareFunc{
@@ -182,7 +247,8 @@ func main() {
 				SubRouterConfigs: nil,
 			}},
 	}
-	router := router_init.New(routerConfig, logger)
+	router := router_init.New(routerConfig, logger, waveHandler)
+	logger.Errorln("test error for deploying check")
 
 	logger.Fatalln(http.ListenAndServe(ServerPort, router))
 }

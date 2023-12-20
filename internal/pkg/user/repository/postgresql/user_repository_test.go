@@ -1,10 +1,11 @@
 package user_repository
 
 import (
-	"github.com/pashagolub/pgxmock/v3"
-	"github.com/sirupsen/logrus"
 	user_domain "main/internal/pkg/user"
 	"testing"
+
+	"github.com/pashagolub/pgxmock/v3"
+	"github.com/sirupsen/logrus"
 )
 
 func TestUserRepository_Create(t *testing.T) {
@@ -104,6 +105,35 @@ func TestUserRepository_CheckEmailAndPassword(t *testing.T) {
 	}
 }
 
+func TestUserRepository_CheckEmailExist(t *testing.T) {
+	mock, err := pgxmock.NewPool()
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+	defer mock.Close()
+
+	repo := Postgres{
+		Pool:   mock,
+		logger: logrus.New(),
+	}
+
+	expectedUserId := "rand-strs-uuid"
+
+	rows := pgxmock.NewRows([]string{"id"}).AddRow(expectedUserId)
+
+	mock.ExpectQuery("select id from profile").
+		WithArgs("test@example.com").
+		WillReturnRows(rows)
+
+	if err = repo.CheckEmailExist("test@example.com"); err != nil {
+		t.Errorf("Error checking email: %v", err)
+	}
+
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Errorf("Unfulfilled expectations: %v", err)
+	}
+}
+
 func TestUserRepository_GetAvatarPath(t *testing.T) {
 	mock, err := pgxmock.NewPool()
 	if err != nil {
@@ -165,6 +195,36 @@ func TestUserRepository_UpdateAvatarPath(t *testing.T) {
 
 	if err != nil {
 		t.Errorf("Error update images path: %v", err)
+	}
+
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Errorf("Unfulfilled expectations: %v", err)
+	}
+}
+
+func TestUserRepository_UpdatePassword(t *testing.T) {
+	mock, err := pgxmock.NewPool()
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+	defer mock.Close()
+
+	repo := Postgres{
+		Pool:   mock,
+		logger: logrus.New(),
+	}
+
+	email := "user@mail.ru"
+	password := "password"
+
+	mock.ExpectExec("update profile set password").
+		WithArgs(pgxmock.AnyArg(), email).
+		WillReturnResult(pgxmock.NewResult("UPDATE", 1))
+
+	err = repo.UpdatePassword(email, password)
+
+	if err != nil {
+		t.Errorf("Error update user password: %v", err)
 	}
 
 	if err := mock.ExpectationsWereMet(); err != nil {

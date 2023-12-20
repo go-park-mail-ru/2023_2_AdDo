@@ -2,9 +2,11 @@ package playlist
 
 import (
 	"context"
+	"errors"
 	"github.com/asaskevich/govalidator"
 	xssvalidator "github.com/infiniteloopcloud/xss-validator"
 	"io"
+	"main/internal/common/utils"
 	"main/internal/pkg/track"
 )
 
@@ -25,12 +27,16 @@ type Response struct {
 	AuthorId   string `json:"AuthorId" example:"sdfa-asdf-adsf"`
 	AuthorName string `json:"AuthorName" example:"username"`
 	Preview    string `json:"Preview" example:"PlaylistPreview"`
-	IsYours    bool   `json:"IsYours" example:"true"`
+
 	Tracks     []track.Response
 }
 
+type Playlists struct {
+	Playlists []Base `json:"Playlists"`
+}
+
 type Name struct {
-	Name string `valid:"length(1|30), required, printableascii" json:"Name" example:"PlaylistName"`
+	Name string `valid:"length(1|30), required" json:"Name" example:"PlaylistName"`
 }
 
 type ToTrackId struct {
@@ -38,10 +44,19 @@ type ToTrackId struct {
 	TrackId    uint64 `json:"TrackId" example:"1"`
 }
 
+type IsCreator struct {
+	IsCreator bool `json:"IsCreator" example:"true"`
+}
+
 func (u *Name) Validate() error {
 	_, err := govalidator.ValidateStruct(u)
 	if err != nil {
 		return err
+	}
+
+	ok := utils.IsRussianLatinDigitUnderscore(u.Name)
+	if !ok {
+		return ErrorInvalidPlaylistName
 	}
 
 	err = xssvalidator.Validate(u.Name, xssvalidator.DefaultRules...)
@@ -54,7 +69,8 @@ func (u *Name) Validate() error {
 
 type UseCase interface {
 	Create(pl Base) (Response, error)
-	Get(userId string, playlistId uint64) (Response, error)
+	Get(playlistId uint64) (Response, error)
+	IsCreator(userId string, playlistId uint64) (bool, error)
 	GetUserPlaylists(userId string) ([]Base, error)
 	CollectionPlaylists(userId string) ([]Base, error)
 	AddTrack(playlistId, trackId uint64) error
@@ -92,3 +108,5 @@ type Repository interface {
 	Search(ctx context.Context, text string) ([]Base, error)
 	UpdateName(ctx context.Context, playlistId uint64, title string) error
 }
+
+var ErrorInvalidPlaylistName = errors.New("error validating got playlist name")

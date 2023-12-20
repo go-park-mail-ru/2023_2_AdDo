@@ -28,17 +28,21 @@ func (m *Middleware) preprocessingPath(path string) string {
 
 func (m *Middleware) Collecting(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		start := time.Now()
-		rw := NewResponseWriter(w)
-		next.ServeHTTP(rw, r)
-		elasped := time.Since(start).Seconds()
+		if r.URL.Path != "/api/v1/wave" {
+			start := time.Now()
+			rw := NewResponseWriter(w)
+			next.ServeHTTP(rw, r)
+			elasped := time.Since(start).Seconds()
 
-		statusCode := strconv.Itoa(rw.statusCode)
-		path := m.preprocessingPath(r.RequestURI)
-		handler := m.handlers.getHandler(path)
-		method := r.Method
+			statusCode := strconv.Itoa(rw.statusCode)
+			path := m.preprocessingPath(r.RequestURI)
+			handler := m.handlers.getHandler(path)
+			method := r.Method
 
-		m.metrics.TotalRequests.WithLabelValues(path, method, statusCode, handler).Inc()
-		m.metrics.HttpDuration.WithLabelValues(path, method, statusCode, handler).Observe(elasped)
+			m.metrics.TotalRequests.WithLabelValues(path, method, statusCode, handler).Inc()
+			m.metrics.HttpDuration.WithLabelValues(path, method, statusCode, handler).Observe(elasped)
+		} else {
+			next.ServeHTTP(w, r)
+		}
 	})
 }

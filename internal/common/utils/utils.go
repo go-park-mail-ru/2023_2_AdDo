@@ -5,8 +5,10 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"fmt"
-	"github.com/google/uuid"
 	"io"
+
+	"github.com/google/uuid"
+	"regexp"
 )
 
 func GetImageName(extension string) string {
@@ -35,4 +37,15 @@ func CastTimeToString(duration int) string {
 	seconds := duration % SecondInMinute
 
 	return fmt.Sprintf("%d:%02d", minutes, seconds)
+}
+
+func IsRussianLatinDigitUnderscore(value string) bool {
+	// Regular expression pattern for matching Russian letters, Latin letters, digits, and underscore
+	pattern := "^[А-Яа-яA-Za-z0-9_]+$"
+
+	// Create a regex object using the compiled pattern
+	regex := regexp.MustCompile(pattern)
+
+	// Check if the value matches the regex pattern
+	return regex.MatchString(value)
 }

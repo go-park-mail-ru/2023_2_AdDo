@@ -76,13 +76,13 @@ func (p Postgres) GetByUserId(userId string) ([]album.Base, error) {
 
 func (p Postgres) GetByReleaseDate(limit uint32) ([]album.Base, error) {
 	p.logger.Infoln("Album Repo GetByReleaseDate entered")
-	query := "select id, name, preview from album order by release_date desc limit $1"
+	query := "select id, name, preview from album order by year desc limit $1"
 	return p.getWithQuery(context.Background(), query, limit)
 }
 
 func (p Postgres) GetRandom(limit uint32) ([]album.Base, error) {
 	p.logger.Infoln("Album Repo GetRandom entered")
-	query := "select id, name, preview from album limit $1"
+	query := "select id, name, preview from album order by random() limit $1"
 	return p.getWithQuery(context.Background(), query, limit)
 }
 
@@ -100,7 +100,11 @@ func (p Postgres) GetByLikeCount(limit uint32) ([]album.Base, error) {
 
 func (p Postgres) Search(text string) ([]album.Base, error) {
 	p.logger.Infoln("Album Repo Search entered")
-	query := "select album.id, name, preview from album where to_tsvector('russian', album.name) @@ plainto_tsquery('russian', $1) or lower(album.name) like lower($2) limit $3"
+	query := `select album.id, name, preview from album 
+                               where to_tsvector('russian', album.name) @@ plainto_tsquery('russian', $1) 
+                                  or lower(album.name) like lower($2)
+								  or similarity(album.name, $1) > 0.5
+                               limit $3`
 	return p.getWithQuery(context.Background(), query, text, "%"+text+"%", album.LimitForMainPage)
 }
 

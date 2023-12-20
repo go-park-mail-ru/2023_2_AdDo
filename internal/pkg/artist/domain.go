@@ -20,7 +20,7 @@ type Response struct {
 	Tracks []track.Response `json:"Tracks"`
 }
 
-type LikedArtists struct {
+type Artists struct {
 	Artists []Base `json:"Artists"`
 }
 
@@ -37,7 +37,7 @@ type UseCase interface {
 	IsLike(userId string, artistId uint64) (bool, error)
 	Unlike(userId string, artistId uint64) error
 	FullSearch(text string) (SearchResponse, error)
-	GetUserArtists(userId string) (LikedArtists, error)
+	GetUserArtists(userId string) (Artists, error)
 }
 
 type Repository interface {

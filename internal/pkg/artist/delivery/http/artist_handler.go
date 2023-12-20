@@ -1,12 +1,14 @@
 package artist_delivery
 
 import (
+	"github.com/mailru/easyjson"
 	"github.com/sirupsen/logrus"
 	"main/internal/common/handler"
 	"main/internal/common/response"
 	"main/internal/common/utils"
 	"main/internal/pkg/artist"
 	"main/internal/pkg/session"
+	"main/internal/pkg/track"
 	"net/http"
 	"strconv"
 
@@ -16,13 +18,15 @@ import (
 type ArtistHandler struct {
 	ArtistUseCase  artist.UseCase
 	SessionUseCase session.UseCase
+	TrackUseCase   track.UseCase
 	logger         *logrus.Logger
 }
 
-func NewHandler(su session.UseCase, artistUseCase artist.UseCase, logger *logrus.Logger) ArtistHandler {
+func NewHandler(su session.UseCase, artistUseCase artist.UseCase, tu track.UseCase, logger *logrus.Logger) ArtistHandler {
 	return ArtistHandler{
 		ArtistUseCase:  artistUseCase,
 		SessionUseCase: su,
+		TrackUseCase:   tu,
 		logger:         logger,
 	}
 }
@@ -56,10 +60,25 @@ func (handler *ArtistHandler) ArtistInfo(w http.ResponseWriter, r *http.Request)
 	}
 	handler.logger.Infoln("Got artist from use case")
 
-	if err = response.RenderJSON(w, artistInfo); err != nil {
+	sessionId, _ := response.GetCookie(r)
+	userId, _ := handler.SessionUseCase.GetUserId(sessionId)
+
+	if userId != "" {
+		result, err := handler.TrackUseCase.LabelIsLikedTracks(userId, artistInfo.Tracks)
+		if err != nil {
+			handler.logger.Errorln("Error Labeling Tracks with IsLiked")
+		}
+		artistInfo.Tracks = result
+	}
+
+	if _, _, err = easyjson.MarshalToHTTPResponseWriter(artistInfo, w); err != nil {
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}
 	handler.logger.Infoln("response  formed")
+
+	if userId == "" {
+		w.WriteHeader(http.StatusUnauthorized)
+	}
 
 	return nil
 }
@@ -154,7 +173,7 @@ func (handler *ArtistHandler) IsLike(w http.ResponseWriter, r *http.Request) err
 	}
 	handler.logger.Infoln("User like checked")
 
-	if err = response.RenderJSON(w, response.IsLiked{IsLiked: isLiked}); err != nil {
+	if _, _, err = easyjson.MarshalToHTTPResponseWriter(response.IsLiked{IsLiked: isLiked}, w); err != nil {
 		return common_handler.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}
 	handler.logger.Infoln("response  formed")
@@ -224,13 +243,39 @@ func (handler *ArtistHandler) FullSearch(w http.ResponseWriter, r *http.Request)
 	}
 	handler.logger.Infoln("got response from useCase")
 
-	if err = response.RenderJSON(w, result); err != nil {
+	sessionId, _ := response.GetCookie(r)
+	userId, _ := handler.SessionUseCase.GetUserId(sessionId)
+
+	if userId != "" {
+		labeledTracks, err := handler.TrackUseCase.LabelIsLikedTracks(userId, result.Tracks)
+		if err != nil {
+			handler.logger.Errorln("Error Labeling Tracks with IsLiked")
+		}
+		result.Tracks = labeledTracks
+	}
+
+	if _, _, err = easyjson.MarshalToHTTPResponseWriter(result, w); err != nil {
 		return common_handler.StatusError{Code: http.StatusNotFound, Err: err}
+	}
+
+	if userId == "" {
+		w.WriteHeader(http.StatusUnauthorized)
 	}
 
 	return nil
 }
 
+// CollectionArtist
+//
+//	@Summary		CollectionArtist
+//	@Description	Return user's artist collection
+//	@Tags			artist
+//	@Produce		json
+//	@Security		cookieAuth
+//	@Success		200	{object}	artist.Artists
+//	@Failure		401	{string}	errMsg
+//	@Failure		404	{string}	errMsg
+//	@Router			/collection/artists [get]
 func (handler *ArtistHandler) CollectionArtist(w http.ResponseWriter, r *http.Request) error {
 	handler.logger.WithFields(logrus.Fields{
 		"request_id": utils.GenReqId(r.RequestURI + r.Method),
@@ -253,7 +298,7 @@ func (handler *ArtistHandler) CollectionArtist(w http.ResponseWriter, r *http.Re
 		return common_handler.StatusError{Code: http.StatusUnauthorized, Err: err}
 	}
 
-	if err = response.RenderJSON(w, result); err != nil {
+	if _, _, err = easyjson.MarshalToHTTPResponseWriter(result, w); err != nil {
 		return common_handler.StatusError{Code: http.StatusNotFound, Err: err}
 	}
 	return nil

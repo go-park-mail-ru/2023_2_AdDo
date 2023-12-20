@@ -4,6 +4,7 @@ import (
 	_ "main/api/openapi"
 	common_handler "main/internal/common/handler"
 	"main/internal/common/middleware/common"
+	websocket_wave "main/internal/pkg/wave/delivery/websocket"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -63,7 +64,7 @@ type Config struct {
 	PrometheusRegistry *prometheus.Registry
 }
 
-func New(config Config, logger *logrus.Logger) http.Handler {
+func New(config Config, logger *logrus.Logger, wh websocket_wave.Handler) http.Handler {
 	router := mux.NewRouter()
 	router.PathPrefix("/swagger").Handler(httpSwagger.WrapHandler)
 	router.PathPrefix("/metrics").Handler(promhttp.HandlerFor(config.PrometheusRegistry, promhttp.HandlerOpts{Registry: config.PrometheusRegistry}))
@@ -80,8 +81,10 @@ func New(config Config, logger *logrus.Logger) http.Handler {
 
 		subRouter.Use(subConfig.Middlewares...)
 	}
-
 	router.Use(config.Middlewares...)
+
+	// temp solution, need changes!!!
+	router.HandleFunc("/api/v1/wave", wh.MyWave)
 
 	routerWithMiddleware := common.Logging(router, logger)
 	routerWithMiddleware = common.PanicRecovery(routerWithMiddleware, logger)

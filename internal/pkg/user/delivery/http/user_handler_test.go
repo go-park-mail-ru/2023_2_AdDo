@@ -4,10 +4,9 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"github.com/sirupsen/logrus"
 	"image"
 	"image/png"
-	"main/internal/common/handler"
+	common_handler "main/internal/common/handler"
 	avatar_domain "main/internal/pkg/image"
 	"main/internal/pkg/session"
 	user_domain "main/internal/pkg/user"
@@ -18,6 +17,9 @@ import (
 	"net/http/httptest"
 	"testing"
 	"time"
+
+	"github.com/gorilla/mux"
+	"github.com/sirupsen/logrus"
 
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
@@ -431,5 +433,172 @@ func TestRemoveAvatar(t *testing.T) {
 		err := handler.RemoveAvatar(w, req)
 		assert.Error(t, err)
 		assert.Equal(t, http.StatusUnauthorized, err.(common_handler.StatusError).Code)
+	})
+}
+
+func TestForgotPassword(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	const url = "/auth/forgot_password"
+
+	mockUserUseCase := user_mock.NewMockUseCase(ctrl)
+	mockSessionUseCase := session_mock.NewMockUseCase(ctrl)
+
+	handler := NewHandler(mockUserUseCase, mockSessionUseCase, logrus.New())
+
+	t.Run("Successful", func(t *testing.T) {
+		email := user_domain.ForgotPasswordInput{Email: "user@mail.ru"}
+		body, err := json.Marshal(email)
+		assert.NoError(t, err)
+
+		req := httptest.NewRequest(http.MethodPost, url, bytes.NewBuffer(body))
+
+		mockUserUseCase.EXPECT().CheckEmailExist(email.Email).Times(1).Return(nil)
+		mockUserUseCase.EXPECT().SendResetToken(email.Email).Times(1).Return(nil)
+
+		w := httptest.NewRecorder()
+
+		err = handler.ForgotPassword(w, req)
+
+		assert.NoError(t, err)
+		assert.Equal(t, http.StatusNoContent, w.Result().StatusCode)
+	})
+
+	t.Run("BadEmail", func(t *testing.T) {
+		email := user_domain.ForgotPasswordInput{Email: "user"}
+		body, err := json.Marshal(email)
+		assert.NoError(t, err)
+
+		req := httptest.NewRequest(http.MethodPost, url, bytes.NewBuffer(body))
+
+		w := httptest.NewRecorder()
+
+		err = handler.ForgotPassword(w, req)
+
+		assert.NotNil(t, err)
+		assert.Equal(t, http.StatusBadRequest, err.(common_handler.StatusError).Code)
+	})
+
+	t.Run("UserWithEmailDoesNotExist", func(t *testing.T) {
+		email := user_domain.ForgotPasswordInput{Email: "user@mail.ru"}
+		body, err := json.Marshal(email)
+		assert.NoError(t, err)
+
+		req := httptest.NewRequest(http.MethodPost, url, bytes.NewBuffer(body))
+
+		w := httptest.NewRecorder()
+
+		mockUserUseCase.EXPECT().CheckEmailExist(email.Email).Times(1).Return(user_domain.ErrUserDoesNotExist)
+
+		err = handler.ForgotPassword(w, req)
+
+		assert.NotNil(t, err)
+		assert.Equal(t, http.StatusBadRequest, err.(common_handler.StatusError).Code)
+	})
+
+	t.Run("InternalError", func(t *testing.T) {
+		email := user_domain.ForgotPasswordInput{Email: "user@mail.ru"}
+		body, err := json.Marshal(email)
+		assert.NoError(t, err)
+
+		req := httptest.NewRequest(http.MethodPost, url, bytes.NewBuffer(body))
+
+		w := httptest.NewRecorder()
+
+		mockUserUseCase.EXPECT().CheckEmailExist(email.Email).Times(1).Return(nil)
+		mockUserUseCase.EXPECT().SendResetToken(email.Email).Times(1).Return(errors.New("internal error"))
+
+		err = handler.ForgotPassword(w, req)
+
+		assert.NotNil(t, err)
+		assert.Equal(t, http.StatusInternalServerError, err.(common_handler.StatusError).Code)
+	})
+}
+
+func TestResetPassword(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	const (
+		resetToken = "anytoken"
+		email      = "user@mail.ru"
+		url        = "/auth/reset_password/"
+	)
+
+	mockUserUseCase := user_mock.NewMockUseCase(ctrl)
+	mockSessionUseCase := session_mock.NewMockUseCase(ctrl)
+
+	handler := NewHandler(mockUserUseCase, mockSessionUseCase, logrus.New())
+
+	passwordsInput := user_domain.ResetPasswordInput{Password: "password", ConfirmPassword: "password"}
+
+	t.Run("Successful", func(t *testing.T) {
+		body, err := json.Marshal(passwordsInput)
+		assert.NoError(t, err)
+
+		req := httptest.NewRequest(http.MethodPost, url, bytes.NewBuffer(body))
+		req = mux.SetURLVars(req, map[string]string{"reset_token": resetToken})
+
+		w := httptest.NewRecorder()
+
+		mockUserUseCase.EXPECT().CheckTokenExist(resetToken).Times(1).Return(email, nil)
+		mockUserUseCase.EXPECT().UpdatePassword(email, passwordsInput.Password).Times(1).Return(nil)
+
+		err = handler.ResetPassword(w, req)
+
+		assert.NoError(t, err)
+		assert.Equal(t, http.StatusNoContent, w.Result().StatusCode)
+	})
+
+	t.Run("PasswordDoNotMatch", func(t *testing.T) {
+		diffPasswords := user_domain.ResetPasswordInput{Password: "password", ConfirmPassword: "passwordd"}
+		body, err := json.Marshal(diffPasswords)
+		assert.NoError(t, err)
+
+		req := httptest.NewRequest(http.MethodPost, url, bytes.NewBuffer(body))
+		req = mux.SetURLVars(req, map[string]string{"reset_token": resetToken})
+
+		w := httptest.NewRecorder()
+
+		err = handler.ResetPassword(w, req)
+
+		assert.NotNil(t, err)
+		assert.Equal(t, http.StatusBadRequest, err.(common_handler.StatusError).Code)
+	})
+
+	t.Run("TokenDoesNotExist", func(t *testing.T) {
+		body, err := json.Marshal(passwordsInput)
+		assert.NoError(t, err)
+
+		req := httptest.NewRequest(http.MethodPost, url, bytes.NewBuffer(body))
+		req = mux.SetURLVars(req, map[string]string{"reset_token": resetToken})
+
+		w := httptest.NewRecorder()
+
+		mockUserUseCase.EXPECT().CheckTokenExist(resetToken).Times(1).Return("", errors.New("token does not exit"))
+
+		err = handler.ResetPassword(w, req)
+
+		assert.NotNil(t, err)
+		assert.Equal(t, http.StatusBadRequest, err.(common_handler.StatusError).Code)
+	})
+
+	t.Run("InernalError", func(t *testing.T) {
+		body, err := json.Marshal(passwordsInput)
+		assert.NoError(t, err)
+
+		req := httptest.NewRequest(http.MethodPost, url, bytes.NewBuffer(body))
+		req = mux.SetURLVars(req, map[string]string{"reset_token": resetToken})
+
+		w := httptest.NewRecorder()
+
+		mockUserUseCase.EXPECT().CheckTokenExist(resetToken).Times(1).Return(email, nil)
+		mockUserUseCase.EXPECT().UpdatePassword(email, passwordsInput.Password).Times(1).Return(errors.New("internal error"))
+
+		err = handler.ResetPassword(w, req)
+
+		assert.NotNil(t, err)
+		assert.Equal(t, http.StatusInternalServerError, err.(common_handler.StatusError).Code)
 	})
 }

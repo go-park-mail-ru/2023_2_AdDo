@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	init_db "main/init/postgres_db"
 	init_redis "main/init/redis_db"
@@ -11,6 +12,7 @@ import (
 	user_repository "main/internal/pkg/user/repository/postgresql"
 	"net"
 	"strconv"
+
 )
 
 const EnvPostgresQueryName = "DATABASE_URL"
@@ -21,6 +23,7 @@ var loggerSingleton = log.Singleton{}
 
 func main() {
 	logger := loggerSingleton.GetLogger()
+	logger.SetLevel(logrus.ErrorLevel)
 
 	lis, err := net.Listen("tcp", ":"+strconv.Itoa(Port))
 	if err != nil {

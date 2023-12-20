@@ -3,10 +3,6 @@ package grpc_server_user
 import (
 	"context"
 	"errors"
-	"github.com/golang/mock/gomock"
-	google_proto "github.com/golang/protobuf/ptypes/empty"
-	"github.com/sirupsen/logrus"
-	"github.com/stretchr/testify/assert"
 	image_proto "main/internal/microservices/image/proto"
 	session_proto "main/internal/microservices/session/proto"
 	user_proto "main/internal/microservices/user/proto"
@@ -15,6 +11,11 @@ import (
 	session_mock "main/test/mocks/session"
 	user_mock "main/test/mocks/user"
 	"testing"
+
+	"github.com/golang/mock/gomock"
+	google_proto "github.com/golang/protobuf/ptypes/empty"
+	"github.com/sirupsen/logrus"
+	"github.com/stretchr/testify/assert"
 )
 
 func Test_UserServiceServer(t *testing.T) {
@@ -148,5 +149,23 @@ func Test_UserServiceServer(t *testing.T) {
 		result, err := userManager.RemoveAvatar(context.Background(), in)
 		assert.Nil(t, err)
 		assert.Equal(t, &image_proto.ImageUrl{Url: avatarUrl}, result)
+	})
+
+	t.Run("CheckEmailExist", func(t *testing.T) {
+		in := &user_proto.Email{Email: "user@mail.ru"}
+
+		mockUserRepo.EXPECT().CheckEmailExist(in.GetEmail()).Times(1).Return(nil)
+
+		_, err := userManager.CheckEmail(context.Background(), in)
+		assert.Nil(t, err)
+	})
+
+	t.Run("UpdatePassword", func(t *testing.T) {
+		in := &user_proto.UserCredentials{Email: "user@mail.ru", Password: "password"}
+
+		mockUserRepo.EXPECT().UpdatePassword(in.GetEmail(), in.GetPassword()).Times(1).Return(nil)
+
+		_, err := userManager.UpdatePassword(context.Background(), in)
+		assert.Nil(t, err)
 	})
 }

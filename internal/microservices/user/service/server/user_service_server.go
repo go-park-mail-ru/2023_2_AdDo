@@ -2,13 +2,14 @@ package grpc_server_user
 
 import (
 	"context"
-	google_proto "github.com/golang/protobuf/ptypes/empty"
-	"github.com/sirupsen/logrus"
 	image_proto "main/internal/microservices/image/proto"
 	session_proto "main/internal/microservices/session/proto"
 	user_proto "main/internal/microservices/user/proto"
 	"main/internal/pkg/session"
 	user_domain "main/internal/pkg/user"
+
+	google_proto "github.com/golang/protobuf/ptypes/empty"
+	"github.com/sirupsen/logrus"
 )
 
 type UserManager struct {
@@ -161,4 +162,29 @@ func (us *UserManager) GetUserName(ctx context.Context, in *session_proto.UserId
 	us.Logger.Infoln("session deleted from database")
 
 	return &user_proto.UserName{UserName: userName}, nil
+}
+
+func (us *UserManager) CheckEmail(ctx context.Context, in *user_proto.Email) (*google_proto.Empty, error) {
+	us.Logger.Infoln("User Micros CheckEmail entered")
+
+	email := in.GetEmail()
+	err := us.UserRepo.CheckEmailExist(email)
+	if err != nil {
+		return nil, err
+	}
+	us.Logger.Infoln("email checked")
+
+	return &google_proto.Empty{}, nil
+}
+
+func (us *UserManager) UpdatePassword(ctx context.Context, in *user_proto.UserCredentials) (*google_proto.Empty, error) {
+	us.Logger.Infoln("User Micros UpdatePassword entered")
+
+	err := us.UserRepo.UpdatePassword(in.GetEmail(), in.GetPassword())
+	if err != nil {
+		return nil, err
+	}
+	us.Logger.Infoln("password was updated")
+
+	return &google_proto.Empty{}, nil
 }

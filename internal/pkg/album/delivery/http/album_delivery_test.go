@@ -37,7 +37,7 @@ func TestReceivingAlbums(t *testing.T) {
 		logger:         logrus.New(),
 	}
 
-	expectedAlbums := []album.Response{
+	albums := []album.Response{
 		{
 			Id:         1,
 			Name:       "Album 1",
@@ -56,17 +56,19 @@ func TestReceivingAlbums(t *testing.T) {
 		},
 	}
 
+	expectedAlbums := album.Albums{Albums: albums}
+
 	t.Run("Feed Success", func(t *testing.T) {
 		req := httptest.NewRequest(http.MethodGet, "/feed", nil)
 		w := httptest.NewRecorder()
 
-		mockAlbumUseCase.EXPECT().GetRandom().Return(expectedAlbums, nil)
+		mockAlbumUseCase.EXPECT().GetRandom().Return(albums, nil)
 		err := handler.Feed(w, req)
 
 		assert.Nil(t, err)
 		assert.Equal(t, http.StatusOK, w.Code)
 
-		var receivedAlbums []album.Response
+		var receivedAlbums album.Albums
 		err = json.NewDecoder(w.Body).Decode(&receivedAlbums)
 		assert.Nil(t, err)
 		assert.Equal(t, expectedAlbums, receivedAlbums)
@@ -87,13 +89,13 @@ func TestReceivingAlbums(t *testing.T) {
 		req := httptest.NewRequest(http.MethodGet, "/new", nil)
 		w := httptest.NewRecorder()
 
-		mockAlbumUseCase.EXPECT().GetNew().Return(expectedAlbums, nil)
+		mockAlbumUseCase.EXPECT().GetNew().Return(albums, nil)
 		err := handler.New(w, req)
 
 		assert.Nil(t, err)
 		assert.Equal(t, http.StatusOK, w.Code)
 
-		var receivedAlbums []album.Response
+		var receivedAlbums album.Albums
 		err = json.NewDecoder(w.Body).Decode(&receivedAlbums)
 		assert.Nil(t, err)
 		assert.Equal(t, expectedAlbums, receivedAlbums)
@@ -103,13 +105,13 @@ func TestReceivingAlbums(t *testing.T) {
 		req := httptest.NewRequest(http.MethodGet, "/most_liked", nil)
 		w := httptest.NewRecorder()
 
-		mockAlbumUseCase.EXPECT().GetMostLiked().Return(expectedAlbums, nil)
+		mockAlbumUseCase.EXPECT().GetMostLiked().Return(albums, nil)
 		err := handler.MostLiked(w, req)
 
 		assert.Nil(t, err)
 		assert.Equal(t, http.StatusOK, w.Code)
 
-		var receivedAlbums []album.Response
+		var receivedAlbums album.Albums
 		err = json.NewDecoder(w.Body).Decode(&receivedAlbums)
 		assert.Nil(t, err)
 		assert.Equal(t, expectedAlbums, receivedAlbums)
@@ -119,13 +121,13 @@ func TestReceivingAlbums(t *testing.T) {
 		req := httptest.NewRequest(http.MethodGet, "/popular", nil)
 		w := httptest.NewRecorder()
 
-		mockAlbumUseCase.EXPECT().GetPopular().Return(expectedAlbums, nil)
+		mockAlbumUseCase.EXPECT().GetPopular().Return(albums, nil)
 		err := handler.Popular(w, req)
 
 		assert.Nil(t, err)
 		assert.Equal(t, http.StatusOK, w.Code)
 
-		var receivedAlbums []album.Response
+		var receivedAlbums album.Albums
 		err = json.NewDecoder(w.Body).Decode(&receivedAlbums)
 		assert.Nil(t, err)
 		assert.Equal(t, expectedAlbums, receivedAlbums)
@@ -179,10 +181,18 @@ func TestAlbumTracks(t *testing.T) {
 			Preview:    "Preview 1",
 			ArtistId:   1,
 			ArtistName: "Artist 1",
-			Tracks:     []track.Response{},
+			Tracks: []track.Response{
+				{
+					Id:       1,
+					ArtistId: 1,
+					Name:     "Track",
+					Preview:  "Preview",
+				},
+			},
 		}
 
 		mockAlbumUseCase.EXPECT().GetAlbum(albumId).Return(expectedAlbum, nil)
+		mockSessionUseCase.EXPECT().GetUserId("").Return("", errors.New("not authenticated"))
 		err := handler.AlbumTracks(w, req)
 
 		assert.Nil(t, err)
@@ -227,6 +237,7 @@ func TestAlbumWithRequiredTrack(t *testing.T) {
 		}
 
 		mockAlbumUseCase.EXPECT().GetAlbumByTrack(trackId).Return(expectedAlbum, nil)
+		mockSessionUseCase.EXPECT().GetUserId("").Return("", errors.New("not authenticated"))
 		err := handler.AlbumWithRequiredTrack(w, req)
 
 		assert.Nil(t, err)
