@@ -170,7 +170,7 @@ func main() {
 			router_init.NewRoute("/upload_avatar", userHandler.UploadAvatar, http.MethodPost),
 			router_init.NewRoute("/remove_avatar", userHandler.RemoveAvatar, http.MethodPost),
 			router_init.NewRoute("/auth", userHandler.Auth, http.MethodGet),
-			router_init.NewRoute("/auth/forgot_pasword", userHandler.ForgotPassword, http.MethodPost),
+			router_init.NewRoute("/auth/forgot_password", userHandler.ForgotPassword, http.MethodPost),
 			router_init.NewRoute("/auth/reset_password/{reset_token}", userHandler.ResetPassword, http.MethodPost),
 			router_init.NewRoute("/me", userHandler.Me, http.MethodGet),
 			router_init.NewRoute("/logout", userHandler.LogOut, http.MethodPost),
