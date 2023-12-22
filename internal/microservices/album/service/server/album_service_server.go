@@ -38,6 +38,7 @@ func SerializeAlbum(in album.Response) *album_proto.AlbumResponse {
 		Id:         in.Id,
 		Name:       in.Name,
 		Preview:    in.Preview,
+		IsSingle:   in.IsSingle,
 		ArtistId:   in.ArtistId,
 		ArtistName: in.ArtistName,
 		Tracks:     grpc_track_server.SerializeTracks(in.Tracks),
@@ -77,7 +78,7 @@ func (am *AlbumManager) GetAlbum(ctx context.Context, in *album_proto.AlbumId) (
 	}
 	am.logger.Infoln("Got album Base")
 
-	return am.formResponseAlbumWithAllTracks(base)
+	return am.formResponseWithTracks(base)
 }
 
 func (am *AlbumManager) GetAlbumByTrack(ctx context.Context, in *track_proto.TrackId) (*album_proto.AlbumResponse, error) {
@@ -89,10 +90,10 @@ func (am *AlbumManager) GetAlbumByTrack(ctx context.Context, in *track_proto.Tra
 	}
 	am.logger.Infoln("Got albums with required track")
 
-	return am.formResponseAlbumWithAllTracks(albumsBase[0])
+	return am.formResponseWithTracks(albumsBase[0])
 }
 
-func (am *AlbumManager) formResponseAlbumWithAllTracks(albumBase album.Base) (*album_proto.AlbumResponse, error) {
+func (am *AlbumManager) formResponseWithTracks(albumBase album.Base) (*album_proto.AlbumResponse, error) {
 	var result album.Response
 
 	result.Id = albumBase.Id
@@ -128,7 +129,7 @@ func (am *AlbumManager) GetRandom(ctx context.Context, status *google_proto.Empt
 	}
 	am.logger.Infoln("Got random albums")
 
-	return am.formResponse(albums)
+	return am.formResponseWithoutTracks(albums)
 }
 
 func (am *AlbumManager) GetMostLiked(ctx context.Context, status *google_proto.Empty) (*album_proto.AlbumsResponse, error) {
@@ -140,7 +141,7 @@ func (am *AlbumManager) GetMostLiked(ctx context.Context, status *google_proto.E
 	}
 	am.logger.Infoln("Got album")
 
-	return am.formResponse(albums)
+	return am.formResponseWithoutTracks(albums)
 }
 
 func (am *AlbumManager) GetByUserId(ctx context.Context, id *session_proto.UserId) (*album_proto.AlbumsBase, error) {
@@ -164,7 +165,7 @@ func (am *AlbumManager) GetPopular(ctx context.Context, status *google_proto.Emp
 	}
 	am.logger.Infoln("Got albums by Listen count")
 
-	return am.formResponse(albums)
+	return am.formResponseWithoutTracks(albums)
 }
 
 func (am *AlbumManager) GetNew(ctx context.Context, status *google_proto.Empty) (*album_proto.AlbumsResponse, error) {
@@ -176,11 +177,11 @@ func (am *AlbumManager) GetNew(ctx context.Context, status *google_proto.Empty) 
 	}
 	am.logger.Infoln("Got new albums")
 
-	return am.formResponse(albums)
+	return am.formResponseWithoutTracks(albums)
 }
 
-func (am *AlbumManager) formResponse(albumBase []album.Base) (*album_proto.AlbumsResponse, error) {
-	am.logger.Infoln("Album Micros fromResponse entered")
+func (am *AlbumManager) formResponseWithoutTracks(albumBase []album.Base) (*album_proto.AlbumsResponse, error) {
+	am.logger.Infoln("Album Micros formResponseWithoutTracks entered")
 
 	result := make([]album.Response, 0)
 	for _, base := range albumBase {
@@ -194,6 +195,7 @@ func (am *AlbumManager) formResponse(albumBase []album.Base) (*album_proto.Album
 		a.Id = base.Id
 		a.Name = base.Name
 		a.Preview = base.Preview
+		a.IsSingle = base.IsSingle
 		a.ArtistId = art.Id
 		a.ArtistName = art.Name
 

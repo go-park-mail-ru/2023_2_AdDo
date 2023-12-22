@@ -43,6 +43,8 @@ func easyjson3e1fa5ecDecodeMainInternalPkgAlbum(in *jlexer.Lexer, out *Response)
 			out.Name = string(in.String())
 		case "Preview":
 			out.Preview = string(in.String())
+		case "IsSingle":
+			out.IsSingle = bool(in.Bool())
 		case "ArtistId":
 			out.ArtistId = uint64(in.Uint64())
 		case "ArtistName":
@@ -98,6 +100,11 @@ func easyjson3e1fa5ecEncodeMainInternalPkgAlbum(out *jwriter.Writer, in Response
 		const prefix string = ",\"Preview\":"
 		out.RawString(prefix)
 		out.String(string(in.Preview))
+	}
+	{
+		const prefix string = ",\"IsSingle\":"
+		out.RawString(prefix)
+		out.Bool(bool(in.IsSingle))
 	}
 	{
 		const prefix string = ",\"ArtistId\":"
@@ -340,6 +347,8 @@ func easyjson3e1fa5ecDecodeMainInternalPkgAlbum3(in *jlexer.Lexer, out *Base) {
 			out.Name = string(in.String())
 		case "Preview":
 			out.Preview = string(in.String())
+		case "IsSingle":
+			out.IsSingle = bool(in.Bool())
 		default:
 			in.SkipRecursive()
 		}
@@ -368,6 +377,11 @@ func easyjson3e1fa5ecEncodeMainInternalPkgAlbum3(out *jwriter.Writer, in Base) {
 		const prefix string = ",\"Preview\":"
 		out.RawString(prefix)
 		out.String(string(in.Preview))
+	}
+	{
+		const prefix string = ",\"IsSingle\":"
+		out.RawString(prefix)
+		out.Bool(bool(in.IsSingle))
 	}
 	out.RawByte('}')
 }

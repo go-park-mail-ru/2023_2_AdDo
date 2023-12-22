@@ -22,6 +22,7 @@ func DeserializeAlbum(in *proto.AlbumResponse) album.Response {
 		Id:         in.GetId(),
 		Name:       in.GetName(),
 		Preview:    in.GetPreview(),
+		IsSingle:   in.GetIsSingle(),
 		ArtistId:   in.GetArtistId(),
 		ArtistName: in.GetArtistName(),
 		Tracks:     grpc_track_server.DeserializeTracks(in.GetTracks()),
