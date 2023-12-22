@@ -29,7 +29,6 @@ type ForgotPasswordInput struct {
 
 type ResetPasswordInput struct {
 	Password        string `valid:"length(6|30), required, printableascii" json:"Password" example:"password"`
-	ConfirmPassword string `valid:"length(6|30), required, printableascii" json:"ConfirmPassword" example:"password"`
 }
 
 func (u *User) ValidateForUpdate() error {
@@ -104,11 +103,6 @@ func (rpi ResetPasswordInput) Validate() error {
 	if err != nil {
 		return err
 	}
-
-	if rpi.Password != rpi.ConfirmPassword {
-		return ErrPasswordsDoNotMatch
-	}
-
 	return nil
 }
 

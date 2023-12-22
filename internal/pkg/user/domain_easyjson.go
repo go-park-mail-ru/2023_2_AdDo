@@ -278,8 +278,6 @@ func easyjson3e1fa5ecDecodeMainInternalPkgUser3(in *jlexer.Lexer, out *ResetPass
 		switch key {
 		case "Password":
 			out.Password = string(in.String())
-		case "ConfirmPassword":
-			out.ConfirmPassword = string(in.String())
 		default:
 			in.SkipRecursive()
 		}
@@ -298,11 +296,6 @@ func easyjson3e1fa5ecEncodeMainInternalPkgUser3(out *jwriter.Writer, in ResetPas
 		const prefix string = ",\"Password\":"
 		out.RawString(prefix[1:])
 		out.String(string(in.Password))
-	}
-	{
-		const prefix string = ",\"ConfirmPassword\":"
-		out.RawString(prefix)
-		out.String(string(in.ConfirmPassword))
 	}
 	out.RawByte('}')
 }

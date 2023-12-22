@@ -531,7 +531,7 @@ func TestResetPassword(t *testing.T) {
 
 	handler := NewHandler(mockUserUseCase, mockSessionUseCase, logrus.New())
 
-	passwordsInput := user_domain.ResetPasswordInput{Password: "password", ConfirmPassword: "password"}
+	passwordsInput := user_domain.ResetPasswordInput{Password: "password"}
 
 	t.Run("Successful", func(t *testing.T) {
 		body, err := json.Marshal(passwordsInput)
@@ -549,22 +549,6 @@ func TestResetPassword(t *testing.T) {
 
 		assert.NoError(t, err)
 		assert.Equal(t, http.StatusNoContent, w.Result().StatusCode)
-	})
-
-	t.Run("PasswordDoNotMatch", func(t *testing.T) {
-		diffPasswords := user_domain.ResetPasswordInput{Password: "password", ConfirmPassword: "passwordd"}
-		body, err := json.Marshal(diffPasswords)
-		assert.NoError(t, err)
-
-		req := httptest.NewRequest(http.MethodPost, url, bytes.NewBuffer(body))
-		req = mux.SetURLVars(req, map[string]string{"reset_token": resetToken})
-
-		w := httptest.NewRecorder()
-
-		err = handler.ResetPassword(w, req)
-
-		assert.NotNil(t, err)
-		assert.Equal(t, http.StatusBadRequest, err.(common_handler.StatusError).Code)
 	})
 
 	t.Run("TokenDoesNotExist", func(t *testing.T) {
