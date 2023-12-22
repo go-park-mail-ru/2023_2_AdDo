@@ -52,6 +52,8 @@ func easyjson3e1fa5ecDecodeMainInternalPkgTrack(in *jlexer.Lexer, out *Response)
 			out.Duration = string(in.String())
 		case "IsLiked":
 			out.IsLiked = bool(in.Bool())
+		case "Lyrics":
+			out.Lyrics = string(in.String())
 		default:
 			in.SkipRecursive()
 		}
@@ -105,6 +107,11 @@ func easyjson3e1fa5ecEncodeMainInternalPkgTrack(out *jwriter.Writer, in Response
 		const prefix string = ",\"IsLiked\":"
 		out.RawString(prefix)
 		out.Bool(bool(in.IsLiked))
+	}
+	{
+		const prefix string = ",\"Lyrics\":"
+		out.RawString(prefix)
+		out.String(string(in.Lyrics))
 	}
 	out.RawByte('}')
 }

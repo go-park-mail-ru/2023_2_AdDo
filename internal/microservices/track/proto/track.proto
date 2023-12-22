@@ -47,6 +47,7 @@ message Track {
   string ArtistName = 6;
   string Duration = 7;
   bool isLiked = 8;
+  string Lyrics = 9;
 }
 
 message TracksResponse {
