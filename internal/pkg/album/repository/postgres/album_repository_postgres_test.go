@@ -24,14 +24,15 @@ func TestAlbumRepository_getWithQuery(t *testing.T) {
 
 	const artistId uint64 = 1
 	expectedAlbums := []album.Base{{
-		Id:      1,
-		Name:    "AlbumName",
-		Preview: "Url to album preview",
+		Id:       1,
+		Name:     "AlbumName",
+		Preview:  "Url to album preview",
+		IsSingle: true,
 	}}
 
-	query := "select id, name, preview from album where artist_id = ?"
-	result := pgxmock.NewRows([]string{"id", "name", "preview"}).
-		AddRow(expectedAlbums[0].Id, expectedAlbums[0].Name, expectedAlbums[0].Preview)
+	query := "select id, name, preview, is_single from album where artist_id = ?"
+	result := pgxmock.NewRows([]string{"id", "name", "preview", "is_single"}).
+		AddRow(expectedAlbums[0].Id, expectedAlbums[0].Name, expectedAlbums[0].Preview, expectedAlbums[0].IsSingle)
 
 	mock.ExpectQuery(query).WithArgs(artistId).WillReturnRows(result)
 
@@ -61,14 +62,15 @@ func TestAlbumRepository_Get(t *testing.T) {
 
 	const albumId uint64 = 1
 	expectedAlbum := album.Base{
-		Id:      1,
-		Name:    "AlbumName",
-		Preview: "Url to album preview",
+		Id:       1,
+		Name:     "AlbumName",
+		Preview:  "Url to album preview",
+		IsSingle: true,
 	}
 
-	query := "select id, name, preview from album where id = ?"
-	row := pgxmock.NewRows([]string{"id", "name", "preview"}).
-		AddRow(expectedAlbum.Id, expectedAlbum.Name, expectedAlbum.Preview)
+	query := "select id, name, preview, is_single from album where id = ?"
+	row := pgxmock.NewRows([]string{"id", "name", "preview", "is_single"}).
+		AddRow(expectedAlbum.Id, expectedAlbum.Name, expectedAlbum.Preview, expectedAlbum.IsSingle)
 
 	mock.ExpectQuery(query).WithArgs(albumId).WillReturnRows(row)
 
