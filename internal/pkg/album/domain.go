@@ -7,15 +7,17 @@ type Id struct {
 }
 
 type Base struct {
-	Id      uint64 `json:"Id" example:"1"`
-	Name    string `json:"Name" example:"AlbumName"`
-	Preview string `json:"Preview" example:"AlbumPreview"`
+	Id       uint64 `json:"Id" example:"1"`
+	Name     string `json:"Name" example:"AlbumName"`
+	Preview  string `json:"Preview" example:"AlbumPreview"`
+	IsSingle bool   `json:"IsSingle" example:"true"`
 }
 
 type Response struct {
 	Id         uint64           `json:"Id" example:"1"`
 	Name       string           `json:"Name" example:"AlbumName"`
 	Preview    string           `json:"Preview" example:"AlbumPreview"`
+	IsSingle   bool             `json:"IsSingle" example:"true"`
 	ArtistId   uint64           `json:"ArtistId" example:"1"`
 	ArtistName string           `json:"ArtistName" example:"ArtistName"`
 	Tracks     []track.Response `json:"Tracks"`

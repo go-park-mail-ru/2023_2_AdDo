@@ -49,7 +49,8 @@ create table if not exists album (
     preview      varchar(1024),
     -- ссылка на объект в s3 хранилище довольно длинная, порядка пяти сотен символов
     release_date timestamptz,
-    year int
+    year int,
+    is_single bool not null default false
 );
 
 create table if not exists track(

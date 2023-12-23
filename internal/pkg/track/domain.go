@@ -21,6 +21,7 @@ type Response struct {
 	ArtistName string `json:"ArtistName" example:"ArtiName"`
 	Duration   string `json:"Duration" example:"1:20"`
 	IsLiked    bool   `json:"IsLiked" example:"false"`
+	Lyrics     string `json:"Lyrics" example:"TrackText"`
 }
 
 type UseCase interface {

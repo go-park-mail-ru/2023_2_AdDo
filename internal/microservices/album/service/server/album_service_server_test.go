@@ -173,7 +173,7 @@ func Test_formResponse(t *testing.T) {
 		},
 	}
 
-	receivedAlbums, err := albumManager.formResponse(albums)
+	receivedAlbums, err := albumManager.formResponseWithoutTracks(albums)
 
 	assert.Equal(t, nil, err)
 	assert.Equal(t, expectedSerializedAlbums, receivedAlbums)

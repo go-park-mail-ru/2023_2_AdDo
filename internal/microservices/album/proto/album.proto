@@ -35,6 +35,7 @@ message AlbumBase {
   uint64 Id = 1;
   string Name = 2;
   string Preview = 3;
+  bool IsSingle = 4;
 }
 
 message AlbumsBase {
@@ -45,9 +46,10 @@ message AlbumResponse {
   uint64 Id = 1;
   string Name = 2;
   string Preview = 3;
-  uint64 ArtistId = 4;
-  string ArtistName = 5;
-  TracksResponse Tracks = 6;
+  bool IsSingle = 4;
+  uint64 ArtistId = 5;
+  string ArtistName = 6;
+  TracksResponse Tracks = 7;
 }
 
 message AlbumsResponse {

@@ -41,6 +41,7 @@ func SerializeTrack(in track.Response) *track_proto.Track {
 		ArtistName: in.ArtistName,
 		Duration:   in.Duration,
 		IsLiked:    in.IsLiked,
+		Lyrics:     in.Lyrics,
 	}
 }
 
@@ -62,6 +63,7 @@ func DeserializeTrack(in *track_proto.Track) track.Response {
 		ArtistName: in.GetArtistName(),
 		Duration:   in.GetDuration(),
 		IsLiked:    in.GetIsLiked(),
+		Lyrics:     in.GetLyrics(),
 	}
 }
 
