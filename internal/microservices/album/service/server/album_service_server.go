@@ -99,6 +99,7 @@ func (am *AlbumManager) formResponseWithTracks(albumBase album.Base) (*album_pro
 	result.Id = albumBase.Id
 	result.Name = albumBase.Name
 	result.Preview = albumBase.Preview
+	result.IsSingle = albumBase.IsSingle
 
 	art, err := am.repoArtist.GetByAlbumId(albumBase.Id)
 	if err != nil {
