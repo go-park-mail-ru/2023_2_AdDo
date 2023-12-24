@@ -3,7 +3,7 @@ import requests
 # url = 'http://localhost:8888/api/v1'
 url = "https://musicon.space/api/v1"
 
-albumsNum = 700
+albumsNum = 1300
 
 with open('set_is_single.sql', "w") as f:
     for i in range(1, albumsNum):
