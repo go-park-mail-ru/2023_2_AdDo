@@ -197,7 +197,7 @@ func (db *Postgres) GetAllUserIds() ([]string, error) {
 	result := make([]string, 0)
 	for row.Next() {
 		var uId string
-		err := row.Scan(uId)
+		err := row.Scan(&uId)
 		if err != nil {
 			db.logger.Errorln("error getting all users from db", err)
 			return nil, err

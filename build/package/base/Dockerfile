@@ -11,6 +11,7 @@ COPY cmd cmd
 COPY api api
 COPY db /db
 COPY go.mod go.sum ./
+COPY models /models
 
 RUN go mod download \
     && go mod tidy \

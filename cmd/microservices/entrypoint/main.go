@@ -96,7 +96,7 @@ func main() {
 		logger.Fatalln("error connecting to images micros ", err)
 	}
 
-	dailyPlaylistConnection, err := grpc.Dial("daily-playlist:8090", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	dailyPlaylistConnection, err := grpc.Dial("daily-playlist-service:8090", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		logger.Fatalln("error connecting to daily playlist micros ", err)
 	}

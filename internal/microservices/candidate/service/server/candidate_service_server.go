@@ -36,6 +36,24 @@ func NewCandidateManager(ar activity.KeyValueRepository, tr track.Repository, cr
 //  UserBlackListMusic
 //  UninterestedTracks(fast skip, less then 10% all dur)
 
+func uniqIds(ids []track.Id) []track.Id {
+	result := make([]track.Id, 0)
+	uniqTracks := make(map[uint64]bool)
+	for _, t := range ids {
+		if len(result) > 55 {
+			break
+		}
+		if _, ok := uniqTracks[t.Id]; ok {
+			continue
+		}
+		uniqTracks[t.Id] = true
+
+		result = append(result, t)
+	}
+
+	return result
+}
+
 const HotTrackDailyNum = 5              // 10
 const DailyTrackCandidatePoolSize = 250 // 500
 func (cm *CandidateManager) GetCandidatesForDailyPlaylist(ctx context.Context, id *session_proto.UserId) (*candidate_proto.Candidates, error) {
@@ -51,7 +69,14 @@ func (cm *CandidateManager) GetCandidatesForDailyPlaylist(ctx context.Context, i
 		return nil, err
 	}
 
-	countPerTrack := DailyTrackCandidatePoolSize / (len(hotTracks) + len(lastDayTracks))
+	if (len(hotTracks) + len(lastDayTracks)) == 0 {
+		result, err := cm.trackRepo.GetRandomTracksForWave("dummy", 60)
+		cm.logger.Errorln(err)
+		return &candidate_proto.Candidates{
+			Tracks: grpc_track_server.SerializeTracks(result),
+		}, nil
+	}
+	countPerTrack := max(DailyTrackCandidatePoolSize/(len(hotTracks)+len(lastDayTracks)), 1)
 
 	tracksByHot, err := cm.clusterRepo.GetNearestTracks(hotTracks, countPerTrack)
 	if err != nil {
@@ -64,8 +89,8 @@ func (cm *CandidateManager) GetCandidatesForDailyPlaylist(ctx context.Context, i
 	}
 
 	ids := append(tracksByHot, trackForLastDay...)
-	// excluding
-
+	// excluding, get skips from db and exclude extra tracks
+	ids = uniqIds(ids)
 	result, err := cm.trackRepo.GetTracksByIds(ids)
 	if err != nil {
 		return nil, err
