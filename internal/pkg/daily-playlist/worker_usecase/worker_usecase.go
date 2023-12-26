@@ -26,25 +26,26 @@ func NewDefault(ruc recommendation.ServiceUseCase, ru user_domain.Repository, dp
 	}
 }
 
+// Активность представляет собой отношение трека к действию:
+// Действие может быть нескольких типов:
+// 1. Like
+// 2. Listen
+// 3. Skip
+// 4. AddToRotation
+// Добавление трека в ротацию подразумевает, что этот трек был ни лайкнут, ни послушан, но был лайкнут альбом, артист или жанр, который
+// содержит этот трек, а сам трек является ярым представителем этой сущности
+// *Ярый представитель в данном случае - это объект лежащий близко к центру кластера(евклидово расстояние между этим объектом и центром не больше,
+// чем у N других объектов этого кластера)
+
+// userActivity, err := d.repoUser.GetLastUserActivity(userId, UserActivityBatchForDailyPlaylist)
+//
+//	if err != nil {
+//		d.logger.Errorln("error getting last user activity", err, userId)
+//		return daily_playlist.Response{}, err
+//	}
 func (d *Default) CreateDailyForUser(userId string) (daily_playlist.Response, error) {
 	d.logger.Infoln("create daily for concrete user entered", userId)
 
-	// Активность представляет собой отношение трека к действию:
-	// Действие может быть нескольких типов:
-	// 1. Like
-	// 2. Listen
-	// 3. Skip
-	// 4. AddToRotation
-	// Добавление трека в ротацию подразумевает, что этот трек был ни лайкнут, ни послушан, но был лайкнут альбом, артист или жанр, который
-	// содержит этот трек, а сам трек является ярым представителем этой сущности
-	// *Ярый представитель в данном случае - это объект лежащий близко к центру кластера(евклидово расстояние между этим объектом и центром не больше,
-	// чем у N других объектов этого кластера)
-
-	//userActivity, err := d.repoUser.GetLastUserActivity(userId, UserActivityBatchForDailyPlaylist)
-	//if err != nil {
-	//	d.logger.Errorln("error getting last user activity", err, userId)
-	//	return daily_playlist.Response{}, err
-	//}
 	candidates, err := d.candidateUseCase.GetCandidateForDaily(userId)
 	if err != nil {
 		d.logger.Errorln("got candidates for user finished with error", err, userId, candidates)
@@ -52,7 +53,6 @@ func (d *Default) CreateDailyForUser(userId string) (daily_playlist.Response, er
 	}
 	d.logger.Errorln("got candidates for user completed", userId)
 
-	// нейронка классифицирует, какое действие произведет пользователь, лайк, прослушивание или скип, она же ранжирует их
 	candidatesAfterClassify, err := d.recommendationUseCase.ClassifyCandidates(userId, candidates)
 	if err != nil {
 		d.logger.Errorln("classify candidates for user finished with error", err, userId, candidates)

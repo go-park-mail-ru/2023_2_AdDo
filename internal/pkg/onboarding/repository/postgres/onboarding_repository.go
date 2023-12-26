@@ -47,7 +47,7 @@ func (p *Postgres) GetGenres() ([]onboarding.GenreBase, error) {
 func (p *Postgres) GetArtists() ([]artist.Base, error) {
 	p.logger.Infoln("Onboarding repo Get Artists entered")
 
-	query := `select id, name, avatar from artist`
+	query := `select id, name, avatar from artist limit 28`
 	result, err := p.Pool.Query(context.Background(), query)
 	if err != nil {
 		p.logger.Errorln("err while getting artists ", err)
